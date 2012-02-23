@@ -125,10 +125,10 @@ def main(global_config, **settings):
   #
   config.add_route('author.features.query.highlights','/v1/authors/{authorname}/features/{featurename}/highlights')
   config.add_route('author.features.query.events','/v1/authors/{authorname}/features/{featurename}/events')
-  config.add_route('author.features.featureEvents','/v1/authors/{authorname}/features/{featurename}/featureEvents') # deprecated
 
 ### PICK UP HERE
 
+  config.add_route('author.features.featureEvents','/v1/authors/{authorname}/features/{featurename}/featureEvents') # deprecated
 
   #
   # AUTHOR FEATURE PROFILE: get profile information from the specified feature

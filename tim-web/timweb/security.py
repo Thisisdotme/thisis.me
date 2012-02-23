@@ -6,8 +6,6 @@ from mi_schema.models import AuthorAccessGroupMap
 
 from timweb.globals import DBSession
 
-# return list of groups for user
-#
 def groupfinder(authorname, request):
 
   dbsession = DBSession()
