@@ -1,0 +1,16 @@
+<metal:index use-macro="load: main_structure.html">
+
+	<div id="feature" data-role="page" data-theme="${theme}" metal:fill-slot="page_content">
+	
+		<div data-role="header" data-theme="${theme}" style="position:fixed;top:0;">
+			<a href="/${author_name}" data-role="button" data-icon="home" data-iconpos="notext" data-transition="slide">Home</a>
+			<h1>thisis: ${author_name}</h1>
+			<a href="/${author_name}/features" data-role="button" data-icon="grid" data-iconpos="notext" data-transition="flip">Features</a>
+		</div><!-- /header -->
+	
+		<div data-role="content">
+		</div> <!-- /content -->
+	
+	</div><!-- /page -->
+
+</metal:index>

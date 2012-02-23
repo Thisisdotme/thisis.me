@@ -1,0 +1,18 @@
+<metal:index use-macro="load: main_structure.html">
+
+	<div id="feedback" data-role="page" metal:fill-slot="page_content">
+	
+		<header data-role="header" data-theme="${theme}">
+			<h1>Feedback</h1>
+		</header><!-- /header -->
+	
+		<div data-role="content">
+		
+			<p>Please provide your feedback</p>
+			
+			<a href="#" data-role="button" data-rel="back" data-icon="check">Submit</a>
+		</div><!-- /content -->
+	
+	</div><!-- /page -->
+
+</metal:index>

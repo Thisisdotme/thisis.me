@@ -1,0 +1,18 @@
+<metal:index use-macro="load: main_structure.html">
+
+	<div data-role="page" metal:fill-slot="page_content">
+	
+		<header data-role="header" data-theme="${theme}" style="position:fixed;top:0;">
+			<a href="/${author_name}" data-role="button" data-icon="check">Done</a>
+			<h1>thisis: ${author_name}</h1>
+		</header><!-- /header -->
+	
+		<div data-role="content">
+		
+			<p>Settings Page</p>
+			
+		</div><!-- /content -->
+	
+	</div><!-- /page -->
+
+</metal:index>

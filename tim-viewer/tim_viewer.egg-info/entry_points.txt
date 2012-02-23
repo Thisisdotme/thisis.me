@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = timviewer:main
+      [console_scripts]
+      populate_tim-viewer = timviewer.scripts.populate:main
+      

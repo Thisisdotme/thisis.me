@@ -1,0 +1,8 @@
+CREATE DATABASE mi
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
+  
+CREATE DATABASE mi_session_store
+  DEFAULT CHARACTER SET utf8
+  DEFAULT COLLATE utf8_general_ci;
+ 

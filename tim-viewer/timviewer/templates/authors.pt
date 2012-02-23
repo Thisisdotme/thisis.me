@@ -1,0 +1,20 @@
+<metal:index use-macro="load: main_structure.html">
+
+	<div id="authors" data-role="page" data-theme="${theme}" data-title="Authors" metal:fill-slot="page_content">
+	
+		<header data-role="header" data-theme="${theme}" style="position:fixed;top:0;">
+			<a href="/feedback" data-role="button" data-icon="info" data-iconpos="notext" data-rel="dialog">Feedback</a>
+			<h1>thisis.me</h1>
+		</header><!-- /header -->
+	
+		<div data-role="content">
+			<h2>Select an Author:</h2>
+			<ul data-role="listview" data-inset="true" data-filter="true"></ul>
+			
+		</div><!-- /content -->
+	
+	</div><!-- /page -->
+
+	<script type="text/javascript" metal:fill-slot="page_script"></script>
+
+</metal:index>

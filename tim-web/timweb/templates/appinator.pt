@@ -1,0 +1,16 @@
+<metal:index use-macro="load: main_structure.html">
+	<div metal:fill-slot="main_content" class="cAppinator">
+		<h2>Select content for your app</h2>
+		<p class="cCaption">
+		Sign in to any of the social media that you use.  Allow your followers to keep up to date with what you are doing and all your news.
+		</p>
+		<ul>
+			<li><a href="/facebook.html"><img src="/img/facebook.png" /></a></li>
+			<li><a href="/twitter.html"><img src="/img/twitter.png" /></a></li>
+			<li><a href="/instagram.html"><img src="/img/instagram.png" /></a></li>
+			<li><a href="/linkedin.html"><img src="/img/social_buttons/LinkedIn.png" /></a></li>
+			<li><a href="/googleplus.html"><img src="/img/social_buttons/GooglePlus.png" /></a></li>
+			<li><a href="/foursquare.html"><img src="/img/social_buttons/Foursquare.png" /></a></li>
+		</ul>
+	</div>
+</metal:index>

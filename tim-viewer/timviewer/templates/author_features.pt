@@ -1,0 +1,20 @@
+<metal:index use-macro="load: main_structure.html">
+
+	<div id="authorFeatures" data-role="page" data-theme="${theme}" metal:fill-slot="page_content">
+	
+		<header data-role="header" data-theme="${theme}" style="position:fixed;top:0;">
+			<a href="#" data-role="button" data-rel="back" data-icon="arrow-l" data-iconpos="notext">Back</a>
+			<h1>thisis: ${author_name}</h1>
+			<a href="/${author_name}/settings" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Options</a>
+		</header><!-- /header -->
+	
+		<div data-role="content">
+		</div><!-- /content -->
+
+		<div class="center-button" data-role="footer" data-theme="${theme}" data-position="fixed"> 
+			<a href="/${author_name}" data-role="button" data-transition="pop">Show all of Me</a> 
+		</div> 
+		
+	</div><!-- /page -->
+
+</metal:index>

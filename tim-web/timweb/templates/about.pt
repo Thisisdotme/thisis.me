@@ -1,0 +1,5 @@
+<metal:index use-macro="load: main_structure.html">
+	<section metal:fill-slot="main_content">
+		<p>Welcome to the thisis.me web application</p>
+	</section>
+</metal:index>

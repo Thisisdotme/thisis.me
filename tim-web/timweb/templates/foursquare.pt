@@ -1,0 +1,10 @@
+<metal:index use-macro="load: main_structure.html">
+	<section metal:fill-slot="main_content">
+		<p><img src="/img/social_icons/Foursquare.png" />
+		<h1>Add ${feature} Feature?</h1>
+		<p>This will redirect to ${feature} where you'll enter your credentials and then back here</p>
+		<form action="${url}" method="post">
+			<input type="submit" name="form.submitted" value="Continue"/>
+		</form>
+	</section>
+</metal:index>
