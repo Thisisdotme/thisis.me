@@ -25,6 +25,8 @@ GROUP_AUTHORS = 'group:authors'
 ## authors
 ##
 
+# GET /v1/authors
+#
 # get list of all authors
 @view_config(route_name='authors', request_method='GET', renderer='jsonp', http_cache=0)
 def authorList(request):
@@ -37,7 +39,8 @@ def authorList(request):
   
   return {'authors':authorlist}
 
-
+# GET /v1/authors/{authorname}
+#
 # get information about a single author
 @view_config(route_name='author.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
 def authorGet(request):
@@ -59,29 +62,30 @@ def authorGet(request):
 ## Create/update/delete author
 ##
 
+# PUT /v1/authors/{authorname}
+#
 # create a new author or update an existing author
 @view_config(route_name='author.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
 def authorPut(request):
   
   authorname = request.matchdict['authorname']
   
-  password = request.params.get('password')
+  authorInfo = request.json_body
+
+  password = authorInfo.get('password')
   if password == None:
     request.response.status_int = 400
     return {'error':'Missing required form field: password'}
-  password = password
   
-  fullname = request.params.get('fullname')
+  fullname = authorInfo.get('fullname')
   if fullname == None:
     request.response.status_int = 400
     return {'error':'Missing required form field: fullname'}
-  fullname = fullname
-  
-  email = request.params.get('email')
+
+  email = authorInfo.get('email')
   if email == None:
     request.response.status_int = 400
     return {'error':'Missing required form field: email'}
-  email = email
   
   dbsession = DBSession()
 
@@ -119,6 +123,8 @@ def authorPut(request):
   return {'author': authorJSON}
 
 
+# DELETE /v1/authors/{authorname}
+#
 # delete existing author
 @view_config(route_name='author.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
 def authorDelete(request):

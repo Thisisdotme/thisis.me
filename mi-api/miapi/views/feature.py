@@ -16,6 +16,9 @@ from miapi.models import DBSession
 
 log = logging.getLogger(__name__)
 
+
+# GET /v1/features
+#
 # return info on all features
 @view_config(route_name='features', request_method='GET', renderer='jsonp', permission='admin', http_cache=0)
 def features(request):
@@ -36,6 +39,8 @@ def features(request):
   return {'features':featureList}
 
 
+# GET /v1/features/{featurename}
+#
 # retrieve information about a feature
 @view_config(route_name='feature.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
 def featureGet(request):
@@ -54,6 +59,8 @@ def featureGet(request):
           'mono_icon_medium_res':request.static_url('miapi:%s' % feature.mono_icon_medium_res),
           'mono_icon_low_res':request.static_url('miapi:%s' % feature.mono_icon_low_res)}
 
+# PUT /v1/features/{featurename}
+#
 # add a new feature
 @view_config(route_name='feature.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
 def featurePut(request):

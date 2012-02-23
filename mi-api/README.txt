@@ -8,7 +8,5 @@ Getting Started
 
 - $venv/bin/python setup.py develop
 
-- $venv/bin/populate_mi-api development.ini
-
 - $venv/bin/pserve development.ini
 
