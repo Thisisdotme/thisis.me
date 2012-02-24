@@ -16,6 +16,8 @@ from miapi.models import DBSession
 
 log = logging.getLogger(__name__)
 
+# GET /v1/features
+#
 # return info on all features
 @view_config(route_name='features', request_method='GET', renderer='jsonp', permission='admin', http_cache=0)
 def features(request):
