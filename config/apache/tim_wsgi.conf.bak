@@ -1,0 +1,19 @@
+# thisis.me mod_wsgi configuration
+
+# Use only 1 Python sub-interpreter.  Multiple sub-interpreters
+# play badly with C extensions.
+WSGIApplicationGroup %{GLOBAL}
+WSGIPassAuthorization On
+WSGIPythonHome /opt/mi/env
+WSGISocketPrefix run/wsgi
+
+WSGIDaemonProcess thisis.me user=ec2-user group=ec2-user threads=4 python-path=/opt/mi/tim-web:/opt/mi/tim-viewer:/opt/mi/mi-model:/opt/mi/mi-utils:/opt/mi/mi-db:/opt/mi/mi-collectors:/opt/mi/env/lib/python2.6/site-packages
+WSGIProcessGroup thisis.me
+
+WSGIScriptAlias /m /var/www/wsgi-scripts/tim_viewer.wsgi
+WSGIScriptAlias / /var/www/wsgi-scripts/tim_web.wsgi
+
+<Directory /var/www/wsgi-scripts>
+  Order allow,deny
+  Allow from all
+</Directory>
