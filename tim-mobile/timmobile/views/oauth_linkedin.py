@@ -3,25 +3,27 @@ import urlparse
 import urllib
 import urllib2
 import oauth2 as oauth
-import simplejson as json
+import json
+from datetime import datetime
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 
-from mi_utils.oauth import make_request
 from mi_url.RequestWithMethod import RequestWithMethod
+from mi_utils.oauth import make_request
 
+from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
 
 log = logging.getLogger(__name__)
 
 
-# ??? TODO - these need to go somewhere else
-FEATURE = 'twitter'
+# ??? TODO - these need to come from somewhere else
+FEATURE = 'linkedin'
 
-@view_config(route_name='twitter', request_method='GET', renderer='timmobile:templates/oauth.pt', permission='author')
-def get_twitter(request):
+@view_config(route_name='linkedin', request_method='GET', renderer='timmobile:templates/oauth.pt', permission='author')
+def get_linkedin(request):
 
   # first check if the author has already added this feature.
   
@@ -30,7 +32,7 @@ def get_twitter(request):
 
   # Query the API for installed features
   try:
-    req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authorName))
+    req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authenticated_userid(request)))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except urllib2.URLError, e:
@@ -43,15 +45,15 @@ def get_twitter(request):
   # Check if the feature we're trying to add is listed
   # ??? TODO - need better handling of feature already existing
   if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
-    request.session.flash('Your Twitter account is enabled.')
+    request.session.flash('You have already added the LinkedIn feature.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
     
-  return { 'feature':'Twitter', 
-           'url' : request.route_url('twitter'), 
-           'api_endpoint':request.registry.settings['mi.api.endpoint']}
+  return { 'feature':'LinkedIn', 
+           'url' : request.route_url('linkedin'),
+           'api_endpoint':request.registry.settings['mi.api.endpoint'] }
   
-@view_config(route_name='twitter', request_method='POST', permission='author')
-def post_twitter(request):
+@view_config(route_name='linkedin', request_method='POST', permission='author')
+def post_linkedin(request):
 
   consumer_key = oAuthConfig[FEATURE]['key']
   consumer_secret = oAuthConfig[FEATURE]['secret']
@@ -62,7 +64,7 @@ def post_twitter(request):
   # having the user authorize an access token and to sign the request to obtain 
   # said access token.
 
-  callback = request.route_url('twitter_callback')
+  callback = request.route_url('linkedin_callback')
   resp, content = client.request(oAuthConfig[FEATURE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback':callback}))
   if resp['status'] != '200':
       raise Exception("Invalid response %s (%s)." % (resp['status'], content))
@@ -76,6 +78,7 @@ def post_twitter(request):
 #  print 
 
   # Step 2: Redirect to the provider.
+
   request.session['oauth_token_secret'] = request_token['oauth_token_secret']
 
   redirectURL = "%s?oauth_token=%s" % (oAuthConfig[FEATURE]['authorize_url'], request_token['oauth_token'])
@@ -83,8 +86,8 @@ def post_twitter(request):
   return HTTPFound(location=redirectURL)
 
 
-@view_config(route_name='twitter_callback', request_method='GET', permission='author')
-def twitter_callback(request):
+@view_config(route_name='linkedin_callback', request_method='GET')
+def linkedin_callback(request):
   
   # the oauth_token is request as a query arg; the auth_token_secret is in session store  
   oauth_token = request.params['oauth_token']
@@ -92,32 +95,34 @@ def twitter_callback(request):
 
   oauth_verifier = request.params['oauth_verifier']
   
-  # Step 3: Once the consumer has redirected the user back to the oauth_callback                                                                                                           
-  # URL you can request the access token the user has approved. You use the                                                                                                                
-  # request token to sign this request. After this is done you throw away the                                                                                                              
-  # request token and use the access token returned. You should store this                                                                                                                 
-  # access token somewhere safe, like a database, for future use.                                                                                                                          
-  consumer_key = oAuthConfig[FEATURE]['key']
-  consumer_secret = oAuthConfig[FEATURE]['secret']
-  consumer = oauth.Consumer(consumer_key, consumer_secret)
+  # Step 3: Once the consumer has redirected the user back to the oauth_callback
+  # URL you can request the access token the user has approved. You use the 
+  # request token to sign this request. After this is done you throw away the
+  # request token and use the access token returned. You should store this 
+  # access token somewhere safe, like a database, for future use.
+  consumer = oauth.Consumer(oAuthConfig[FEATURE]['key'], oAuthConfig[FEATURE]['secret'])
+  
   token = oauth.Token(oauth_token,oauth_token_secret)
-  client = oauth.Client(consumer, token)
-
   token.set_verifier(oauth_verifier)
 
+  client = oauth.Client(consumer, token)
+  
   resp, content = client.request(oAuthConfig[FEATURE]['access_token_url'], "POST")
   access_token = dict(urlparse.parse_qsl(content))
 
-  # these are the real deal and need to be stored securely in the DB                                                                                                                       
-  oauth_token = access_token['oauth_token']
-  oauth_token_secret = access_token['oauth_token_secret']
+  # these are the real deal and need to be stored securely in the DB  
+  accessToken = access_token['oauth_token']
+  accessTokenSecret = access_token['oauth_token_secret']
 
-  token = oauth.Token(oauth_token,oauth_token_secret)
+  # Create our OAuth consumer instance
+  token = oauth.Token(key=accessToken,secret=accessTokenSecret)
   client = oauth.Client(consumer, token)
 
-  userInfoJSON = json.loads(make_request(client,'https://api.twitter.com/1/account/verify_credentials.json').decode('utf-8'))
+  response = make_request(client,'http://api.linkedin.com/v1/people/~:(id)',{'x-li-format':'json'})
+  respJSON = json.loads(response)
+  linkedinId = respJSON['id']
 
-  json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'auxillary_data':{'id':userInfoJSON['id']}})
+  json_payload = json.dumps({'access_token':accessToken,'access_token_secret':accessTokenSecret,'auxillary_data':{'id':linkedinId}})
   headers = {'Content-Type':'application/json; charset=utf-8'}      
   req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
                             (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE), 
@@ -128,11 +133,10 @@ def twitter_callback(request):
   resJSON = json.loads(res.read())
 
   try:
-    request.session['twitter_access_token'] = oauth_token
-    request.session['twitter_access_token_secret'] = oauth_token_secret
+    request.session['linkedin_access_token'] = accessToken
+    request.session['linkedin_access_token_secret'] = accessTokenSecret
   except Exception, e:
     print e
     
-  request.session.flash('Your Twitter account has been successfully added.')
+  request.session.flash('Your LinkedIn feature has been successfully added.')
   return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
-

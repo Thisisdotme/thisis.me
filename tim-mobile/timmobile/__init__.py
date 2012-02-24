@@ -53,10 +53,42 @@ def main(global_config, **settings):
   config.add_route('account_details', '/accounts/{featurename}')
   config.add_route('newsfeed', '/newsfeed')
   
+  #
+  # oauth setup paths
+  #
+
   # twitter oauth
   config.add_route('twitter','/oauth/twitter')
   config.add_route('twitter_callback', '/twitter_callback')
 
+  # facebook auth
+  config.add_route('facebook','/oauth/facebook')
+  config.add_route('facebook_callback', '/facebook_callback')
+  
+  # linkedin auth
+  config.add_route('linkedin','/oauth/linkedin')
+  config.add_route('linkedin_callback', '/linkedin_callback')
+ 
+  # google+ auth
+  config.add_route('googleplus','/oauth/googleplus')
+  config.add_route('googleplus_callback', '/google_callback')
+
+  # instagram auth
+  config.add_route('instagram','/oauth/instagram')
+  config.add_route('instagram_callback', '/instagram_callback')
+
+  # flickr auth
+  config.add_route('flickr','/oauth/flickr')
+  config.add_route('flickr_callback', '/flickr_callback')
+
+  # foursquare auth
+  config.add_route('foursquare','/oauth/foursquare')
+  config.add_route('foursquare_callback', '/foursquare_callback')
+  
+  # generic oauth
+  config.add_route('oauth','/oauth/{featurename}')
+  config.add_route('oauth_callback', '/oauth/callback/{featurename}')
+  
   config.scan()
 
   return config.make_wsgi_app()
