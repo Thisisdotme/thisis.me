@@ -17,7 +17,7 @@ curl -i -X PUT -d '{"color_icon_high_res":"img/h/features/color/placeholder.png"
 
 # create new author howard and associate features
 #
-curl -i -X PUT -F password=mi -F fullname="Howard Burrows" -F email=howard@mobileidentity.me api.thisis.me/v1/authors/howard
+curl -i -X PUT -d '{"password":"mi","fullname":"Howard Burrows","email":"howard@mobileidentity.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard
 
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/features/me
 curl -i -X PUT -d '{"access_token":"14058912-DWWuU3QOcNVwEXMQO8oZT0XsEX8BV3ABbnNhsp80Q","access_token_secret":"qxg2IOkLfj82KQlJTuZ1LwtkpVZ0xdDBel6Q2MS9ik"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/features/twitter
@@ -27,7 +27,7 @@ curl -i -X PUT -d '{"access_token":"72157628366602963-cae202cd31e7af05"}' -H "Co
 
 # create new author loree and associate features
 #
-curl -i -X PUT -F password=mi -F fullname="Loree Hirschman" -F email=loree@mobileidentity.me api.thisis.me/v1/authors/loree
+curl -i -X PUT -d '{"password":"mi","fullname":"Loree Hirschman","email":"loree@mobileidentity.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree
 
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/features/me
 curl -i -X PUT -d '{"access_token":"14603721-z82wscRuTCjIeTRqlqE8ckKjeuy7P9TBZhnnuwKk","access_token_secret":"AI2fWbgEkErymyd3GUgD0uQvjhKNGC61kYj6H5I"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/features/twitter
