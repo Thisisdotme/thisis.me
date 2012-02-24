@@ -1,0 +1,22 @@
+<metal:index use-macro="load: master_template.html">
+
+	<div id="newsfeed" data-role="page" data-title="News Feed" metal:fill-slot="page_content">
+	
+		<header data-role="header">
+
+			<h1>News Feed</h1>
+			<a href="/accounts" data-role="button" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Accounts</a>
+
+		</header><!-- /header -->
+	
+		<div data-role="content">
+
+			<h2>NewsFeed Highlights</h2>
+
+		</div><!-- /content -->
+	
+	</div><!-- /page -->
+
+	<script type="text/javascript" metal:fill-slot="page_script"></script>
+
+</metal:index>
