@@ -21,63 +21,87 @@ log = logging.getLogger(__name__)
 ## author FeatureEvents functionality
 ##
 
-
-#/v1/authors/{authorname}/highlights
-# get the event highlights for the author
-@view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-def authorHighlights(request):
-
-  dbSession = DBSession()
-
-  authorName = request.matchdict['authorname']
-
-  return {'error':'not implemented'}
-
-
-# /v1/authors/{authorname}/events
-# get all FeatureEvents for the author (constrained to query arg. filters)
-#
-@view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-@view_config(route_name='author.featureEvents', request_method='GET', renderer='jsonp', http_cache=0) # deprecated
-def authorEvents(request):
+class AuthorQuery(object):
+  '''
+  classdocs
+  '''
   
-  authorName = request.matchdict['authorname']
+  '''
+  class variables
+  '''
   
-  dbSession = DBSession()
+  '''
+  Constructor
+  '''
+  def __init__(self, request):
+      self.request = request
+      self.dbSession = DBSession()
 
-  # get author-id for authorName
-  try:
-    authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
-  except:
-    request.response.status_int = 404;
-    return {'error':'unknown author %s' % authorName}  
+
+  # GET /v1/authors/{authorname}/highlights
+  #
+  # get the event highlights for the author
+  #
+  def getHighlights(self):
+
+    authorName = self.request.matchdict['authorname']
   
-  events = []  
-  for fe,featureName in dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==authorId).order_by(FeatureEvent.create_time.desc()).all():
-    events.append(createFeatureEvent(request,fe,featureName))
+    return {'error':'not implemented'}
 
-  return {'events':events,'paging':{'prev':None,'next':None}}
+  
+  # GET /v1/authors/{authorname}/events
+  #
+  # get all FeatureEvents for the author (constrained to query arg. filters)
+  #
+  ## THIS NEEDS TO MOVE BACK TO self.getHighlights WHEN IMPLEMENTED
+  @view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
+  ##
+  ## THIS NEEDS TO MOVE BACK TO AuthorGroupQuery.getHighlights WHEN IMPLEMENTED
+  @view_config(route_name='author.groups.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
+  ##
+  ## THIS NEEDS TO MOVE BACK TO AuthorGroupQuery.getEvents WHEN IMPLEMENTED
+  @view_config(route_name='author.groups.query.events', request_method='GET', renderer='jsonp', http_cache=0)
+  ##  
+  @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
+  @view_config(route_name='author.featureEvents', request_method='GET', renderer='jsonp', http_cache=0) # deprecated
+  def getEvents(self):
+  
+    authorName = self.request.matchdict['authorname']
+    
+    # get author-id for authorName
+    try:
+      authorId, = self.dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+    except:
+      self.request.response.status_int = 404;
+      return {'error':'unknown author %s' % authorName}  
+    
+    events = []  
+    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==authorId).order_by(FeatureEvent.create_time.desc()).all():
+      events.append(createFeatureEvent(self.request,fe,featureName))
+  
+    return {'events':events,'paging':{'prev':None,'next':None}}
 
 
-# /v1/authors/{authorname}/events/{eventID}
-# get details for the featureEvent
-@view_config(route_name='author.query.events.eventId', request_method='GET', renderer='jsonp', http_cache=0)
-@view_config(route_name='author.featureEvents.featureEvent', request_method='GET', renderer='jsonp', http_cache=0) # deprecated
-def authorEventInfo(request):
-
-  authorName = request.matchdict['authorname']
-  featureEventID = int(request.matchdict['eventID'])
-
-  dbSession = DBSession()
-
-  # get author-id for authorName
-  try:
-    authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
-  except:
-    request.response.status_int = 404;
-    return {'error':'unknown author %s' % authorName}  
-
-  fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==authorId).one()
-
-  return {'event':createFeatureEvent(request,fe,featureName)}
-
+  # GET /v1/authors/{authorname}/events/{eventID}
+  #
+  # get details for the featureEvent
+  #
+  @view_config(route_name='author.query.events.eventId', request_method='GET', renderer='jsonp', http_cache=0)
+  @view_config(route_name='author.featureEvents.featureEvent', request_method='GET', renderer='jsonp', http_cache=0) # deprecated
+  def getEventDetail(self):
+    
+    authorName = self.request.matchdict['authorname']
+    featureEventID = int(self.request.matchdict['eventID'])
+  
+    dbSession = DBSession()
+  
+    # get author-id for authorName
+    try:
+      authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+    except:
+      self.request.response.status_int = 404;
+      return {'error':'unknown author %s' % authorName}  
+  
+    fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==authorId).one()
+  
+    return {'event':createFeatureEvent(self.request,fe,featureName)}

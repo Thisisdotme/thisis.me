@@ -67,7 +67,7 @@ class CollectorDriver(AppBase):
 #      collector.build_all(dbSession,oauthConfig[feature],incremental)
   
     for feature, oauthConfig in oauthConfig.iteritems():
-      collector = EventCollectorFactory.get_collector_for(feature,config.get('AWS','aws_access_key'), config.get('AWS','aws_secret_key'))
+      collector = EventCollectorFactory.get_collector_for(feature,config.get('AWS','s3_bucket'), config.get('AWS','aws_access_key'), config.get('AWS','aws_secret_key'))
       if collector:
         try:
           collector.build_all(dbSession,oauthConfig,incremental)
