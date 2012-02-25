@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 def features(request):
 
   dbsession = DBSession()
-  features = dbsession.query(Feature)
+
   featureList = []
   for feature in dbsession.query(Feature).order_by(Feature.feature_name):
     featureList.append({'feature_id':feature.id,

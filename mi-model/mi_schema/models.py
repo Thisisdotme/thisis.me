@@ -29,7 +29,7 @@ class Author(Base):
     return "<Author('%s','%s','%s','%s')>" % (self.author_name, self.email, self.full_name, self.password)
 
   def toJSONObject(self):
-    return {'author_id':self.id,'authorname':self.author_name,'email':self.email,'fullname':self.full_name}
+    return {'author_id':self.id,'author_name':self.author_name,'email':self.email,'full_name':self.full_name}
 
 
 '''
@@ -144,6 +144,59 @@ class AuthorFeatureMap(Base):
     
   def __repr__(self):
     return "<AuthorFeatureMap('%s,%s')>" % (self.author_id,self.feature_id)
+
+
+'''
+TABLE: author_group
+
+  Defines a group private to the author
+  
+'''
+class AuthorGroup(Base):
+
+  __tablename__ = 'author_group'
+
+  id = Column(Integer, primary_key=True)
+
+  author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
+
+  group_name = Column(String(255), nullable=False)
+
+  def __init__(self, authorId, groupName):
+    self.author_id = authorId
+    self.group_name = groupName
+
+  def __repr__(self):
+    return "<AuthorGroup('%s,%s,%s')>" % (self.id,self.author_id,self.group_name)
+
+  def toJSONObject(self):
+    return {'author_id': self.author_id,
+            'author_group_id':self.id,
+            'group_name':self.group_name}
+
+'''
+TABLE: author_group_map
+
+  Maps authors to an author_group
+  
+'''
+class AuthorGroupMap(Base):
+
+  __tablename__ = 'author_group_map'
+
+  author_group_id = Column(Integer, ForeignKey('author_group.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+  author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+
+  def __init__(self, authorGroupId, authorId):
+    self.author_group_id = authorGroupId
+    self.author_id = authorId
+
+  def __repr__(self):
+    return "<AuthorGroupMap('%s,%s')>" % (self.author_group_id,self.author_id)
+
+  def toJSONObject(self):
+    return {'author_id': self.author_id,
+            'author_group_id':self.author_group_id}
 
 
 '''
