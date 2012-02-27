@@ -14,6 +14,7 @@ tim_mobile.egg-info/requires.txt
 tim_mobile.egg-info/top_level.txt
 timmobile/__init__.py
 timmobile/context.py
+timmobile/exceptions.py
 timmobile/globals.py
 timmobile/models.py
 timmobile/security.py
@@ -36,6 +37,7 @@ timmobile/img/social_icons/Facebook.png
 timmobile/img/social_icons/Foursquare.png
 timmobile/img/social_icons/GooglePlus.png
 timmobile/img/social_icons/Instagram.png
+timmobile/img/social_icons/Twitter.png
 timmobile/img/social_icons/Wordpress.png
 timmobile/img/social_icons/YouTube.png
 timmobile/img/social_icons/linkedin.png
@@ -65,4 +67,10 @@ timmobile/views/accounts.py
 timmobile/views/login.py
 timmobile/views/newlogin.py
 timmobile/views/newsfeed.py
+timmobile/views/oauth_facebook.py
+timmobile/views/oauth_flickr.py
+timmobile/views/oauth_foursquare.py
+timmobile/views/oauth_googleplus.py
+timmobile/views/oauth_instagram.py
+timmobile/views/oauth_linkedin.py
 timmobile/views/oauth_twitter.py
