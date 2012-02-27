@@ -234,7 +234,7 @@ TIM.feature.eventsController = function (spec) {
 
 	that.load = function () {
 
-		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/features/' + spec.feature + '/featureEvents?callback=?', function (data) {
+		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features/' + spec.feature + '/events?callback=?', function (data) {
 			var tl = that.getContainer(),
 					events,
 					renderer;
@@ -507,6 +507,11 @@ TIM.timelineController = function (spec) {
 					}					
 				}
 			});
+			$("#wrapper").bind("swipeleft", function(){
+          		console.log("swipeleft");
+          		//TIM.timelineController.hello();
+          		that.setPage($("#wrapper"), ++TIM.currentPage);
+              });
 		}
 			
 		window.setTimeout(function () { document.getElementById('wrapper').style.left = '0'; }, 800);
@@ -515,24 +520,15 @@ TIM.timelineController = function (spec) {
 	};
 
 	that.load = function () {
-		
-		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/events?callback=?', function (data) {
-			var tl = $("#timeline .mi-content"),
-					events,
+				
+		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events?callback=?', function (data) {
+			var tl = $("#newsfeed .mi-content"),
 					renderer;
 			try {
 				tl.empty();
-				events = data.events || [];
-				if (events.length > 0) {
-					$.each(events, function (idx, event) {
-						renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.globals.authorName, "event": event});
-						tl.append(renderer.renderTimeline());
-					});
-				}
-				else {
-					tl.append('<p>No Events.  Get busy and create some content!</p>');
-				}
-
+				TIM.allEvents = data.events || [];
+				TIM.currentPage = 0;
+				that.setPage(tl, TIM.currentPage);
 				that.loaded();
 			}
 			catch (e) {
@@ -542,10 +538,35 @@ TIM.timelineController = function (spec) {
 		
 		return that;
 	};
-
+	
+	that.setPage = function (obj, idx) {
+		obj.empty();
+		if (TIM.allEvents !== undefined
+			&& TIM.allEvents.length > 0) {
+				if (idx < 0 || idx > TIM.allEvents.length) {
+					return;
+				}
+				
+				var numberOfFeedsPerPage = 3;
+				var firstDisplayedFeed = TIM.currentPage * numberOfFeedsPerPage;
+				var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
+				console.log(firstDisplayedFeed);
+				for (var i = firstDisplayedFeed; i < lastDisplayedFeed; i++) {
+					renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": TIM.allEvents[i]});
+					$(obj).append(renderer.renderTimeline());
+				}
+				that.loaded();
+			}
+			else {
+				$(obj).append('<p>No Events.  Get busy and create some content!</p>');
+			}
+		return;
+	};	
 	return that;
 
 };
+
+
 
 
 TIM.AuthorFeaturesController = function (spec) {
@@ -553,13 +574,13 @@ TIM.AuthorFeaturesController = function (spec) {
 	return {
 	
 		load: function () {
-			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/features?callback=?', function (data) {
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features?callback=?', function (data) {
 				var fl = $("#authorFeatures .ui-content"),
 						features;
 				fl.empty();
 				features = data.features || [];
 				$.each(features, function (idx, feature) {
-					fl.append('<a href="/' + TIM.globals.authorName + '/features/' + feature.name + '" data-transition="pop">' +
+					fl.append('<a href="/' + TIM.pageInfo.authorName + '/features/' + feature.name + '" data-transition="pop">' +
 											'<img src="' + feature.color_icon_medium_res + '" />' +
 										'</a>');
 				});
@@ -574,12 +595,12 @@ TIM.DetailController = function (spec) {
 	
 		load: function () {
 
-			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/featureEvents/' + TIM.globals.eventId + '?callback=?', function (data) {
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events/' + TIM.globals.eventId + '?callback=?', function (data) {
 				var dt = $("#detail .ui-content"),
 						event;
 				dt.empty();
 				event = data.event || {};
-				dt.append(TIM.eventRenderer.rendererFactory.create({"author": TIM.globals.authorName, "event": event}).renderDetail());
+				dt.append(TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": event}).renderDetail());
 			});
 		}
 	};
@@ -636,7 +657,7 @@ $(document).bind("pagebeforechange", function (e, data) {
 	if (typeof data.toPage === "string") {
 		var u = $.mobile.path.parseUrl(data.toPage);
 		if (u.directory === "/") {
-			TIM.globals.authorName = u.filename;
+			TIM.pageInfo.authorName = u.filename;
 		}
 		else {
 			var comp = u.directory.split("/");
@@ -656,7 +677,7 @@ $(document).delegate("#authors", "pageinit", function () {
 	TIM.AuthorsController({}).load();
 });
 
-$(document).delegate("#timeline", "pageinit", function () {
+$(document).delegate("#newsfeed", "pageinit", function () {
 	TIM.timelineController({}).load();
 });
 
@@ -666,7 +687,7 @@ $(document).delegate("#authorFeatures", "pageinit", function () {
 
 $(document).delegate("#feature", "pageinit", function () {
 	try {
-		TIM.feature.controllerFactory.create({"author": TIM.globals.authorName, "feature": TIM.globals.featureName}).load();
+		TIM.feature.controllerFactory.create({"author": TIM.pageInfo.authorName, "feature": TIM.globals.featureName}).load();
 	}
 	catch (e) {
 		TIM.errorHandler.handle(e);

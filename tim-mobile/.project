@@ -3,6 +3,9 @@
 	<name>tim-mobile</name>
 	<comment></comment>
 	<projects>
+		<project>config</project>
+		<project>mi-api</project>
+		<project>mi-collectors</project>
 		<project>mi-db</project>
 		<project>mi-model</project>
 		<project>mi-utils</project>

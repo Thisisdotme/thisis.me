@@ -1,6 +1,14 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="newsfeed" data-role="page" data-title="News Feed" metal:fill-slot="page_content">
+		<script type="text/javascript">
+			TIM.pageInfo = {
+				authorName: '${author_name}'
+			}
+			
+			TIM.currentPage = 0;
+			TIM.allEvents = [];
+			
+		</script>
 	
 		<header data-role="header">
 
@@ -12,7 +20,14 @@
 		<div data-role="content">
 
 			<h2>NewsFeed Highlights</h2>
-
+			<div id="wrapper">
+				<div id="scroller">
+					
+					<div class="mi-content" style="padding:15px;">
+					</div>
+					
+				</div>
+			</div>
 		</div><!-- /content -->
 	
 	</div><!-- /page -->
