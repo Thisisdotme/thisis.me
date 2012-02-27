@@ -7,7 +7,5 @@
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/mi-collectors</path>
 </pydev_pathproperty>
-<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>/Users/howard/dev/env/bin</path>
-</pydev_pathproperty>
+
 </pydev_project>

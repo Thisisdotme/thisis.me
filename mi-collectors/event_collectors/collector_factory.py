@@ -14,21 +14,21 @@ from event_collectors.googleplus import GooglePlusFullCollector
 class EventCollectorFactory(object):
 
   @classmethod
-  def get_collector_for(cls,feature_name,aws_access_key, aws_secret_key):
+  def get_collector_for(cls,feature_name,s3Bucket, aws_access_key, aws_secret_key):
 
     collector = None
     
     if feature_name == 'facebook':
-      collector = FacebookFullCollector(aws_access_key, aws_secret_key)
+      collector = FacebookFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     elif feature_name == 'twitter':
-      collector = TwitterFullCollector(aws_access_key, aws_secret_key)
+      collector = TwitterFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     elif feature_name == 'foursquare':
-      collector = FoursquareFullCollector(aws_access_key, aws_secret_key)
+      collector = FoursquareFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     elif feature_name == 'linkedin':
-      collector = LinkedInFullCollector(aws_access_key, aws_secret_key)
+      collector = LinkedInFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     elif feature_name == 'instagram':
-      collector = InstagramFullCollector(aws_access_key, aws_secret_key)
+      collector = InstagramFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     elif feature_name == 'googleplus':
-      collector = GooglePlusFullCollector(aws_access_key, aws_secret_key)
+      collector = GooglePlusFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     
     return collector

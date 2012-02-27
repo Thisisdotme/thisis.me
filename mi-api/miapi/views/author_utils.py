@@ -36,7 +36,7 @@ def createFeatureEvent(request,fe,featureName):
   return event
 
 
-def featureBuild(authorName, featureName, incremental, aws_access_key, aws_secret_key):
+def featureBuild(authorName, featureName, incremental, s3Bucket, aws_access_key, aws_secret_key):
 
   print("refresh %s featureEvents for %s" % (authorName,featureName))
 
@@ -50,7 +50,7 @@ def featureBuild(authorName, featureName, incremental, aws_access_key, aws_secre
 
   mapping = dbSession.query(AuthorFeatureMap).filter_by(feature_id=featureId,author_id=authorId).one()
 
-  collector = EventCollectorFactory.get_collector_for(featureName,aws_access_key, aws_secret_key)
+  collector = EventCollectorFactory.get_collector_for(featureName,s3Bucket, aws_access_key, aws_secret_key)
   if collector:
     collector.build_one(mapping,dbSession,oAuthConfig.get(featureName),incremental)
 

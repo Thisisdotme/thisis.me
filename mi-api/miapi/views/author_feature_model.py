@@ -24,9 +24,10 @@ def authorFeatureFullBuild(request):
   authorName = request.matchdict['authorname']
   featureName = request.matchdict['featurename']
 
+  s3Bucket = request.registry.settings.get('mi.s3_bucket')
   awsAccessKey = request.registry.settings.get('mi.aws_access_key')
   awsSecretKey = request.registry.settings.get('mi.aws_secret_key')
-  featureBuild(authorName,featureName,False,awsAccessKey,awsSecretKey)
+  featureBuild(authorName,featureName,False,s3Bucket,awsAccessKey,awsSecretKey)
 
   return {}
 
@@ -41,9 +42,10 @@ def authorFeatureIncrementalBuild(request):
   authorName = request.matchdict['authorname']
   featureName = request.matchdict['featurename']
 
+  s3Bucket = request.registry.settings.get('mi.s3_bucket')
   awsAccessKey = request.registry.settings.get('mi.aws_access_key')
   awsSecretKey = request.registry.settings.get('mi.aws_secret_key')
-  featureBuild(authorName,featureName,True,awsAccessKey,awsSecretKey)
+  featureBuild(authorName,featureName,True,s3Bucket,awsAccessKey,awsSecretKey)
 
   return {}
 

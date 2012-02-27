@@ -13,12 +13,11 @@ from pyramid.view import view_config
 
 from miapi.models import DBSession
 
-from mi_schema.models import (Author, AccessGroup, AuthorAccessGroupMap)
+from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGroup, AuthorGroupMap
 
+from miapi.globals import ACCESS_GROUP_AUTHORS, DEFAULT_AUTHOR_GROUP
 
 log = logging.getLogger(__name__)
-
-GROUP_AUTHORS = 'group:authors'
 
 
 ##
@@ -68,7 +67,7 @@ def authorGet(request):
 # create a new author or update an existing author
 @view_config(route_name='author.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
 def authorPut(request):
-  
+
   authorname = request.matchdict['authorname']
 
   authorInfo = request.json_body
@@ -90,24 +89,36 @@ def authorPut(request):
   
   dbsession = DBSession()
 
-  author = Author(authorname,email,fullname,password)
-
   try:
   
+    author = Author(authorname,email,fullname,password)
     dbsession.add(author)
     dbsession.flush() # flush so we can get the id
+    
+    ''' ??? this might only be temporary ???
+        Create a default group (follow) and add the author to that group
+        so that author is following themselves.
+    '''
+    
+    authorGroup = AuthorGroup(author.id,DEFAULT_AUTHOR_GROUP)
+    dbsession.add(authorGroup)
+    dbsession.flush()
+ 
+    mapping = AuthorGroupMap(authorGroup.id,author.id)
+    dbsession.add(mapping)
+    dbsession.flush()
+
+    ''' Add the new author to the authors access group '''
+    groupId, = dbsession.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
+    authorAccessGroupMap = AuthorAccessGroupMap(author.id,groupId)
+    dbsession.add(authorAccessGroupMap)
+    dbsession.flush()
 
     authorJSON = author.toJSONObject()
   
-    groupId, = dbsession.query(AccessGroup.id).filter_by(group_name=GROUP_AUTHORS).one()
-
-    authorAccessGroupMap = AuthorAccessGroupMap(author.id,groupId)
-
-    dbsession.add(authorAccessGroupMap)
-
     dbsession.commit()
 
-    log.info("create author %s and added to group %s" % (authorname, GROUP_AUTHORS))
+    log.info("create author %s and added to group %s" % (authorname, ACCESS_GROUP_AUTHORS))
 
   except IntegrityError, e:
     dbsession.rollback()

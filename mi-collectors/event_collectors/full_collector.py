@@ -15,7 +15,6 @@ from boto.s3.key import Key
 from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent
 
 INCREMENTAL_OVERLAP = timedelta (hours = 1)
-S3_BUCKET = 'events.v1.mobileidentity.me'
 
 
 class FullCollectorState(object):
@@ -60,9 +59,6 @@ class FullCollector(object):
   '''
   classdocs
   '''
-  log = None
-  s3Connection = None
-  writer = None
   lookbackWindow = datetime.now () - timedelta (days = 365)
   incremental = True
 
@@ -73,10 +69,14 @@ class FullCollector(object):
   '''
   Constructor
   '''
-  def __init__(self,aws_access_key,aws_secret_key):
+  def __init__(self,s3Bucket, aws_access_key,aws_secret_key):
     #self.init_logger()
     self.log = logging.getLogger('driver')
-    self.s3Connection = S3Connection(aws_access_key, aws_secret_key)
+    self.s3Bucket = s3Bucket
+    self.awsAccessKey = aws_access_key
+    self.awsSecretKey = aws_secret_key
+    self.incremental = True
+    self.s3Connection = S3Connection(self.awsAccessKey, self.awsSecretKey)
 
 
   def init_logger(self):
@@ -139,7 +139,7 @@ class FullCollector(object):
       dbSession.commit()
 
       # clean s3
-      bucket = self.s3Connection.get_bucket(S3_BUCKET)
+      bucket = self.s3Connection.get_bucket(self.s3Bucket)
       for key in bucket.get_all_keys(prefix='%s/%s/' % (afm.author_id,self.getFeatureName())):
         bucket.delete_key(key)
 
@@ -176,7 +176,7 @@ class FullCollector(object):
     # copy new mapper file to s3 if the file exists and has a non-zero size
     #
     if (os.path.exists(state.filename) and os.path.getsize(state.filename) > 0):
-      bucket = self.s3Connection.get_bucket(S3_BUCKET)
+      bucket = self.s3Connection.get_bucket(self.s3Bucket)
       k = Key(bucket)
       k.key = '%s/%s/%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
       k.set_contents_from_filename(state.filename)

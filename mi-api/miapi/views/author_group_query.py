@@ -18,37 +18,42 @@ log = logging.getLogger(__name__)
 # AUTHOR GROUP QUERY: query for the highlights/details for a particular group (i.e. following)
 #
 
-# type and author required; group and feature are optional
-def authorGroupQuery(type,author,group=None,feature=None):
-
-  dbSession = DBSession()
-
-  return {'error':'not implemented'}
-
-
-# return highlights for the group
-#
-
-# /v1/authors/{authorname}/groups/{groupname}/highlights
-#
-@view_config(route_name='author.groups.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-def authorGroupHighlights(request):
+class AuthorGroupQuery(object):
+  '''
+  classdocs
+  '''
   
-  authorName = request.matchdict['authorname']
-  groupName = request.matchdict['groupname']
+  '''
+  class variables
+  '''
   
-  return authorGroupQuery('highlights',authorName,group=groupName)
+  '''
+  Constructor
+  '''
+  def __init__(self, request):
+      self.request = request
+      self.dbSession = DBSession()
 
 
-# /v1/authors/{authorname}/groups/{groupname}/events
-#
-# return all authors that match the specified search criteria
-#
-@view_config(route_name='author.groups.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-def authorGroupEvents(request):
+  # GET /v1/authors/{authorname}/groups/{groupname}/highlights
+  #
+  # get the highlights for the author's group
+  #
+  def getHighlights(self):
+
+    authorName = self.request.matchdict['authorname']
+    groupName = self.request.matchdict['groupname']
   
-  authorName = request.matchdict['authorname']
-  groupName = request.matchdict['groupname']
+    return {'error':'not implemented'}
+
+  # /v1/authors/{authorname}/groups/{groupname}/events
+  #
+  # get all events for the author's group
+  #
+  def getEvents(self):
+
+    authorName = self.request.matchdict['authorname']
+    groupName = self.request.matchdict['groupname']
   
-  return authorGroupQuery('events',authorName,group=groupName)
+    return {'error':'not implemented'}
 
