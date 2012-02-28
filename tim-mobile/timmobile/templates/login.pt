@@ -4,32 +4,24 @@
 			authorName: ''
 		}
 	</script>
-
+	
 	<div id="accounts" data-role="page" data-title="Accounts" metal:fill-slot="page_content">
-	
 		<header data-role="header">
-
 			<h1>Login</h1>
-
-		</header><!-- /header -->
-	
+		</header>
+		
 		<div data-role="content">
-
 			<span>${message}</span>
-	    <form action="${url}" method="post">
-	      <input type="hidden" name="forward" value="${forward}"/>
-	      <input type="text" name="login" value="${login}"/><br/>
-	      <input type="password" name="password"
-	             value="${password}"/><br/>
-	      <input type="submit" name="form.submitted" value="Log In"/>
-	    </form>
-
+			<form action="${url}" method="post">
+				<input type="hidden" name="forward" value="${forward}"/>
+				<input type="text" name="login" value="${login}"/><br/>
+				<input type="password" name="password" value="${password}"/><br/>
+				<input type="submit" name="form.submitted" value="Log In"/>
+			</form>
+			
 			<a href="/newlogin">Create New Login</a>
-
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
-
+	
 	<script type="text/javascript" metal:fill-slot="page_script"></script>
-
 </metal:index>

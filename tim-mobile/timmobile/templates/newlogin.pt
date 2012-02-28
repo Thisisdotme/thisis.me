@@ -1,22 +1,14 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="newlogin" data-role="page" data-title="New Login" metal:fill-slot="page_content">
-	
 		<header data-role="header">
-
 			<a href="/login" data-role="button" data-icon="arrow-l">Login</a>
 			<h1>New Login</h1>
-
-		</header><!-- /header -->
+		</header>
 	
 		<div data-role="content">
-
 			<h2>Create New Login</h2>
-			
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script"></script>
-
 </metal:index>
