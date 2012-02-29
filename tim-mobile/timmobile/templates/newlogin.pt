@@ -1,22 +1,23 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="newlogin" data-role="page" data-title="New Login" metal:fill-slot="page_content">
-	
 		<header data-role="header">
-
 			<a href="/login" data-role="button" data-icon="arrow-l">Login</a>
 			<h1>New Login</h1>
-
-		</header><!-- /header -->
+		</header>
 	
 		<div data-role="content">
-
 			<h2>Create New Login</h2>
-			
+			<form action="${url}" method="post">
+				<input type="hidden" name="forward" value="${forward}"/>
+				Full name: <input type="text" name="fullname" value="${fullname}"/><br/>
+				Email: <input type="text" name="email" value="${email}"/><br/>
+				Login: <input type="text" name="newlogin" value="${login}"/><br/>
+				Password: <input type="password" name="newpassword" value="${password}"/><br/>
+				<span style="color: red; font-size: 14pt">${message}</span>
+				<input type="submit" name="form.submitted" value="Create Account"/>
+			</form>
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script"></script>
-
 </metal:index>
