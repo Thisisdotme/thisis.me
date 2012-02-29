@@ -5,9 +5,9 @@
 .mi-header { }
 .ui-content { margin-top: 43px; }
 
-#timeline .ui-content > div, #feature .ui-content > div { clear: both; }
+#newsfeed .ui-content > div, #feature .ui-content > div { clear: both; }
 
-#timeline .event, #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
+#newsfeed .event, #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
 
 .featureIcon { float:left; margin-right:1em; } 
 
@@ -21,6 +21,10 @@
 .center-button { text-align:center; }
 
 #feature label { font-weight: bold; }
+
+
+/* Newsfeed */
+#newsfeed .mi-content { background-color: #fff; }
 
 
 /* experimental for pull-down and pull-up */

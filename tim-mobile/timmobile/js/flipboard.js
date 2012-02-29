@@ -1,27 +1,37 @@
-function FlipSet(width, height, nodes) {
+function FlipSet($wrapper, width, height, nodes) {
   this.flips_ = [];
   this.currentIndex_ = 0;
-  
+  this.width = width;
+  this.height = height;
+
   for (var i = 0, node; node = nodes[i]; i++) {
     this.flips_.push(new Flip(node, width, height, this));
   }
-  
-  this.containerNode_ = goog.dom.$dom('div', 'flip-set');
-  this.containerNode_.style.width = width + 'px';
-  this.containerNode_.style.height = height + 'px';
-  this.containerNode_.style.marginLeft = -width/2 + 'px';
-  this.containerNode_.style.marginTop = -height/2 + 'px';
-
+    
+  this.containerNode_ = $("<div class='flip-set'/>");
+  this.containerNode_.css("width", width + 'px');
+  this.containerNode_.css("height", height + 'px');
+  this.containerNode_.css("margin-left", -width/2 + 'px');
+  this.containerNode_.css("margin-top", -height/2 + 'px');
+    
   this.displayCurrentFlip_();
-  document.body.appendChild(this.containerNode_);
+  $wrapper.append(this.containerNode_);
 } 
 
 FlipSet.prototype.displayCurrentFlip_ = function() {
-  goog.dom.removeChildren(this.containerNode_);
-  this.containerNode_.appendChild(this.flips_[this.currentIndex_].originalNode_);
+  this.containerNode_.empty();
+  this.containerNode_.append(this.flips_[this.currentIndex_].originalNode_);
 }
 
-FlipSet.prototype.next = function() {
+FlipSet.prototype.push = function(node) {
+	this.flips_.push(new Flip(node, this.width, this.height, this));
+}
+
+FlipSet.prototype.unshift = function(node) {
+	this.flips_.unshift(new Flip(node, this.width, this.height, this));
+}
+
+FlipSet.prototype.next = function(callback) {
   if (this.isTransitioning_) return;
   
   this.isTransitioning_ = true;
@@ -30,23 +40,50 @@ FlipSet.prototype.next = function() {
   
   currentFlip.beginFlipFrom();
   nextFlip.beginFlipTo();
-  
+
   var self = this;
-  nextFlip.immediate(nextFlip.foldRight, function() {
-    currentFlip.foldLeft();
+  nextFlip.immediate(nextFlip.foldBottom, function() {
+    currentFlip.foldTop();
     nextFlip.unfold();
     currentFlip.moveToBack();
     nextFlip.onTransitionEnd(function() {
       nextFlip.endFlipTo();
       currentFlip.endFlipFrom();
       self.isTransitioning_ = false;
+      callback();
     });
   });
 
   this.currentIndex_++;
 };
 
-FlipSet.prototype.previous = function() {
+FlipSet.prototype.simulateNext = function(callback) {
+  if (this.isTransitioning_) return;
+  
+  this.isTransitioning_ = true;
+  var currentFlip = this.flips_[this.currentIndex_]
+  var nextFlip = this.flips_[this.currentIndex_ + 1];
+  
+  currentFlip.beginFlipFrom();
+  nextFlip.beginFlipTo();
+
+  var self = this;
+  nextFlip.immediate(nextFlip.foldBottom, function() {
+    currentFlip.foldTop();
+    nextFlip.unfold();
+    currentFlip.moveToBack();
+    nextFlip.onTransitionEnd(function() {
+      nextFlip.endFlipTo();
+      currentFlip.endFlipFrom();
+      self.isTransitioning_ = false;
+      callback();
+    });
+  });
+
+  this.currentIndex_++;
+};
+
+FlipSet.prototype.previous = function(callback) {
   if (this.isTransitioning_) return;
   
   this.isTransitioning_ = true;
@@ -57,14 +94,15 @@ FlipSet.prototype.previous = function() {
   previousFlip.beginFlipTo();
   
   var self = this;
-  previousFlip.immediate(previousFlip.foldLeft, function() {
-    currentFlip.foldRight();
+  previousFlip.immediate(previousFlip.foldTop, function() {
+    currentFlip.foldBottom();
     previousFlip.unfold();
     currentFlip.moveToBack();
     previousFlip.onTransitionEnd(function() {
       previousFlip.endFlipTo();
       currentFlip.endFlipFrom();
       self.isTransitioning_ = false;
+      callback();
     });
   });	  
   
@@ -88,35 +126,35 @@ function Flip(node, width, height, parentSet) {
 Flip.prototype.init_ = function(width, height) {
   var node = this.originalNode_;
   
-  var containerNode = goog.dom.$dom('div', 'flip-container');
-  containerNode.style.width = width + 'px';
-  containerNode.style.height = height + 'px';
+  var containerNode = $("<div class='flip-container'/>");
+  containerNode.css("width", width + 'px');
+  containerNode.css("height", height + 'px');
   
-  var leftContainerNode = goog.dom.$dom('div', 'flip-left-container flip-transitionable');
-  leftContainerNode.appendChild(node.cloneNode(true));
-  leftContainerNode.style.width = Math.floor(width/2) + 'px';
-  leftContainerNode.style.height = height + 'px';
-
-  var rightContainerNode = goog.dom.$dom('div', 'flip-right-container flip-transitionable');
-  var rightInnerContainerNode = goog.dom.$dom('div', 'flip-right-inner-container');
+  var topContainerNode = $("<div class='flip-top-container flip-transitionable'/>");
+  topContainerNode.append(node.clone());
+  topContainerNode.css("width", width + 'px');
+  topContainerNode.css("height", Math.floor(height/2) + 'px');
   
-  rightInnerContainerNode.appendChild(node.cloneNode(true));
-  rightInnerContainerNode.style.width = width + 'px';
-
-  rightContainerNode.appendChild(rightInnerContainerNode);
-  rightContainerNode.style.width = Math.ceil(width/2) + 'px';
-  rightContainerNode.style.height = rightInnerContainerNode.style.height =
-      height + 'px';
-
-  rightInnerContainerNode.style.left = -Math.floor(width/2) + 'px';
+  var bottomContainerNode = $("<div class='flip-bottom-container flip-transitionable'/>");
+  var bottomInnerContainerNode = $("<div class='flip-bottom-inner-container'/>");
   
-  containerNode.appendChild(leftContainerNode);
-  containerNode.appendChild(rightContainerNode);
+  bottomInnerContainerNode.append(node.clone());
+  bottomInnerContainerNode.css("height", height + 'px');
+
+  bottomContainerNode.append(bottomInnerContainerNode);
+  bottomContainerNode.css("height", Math.ceil(height/2) + 'px');
+  bottomContainerNode.css("width", width + 'px');
+  bottomInnerContainerNode.css("width", width + 'px');
+
+  bottomInnerContainerNode.css("top",  -Math.floor(height/2) + 'px');
+
+  containerNode.append(topContainerNode);
+  containerNode.append(bottomContainerNode);
   
   this.containerNode_ = containerNode;
-  this.leftContainerNode_ = leftContainerNode;
-  this.rightContainerNode_ = rightContainerNode;
-  this.rightInnerContainerNode_ = rightInnerContainerNode;
+  this.topContainerNode_ = topContainerNode;
+  this.bottomContainerNode_ = bottomContainerNode;
+  this.bottomInnerContainerNode_ = bottomInnerContainerNode;
   
   var self = this;
   var onTransitionEnd = function() {
@@ -127,71 +165,71 @@ Flip.prototype.init_ = function(width, height) {
   };
   
   try {
-    goog.events.listen(
-        this.containerNode_, 'webkitTransitionEnd', onTransitionEnd);
+  	this.containerNode_.bind("webkitTransitionEnd", onTransitionEnd);
   } catch (err) {}
   
   try {
     // Should be mozTransitionEnd, but is transition end per 
     // https://developer.mozilla.org/en/CSS/CSS_transitions#Detecting_the_completion_of_a_transition
-    goog.events.listen(
-        this.containerNode_, 'transitionend', onTransitionEnd);
+  	this.containerNode_.bind("transitionend", onTransitionEnd);
   } catch (err) {}
 };
 
 Flip.prototype.moveToFront = function() {
-  this.containerNode_.style.zIndex = 1;
+  this.containerNode_.css("z-index", 1);
 };
 
 Flip.prototype.moveToBack = function() {
-  this.containerNode_.style.zIndex = -1;
+  this.containerNode_.css("z-index", -1);
 };
 
 Flip.prototype.beginFlipFrom = function() {
   this.moveToFront();
-  goog.dom.replaceNode(this.containerNode_, this.originalNode_);	  
+  this.originalNode_.parent().append(this.containerNode_);
+  this.originalNode_.detach();  
 };
 
 Flip.prototype.beginFlipTo = function() {
-  this.parentSet_.containerNode_.appendChild(this.containerNode_);	  
+  this.parentSet_.containerNode_.append(this.containerNode_);
 };
 
 Flip.prototype.endFlipFrom = function() {
-  goog.dom.removeNode(this.containerNode_);
-  this.containerNode_.style.zIndex = 'auto';
+  this.containerNode_.detach();
+  this.containerNode_.css("z-index", 'auto');
 };
 
 Flip.prototype.endFlipTo = function() {
-  goog.dom.replaceNode(this.originalNode_, this.containerNode_);
-  this.containerNode_.style.zIndex = 'auto';
+  this.containerNode_.parent().append(this.originalNode_);
+  this.containerNode_.detach();
+  this.containerNode_.css("z-index", 'auto');
 };
 
 Flip.prototype.immediate = function(method, callback) {
-  goog.dom.classes.remove(this.leftContainerNode_, 'flip-transitionable');
-  goog.dom.classes.remove(this.rightContainerNode_, 'flip-transitionable');
+	this.topContainerNode_.removeClass('flip-transitionable');
+	this.bottomContainerNode_.removeClass('flip-transitionable');
   
   method.call(this);
   
   var self = this;
   window.setTimeout(function() {
-    goog.dom.classes.add(self.leftContainerNode_, 'flip-transitionable');
-    goog.dom.classes.add(self.rightContainerNode_, 'flip-transitionable');
+	self.topContainerNode_.addClass('flip-transitionable');
+	self.bottomContainerNode_.addClass('flip-transitionable');
     
     callback();
   });
 };
 
-Flip.prototype.foldLeft = function() {
-  goog.dom.classes.add(this.containerNode_, 'folded-left');
+Flip.prototype.foldTop = function() {
+  this.containerNode_.addClass('folded-top');
 };
 
-Flip.prototype.foldRight = function(opt_immediate) {
-  goog.dom.classes.add(this.containerNode_, 'folded-right');
+Flip.prototype.foldBottom = function(opt_immediate) {
+  this.containerNode_.addClass('folded-bottom');
 }
 
 Flip.prototype.unfold = function(opt_immediate) {
-  goog.dom.classes.remove(this.containerNode_, 'folded-left');
-  goog.dom.classes.remove(this.containerNode_, 'folded-right');
+  this.containerNode_.removeClass('folded-top');
+  this.containerNode_.removeClass('folded-bottom');
 }
 
 Flip.prototype.onTransitionEnd = function(callback) {

@@ -20,13 +20,11 @@
 		<div data-role="content">
 
 			<h2>NewsFeed Highlights</h2>
-			<div id="wrapper">
-				<div id="scroller">
+			<div id="wrapper" style="padding:15px; height:480px; width:320px; position: relative;">
 					
-					<div class="mi-content" style="padding:15px;">
+					<div class="mi-content" style="background-color:#fff; width:320px; height:480px;">
 					</div>
 					
-				</div>
 			</div>
 		</div><!-- /content -->
 	

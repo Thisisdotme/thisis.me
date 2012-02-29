@@ -454,63 +454,104 @@ TIM.timelineController = function (spec) {
 					pullUp = $('#pullUp'),	
 					pullUpOffset = pullUp.outerHeight(true);
 
-			theScroller = new iScroll('wrapper', {
-				useTransition: true,
-				topOffset: pullDownOffset,
-				onRefresh: function () {
-					if (pullDown.hasClass('loading')) {
-						pullDown.removeClass('loading');
-						pullDown.find('.pullDownLabel').text('Pull down to refresh...');
-					}
-					else
-					if (pullUp.hasClass('loading')) {
-						pullUp.removeClass('loading');
-						pullUp.find('.pullUpLabel').text('Pull up to load more...');
-					}						
-
-				},
-				onScrollMove: function () {
-					if (this.y > 5 && !pullDown.hasClass('flip')) {
-						pullDown.addClass('flip');
-						pullDown.find('.pullDownLabel').text('Release to refresh...');
-						this.minScrollY = 0;
-					} 
-					else 
-					if (this.y < 5 && pullDown.hasClass('flip')) {
-						pullDown.removeClass('flip');
-						pullDown.find('.pullDownLabel').text('Pull down to refresh...');
-						this.minScrollY = -pullDownOffset;
-					}
-					else
-					if (this.y < (this.maxScrollY - 5) && !pullUp.hasClass('flip')) {
-						pullUp.addClass('flip');
-						pullUp.find('.pullUpLabel').text('Release to refresh...');
-						this.maxScrollY = this.maxScrollY;
-					}
-					else
-					if (this.y > (this.maxScrollY + 5) && pullUp.hasClass('flip')) {
-						pullUp.removeClass('flip');
-						pullUp.find('.pullUpLabel').text('Pull up to load more...');
-						this.maxScrollY = pullUpOffset;
-					}						
-				},
-				onScrollEnd: function () {
-					if (pullDown.hasClass('flip')) {
-						pullDown.removeClass('flip').addClass('loading');
-						pullDown.find('.pullDownLabel').text('Loading...');
-						pullDownAction();
-					}
-					else if (pullUp.hasClass('flip')) {
-						pullUp.removeClass('flip').addClass('loading');
-						pullUp.find('.pullUpLabel').text('Loading...');				
-						pullUpAction();
-					}					
-				}
-			});
-			$("#wrapper").bind("swipeleft", function(){
-          		console.log("swipeleft");
-          		//TIM.timelineController.hello();
-          		that.setPage($("#wrapper"), ++TIM.currentPage);
+			// theScroller = new iScroll('wrapper', {
+				// useTransition: true,
+				// topOffset: pullDownOffset,
+				// onRefresh: function () {
+					// if (pullDown.hasClass('loading')) {
+						// pullDown.removeClass('loading');
+						// pullDown.find('.pullDownLabel').text('Pull down to refresh...');
+					// }
+					// else
+					// if (pullUp.hasClass('loading')) {
+						// pullUp.removeClass('loading');
+						// pullUp.find('.pullUpLabel').text('Pull up to load more...');
+					// }						
+// 
+				// },
+				// onScrollMove: function () {
+					// if (this.y > 5 && !pullDown.hasClass('flip')) {
+						// pullDown.addClass('flip');
+						// pullDown.find('.pullDownLabel').text('Release to refresh...');
+						// this.minScrollY = 0;
+					// } 
+					// else 
+					// if (this.y < 5 && pullDown.hasClass('flip')) {
+						// pullDown.removeClass('flip');
+						// pullDown.find('.pullDownLabel').text('Pull down to refresh...');
+						// this.minScrollY = -pullDownOffset;
+					// }
+					// else
+					// if (this.y < (this.maxScrollY - 5) && !pullUp.hasClass('flip')) {
+						// pullUp.addClass('flip');
+						// pullUp.find('.pullUpLabel').text('Release to refresh...');
+						// this.maxScrollY = this.maxScrollY;
+					// }
+					// else
+					// if (this.y > (this.maxScrollY + 5) && pullUp.hasClass('flip')) {
+						// pullUp.removeClass('flip');
+						// pullUp.find('.pullUpLabel').text('Pull up to load more...');
+						// this.maxScrollY = pullUpOffset;
+					// }						
+				// },
+				// onScrollEnd: function () {
+					// if (pullDown.hasClass('flip')) {
+						// pullDown.removeClass('flip').addClass('loading');
+						// pullDown.find('.pullDownLabel').text('Loading...');
+						// pullDownAction();
+					// }
+					// else if (pullUp.hasClass('flip')) {
+						// pullUp.removeClass('flip').addClass('loading');
+						// pullUp.find('.pullUpLabel').text('Loading...');				
+						// pullUpAction();
+					// }					
+				// }
+			// });
+			
+			
+			// $("#wrapper").bind("swipe", function(){
+          		// console.log("swipe");
+          		// if (that.flipSet.canGoNext()) {
+          			// that.flipSet.next();	
+          		// }
+//           		
+          		// // that.setPage($("#newsfeed .mi-content"), ++TIM.currentPage);
+				// // that.loaded();
+              // });
+//               
+			$("#wrapper").bind("swipeup", function(){
+          		console.log("swipeup");
+          		if (that.flipSet.canGoNext()) {
+          			that.flipSet.next(function() {
+          				TIM.currentPage ++;
+          				if (TIM.currentPage < TIM.allEvents.length) {
+          					that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
+          				}
+          				console.log("is at next");
+          			});	
+          		}
+          		
+          		// that.setPage($("#newsfeed .mi-content"), ++TIM.currentPage);
+				// that.loaded();
+              });
+			$("#wrapper").bind("swipedown", function(){
+          		console.log("swipedown");
+				if (that.flipSet.canGoPrevious()) {
+	          		that.flipSet.previous(function() {
+          				TIM.currentPage --;
+          				if (TIM.currentPage > 0) {
+          					if (that.flipSet.currentIndex === 0) {
+          						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
+          						that.flipSet.currentIndex++;
+          					}
+          				}
+          				console.log("is at next");
+          			});
+	          	}
+          		// if (TIM.currentPage > 0) {
+          			// that.setPage($("#newsfeed .mi-content"), --TIM.currentPage);
+          		// }
+				// that.loaded();
               });
 		}
 			
@@ -518,17 +559,24 @@ TIM.timelineController = function (spec) {
 
 		return that;
 	};
-
+	
+	that.flipSet = {};
+	
 	that.load = function () {
 				
 		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events?callback=?', function (data) {
+			var feedPages = new Array();
 			var tl = $("#newsfeed .mi-content"),
 					renderer;
 			try {
-				tl.empty();
+				tl.remove();
 				TIM.allEvents = data.events || [];
 				TIM.currentPage = 0;
-				that.setPage(tl, TIM.currentPage);
+				
+				feedPages.push(that.makePageObj(TIM.currentPage));
+				feedPages.push(that.makePageObj(TIM.currentPage + 1));
+				that.flipSet = new FlipSet($("#wrapper"), 320, 480, feedPages);
+				
 				that.loaded();
 			}
 			catch (e) {
@@ -539,28 +587,28 @@ TIM.timelineController = function (spec) {
 		return that;
 	};
 	
-	that.setPage = function (obj, idx) {
-		obj.empty();
-		if (TIM.allEvents !== undefined
-			&& TIM.allEvents.length > 0) {
-				if (idx < 0 || idx > TIM.allEvents.length) {
-					return;
-				}
-				
-				var numberOfFeedsPerPage = 3;
-				var firstDisplayedFeed = TIM.currentPage * numberOfFeedsPerPage;
-				var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
-				console.log(firstDisplayedFeed);
-				for (var i = firstDisplayedFeed; i < lastDisplayedFeed; i++) {
-					renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": TIM.allEvents[i]});
-					$(obj).append(renderer.renderTimeline());
-				}
-				that.loaded();
+	that.makePageObj = function (idx) {
+		if (TIM.allEvents === undefined
+			|| idx < 0 
+			|| idx > TIM.allEvents.length) {
+			return null;
+		}
+		
+		var obj = $("<div class='mi-content'/>");
+		if (TIM.allEvents.length > 0) {
+			var numberOfFeedsPerPage = 1;
+			var firstDisplayedFeed = idx * numberOfFeedsPerPage;
+			var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
+			console.log(firstDisplayedFeed);
+			for (var i = firstDisplayedFeed; i < lastDisplayedFeed; i++) {
+				renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": TIM.allEvents[i]});
+				obj.append(renderer.renderTimeline());
 			}
-			else {
-				$(obj).append('<p>No Events.  Get busy and create some content!</p>');
-			}
-		return;
+		}
+		else {
+			obj.append('<p>No Events.  Get busy and create some content!</p>');
+		}
+		return obj;
 	};	
 	return that;
 
