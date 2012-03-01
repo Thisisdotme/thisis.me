@@ -7,13 +7,13 @@
 
 #newsfeed .ui-content > div, #feature .ui-content > div { clear: both; }
 
-#newsfeed .event, #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
+#feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
 
 .featureIcon { float:left; margin-right:1em; } 
 
-.event { min-height: 5em; }
+/*.event { min-height: 5em; }
 .event em { font-size:75%; }
-.event p { margin-top:.33em; }
+.event p { margin-top:.33em; }*/
 
 #authorFeatures .ui-content a { margin: 1em; display: inline-block;}
 
@@ -24,8 +24,74 @@
 
 
 /* Newsfeed */
-#newsfeed .mi-content { background-color: #fff; }
 
+/*#newsfeed .event .content { position: absolute; top: 50%; }*/
+#newsfeed .ui-content {
+	padding: 0;
+	margin: 0;
+}
+
+#newsfeed .mi-content {
+	display:table-cell; 
+	vertical-align:bottom;
+	
+	width: 320px;
+	height: 370px;
+	
+	background-color: #fff;
+}
+
+#newsfeed .event {
+	height: 184px;
+	border-bottom:1px dotted black;
+}
+
+#newsfeed .event p {
+	height: 105px;
+	
+	padding: 10px 10px 10px 10px;
+	
+	display: table-cell;
+	vertical-align: middle;
+	text-align: left;
+}
+
+/*	Feature specific configurations  */
+#newsfeed .event.halfpage { height: 184px; }
+#newsfeed .event.halfpage p { height: 104px; }
+
+#newsfeed .event .info .author {
+	font-weight: bold;
+	padding-left: 5px;
+}
+
+#newsfeed .event .footer {
+	height: 50px;
+	padding: 5px;
+	margin:0;
+}
+
+#newsfeed .event .baseline {
+	height: 30px;
+	padding-top: 5px;
+}
+
+#newsfeed .event .baseline img {
+	float: left;
+	padding-left: 5px;
+	height: 20px;
+	width: 20px;
+}
+
+#newsfeed .event .baseline .fuzzy-time {
+	float: left;
+	
+	padding-left: 5px;
+	padding-top: 3px;
+	
+	color: gray;
+	font-size: 14px;
+}
 
 /* experimental for pull-down and pull-up */
 

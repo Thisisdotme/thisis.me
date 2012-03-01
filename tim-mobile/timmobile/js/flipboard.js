@@ -11,8 +11,6 @@ function FlipSet($wrapper, width, height, nodes) {
   this.containerNode_ = $("<div class='flip-set'/>");
   this.containerNode_.css("width", width + 'px');
   this.containerNode_.css("height", height + 'px');
-  this.containerNode_.css("margin-left", -width/2 + 'px');
-  this.containerNode_.css("margin-top", -height/2 + 'px');
     
   this.displayCurrentFlip_();
   $wrapper.append(this.containerNode_);
@@ -23,12 +21,21 @@ FlipSet.prototype.displayCurrentFlip_ = function() {
   this.containerNode_.append(this.flips_[this.currentIndex_].originalNode_);
 }
 
+FlipSet.prototype.getCurrentIndex = function(node) {
+	return this.currentIndex_;
+}
+
 FlipSet.prototype.push = function(node) {
 	this.flips_.push(new Flip(node, this.width, this.height, this));
 }
 
 FlipSet.prototype.unshift = function(node) {
 	this.flips_.unshift(new Flip(node, this.width, this.height, this));
+    this.currentIndex_++;
+}
+
+FlipSet.prototype.getLength = function() {
+	return this.flips_.length;
 }
 
 FlipSet.prototype.next = function(callback) {

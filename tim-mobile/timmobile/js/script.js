@@ -71,6 +71,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getCreateTimeMillis = function () {
 		return Number(spec.event.create_time) * 1000;
 	};
+	
+	that.getFuzzyCreateTime = function () {
+		return $.timeago(new Date(this.getCreateTimeMillis()));
+	}
 
 	that.getDetailURL = function () {
 		return spec.event.link;
@@ -78,6 +82,14 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 
 	that.getCaption = function () {
 		return spec.event.content.label || '';
+	};
+	
+	that.getShortCaption = function (shortCaptionLength) {
+		if (shortCaptionLength === undefined) {
+			shortCaptionLength = 20;
+		}
+		var caption = that.getCaption();
+		return (caption.length <= shortCaptionLength) ? caption : (caption.substr(0, shortCaptionLength) + "...");
 	};
 
 	that.getData = function () {
@@ -93,22 +105,44 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 
 	that.renderBegin = function () {
-		var ct = new Date(this.getCreateTimeMillis());
-		return '<div class="event"><a class="featureIcon" href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
-									'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
-							'</a><em>' + ct.toLocaleString() + '</em>';
+		return '<div class="event ' + that.getFeatureName() + '">';
 	};
 	
 	that.renderContent = function () {
-		return '<p>' + TIM.utils.linkify(that.getCaption()) + '</p>';
+		return '<p class="text-content">' + TIM.utils.linkify(that.getCaption()) + '</p>';
 	};
 	
 	that.renderEnd = function () {
 		return '</div>';
 	};
+	
+	// that.renderUserInfo = function () {
+		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
+	// }
+// 	
+	// that.renderUserIcon = function () {
+		// return '<div class="icon"><a class="featureIcon" href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
+						// '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
+					// '</a>';
+	// }
+	that.renderFooter = function () {
+		return '<div class="footer">' + that.renderInfo() +  that.renderBaseline() + '</div>';
+	}
+	
+	that.renderInfo = function () {
+		var author = '<div class="author">' + that.getAuthorName() + '</div>';
+		var caption = '<div class="caption">' + that.getShortCaption() + '</div>';
+		return '<div class="info">' + author + caption + '</div>';
+	}
+	
+	that.renderBaseline = function () {
+		var featureIcon = 	'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
+		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
+		return '<div class="baseline">' + featureIcon + timeago + '</div>';
+	}
 
 	that.renderTimeline = function () {
-		return $(that.renderBegin() + that.renderContent() + that.renderEnd());
+		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
 	that.renderDetail = function () {
@@ -151,6 +185,7 @@ TIM.eventRenderer.instagramRenderer = function (spec) {
 
 TIM.eventRenderer.linkedinRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
+	
 	return that;
 };
 
@@ -161,6 +196,12 @@ TIM.eventRenderer.meRenderer = function (spec) {
 
 TIM.eventRenderer.twitterRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
+	
+	that.renderInfo = function () {
+		var author = '<div class="author">' + that.getAuthorName() + '</div>';
+		return '<div class="info">' + author + '</div>';
+	}
+	
 	return that;
 };
 
@@ -519,22 +560,25 @@ TIM.timelineController = function (spec) {
 				// // that.loaded();
               // });
 //               
-			$("#wrapper").bind("swipeup", function(){
+			$("#newsfeed-content").bind("swipeup", function(){
           		console.log("swipeup");
           		if (that.flipSet.canGoNext()) {
           			that.flipSet.next(function() {
           				TIM.currentPage ++;
           				if (TIM.currentPage < TIM.allEvents.length) {
-          					that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
+          					console.log("that.flipSet.currentIndex:" + that.flipSet.getCurrentIndex());
+          					console.log("that.flipSet.length:" + that.flipSet.getLength());
+          					if (that.flipSet.getCurrentIndex() === that.flipSet.getLength() - 1) {
+          						that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
+          					}
           				}
-          				console.log("is at next");
           			});	
           		}
           		
           		// that.setPage($("#newsfeed .mi-content"), ++TIM.currentPage);
 				// that.loaded();
               });
-			$("#wrapper").bind("swipedown", function(){
+			$("#newsfeed-content").bind("swipedown", function(){
           		console.log("swipedown");
 				if (that.flipSet.canGoPrevious()) {
 	          		that.flipSet.previous(function() {
@@ -542,7 +586,6 @@ TIM.timelineController = function (spec) {
           				if (TIM.currentPage > 0) {
           					if (that.flipSet.currentIndex === 0) {
           						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
-          						that.flipSet.currentIndex++;
           					}
           				}
           				console.log("is at next");
@@ -553,9 +596,13 @@ TIM.timelineController = function (spec) {
           		// }
 				// that.loaded();
               });
+              
+              $("#newsfeed-content").bind("touchmove", function(event) {
+              		event.preventDefault();
+              });
 		}
 			
-		window.setTimeout(function () { document.getElementById('wrapper').style.left = '0'; }, 800);
+		window.setTimeout(function () { document.getElementById('newsfeed-content').style.left = '0'; }, 800);
 
 		return that;
 	};
@@ -575,7 +622,7 @@ TIM.timelineController = function (spec) {
 				
 				feedPages.push(that.makePageObj(TIM.currentPage));
 				feedPages.push(that.makePageObj(TIM.currentPage + 1));
-				that.flipSet = new FlipSet($("#wrapper"), 320, 480, feedPages);
+				that.flipSet = new FlipSet($("#newsfeed .ui-content"), 320, 370, feedPages);
 				
 				that.loaded();
 			}
@@ -596,7 +643,7 @@ TIM.timelineController = function (spec) {
 		
 		var obj = $("<div class='mi-content'/>");
 		if (TIM.allEvents.length > 0) {
-			var numberOfFeedsPerPage = 1;
+			var numberOfFeedsPerPage = 2;
 			var firstDisplayedFeed = idx * numberOfFeedsPerPage;
 			var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
 			console.log(firstDisplayedFeed);
