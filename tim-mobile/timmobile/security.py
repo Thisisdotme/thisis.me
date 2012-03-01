@@ -15,7 +15,9 @@ def groupfinder(authorname, request):
   author = dbsession.query(Author).filter_by(author_name=authorname).first()
   
   # TODO: add handling for invalid author name
-  groups = dbsession.query(AccessGroup).select_from(join(AuthorAccessGroupMap, AccessGroup, AuthorAccessGroupMap.group_id==AccessGroup.id)).filter(AuthorAccessGroupMap.author_id==author.id).all()
-
-  return [group.group_name for group in groups]
+  if author is not None:
+    groups = dbsession.query(AccessGroup).select_from(join(AuthorAccessGroupMap, AccessGroup, AuthorAccessGroupMap.group_id==AccessGroup.id)).filter(AuthorAccessGroupMap.author_id==author.id).all()
+    return [group.group_name for group in groups]
+  
+  return []
   
