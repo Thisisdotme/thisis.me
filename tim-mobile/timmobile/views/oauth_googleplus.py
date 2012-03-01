@@ -32,8 +32,8 @@ def get_googlePlus_info(request):
 
   # the presumption is that the feature already exists.  If it doesn't then this function
   # should not have been called
-  req = urllib2.Request('%s/v1/authors/%s/features/%s' % 
-                          (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE)) 
+  req = urllib2.Request('%s/v1/authors/%s/features/%s' %
+                          (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
   
@@ -43,14 +43,14 @@ def get_googlePlus_info(request):
 
   userId = resJSON['auxillary_data']['id']
 
-  # let's exchange the refresh token for an access token 
+  # let's exchange the refresh token for an access token
   apiKey = oAuthConfig[FEATURE]['key']
   apiSecret = oAuthConfig[FEATURE]['secret']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('client_secret',apiSecret),
                                 ('refresh_token',refreshToken),
                                 ('grant_type','refresh_token')])
-  req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs) 
+  req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs)
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 
@@ -99,7 +99,7 @@ def get_googlePlus(request):
     # ??? TODO - need better handling of feature already existing
     if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
 
-      accessToken, userId = get_googlePlus_info(request)      
+      accessToken, userId = get_googlePlus_info(request)
   
       request.session['googlePlus_access_token'] = accessToken
       request.session['googlePlus_user_id'] = userId
@@ -142,7 +142,7 @@ def googlePlus_callback(request):
                                   ('client_secret',apiSecret),
                                   ('redirect_uri',request.route_url('googleplus_callback')),
                                   ('grant_type','authorization_code')])
-    req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs) 
+    req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs)
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
 
@@ -152,7 +152,7 @@ def googlePlus_callback(request):
   else:
     error = request.params.get('error')
     log.error('Google+ oauth failed: %s' % error)
-    raise GenericError(error) 
+    raise GenericError(error)
 
   # now let's get some information about the user -- namely their id
   req = urllib2.Request('https://www.googleapis.com/oauth2/v1/userinfo?access_token=%s' % accessToken)
@@ -163,9 +163,9 @@ def googlePlus_callback(request):
 
   # add the feature via the API
   json_payload = json.dumps({'access_token':refreshToken,'auxillary_data':{'id':userId}})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                            (request.registry.settings['mi.api.endpoint'],authorName,FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                            (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                           'PUT',
                           json_payload,
                           headers)
@@ -174,7 +174,7 @@ def googlePlus_callback(request):
 
   log.info("Added Google+ feature for author %s" % authorName)
 
-  # store the access-token and user-id in the session    
+  # store the access-token and user-id in the session
   request.session['googlePlus_access_token'] = accessToken
   request.session['googlePlus_user_id'] = userId
 

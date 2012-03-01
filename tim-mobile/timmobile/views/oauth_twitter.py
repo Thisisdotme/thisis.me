@@ -47,8 +47,8 @@ def get_twitter(request):
     request.session.flash('Your Twitter account is enabled.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
     
-  return { 'feature':'Twitter', 
-           'url' : request.route_url('twitter'), 
+  return { 'feature':'Twitter',
+           'url' : request.route_url('twitter'),
            'api_endpoint':request.registry.settings['mi.api.endpoint']}
   
 @view_config(route_name='twitter', request_method='POST', permission='author')
@@ -59,8 +59,8 @@ def post_twitter(request):
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   client = oauth.Client(consumer)
   
-  # Step 1: Get a request token. This is a temporary token that is used for 
-  # having the user authorize an access token and to sign the request to obtain 
+  # Step 1: Get a request token. This is a temporary token that is used for
+  # having the user authorize an access token and to sign the request to obtain
   # said access token.
 
   callback = request.route_url('twitter_callback')
@@ -74,7 +74,7 @@ def post_twitter(request):
 #  print "    - oauth_token             = %s" % request_token['oauth_token']
 #  print "    - oauth_token_secret      = %s" % request_token['oauth_token_secret']
 #  print "    - oauth_callback_confirmed = %s" % request_token['oauth_callback_confirmed']
-#  print 
+#  print
 
   # Step 2: Redirect to the provider.
   request.session['oauth_token_secret'] = request_token['oauth_token_secret']
@@ -87,17 +87,17 @@ def post_twitter(request):
 @view_config(route_name='twitter_callback', request_method='GET', permission='author')
 def twitter_callback(request):
   
-  # the oauth_token is request as a query arg; the auth_token_secret is in session store  
+  # the oauth_token is request as a query arg; the auth_token_secret is in session store
   oauth_token = request.params['oauth_token']
   oauth_token_secret = request.session['oauth_token_secret']
 
   oauth_verifier = request.params['oauth_verifier']
   
-  # Step 3: Once the consumer has redirected the user back to the oauth_callback                                                                                                           
-  # URL you can request the access token the user has approved. You use the                                                                                                                
-  # request token to sign this request. After this is done you throw away the                                                                                                              
-  # request token and use the access token returned. You should store this                                                                                                                 
-  # access token somewhere safe, like a database, for future use.                                                                                                                          
+  # Step 3: Once the consumer has redirected the user back to the oauth_callback
+  # URL you can request the access token the user has approved. You use the
+  # request token to sign this request. After this is done you throw away the
+  # request token and use the access token returned. You should store this
+  # access token somewhere safe, like a database, for future use.
   consumer_key = oAuthConfig[FEATURE]['key']
   consumer_secret = oAuthConfig[FEATURE]['secret']
   consumer = oauth.Consumer(consumer_key, consumer_secret)
@@ -109,7 +109,7 @@ def twitter_callback(request):
   resp, content = client.request(oAuthConfig[FEATURE]['access_token_url'], "POST")
   access_token = dict(urlparse.parse_qsl(content))
 
-  # these are the real deal and need to be stored securely in the DB                                                                                                                       
+  # these are the real deal and need to be stored securely in the DB
   oauth_token = access_token['oauth_token']
   oauth_token_secret = access_token['oauth_token_secret']
 
@@ -119,9 +119,9 @@ def twitter_callback(request):
   userInfoJSON = json.loads(make_request(client,'https://api.twitter.com/1/account/verify_credentials.json').decode('utf-8'))
 
   json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'auxillary_data':{'id':userInfoJSON['id']}})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                            (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                            (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE),
                           'PUT',
                           json_payload,
                           headers)
