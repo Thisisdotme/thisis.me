@@ -1,26 +1,20 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="accounts" data-role="page" data-title="Accounts" metal:fill-slot="page_content">
-	
 		<header data-role="header">
-
-			<h1>Accounts</h1>
-
+			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">All Accounts</a>
+			<h1>${feature}</h1>
 		</header><!-- /header -->
 	
 		<div data-role="content">
-
 			<p><img src="/img/social_icons/${feature}.png" />
 			<h1>Add ${feature} Feature?</h1>
-			<p>This will redirect to ${feature} where you'll enter your credentials and then back here</p>
+			<p>This will redirect to ${feature} where you'll enter your credentials and then return here</p>
 			<form action="${url}" method="post" data-ajax="false">
 				<input type="submit" name="form.submitted" value="Continue"/>
 			</form>
 
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script"></script>
-
 </metal:index>
