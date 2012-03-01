@@ -13,6 +13,7 @@ from mi_utils.oauth import make_request
 from mi_url.RequestWithMethod import RequestWithMethod
 
 from timmobile import oAuthConfig
+from urllib2 import HTTPError
 
 log = logging.getLogger(__name__)
 
@@ -124,8 +125,12 @@ def twitter_callback(request):
                           'PUT',
                           json_payload,
                           headers)
-  res = urllib2.urlopen(req)
-  resJSON = json.loads(res.read())
+  try:
+    res = urllib2.urlopen(req)
+    resJSON = json.loads(res.read())
+  except HTTPError, e:
+    # TODO: handle errors more gracefully here (caused by, e.g., API S3 bucket not existing)
+    print e.read()
 
   try:
     request.session['twitter_access_token'] = oauth_token
