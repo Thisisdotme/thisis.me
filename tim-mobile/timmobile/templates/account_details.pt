@@ -2,12 +2,15 @@
 	<div id="accountdetails" data-role="page" data-title="Account Details" metal:fill-slot="page_content">
 		<header data-role="header">
 			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">All Accounts</a>
-			<h1>Account Details</h1>
+			<h1>${feature} Details</h1>
 		</header>
 	
 		<div data-role="content">
 			<h2>Details for ${feature}</h2>
 			<p>${message}</p>
+			<form action="${url}" method="post" data-ajax="false">
+				<input type="submit" name="form.submitted" value="Remove"/>
+			</form>
 		</div><!-- /content -->
 	</div><!-- /page -->
 
