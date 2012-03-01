@@ -86,7 +86,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.getShortCaption = function (shortCaptionLength) {
 		if (shortCaptionLength === undefined) {
-			shortCaptionLength = 20;
+			shortCaptionLength = 50;
 		}
 		var caption = that.getCaption();
 		return (caption.length <= shortCaptionLength) ? caption : (caption.substr(0, shortCaptionLength) + "...");
@@ -103,9 +103,13 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getContentURL = function () {
 		return spec.event.content.url || '';
 	};
+	
+	that.getEventDisplaySize = function () {
+		return 'half-page';
+	}
 
 	that.renderBegin = function () {
-		return '<div class="event ' + that.getFeatureName() + '">';
+		return '<div class="event ' + that.getEventDisplaySize() + '">';
 	};
 	
 	that.renderContent = function () {
@@ -202,6 +206,9 @@ TIM.eventRenderer.twitterRenderer = function (spec) {
 		return '<div class="info">' + author + '</div>';
 	}
 	
+	that.getEventDisplaySize = function () {
+		return 'full-page';
+	}
 	return that;
 };
 
@@ -643,7 +650,7 @@ TIM.timelineController = function (spec) {
 		
 		var obj = $("<div class='mi-content'/>");
 		if (TIM.allEvents.length > 0) {
-			var numberOfFeedsPerPage = 2;
+			var numberOfFeedsPerPage = 1;
 			var firstDisplayedFeed = idx * numberOfFeedsPerPage;
 			var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
 			console.log(firstDisplayedFeed);
@@ -703,17 +710,28 @@ TIM.DetailController = function (spec) {
 
 
 TIM.ImageController = function (spec) {
-
-	var images = {};
 	
+	var isLoaded = false;
+	var isLoading = false;
+	var images = {};
 	return {
 	
-		load: function () {
+		load: function (callback) {
+			if (isLoaded) {
+				if (callback !== undefined) callback(this);
+				return;
+			}
+			else if (isLoading){
+				return;
+			}
+			
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/features?callback=?', function (data) {
 				var features = data.features || [];
 				$.each(features, function (idx, feature) {
 					images[feature.name] = feature;
 				});
+				
+				if (callback !== undefined) callback(this);
 			});
 		},
 		
@@ -745,6 +763,50 @@ TIM.ImageController = function (spec) {
 
 }();
 
+TIM.Resources = function() {
+	var availableResources = [];
+	availableResources.push(TIM.ImageController);
+	
+	var resources = [];
+	
+	var isLoaded = false;
+	var isLoading = false;
+	
+	var queue = [];
+	
+	return {	
+		load: function (callback) {
+			if (isLoaded) {
+				if (callback !== undefined) callback();
+				return;
+			}
+			if (callback !== undefined) queue.push(callback);
+			
+			if (isLoading){
+				return;
+			}
+			
+			isLoading = true;
+			for (var i = 0; i < availableResources.length; i++) {
+				availableResources[i].load(this.didLoadResource);	
+			}
+		},
+		
+		didLoadResource: function(resource) {
+			resources.push(resource);
+			if (resources.length === availableResources.length) {
+				isLoading = false;
+				isLoaded = true;
+				
+				for (var i = 0; i < queue.length; i++) {
+					queue[i]();	
+				}
+			}
+		}
+	};
+}();
+
+
 //Listen for any attempts to call changePage().
 $(document).bind("pagebeforechange", function (e, data) {
 
@@ -768,17 +830,24 @@ $(document).bind("pagebeforechange", function (e, data) {
 	}
 });
 
-
+TIM.ImageController.load();
+	
 $(document).delegate("#authors", "pageinit", function () {
-	TIM.AuthorsController({}).load();
+	 TIM.Resources.load(function() {
+		TIM.AuthorsController({}).load();
+	 });
 });
 
 $(document).delegate("#newsfeed", "pageinit", function () {
-	TIM.timelineController({}).load();
+	 TIM.Resources.load(function() {
+		TIM.timelineController({}).load();
+	 });
 });
 
 $(document).delegate("#authorFeatures", "pageinit", function () {
-	TIM.AuthorFeaturesController({}).load();
+	 TIM.Resources.load(function() {
+		TIM.AuthorFeaturesController({}).load();
+	 });
 });
 
 $(document).delegate("#feature", "pageinit", function () {
@@ -791,11 +860,14 @@ $(document).delegate("#feature", "pageinit", function () {
 });
 
 $(document).delegate("#detail", "pageinit", function () {
-	TIM.DetailController({}).load();
+	 TIM.Resources.load(function() {
+		TIM.DetailController({}).load();
+	 });
 });
 
 $(window).bind('orientationchange', function (event) {
 
 });
 
-TIM.ImageController.load();
+$(document).ready(function () {
+});
