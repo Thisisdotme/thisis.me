@@ -45,8 +45,8 @@ class FoursquareView(object):
 
     # the presumption is that the feature already exists.  If it doesn't then this function
     # should not have been called
-    req = urllib2.Request('%s/v1/authors/%s/features/%s' % 
-                                (self.request.registry.settings['mi.api.endpoint'],authenticated_userid(self.request),self.featureName)) 
+    req = urllib2.Request('%s/v1/authors/%s/features/%s' %
+                                (self.request.registry.settings['mi.api.endpoint'],authenticated_userid(self.request),self.featureName))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
     
@@ -96,7 +96,7 @@ class FoursquareView(object):
       # Check if the feature we're trying to add is listed
       # ??? TODO - need better handling of feature already existing
       if len([feature for feature in resJSON['features'] if feature['name'] == self.featureName]) == 1:
-        accessToken, userId = self.get_access_info()      
+        accessToken, userId = self.get_access_info()
     
         self.request.session['foursquare_access_token'] = accessToken
         self.request.session['foursquare_user_id'] = userId
@@ -157,7 +157,7 @@ class FoursquareView(object):
       try:
         req = urllib2.Request(url)
         res = urllib2.urlopen(req)
-        resJSON = json.loads(res.read())        
+        resJSON = json.loads(res.read())
   
         accessToken = resJSON['access_token']
   
@@ -178,9 +178,9 @@ class FoursquareView(object):
       raise GenericError('Error authenticating user with Foursquare: %s' % error)
     
     json_payload = json.dumps({'access_token':accessToken,'auxillary_data':{'id':userId}})
-    headers = {'Content-Type':'application/json; charset=utf-8'}      
-    req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                                    (self.request.registry.settings['mi.api.endpoint'],authorName,self.featureName), 
+    headers = {'Content-Type':'application/json; charset=utf-8'}
+    req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                                    (self.request.registry.settings['mi.api.endpoint'],authorName,self.featureName),
                             'PUT',
                             json_payload,
                             headers)
@@ -193,5 +193,5 @@ class FoursquareView(object):
     self.request.session['foursquare_user_id'] = userId
     
     self.request.session.flash('Your Foursquare account has been successfully added.')
-    return HTTPFound(location=self.request.route_path('account_details',featurename=self.featureName))
+    return HTTPFound(location=self.request.route_path('newsfeed'))
     

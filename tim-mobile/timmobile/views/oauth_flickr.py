@@ -38,7 +38,7 @@ def verify_flickr_access_token(flickr_access_token):
 
 def get_flickr_access_token(request):
 
-  req = urllib2.Request('%s/v1/authors/%s/features/%s' % 
+  req = urllib2.Request('%s/v1/authors/%s/features/%s' %
                               (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
@@ -83,10 +83,10 @@ def get_flickr(request):
     # Check if the feature we're trying to add is listed
     # ??? TODO - need better handling of feature already existing
     if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
-      flickr_access_token = get_flickr_access_token(request)      
+      flickr_access_token = get_flickr_access_token(request)
   
   if not flickr_access_token:
-    return {'feature':'Flickr', 
+    return {'feature':'Flickr',
             'url' : request.route_url('flickr'),
             'api_endpoint':request.registry.settings['mi.api.endpoint']}
   else:
@@ -120,9 +120,9 @@ def flickr_callback(request):
   flickr_access_token = f.get_token(frob)
 
   json_payload = json.dumps({'access_token':flickr_access_token})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                                  (request.registry.settings['mi.api.endpoint'],authorName,FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                                  (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                           'PUT',
                           json_payload,
                           headers)
@@ -134,4 +134,4 @@ def flickr_callback(request):
   request.session['flickr_access_token'] = flickr_access_token
   
   request.session.flash('Your Flickr account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

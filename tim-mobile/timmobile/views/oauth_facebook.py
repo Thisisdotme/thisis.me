@@ -33,8 +33,8 @@ def get_facebook_info(request):
 
   # the presumption is that the feature already exists.  If it doesn't then this function
   # should not have been called
-  req = urllib2.Request('%s/v1/authors/%s/features/%s' % 
-                              (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE)) 
+  req = urllib2.Request('%s/v1/authors/%s/features/%s' %
+                              (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
   
@@ -87,7 +87,7 @@ def get_facebook(request):
     # Check if the feature we're trying to add is listed
     # ??? TODO - need better handling of feature already existing
     if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
-      facebookAccessToken, facebookUserId = get_facebook_info(request)      
+      facebookAccessToken, facebookUserId = get_facebook_info(request)
   
       request.session['facebook_access_token'] = facebookAccessToken
       request.session['facebook_user_id'] = facebookUserId
@@ -166,9 +166,9 @@ def facebook_callback(request):
     raise GenericError(msg)
   
   json_payload = json.dumps({'access_token':fbAccessToken,'auxillary_data':{'id':fbUserId}})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                                  (request.registry.settings['mi.api.endpoint'],authorName,FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                                  (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                           'PUT',
                           json_payload,
                           headers)
@@ -181,4 +181,4 @@ def facebook_callback(request):
   request.session['facebook_user_id'] = fbUserId
   
   request.session.flash('Your Facebook account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

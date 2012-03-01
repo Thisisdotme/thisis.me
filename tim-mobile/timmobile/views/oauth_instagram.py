@@ -12,7 +12,7 @@ from instagram import client
 from mi_url.RequestWithMethod import RequestWithMethod
 
 from timmobile.exceptions import GenericError
-from timmobile.exceptions import UnexpectedAPIResponse 
+from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
 
 # ??? TODO - these need to come from somewhere else
@@ -56,7 +56,7 @@ def post_instagram(request):
    
   unauthenticated_api = client.InstagramAPI(**config)
   
-  redirectURL = unauthenticated_api.get_authorize_url(scope=["likes","comments"])  
+  redirectURL = unauthenticated_api.get_authorize_url(scope=["likes","comments"])
 
   return HTTPFound(location=redirectURL)
 
@@ -86,9 +86,9 @@ def instagram_callback(request):
     raise GenericError('no access_token returned from Instagram when exchanging code for access_token')
 
   json_payload = json.dumps({'access_token':access_token})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                                                    (request.registry.settings['mi.api.endpoint'],authorName,FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                                                    (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                                             'PUT',
                                             json_payload,
                                             headers)
@@ -98,4 +98,4 @@ def instagram_callback(request):
   request.session['instagram_access_token'] = access_token
   
   request.session.flash('Your Instagram account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))
