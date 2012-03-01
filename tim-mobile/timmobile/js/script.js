@@ -5,7 +5,7 @@ TIM.errorHandler = function () {
 	
 	return {
 		handle: function (e) {
-			alert("Please excuse us!!  thisis.me encounted and unexpected error.  We're very sorry for the inconvenience.\n\n" + 
+			alert("Please excuse us!  thisis.me encountered an unexpected error.  We're very sorry for the inconvenience.\n\n" + 
 							(e.name || 'Unknown name') + " - " + 
 							(e.message || 'Unknown message') + 
 							(e.getSourceLine === 'function' ? " - lineNo: " + e.getSourceLine() : ''));
