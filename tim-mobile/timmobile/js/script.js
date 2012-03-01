@@ -768,6 +768,7 @@ $(document).bind("pagebeforechange", function (e, data) {
 	}
 });
 
+
 $(document).delegate("#authors", "pageinit", function () {
 	TIM.AuthorsController({}).load();
 });
@@ -797,6 +798,4 @@ $(window).bind('orientationchange', function (event) {
 
 });
 
-$(document).ready(function () {
-	TIM.ImageController.load();
-});
+TIM.ImageController.load();
