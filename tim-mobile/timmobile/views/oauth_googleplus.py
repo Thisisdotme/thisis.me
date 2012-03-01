@@ -12,6 +12,7 @@ from mi_url.RequestWithMethod import RequestWithMethod
 
 from timmobile.exceptions import UnexpectedAPIResponse, GenericError
 from timmobile import oAuthConfig
+from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -169,6 +170,7 @@ def googlePlus_callback(request):
                           'PUT',
                           json_payload,
                           headers)
+  DBSession().close()
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 

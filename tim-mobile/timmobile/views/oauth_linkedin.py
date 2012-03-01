@@ -15,6 +15,7 @@ from mi_utils.oauth import make_request
 
 from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
+from timweb.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ def linkedin_callback(request):
                           'PUT',
                           json_payload,
                           headers)
+  DBSession().close()
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 

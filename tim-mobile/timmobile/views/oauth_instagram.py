@@ -14,6 +14,7 @@ from mi_url.RequestWithMethod import RequestWithMethod
 from timmobile.exceptions import GenericError
 from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
+from timmobile.globals import DBSession
 
 # ??? TODO - these need to come from somewhere else
 FEATURE = 'instagram'
@@ -92,6 +93,7 @@ def instagram_callback(request):
                                             'PUT',
                                             json_payload,
                                             headers)
+  DBSession().close()
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 
