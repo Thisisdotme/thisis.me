@@ -193,5 +193,5 @@ class FoursquareView(object):
     self.request.session['foursquare_user_id'] = userId
     
     self.request.session.flash('Your Foursquare account has been successfully added.')
-    return HTTPFound(location=self.request.route_path('account_details',featurename=self.featureName))
+    return HTTPFound(location=self.request.route_path('newsfeed'))
     

@@ -179,4 +179,4 @@ def googlePlus_callback(request):
   request.session['googlePlus_user_id'] = userId
 
   request.session.flash('Your Google+ feature has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details'),featurename=FEATURE)
+  return HTTPFound(location=request.route_path('newsfeed'))

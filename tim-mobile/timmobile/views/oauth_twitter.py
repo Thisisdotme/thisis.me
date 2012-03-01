@@ -139,5 +139,4 @@ def twitter_callback(request):
     print e
     
   request.session.flash('Your Twitter account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
-
+  return HTTPFound(location=request.route_path('newsfeed'))

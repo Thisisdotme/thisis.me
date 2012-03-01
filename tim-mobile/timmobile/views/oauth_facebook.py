@@ -181,4 +181,4 @@ def facebook_callback(request):
   request.session['facebook_user_id'] = fbUserId
   
   request.session.flash('Your Facebook account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

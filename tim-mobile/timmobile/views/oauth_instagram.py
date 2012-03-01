@@ -98,4 +98,4 @@ def instagram_callback(request):
   request.session['instagram_access_token'] = access_token
   
   request.session.flash('Your Instagram account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

@@ -139,4 +139,4 @@ def linkedin_callback(request):
     print e
     
   request.session.flash('Your LinkedIn feature has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

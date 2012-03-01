@@ -134,4 +134,4 @@ def flickr_callback(request):
   request.session['flickr_access_token'] = flickr_access_token
   
   request.session.flash('Your Flickr account has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))
