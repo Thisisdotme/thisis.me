@@ -14,6 +14,7 @@ from mi_url.RequestWithMethod import RequestWithMethod
 
 from timmobile import oAuthConfig
 from urllib2 import HTTPError
+from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -126,6 +127,7 @@ def twitter_callback(request):
                           json_payload,
                           headers)
   try:
+    DBSession().close()
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except HTTPError, e:

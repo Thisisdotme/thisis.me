@@ -11,7 +11,7 @@ from pyramid.security import authenticated_userid, remember, forget
 from pyramid.url import route_url
 from pyramid.view import view_config
 from sqlalchemy import func
-from timmobile.models import DBSession
+from timmobile.globals import DBSession
 from urllib2 import HTTPError
 import json
 import logging
@@ -43,7 +43,15 @@ def newuser(request):
     if count <= 0:
       log.info('Creating user: %s' % login)
       try:
-        create_user(request, fullname, email, login, password)
+        json_payload = json.dumps(dict(password=password, fullname=fullname, email=email))
+        headers = {'Content-Type':'application/json; charset=utf-8'}
+        req = RequestWithMethod('%s/v1/authors/%s' % (request.registry.settings['mi.api.endpoint'],login),
+                                'PUT',
+                                json_payload,
+                                headers)
+        dbsession.close() # force DB refresh to see new data
+        res = urllib2.urlopen(req)
+        resJSON = json.loads(res.read())
         request.session['logged_id'] = '1'
         headers = remember(request, login)
         return HTTPFound(location=forward, headers=headers)
@@ -65,13 +73,3 @@ def newuser(request):
               api_endpoint = request.registry.settings['mi.api.endpoint'],
               author_name = ''
               )
-
-def create_user(request, fullname, email, login, password):
-  json_payload = json.dumps(dict(password=password, fullname=fullname, email=email))
-  headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s' % (request.registry.settings['mi.api.endpoint'],login), 
-                          'PUT',
-                          json_payload,
-                          headers)
-  res = urllib2.urlopen(req)
-  resJSON = json.loads(res.read())

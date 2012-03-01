@@ -12,6 +12,7 @@ from timmobile.exceptions import UnexpectedAPIResponse
 import flickrapi
 
 from mi_url.RequestWithMethod import RequestWithMethod
+from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -126,6 +127,7 @@ def flickr_callback(request):
                           'PUT',
                           json_payload,
                           headers)
+  DBSession().close()
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 
