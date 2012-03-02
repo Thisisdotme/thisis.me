@@ -1,0 +1,247 @@
+/* ==|== primary styles =====================================================
+   Author:
+   ========================================================================== */
+
+.mi-header { }
+.ui-content { margin-top: 43px; }
+
+#newsfeed .ui-content > div, #feature .ui-content > div { clear: both; }
+
+#feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
+
+.featureIcon { float:left; margin-right:1em; } 
+
+/*.event { min-height: 5em; }
+.event em { font-size:75%; }
+.event p { margin-top:.33em; }*/
+
+#authorFeatures .ui-content a { margin: 1em; display: inline-block;}
+
+/* getting the button in the feature footer to be centered */
+.center-button { text-align:center; }
+
+#feature label { font-weight: bold; }
+
+
+/* Newsfeed */
+
+/*#newsfeed .event .content { position: absolute; top: 50%; }*/
+#newsfeed .ui-content {
+	padding: 0;
+	margin: 0;
+}
+
+#newsfeed .mi-content {
+	display:table-cell; 
+	vertical-align:bottom;
+	
+	width: 320px;
+	height: 370px;
+	
+	background-color: #fff;
+}
+
+#newsfeed .event {
+	height: 184px;
+	border-bottom:1px dotted black;
+	
+	background-color: #fff;
+}
+
+#newsfeed .event > div:first-child {
+	height: 86px;	
+}
+
+/*	Feature specific configurations  */
+#newsfeed .event.half-page { height: 184px; }
+#newsfeed .event.half-page  > div:first-child { height: 86px; }
+#newsfeed .event.full-page { height: 369px; }
+#newsfeed .event.full-page > div:first-child.text-content { height: 256px; }
+#newsfeed .event.full-page > div:first-child.img-content { height: 246px; }
+
+#newsfeed .event .text-content {
+	padding: 10px 10px 10px 10px;
+	
+	display: table-cell;
+	vertical-align: middle;
+	text-align: left;
+}
+
+#newsfeed .event .img-content {
+	padding: 15px 0;
+	
+	background-color: black;
+	text-align: center;
+	
+}
+
+#newsfeed .event .img-content img {
+	max-height: 100%;
+	max-width: 100%;
+}
+
+#newsfeed .event .footer {
+	height: 68px;
+	padding: 20px 5px 5px 5px;
+	margin:0;
+}
+
+#newsfeed .event .footer .info {
+	float: none;	
+	display: table-cell;
+	vertical-align: middle;
+	
+	height: 36px;
+	
+	padding-left: 5px;
+	padding-right: 10px;
+}
+
+#newsfeed .event .footer .info .author {
+	font-weight: bold;
+}
+
+#newsfeed .event .footer .info .caption {
+	height: 18px;
+	
+	font-size: 14px;
+	
+	width: 200px;
+    white-space: nowrap;
+    word-wrap: break-word;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+
+#newsfeed .event .footer > div{
+	float: left;
+}
+
+#newsfeed .event .footer .avatar {
+	height: 100%;	
+}
+
+#newsfeed .event .footer .avatar img {
+	height: 40px;
+}
+
+#newsfeed .event .baseline {
+	height: 30px;
+	padding-top: 5px;
+}
+
+#newsfeed .event .baseline a {
+	float: left;
+	padding-left: 5px;
+	height: 20px;
+	width: 20px;
+}
+
+#newsfeed .event .baseline img {
+	height: 100%;
+}
+
+#newsfeed .event .baseline .fuzzy-time {
+	float: left;
+	
+	padding-left: 5px;
+	padding-top: 3px;
+	
+	color: gray;
+	font-size: 14px;
+}
+
+/* experimental for pull-down and pull-up */
+
+#wrapper {
+	position:absolute; z-index:1;
+	top:0px; bottom:0px; left:-9999px;
+	width:100%;
+	overflow:auto;
+}
+
+#scroller {
+	position:absolute; z-index:1;
+/*	-webkit-touch-callout:none;*/
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
+	width:100%;
+	padding:0;
+}
+
+#pullDown, #pullUp {
+	background:#fff;
+	height:40px;
+	line-height:40px;
+	padding:5px 10px;
+	border-bottom:1px solid #ccc;
+	color:#888;
+	text-size:.75em;
+	text-align:center;
+	}
+
+#pullDown .pullDownIcon, #pullUp .pullUpIcon  {
+	display:block; float:left;
+	width:40px; height:40px;
+	background:url(/img/pull-icon@2x.png) 0 0 no-repeat;
+	-webkit-background-size:40px 80px; background-size:40px 80px;
+	-webkit-transition-property:-webkit-transform;
+	-webkit-transition-duration:250ms;	
+}
+
+#pullDown .pullDownIcon {
+	-webkit-transform:rotate(0deg) translateZ(0);
+}
+
+#pullUp .pullUpIcon  {
+	-webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+#pullDown.flip .pullDownIcon {
+	-webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+#pullUp.flip .pullUpIcon {
+	-webkit-transform:rotate(0deg) translateZ(0);
+}
+
+#pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon {
+	background-position:0 100%;
+	-webkit-transform:rotate(0deg) translateZ(0);
+	-webkit-transition-duration:0ms;
+
+	-webkit-animation-name:loading;
+	-webkit-animation-duration:2s;
+	-webkit-animation-iteration-count:infinite;
+	-webkit-animation-timing-function:linear;
+}
+
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+
+
+/*
+ * Media queries for responsive design https://github.com/shichuan/mobile-html5-boilerplate/wiki/The-Style
+ */
+
+
+/* Styles for desktop and large screen ----------- */
+
+/*styles for 800px and up!*/
+@media only screen and (min-width: 800px) {
+  /* Styles */
+}/*/mediaquery*/
+
+
+/* iPhone 4, Opera Mobile 11 and other high pixel ratio devices ----------- */
+@media
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+  /* Styles */
+}
+
+

@@ -1,18 +1,12 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="accounts" data-role="page" data-title="Accounts" metal:fill-slot="page_content">
-	
 		<header data-role="header">
-
 			<a href="/newsfeed" data-role="button" data-icon="arrow-l">Newsfeed</a>
 			<h1>Accounts</h1>
-
-		</header><!-- /header -->
+		</header>
 	
 		<div data-role="content">
-
 			<h2>Account List</h2>
-
 			<ul>
 			<li><a href="/oauth/twitter">Twitter</a></li>
 			<li><a href="/oauth/facebook">Facebook</a></li>
@@ -28,11 +22,8 @@
 			<p>
 			<a href="/logout" >Logout</a>
 			</p>
-
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script"></script>
-
 </metal:index>

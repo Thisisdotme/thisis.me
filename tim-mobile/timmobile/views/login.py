@@ -57,7 +57,8 @@ def login_view(request):
     login = login,
     password = password,
     title = 'Login',
-    api_endpoint = request.registry.settings['mi.api.endpoint']
+    api_endpoint = request.registry.settings['mi.api.endpoint'],
+    author_name = ''
     )
 
 

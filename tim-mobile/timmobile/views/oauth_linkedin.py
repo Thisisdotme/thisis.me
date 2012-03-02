@@ -15,6 +15,7 @@ from mi_utils.oauth import make_request
 
 from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
+from timweb.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def get_linkedin(request):
     request.session.flash('You have already added the LinkedIn feature.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
     
-  return { 'feature':'LinkedIn', 
+  return { 'feature':'LinkedIn',
            'url' : request.route_url('linkedin'),
            'api_endpoint':request.registry.settings['mi.api.endpoint'] }
   
@@ -60,8 +61,8 @@ def post_linkedin(request):
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   client = oauth.Client(consumer)
   
-  # Step 1: Get a request token. This is a temporary token that is used for 
-  # having the user authorize an access token and to sign the request to obtain 
+  # Step 1: Get a request token. This is a temporary token that is used for
+  # having the user authorize an access token and to sign the request to obtain
   # said access token.
 
   callback = request.route_url('linkedin_callback')
@@ -75,7 +76,7 @@ def post_linkedin(request):
 #  print "    - oauth_token             = %s" % request_token['oauth_token']
 #  print "    - oauth_token_secret      = %s" % request_token['oauth_token_secret']
 #  print "    - oauth_callback_confirmed = %s" % request_token['oauth_callback_confirmed']
-#  print 
+#  print
 
   # Step 2: Redirect to the provider.
 
@@ -89,16 +90,16 @@ def post_linkedin(request):
 @view_config(route_name='linkedin_callback', request_method='GET')
 def linkedin_callback(request):
   
-  # the oauth_token is request as a query arg; the auth_token_secret is in session store  
+  # the oauth_token is request as a query arg; the auth_token_secret is in session store
   oauth_token = request.params['oauth_token']
   oauth_token_secret = request.session['oauth_token_secret']
 
   oauth_verifier = request.params['oauth_verifier']
   
   # Step 3: Once the consumer has redirected the user back to the oauth_callback
-  # URL you can request the access token the user has approved. You use the 
+  # URL you can request the access token the user has approved. You use the
   # request token to sign this request. After this is done you throw away the
-  # request token and use the access token returned. You should store this 
+  # request token and use the access token returned. You should store this
   # access token somewhere safe, like a database, for future use.
   consumer = oauth.Consumer(oAuthConfig[FEATURE]['key'], oAuthConfig[FEATURE]['secret'])
   
@@ -110,7 +111,7 @@ def linkedin_callback(request):
   resp, content = client.request(oAuthConfig[FEATURE]['access_token_url'], "POST")
   access_token = dict(urlparse.parse_qsl(content))
 
-  # these are the real deal and need to be stored securely in the DB  
+  # these are the real deal and need to be stored securely in the DB
   accessToken = access_token['oauth_token']
   accessTokenSecret = access_token['oauth_token_secret']
 
@@ -123,9 +124,9 @@ def linkedin_callback(request):
   linkedinId = respJSON['id']
 
   json_payload = json.dumps({'access_token':accessToken,'access_token_secret':accessTokenSecret,'auxillary_data':{'id':linkedinId}})
-  headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
-                            (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE), 
+  headers = {'Content-Type':'application/json; charset=utf-8'}
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+                            (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE),
                           'PUT',
                           json_payload,
                           headers)
@@ -139,4 +140,4 @@ def linkedin_callback(request):
     print e
     
   request.session.flash('Your LinkedIn feature has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
+  return HTTPFound(location=request.route_path('newsfeed'))

@@ -549,7 +549,7 @@ TIM.timelineController = function (spec) {
 
 	that.load = function () {
 		
-		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/featureEvents?callback=?', function (data) {
+		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/events?callback=?', function (data) {
 			var tl = $("#timeline .mi-content"),
 					events,
 					renderer;
