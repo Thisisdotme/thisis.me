@@ -61,7 +61,9 @@ def get_googlePlus_info(request):
 
   return accessToken, userId
 
-  
+
+# GET
+#
 @view_config(route_name='googleplus', request_method='GET', renderer='timmobile:templates/oauth.pt', permission='author')
 def get_googlePlus(request):
   
@@ -113,6 +115,8 @@ def get_googlePlus(request):
     request.session.flash('You have already added the Google+ feature.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
 
+# POST
+#
 @view_config(route_name='googleplus', request_method='POST', permission='author')
 def post_googlePlus(request):
 
@@ -179,4 +183,4 @@ def googlePlus_callback(request):
   request.session['googlePlus_user_id'] = userId
 
   request.session.flash('Your Google+ feature has been successfully added.')
-  return HTTPFound(location=request.route_path('account_details'),featurename=FEATURE)
+  return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))

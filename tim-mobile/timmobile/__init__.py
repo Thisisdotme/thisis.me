@@ -71,7 +71,7 @@ def main(global_config, **settings):
  
   # google+ auth
   config.add_route('googleplus','/oauth/googleplus')
-  config.add_route('googleplus_callback', '/google_callback')
+  config.add_route('googleplus_callback', '/oauth/googleplus/callback')
 
   # instagram auth
   config.add_route('instagram','/oauth/instagram')
@@ -87,7 +87,7 @@ def main(global_config, **settings):
   
   # generic oauth
   config.add_route('oauth','/oauth/{featurename}')
-  config.add_route('oauth_callback', '/oauth/callback/{featurename}')
+  config.add_route('oauth_callback', '/oauth/{featurename}/callback')
   
   config.scan()
 

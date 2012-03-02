@@ -4,7 +4,8 @@
 	
 		<header data-role="header">
 
-			<h1>Accounts</h1>
+			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">Accounts</a>
+			<h1>Add Accounts</h1>
 
 		</header><!-- /header -->
 	
