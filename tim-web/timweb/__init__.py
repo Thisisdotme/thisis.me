@@ -90,7 +90,7 @@ def main(global_config, **settings):
   config.add_route('googleplus_callback', '/google_callback')
   config.add_route('googleplus_confirmation', '/googleplus_confirmation.html')
   
-  # google+ auth
+  # foursquare auth
   config.add_route('foursquare','/foursquare.html')
   config.add_route('foursquare_callback', '/foursquare_callback')
   config.add_route('foursquare_confirmation', '/foursquare_confirmation.html')

@@ -28,7 +28,7 @@ def get_twitter(request):
   
   # Query the API for installed features
   try:
-    req = urllib2.Request('http://%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authenticated_userid(request)))
+    req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authenticated_userid(request)))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except urllib2.URLError, e:
@@ -118,7 +118,7 @@ def twitter_callback(request):
 
   json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'auxillary_data':{'id':userInfoJSON['id']}})
   headers = {'Content-Type':'application/json; charset=utf-8'}      
-  req = RequestWithMethod('http://%s/v1/authors/%s/features/%s' % 
+  req = RequestWithMethod('%s/v1/authors/%s/features/%s' % 
                             (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE), 
                           'PUT',
                           json_payload,
@@ -140,7 +140,7 @@ def twitter_callback(request):
 def twitter_confirmation(request):
   
   # query the api for some feature events to display to the user
-  req = urllib2.Request('http://%s/v1/authors/%s/features/%s/featureEvents' % 
+  req = urllib2.Request('%s/v1/authors/%s/features/%s/featureEvents' % 
                           (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE)) 
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())

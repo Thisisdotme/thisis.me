@@ -64,7 +64,8 @@ class FacebookFullCollector(FullCollector):
         for post in rawJSON['data']:
   
           # currently only interested in 'status' posts from the user
-          if post['type'] == 'status' and post['from']['id'] == fbUserId:
+#          if post['type'] == 'status' and post['from']['id'] == fbUserId:
+          if post['from']['id'] == fbUserId:
 
             event = Event.FacebookEvent(afm.author_id,post['id'],fbUserId).fromJSON(post)
             self.writeEvent(event, traversal)

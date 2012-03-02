@@ -57,7 +57,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 
 	that.getEventId = function () {
-		return spec.event.feature_event_id;
+		return spec.event.event_id;
 	};
 
 	that.getFeatureName = function () {
@@ -85,18 +85,22 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 
 	that.getAuxillaryData = function () {
-		return spec.event.content.auxillary_data || '';
+		return spec.event.content.auxillary_data;
 	};
 	
 	that.getContentURL = function () {
-		return spec.event.content.url || '';
+		return spec.event.content.url;
+	};
+	
+	that.getContentImage = function () {
+		return spec.event.content.photo_url;
 	};
 
 	that.renderBegin = function () {
 		var ct = new Date(this.getCreateTimeMillis());
 		return '<div class="event"><a class="featureIcon" href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
 									'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
-							'</a><em>' + ct.toLocaleString() + '</em>';
+							'</a><em>' + ct.toLocaleString() + '</em><div>' + that.getEventId() + '</div>';
 	};
 	
 	that.renderContent = function () {
@@ -129,7 +133,36 @@ TIM.eventRenderer.flickrRenderer = function (spec) {
 };
 
 TIM.eventRenderer.foursquareRenderer = function (spec) {
+
 	var that = TIM.eventRenderer.baseRenderer(spec);
+
+	that.renderContent = function () {
+		
+		var auxData = this.getAuxillaryData();
+
+		var photo = this.getContentImage();
+		photo = photo ? '<img style="width:300px;height:300px;" src="' + photo + '" />' : '';
+		if (auxData) {
+			if (auxData && auxData.photo_sizes) {
+				$.each(auxData.photo_sizes.items, function (index, item) {
+					if (item.width === 300 && item.height === 300) {
+						photo = '<img style="width:300px;" src="' + item.url + '" />';
+						return false;
+					}
+				});
+			}
+		}
+
+		var venue = auxData && this.getAuxillaryData().venue_url;
+		venue = venue ? '<a href="' + venue + '">' + venue + '</a>' : '';
+
+		return '<p>' + this.getCaption() + '</p>' + 
+					 photo +
+					 '<p>' + this.getData() + '</p>' +
+					 '<span style="font-size:smaller">' + venue + '</span>';
+	};
+
+
 	return that;
 };
 
@@ -421,7 +454,7 @@ TIM.AuthorsController = function (spec) {
 						authors = data.authors || [];
 				al.empty();
 				$.each(authors, function (idx, item) {
-					al.append('<li><a href="/' + item.authorname + '" data-transition="pop">' + item.fullname + '</a></li>');
+					al.append('<li><a href="/' + item.author_name + '" data-transition="pop">' + item.full_name + '</a></li>');
 				});
 				al.listview("refresh");
 			});

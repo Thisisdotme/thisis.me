@@ -29,7 +29,7 @@ class Author(Base):
     return "<Author('%s','%s','%s','%s')>" % (self.author_name, self.email, self.full_name, self.password)
 
   def toJSONObject(self):
-    return {'author_id':self.id,'author_name':self.author_name,'email':self.email,'full_name':self.full_name}
+    return {'author_id':self.id,'author_name':self.author_name,'authorname':self.author_name,'email':self.email,'full_name':self.full_name,'fullname':self.full_name}
 
 
 '''
@@ -212,7 +212,14 @@ class FeatureEvent(Base):
   
   id = Column(Integer, primary_key=True)
   
+  parent_id = Column(Integer, ForeignKey('feature_event.id'), nullable=True)
+  
   author_feature_map_id = Column(Integer, ForeignKey('author_feature_map.id', ondelete='CASCADE'), nullable=False)
+
+  # added for convenience.  Not sure if we want them long term but they make querying feature_events by feature and
+  # author easy and more efficient (no join to author_feature_map)
+#  feature_id = Column(Integer, ForeignKey('feature.id'), nullable=False)
+#  author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
 
   event_id = Column(String(255), nullable=False)
   create_time = Column(DateTime, nullable=False)
@@ -237,3 +244,37 @@ class FeatureEvent(Base):
 
   def __repr__(self):
     return "<FeatureEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_feature_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
+
+
+class FeatureEventJSON(Base):
+  
+  __tablename__ = 'feature_event_json'
+  
+  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=False, primary_key=True)
+
+  json = Column(String(65535))
+
+  def __init__(self, featureEventId, json=None):
+    self.feature_event_id = featureEventId
+    self.json = json
+
+  def __repr__(self):
+    return "<FeatureEventJSON('%s,%s')>" % (self.feature_event_id,self.json)
+
+
+class OriginMap(Base):
+  
+  __tablename__ = 'origin_map'
+
+  feature_name = Column(String(255), nullable=False,primary_key=True)
+  origin = Column(String(255),primary_key=True)
+  origin_feature_name = Column(String(255), nullable=False)
+
+  def __init__(self, featureName, origin, originFeatureName):
+    self.feature_name = featureName
+    self.origin = origin
+    self.origin_feature_name = originFeatureName
+
+  def __repr__(self):
+    return "<OriginMap('%s,%s,%s')>" % (self.feature_name,self.origin,self.origin_feature_name)
+

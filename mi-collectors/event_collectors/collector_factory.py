@@ -4,6 +4,7 @@ Created on Dec 14, 2011
 @author: howard
 '''
 
+
 from event_collectors.facebook import FacebookFullCollector
 from event_collectors.twitter import TwitterFullCollector
 from event_collectors.foursquare import FoursquareFullCollector
@@ -12,6 +13,15 @@ from event_collectors.instagram import InstagramFullCollector
 from event_collectors.googleplus import GooglePlusFullCollector
 
 class EventCollectorFactory(object):
+  '''
+  classdocs
+  '''
+  
+  
+  def __init__(self):
+    '''
+    Constructor
+    '''
 
   @classmethod
   def get_collector_for(cls,feature_name,s3Bucket, aws_access_key, aws_secret_key):

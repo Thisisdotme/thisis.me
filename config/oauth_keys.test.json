@@ -8,7 +8,7 @@
 							
 	"facebook": {"key":"155653471208821", 
 							 "secret": "885485dd6410482369a4ab77b3421f8b",
-							 "oauth_url": "https://www.facebook.com/dialog/oauth?%s",
+							 "oauth_url": "https://m.facebook.com/dialog/oauth?%s",
 							 "access_token_url": "https://graph.facebook.com/oauth/access_token?%s",
 							 "url": "https://graph.facebook.com/%s?access_token=%s",
 							 "endpoint": "https://graph.facebook.com/%s"},

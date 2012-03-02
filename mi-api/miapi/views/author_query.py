@@ -76,7 +76,7 @@ class AuthorQuery(object):
       return {'error':'unknown author %s' % authorName}  
     
     events = []  
-    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==authorId).order_by(FeatureEvent.create_time.desc()).all():
+    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==authorId).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).all():
       events.append(createFeatureEvent(self.request,fe,featureName))
   
     return {'events':events,'paging':{'prev':None,'next':None}}

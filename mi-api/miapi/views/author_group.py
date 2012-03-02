@@ -77,7 +77,7 @@ class AuthorGroupBasics(object):
       authorGroup = self.dbSession.query(AuthorGroup).filter(and_(AuthorGroup.author_id==authorId,AuthorGroup.group_name==groupName)).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown author %s' % authorName}
+      return {'error':'unknown group %s for author %s' % (groupName,authorName)}
 
     return authorGroup.toJSONObject()
 
@@ -138,7 +138,7 @@ class AuthorGroupBasics(object):
       authorGroup = self.dbSession.query(AuthorGroup).filter(and_(AuthorGroup.author_id==authorId,AuthorGroup.group_name==groupName)).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown author %s' % authorName}
+      return {'error':'unknown group %s for author %s' % (groupName,authorName)}
 
     self.dbSession.delete(authorGroup)
     
@@ -203,13 +203,13 @@ class AuthorGroupBasics(object):
       member = self.dbSession.query(Author).filter_by(author_name=memberName).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown member %s' % authorName}
+      return {'error':'unknown member author %s' % authorName}
 
     try:
       mapping = self.dbSession.query(AuthorGroupMap).filter(and_(AuthorGroupMap.author_group_id==authorGroupId,AuthorGroupMap.author_id==member.id)).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown member %s' % authorName}
+      return {'error':'unknown member %s in group %s for author %s' % (memberName,groupName,authorName)}
 
     responseJSON = mapping.toJSONObject()
     responseJSON['author_id'] = authorId
@@ -245,7 +245,7 @@ class AuthorGroupBasics(object):
       member = self.dbSession.query(Author).filter_by(author_name=memberName).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown author %s' % authorName}
+      return {'error':'unknown member author %s' % memberName}
 
     mapping = AuthorGroupMap(authorGroupId,member.id)
 
@@ -295,13 +295,13 @@ class AuthorGroupBasics(object):
       memberId, = self.dbSession.query(Author.id).filter_by(author_name=memberName).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown member %s' % authorName}
+      return {'error':'unknown member author %s' % memberName}
 
     try:
       mapping = self.dbSession.query(AuthorGroupMap).filter(and_(AuthorGroupMap.author_group_id==authorGroupId,AuthorGroupMap.author_id==memberId)).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown member %s' % authorName}
+      return {'error':'unknown member %s in group %s for author %s' % (memberName,groupName,authorName)}
 
     self.dbSession.delete(mapping)
     

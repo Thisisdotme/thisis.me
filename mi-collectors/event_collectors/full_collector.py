@@ -12,7 +12,7 @@ from time import mktime
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent
+from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent, FeatureEventJSON
 
 INCREMENTAL_OVERLAP = timedelta (hours = 1)
 
@@ -22,6 +22,7 @@ class FullCollectorState(object):
   afm = None
   authorId = None
   now = None
+
   filename = None
   mapper = None
   writer = None
@@ -38,14 +39,20 @@ class FullCollectorState(object):
   mostRecentEventTimestamp = None
   baselineLastUpdateTime = None
 
-  def __init__(self,dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp):
+  def __init__(self,dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp):
     self.dbSession = dbSession
     self.afm = afm
     self.authorId = afm.author_id
     self.now = now
+
     self.filename = filename
     self.mapper = mapper
     self.writer = writer
+
+    self.raw_filename = rawFilename
+    self.raw_mapper = rawMapper
+    self.raw_writer = rawWriter
+
     self.lastUpdateTime = lastUpdateTime
     self.mostRecentEventId = mostRecentEventId
     self.mostRecentEventTimestamp = mostRecentEventTimestamp
@@ -153,20 +160,23 @@ class FullCollector(object):
   def getLookbackWindow(self):
     return self.lookbackWindow
 
-  def makeFilename(self,authorId,now):
-    return '%s.%s.%d.csv' % (authorId, self.getFeatureName(), mktime(now.timetuple()))
+  def makeFilename(self,authorId,now,varient):
+    return '%s.%s.%d.%s.csv' % (authorId, self.getFeatureName(), mktime(now.timetuple()), varient)
 
 
   def beginTraversal(self,dbSession,afm):
     now = datetime.now()
-    filename = self.makeFilename(afm.author_id,now)
+    filename = self.makeFilename(afm.author_id,now,"refined")
     mapper = open(filename,'wb')
     writer = csv.writer(mapper)
+    rawFilename = self.makeFilename(afm.author_id,now,"raw")
+    rawMapper = open(rawFilename,'wb')
+    rawWriter = csv.writer(rawMapper)
     mostRecentEventId = afm.most_recent_event_id if self.incremental else None
     mostRecentEventTimestamp = afm.most_recent_event_timestamp if self.incremental else None
     lastUpdateTime = afm.last_update_time if self.incremental else None
 
-    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp)
+    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp)
 
 
   def endTraversal(self,state,authorName):
@@ -175,12 +185,24 @@ class FullCollector(object):
 
     # copy new mapper file to s3 if the file exists and has a non-zero size
     #
-    if (os.path.exists(state.filename) and os.path.getsize(state.filename) > 0):
-      bucket = self.s3Connection.get_bucket(self.s3Bucket)
-      k = Key(bucket)
-      k.key = '%s/%s/%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
-      k.set_contents_from_filename(state.filename)
+    if os.path.exists(state.filename):
+
+      # only if the file-size is greater than 0 do we want to upload to s3
+      if os.path.getsize(state.filename) > 0:
+        bucket = self.s3Connection.get_bucket(self.s3Bucket)
+        k = Key(bucket)
+        
+        # output refined JSON
+        k.key = 'refined/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
+        k.set_contents_from_filename(state.filename)
+        
+        # output raw JSON
+        k.key = 'raw/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
+        k.set_contents_from_filename(state.raw_filename)
+
+      # remove the file from the local file-system
       os.remove(state.filename)
+      os.remove(state.raw_filename)
 
     # terminate the transaction
     #
@@ -226,6 +248,7 @@ class FullCollector(object):
         # output to s3
         #
         state.writer.writerow([state.authorId,json.dumps(event.toJSON(),sort_keys=True)])
+        state.raw_writer.writerow([state.authorId,json.dumps(event.raw_json,sort_keys=True)])
         
         #
         # output to MySQL
@@ -238,6 +261,10 @@ class FullCollector(object):
 
         featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent)
         state.dbSession.add(featureEvent)
+        state.dbSession.flush()
+        
+        featureEventJSON = FeatureEventJSON(featureEvent.id,json.dumps(event.getRawJSON()))
+        state.dbSession.add(featureEventJSON)
         state.dbSession.flush()
 
         state.totalAccepted = state.totalAccepted + 1

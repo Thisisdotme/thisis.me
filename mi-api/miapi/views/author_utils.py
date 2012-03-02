@@ -26,6 +26,8 @@ def createFeatureEvent(request,fe,featureName):
     content['auxillary_data'] = json.loads(fe.auxillary_content)
   if fe.url:
     content['url'] = fe.url
+  if fe.photo_url:
+    content['photo_url'] = fe.photo_url
 
   event = {'event_id':fe.id,
            'feature':featureName,

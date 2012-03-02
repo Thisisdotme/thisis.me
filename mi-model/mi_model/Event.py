@@ -51,8 +51,14 @@ class Event(object):
     json["user_id"] = self.user_id
     json["create_time"] = self.getEventTime().isoformat()
     json["type"] = self.getType()
-    json["source"] = self.getEventSource()
-    json["message"] = self.getEventCaption()
+    json["origin"] = self.getEventOrigin()
+    json["caption"] = self.getEventCaption()
+    content = self.getEventContent()
+    if content:
+      json["content"] = content
+    photo = self.getEventPhoto()
+    if photo:
+      json["photo"] = photo
   
 
   def getEventId(self):
@@ -73,20 +79,24 @@ class Event(object):
   def getEventCaption(self):
     pass
   
-  def getEventContent(self):
-    return None
-  
   def getEventPhoto(self):
     return None
 
-  def getEventSource(self):
+  def getEventContent(self):
+    return None
+  
+  def getAuxillaryContent(self):
+    return None
+  
+  def getEventOrigin(self):
     return self.getType() 
 
   def getEventURL(self):
     return None
 
-  def getAuxillaryContent(self):
-    return None
+  def getRawJSON(self):
+    return self.raw_json
+
 
 '''
 '''
@@ -144,8 +154,9 @@ class TwitterEvent(StatusEvent):
   def getEventCaption(self):
     return self.raw_json.get('text','')
 
-  def getEventSource(self):
-    return self.raw_json.get('source','')
+  def getEventOrigin(self):
+    source = self.raw_json.get('source') 
+    return source if source else super(TwitterEvent,self).getEventOrigin()
 
 
 '''
@@ -189,16 +200,19 @@ class FacebookEvent(StatusEvent):
     return datetime.strptime(self.raw_json['created_time'],'%Y-%m-%dT%H:%M:%S+0000')
 
   def getEventCaption(self):
-    return self.raw_json.get('story') or self.raw_json.get('message')
+    # this handles events from Nike which is a repetition event
+    other = self.raw_json.get('name') + ".  " + self.raw_json.get('caption') if self.raw_json.get('caption') and self.raw_json.get('name') else None
+    
+    return self.raw_json.get('story') or self.raw_json.get('message') or other
 
-  def getEventSource(self):
+  def getEventOrigin(self):
     application = self.raw_json.get('application')
     if application:
-      source = '%s,%s,%s' % (application.get('name',''),application.get('namespace'),application.get('id'))
+      origin = '%s,%s,%s' % (application.get('name',''),application.get('namespace'),application.get('id'))
     else:
-      source = 'facebook'
+      origin = super(FacebookEvent,self).getEventOrigin()
 
-    return source
+    return origin
 
   def getEventURL(self):
     return 'https://graph.facebook.com/%s' % (self.event_id)
@@ -231,8 +245,8 @@ class GooglePlusEvent(StatusEvent):
   def getEventCaption(self):
     return self.raw_json.get('title')
 
-  def getEventSource(self):
-    return self.raw_json['provider']['title'] if 'provider' in self.raw_json and 'title' in self.raw_json['provider'] else None
+  def getEventOrigin(self):
+    return self.raw_json['provider']['title'] if 'provider' in self.raw_json and 'title' in self.raw_json['provider'] else super(GooglePlusEvent,self).getEventOrigin()
 
   def getEventURL(self):
     return self.raw_json.get('url')
@@ -296,13 +310,7 @@ class LinkedInEvent(StatusEvent):
       caption = None
     return caption
 
-  def getEventSource(self):
-    return None
-
   def getEventURL(self):
-    return None
-
-  def getEventPhoto(self):
     return None
 
 '''
@@ -350,9 +358,9 @@ class FoursquareEvent(PlaceEvent):
     
     self.source = {"name":source_name,"url":source_url}
 
-    self.caption = '%s%s' % (caption,location)
-    self.content = shout
-  
+    self.caption = shout
+    self.content = '%s%s' % (caption,location)
+    
     return self
 
 
@@ -365,8 +373,29 @@ class FoursquareEvent(PlaceEvent):
   def getEventCaption(self):
     return self.caption
 
-  def getEventSource(self):
-    return '%s#%s' % (self.source['name'],self.source['url']) 
+  def getEventContent(self):
+    return self.content
+
+  def getEventOrigin(self):
+    return '%s#%s' % (self.source['name'],self.source['url'])
+
+  def getEventURL(self):
+    return None
+  
+  def getEventPhoto(self):
+    return self.raw_json['photos']['items'][0]['url'] if int(self.raw_json['photos']['count']) > 0 else None 
+
+  def getAuxillaryContent(self):
+    auxData = {}
+
+    venueURL = self.raw_json['venue'].get('url')
+    auxData['venue_url'] = venueURL;
+
+    photoSizes = self.raw_json['photos']['items'][0]['sizes'] if int(self.raw_json['photos']['count']) > 0 else None
+    if photoSizes:
+      auxData['photo_sizes'] = photoSizes
+
+    return json.dumps(auxData,sort_keys=True) if venueURL else None
 
 
 '''
@@ -408,7 +437,7 @@ class InstagramEvent(PhotoEvent):
       auxData['location'] = self.raw_json['location']
     if 'images' in self.raw_json:
       auxData['images'] = self.raw_json['images']
-    return json.dumps(auxData,sort_keys=True,)
+    return json.dumps(auxData,sort_keys=True)
 
 '''
 '''
