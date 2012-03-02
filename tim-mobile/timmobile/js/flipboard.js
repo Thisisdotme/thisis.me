@@ -187,7 +187,7 @@ Flip.prototype.moveToFront = function() {
 };
 
 Flip.prototype.moveToBack = function() {
-  this.containerNode_.css("z-index", -1);
+   this.containerNode_.css("z-index", -1);
 };
 
 Flip.prototype.beginFlipFrom = function() {

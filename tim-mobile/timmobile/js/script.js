@@ -105,7 +105,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 	
 	that.getEventDisplaySize = function () {
-		return 'half-page';
+		return 'full-page';
 	}
 
 	that.renderBegin = function () {
@@ -113,7 +113,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 	
 	that.renderContent = function () {
-		return '<p class="text-content">' + TIM.utils.linkify(that.getCaption()) + '</p>';
+		return '<div class="text-content">' + TIM.utils.linkify(that.getCaption()) + '</div>';
 	};
 	
 	that.renderEnd = function () {
@@ -124,13 +124,13 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
 	// }
 // 	
-	// that.renderUserIcon = function () {
-		// return '<div class="icon"><a class="featureIcon" href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
-						// '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
-					// '</a>';
-	// }
+	 that.renderAvatar = function () {
+	 	 return '<div class="avatar">' +
+					'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
+				'</div>';
+	 }
 	that.renderFooter = function () {
-		return '<div class="footer">' + that.renderInfo() +  that.renderBaseline() + '</div>';
+		return '<div class="footer">' + that.renderAvatar() + that.renderInfo() +  that.renderBaseline() + '</div>';
 	}
 	
 	that.renderInfo = function () {
@@ -140,7 +140,9 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 	
 	that.renderBaseline = function () {
-		var featureIcon = 	'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
+		var featureIcon = 	'<a href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
+								'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
+							'</a>';
 		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
 		return '<div class="baseline">' + featureIcon + timeago + '</div>';
 	}
@@ -181,7 +183,7 @@ TIM.eventRenderer.instagramRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
 
 	that.renderContent = function () {
-		return '<p>' + this.getCaption() + '</p>' + '<img src="' + this.getAuxillaryData().images.low_resolution.url + '" />';
+		return '<div class="img-content"><img src="' + this.getAuxillaryData().images.low_resolution.url + '" /></div>';
 	};
 
 	return that;
@@ -203,11 +205,7 @@ TIM.eventRenderer.twitterRenderer = function (spec) {
 	
 	that.renderInfo = function () {
 		var author = '<div class="author">' + that.getAuthorName() + '</div>';
-		return '<div class="info">' + author + '</div>';
-	}
-	
-	that.getEventDisplaySize = function () {
-		return 'full-page';
+		return '<div class="info" style="display: table-cell;">' + author + '</div>';
 	}
 	return that;
 };
@@ -572,36 +570,30 @@ TIM.timelineController = function (spec) {
           		if (that.flipSet.canGoNext()) {
           			that.flipSet.next(function() {
           				TIM.currentPage ++;
+          				
+          				// If the next page has not been rendered, add it to the flipset
           				if (TIM.currentPage < TIM.allEvents.length) {
-          					console.log("that.flipSet.currentIndex:" + that.flipSet.getCurrentIndex());
-          					console.log("that.flipSet.length:" + that.flipSet.getLength());
           					if (that.flipSet.getCurrentIndex() === that.flipSet.getLength() - 1) {
           						that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
           					}
           				}
           			});	
           		}
-          		
-          		// that.setPage($("#newsfeed .mi-content"), ++TIM.currentPage);
-				// that.loaded();
               });
 			$("#newsfeed-content").bind("swipedown", function(){
           		console.log("swipedown");
 				if (that.flipSet.canGoPrevious()) {
 	          		that.flipSet.previous(function() {
           				TIM.currentPage --;
+          				
+          				// If the previous page has not been rendered, add it to the flipset
           				if (TIM.currentPage > 0) {
           					if (that.flipSet.currentIndex === 0) {
           						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
           					}
           				}
-          				console.log("is at next");
           			});
 	          	}
-          		// if (TIM.currentPage > 0) {
-          			// that.setPage($("#newsfeed .mi-content"), --TIM.currentPage);
-          		// }
-				// that.loaded();
               });
               
               $("#newsfeed-content").bind("touchmove", function(event) {

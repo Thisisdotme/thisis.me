@@ -6,11 +6,10 @@
   -webkit-transform-style: preserve-3d;
   -webkit-transform: translateZ(0);	     
   -moz-transform-style: preserve-3d;	  
-  -moz-transform: translateZ(0);	   
+  -moz-transform: translateZ(0);
 }
 
 .flip-container {
-	
   position: absolute;
   top: 0;
   left: 0;  
@@ -50,7 +49,7 @@
 
 .folded-top .flip-bottom-container {
   -webkit-transform: rotateX(180deg);	    
-  -moz-transform: rotateX(180deg);	   
+  -moz-transform: rotateX(180deg);
 }
 
 .folded-bottom .flip-top-container {
