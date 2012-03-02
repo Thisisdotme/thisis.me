@@ -127,7 +127,6 @@ def twitter_callback(request):
                           json_payload,
                           headers)
   try:
-    DBSession().close()
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except HTTPError, e:

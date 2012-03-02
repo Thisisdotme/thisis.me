@@ -93,7 +93,6 @@ def instagram_callback(request):
                                             'PUT',
                                             json_payload,
                                             headers)
-  DBSession().close()
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 

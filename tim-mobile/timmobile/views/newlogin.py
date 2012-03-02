@@ -49,7 +49,6 @@ def newuser(request):
                                 'PUT',
                                 json_payload,
                                 headers)
-        dbsession.close() # force DB refresh to see new data
         res = urllib2.urlopen(req)
         resJSON = json.loads(res.read())
         request.session['logged_id'] = '1'
