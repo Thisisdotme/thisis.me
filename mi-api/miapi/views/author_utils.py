@@ -28,12 +28,18 @@ def createFeatureEvent(request,fe,featureName):
     content['url'] = fe.url
   if fe.photo_url:
     content['photo_url'] = fe.photo_url
+    
+  author = {'profile_image_url':request.static_url('miapi:%s' % 'img/profile_placeholder.png')}
+  
+  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
 
   event = {'event_id':fe.id,
            'feature':featureName,
            'create_time':int(mktime(fe.create_time.timetuple())),
            'link':request.route_url('author.query.events.eventId',authorname=request.matchdict['authorname'],eventID=fe.id),
-           'content':content}
+           'content':content,
+           'author':author,
+           'sources':{'count':len(sourcesItems),'items':sourcesItems}}
 
   return event
 
