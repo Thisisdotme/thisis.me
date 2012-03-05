@@ -70,14 +70,14 @@ class AuthorQuery(object):
     
     # get author-id for authorName
     try:
-      authorId, = self.dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404;
       return {'error':'unknown author %s' % authorName}  
     
     events = []  
-    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==authorId).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).all():
-      events.append(createFeatureEvent(self.request,fe,featureName))
+    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==author.id).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).all():
+      events.append(createFeatureEvent(self.request,fe,featureName,author))
   
     return {'events':events,'paging':{'prev':None,'next':None}}
 
@@ -97,11 +97,11 @@ class AuthorQuery(object):
   
     # get author-id for authorName
     try:
-      authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+      author = dbSession.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404;
       return {'error':'unknown author %s' % authorName}  
   
-    fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==authorId).one()
+    fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==author.id).one()
   
-    return {'event':createFeatureEvent(self.request,fe,featureName)}
+    return {'event':createFeatureEvent(self.request,fe,featureName,author)}

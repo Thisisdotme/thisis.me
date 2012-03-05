@@ -160,6 +160,10 @@ class TwitterEvent(StatusEvent):
     source = self.raw_json.get('source') 
     return source if source else super(TwitterEvent,self).getEventOrigin()
 
+  def getEventPhoto(self):
+    for media in self.raw_json['entities'].get('media',[]):
+      if media.get('type') == "photo":
+        return media.get('media_url')
 
 '''
 '''
@@ -437,6 +441,9 @@ class InstagramEvent(PhotoEvent):
 
   def getEventCaption(self):
     return self.raw_json['caption']['text'] if 'caption' in self.raw_json and self.raw_json['caption'] and 'text' in self.raw_json['caption'] else None
+
+  def getEventPhoto(self):
+    return self.raw_json['images']['low_resolution']['url']
 
   def getAuxillaryContent(self):
     auxData = {}

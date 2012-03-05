@@ -14,7 +14,7 @@ from miapi import oAuthConfig
 
 from event_collectors.collector_factory import EventCollectorFactory
 
-def createFeatureEvent(request,fe,featureName):
+def createFeatureEvent(request,fe,featureName,author):
 
   # collect the pieces of available content 
   content = {}
@@ -31,7 +31,7 @@ def createFeatureEvent(request,fe,featureName):
 
   profileImageUrl = fe.author_profile_image_url if fe.author_profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png') 
     
-  author = {'profile_image_url': profileImageUrl}
+  author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
   
   sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
 
