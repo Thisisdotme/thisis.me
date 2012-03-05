@@ -32,7 +32,7 @@
   -webkit-transition-property: -webkit-transform;
   -webkit-transition-duration: .6s;	    	  
   -moz-transition-property: -webkit-transform;
-  -moz-transition-duration: .6s;	  	  
+  -moz-transition-duration: 6s;	  	  
 }
 
 .flip-top-container {

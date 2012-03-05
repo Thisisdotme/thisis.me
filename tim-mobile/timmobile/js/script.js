@@ -55,6 +55,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getAuthorName = function () {
 		return spec.author || '';
 	};
+	
+	that.getAuthorProfilePicture = function() {
+		return spec.event.author.profile_image_url || '';
+	}
 
 	that.getEventId = function () {
 		return spec.event.feature_event_id;
@@ -62,6 +66,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 
 	that.getFeatureName = function () {
 		return spec.event.feature;
+	};
+	
+	that.getSources = function () {
+		return spec.event.sources.items || '';
 	};
 
 	that.getCreateTime = function () {
@@ -124,13 +132,15 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
 	// }
 // 	
-	 that.renderAvatar = function () {
+	 that.renderAuthorProfilePicture = function () {
 	 	 return '<div class="avatar">' +
-					'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
+	 	 			'<div class="frame">' +
+						'<img src="' + that.getAuthorProfilePicture() + '" />' +
+					'</div>' +
 				'</div>';
 	 }
 	that.renderFooter = function () {
-		return '<div class="footer">' + that.renderAvatar() + that.renderInfo() +  that.renderBaseline() + '</div>';
+		return '<div class="footer">' + that.renderAuthorProfilePicture() + that.renderInfo() +  that.renderBaseline() + '</div>';
 	}
 	
 	that.renderInfo = function () {
@@ -140,11 +150,19 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 	
 	that.renderBaseline = function () {
-		var featureIcon = 	'<a href="/' + that.getAuthorName() + '/event/' + that.getEventId() + '">' +
-								'<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />' +
-							'</a>';
+		var featureIcons = '';
+		var sources = that.getSources();
+		if (sources.length > 0) {
+			for (var i = 0; i < sources.length; i++) {
+				featureIcons += '<img src="' + TIM.ImageController.getLResColor(sources[i].feature_name) + '" />';
+			}
+		}
+		else {
+			featureIcons = '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
+		}					
+							
 		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
-		return '<div class="baseline">' + featureIcon + timeago + '</div>';
+		return '<div class="baseline">' + featureIcons + timeago + '</div>';
 	}
 
 	that.renderTimeline = function () {
@@ -831,9 +849,12 @@ $(document).delegate("#authors", "pageinit", function () {
 });
 
 $(document).delegate("#newsfeed", "pageinit", function () {
-	 TIM.Resources.load(function() {
+	TIM.currentPage = 0;
+	TIM.allEvents = [];
+
+	TIM.Resources.load(function() {
 		TIM.timelineController({}).load();
-	 });
+	});
 });
 
 $(document).delegate("#authorFeatures", "pageinit", function () {

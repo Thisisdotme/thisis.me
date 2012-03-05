@@ -1,11 +1,11 @@
 <metal:index use-macro="load: master_template.html">
-	<script type="text/javascript">
-		TIM.pageInfo = {
-			authorName: ''
-		}
-	</script>
+	<div id="login" data-role="page" data-title="Login" data-url="/login" metal:fill-slot="page_content">
+		<script type="text/javascript">
+			TIM.pageInfo = {
+				authorName: ''
+			}
+		</script>
 	
-	<div id="accounts" data-role="page" data-title="Accounts" metal:fill-slot="page_content">
 		<header data-role="header">
 			<h1>Login</h1>
 		</header>

@@ -1,17 +1,14 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="newsfeed" data-role="page" data-title="News Feed" metal:fill-slot="page_content">
+	<div id="newsfeed" data-role="page" data-title="News Feed" data-url="/newsfeed" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
 				authorName: '${author_name}'
 			}
-			
-			TIM.currentPage = 0;
-			TIM.allEvents = [];
-			
 		</script>
 		<header data-role="header">
 
 			<h1>News Feed</h1>
+			<!-- 	TODO: Change link to go to followers page.		 -->
 			<a href="/accounts" data-role="button" data-icon="gear" data-iconpos="notext" class="ui-btn-right">Accounts</a>
 
 		</header><!-- /header -->

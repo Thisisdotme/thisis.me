@@ -44,8 +44,7 @@
 #newsfeed .event {
 	height: 184px;
 	border-bottom:1px dotted black;
-	
-	background-color: #fff;
+		    
 }
 
 #newsfeed .event > div:first-child {
@@ -119,37 +118,47 @@
 }
 
 #newsfeed .event .footer .avatar {
-	height: 100%;	
+	height: 50px;
+}
+
+#newsfeed .event .footer .avatar .frame {
+	height: 33px;
+	width: 33px;
+	margin-left: 4px;
+	margin-right: 4px;
+	padding: 1px;
+	background-color: #fff;
+	
+	-webkit-box-shadow: 0px 0px 1px .1px #555;
+	-moz-box-shadow:    0px 0px 1px 1px #000;
 }
 
 #newsfeed .event .footer .avatar img {
-	height: 40px;
+	max-height: 100%;
+	max-width: 100%;
+  
 }
 
 #newsfeed .event .baseline {
 	height: 30px;
-	padding-top: 5px;
-}
-
-#newsfeed .event .baseline a {
-	float: left;
-	padding-left: 5px;
-	height: 20px;
-	width: 20px;
+	padding-top: 7px;
 }
 
 #newsfeed .event .baseline img {
-	height: 100%;
+	float: left;
+	padding-left: 5px;
+	height: 15px;
+	width: 15px;
 }
 
 #newsfeed .event .baseline .fuzzy-time {
 	float: left;
 	
 	padding-left: 5px;
-	padding-top: 3px;
+	padding-top: 2px;
 	
 	color: gray;
-	font-size: 14px;
+	font-size: 12px;
 }
 
 /* experimental for pull-down and pull-up */

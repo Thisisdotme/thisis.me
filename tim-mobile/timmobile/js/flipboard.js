@@ -163,6 +163,7 @@ Flip.prototype.init_ = function(width, height) {
   this.bottomContainerNode_ = bottomContainerNode;
   this.bottomInnerContainerNode_ = bottomInnerContainerNode;
   
+  
   var self = this;
   var onTransitionEnd = function() {
     if (self.onTransitionEnd_) {
@@ -192,8 +193,7 @@ Flip.prototype.moveToBack = function() {
 
 Flip.prototype.beginFlipFrom = function() {
   this.moveToFront();
-  this.originalNode_.parent().append(this.containerNode_);
-  this.originalNode_.detach();  
+  this.originalNode_.replaceWith(this.containerNode_);  
 };
 
 Flip.prototype.beginFlipTo = function() {
