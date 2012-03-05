@@ -30,10 +30,18 @@ class FacebookFullCollector(FullCollector):
 
     try:
 
-      traversal = self.beginTraversal(dbSession,afm)
+      args = {'access_token':afm.access_token}
+
+      # fetch all the pages /me/feed
+      path = oauthConfig['endpoint'] % 'me/picture?%s' % urllib.urlencode(args)
+      req = urllib2.Request(path)
+      res = urllib2.urlopen(req)
+      
+      profileImageURL = res.geturl()
+
+      traversal = self.beginTraversal(dbSession,afm,profileImageURL)
       
       # optimization to request only those since we've last updated
-      args = {'access_token':afm.access_token}
       if traversal.baselineLastUpdateTime:
         since =int(mktime(traversal.baselineLastUpdateTime.timetuple()))
         args['since'] = since

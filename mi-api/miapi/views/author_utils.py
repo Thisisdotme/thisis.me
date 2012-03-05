@@ -28,8 +28,10 @@ def createFeatureEvent(request,fe,featureName):
     content['url'] = fe.url
   if fe.photo_url:
     content['photo_url'] = fe.photo_url
+
+  profileImageUrl = fe.author_profile_image_url if fe.author_profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png') 
     
-  author = {'profile_image_url':request.static_url('miapi:%s' % 'img/profile_placeholder.png')}
+  author = {'profile_image_url': profileImageUrl}
   
   sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
 

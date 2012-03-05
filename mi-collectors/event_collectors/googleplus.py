@@ -12,6 +12,7 @@ from full_collector import FullCollector
 
 
 USER_ACTIVITY = 'people/me/activities/public'
+USER_INFO = 'people/me'
 
 class GooglePlusFullCollector(FullCollector):
 
@@ -44,11 +45,22 @@ class GooglePlusFullCollector(FullCollector):
    
       accessToken = rawJSON['access_token']
 
-      traversal = self.beginTraversal(dbSession,afm)
+      args = {'access_token':accessToken}
+
+      # setup the url for fetching a page of posts
+      url = '%s%s?%s' % (oauthConfig['endpoint'],USER_INFO,urllib.urlencode(args))
+
+      # get a little info from the plus people api
+      req = urllib2.Request(url)
+      res = urllib2.urlopen(req)
+      rawJSON = json.loads(res.read())
+
+      profileImageURL = rawJSON['image']['url'] if rawJSON.has_key('image') and rawJSON['image'].has_key('url') else None 
+
+      traversal = self.beginTraversal(dbSession,afm,profileImageURL)
       
       # optimization to request only those since we've last updated
-      args = {'access_token':accessToken,
-              'maxResults':100}
+      args['maxResults'] = 100
 
       # set args for appropriate for incremental update
 #      if traversal.baselineLastUpdateTime:

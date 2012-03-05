@@ -97,6 +97,8 @@ class Event(object):
   def getRawJSON(self):
     return self.raw_json
 
+  def getProfileImageUrl(self):
+    return None
 
 '''
 '''
@@ -166,14 +168,14 @@ class FacebookEvent(StatusEvent):
   classdocs
   '''
   
-  foreignUserId = None
+  facebookUserId = None
 
-  def __init__(self,userId,eventId,foreignUserId):
+  def __init__(self,userId,eventId,facebookUserId):
     '''
     Constructor
     '''
     super(FacebookEvent, self).__init__(userId,eventId)
-    self.foreignUserId = foreignUserId
+    self.facebookUserId = facebookUserId
     
 
   def fromJSONFields(self,json):
@@ -216,6 +218,11 @@ class FacebookEvent(StatusEvent):
 
   def getEventURL(self):
     return 'https://graph.facebook.com/%s' % (self.event_id)
+
+  def getEventPhoto(self):
+    return self.raw_json['picture'] if self.raw_json.has_key('picture') else None
+
+
 
 '''
 '''

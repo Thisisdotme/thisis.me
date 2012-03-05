@@ -11,7 +11,6 @@ from time import mktime
 
 from full_collector import FullCollector
 
-
 USER_INFO = 'users/self'
 USER_MEDIA = 'users/self/media/recent'
 
@@ -33,20 +32,19 @@ class InstagramFullCollector(FullCollector):
 
     try:
 
-#      # fetch basic information about the user
-#      args = {'access_token':afm.access_token}
-#      url = '%s%s?%s' % (oauthConfig['endpoint'],USER_INFO,urllib.urlencode(args))
-#      req = urllib2.Request(url)
-#      res = urllib2.urlopen(req)
-#      rawJSON = json.loads(res.read())
+      args = {'access_token':afm.access_token}
 
-#      print json.dumps(rawJSON, sort_keys=True, indent=2)
-   
-      traversal = self.beginTraversal(dbSession,afm)
+      url = '%s%s?%s' % (oauthConfig['endpoint'],USER_INFO,urllib.urlencode(args))
+      req = urllib2.Request(url)
+      res = urllib2.urlopen(req)
+      rawJSON = json.loads(res.read())
+      
+      profileImageURL = rawJSON['data']['profile_picture'] if rawJSON.has_key('data') and rawJSON['data'].has_key('profile_picture') else None
+
+      traversal = self.beginTraversal(dbSession,afm,profileImageURL)
       
       # optimization to request only those since we've last updated
-      args = {'access_token':afm.access_token,
-              'count':200}
+      args['count'] = 200
 
       # set args for appropriate for incremental update
       if traversal.baselineLastUpdateTime:

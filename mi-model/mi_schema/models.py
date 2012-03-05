@@ -229,10 +229,12 @@ class FeatureEvent(Base):
   caption = Column(String(4096))
   content = Column(String(4096))
   photo_url = Column(String(4096))
-
+  
   auxillary_content = Column(String(65565))
 
-  def __init__(self, authorFeatureMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None):
+  author_profile_image_url = Column(String(1024))
+
+  def __init__(self, authorFeatureMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None):
     self.author_feature_map_id = authorFeatureMapId
     self.event_id = eventId
     self.create_time = createTime
@@ -241,6 +243,7 @@ class FeatureEvent(Base):
     self.content = content
     self.photo_url = photoURL
     self.auxillary_content = auxillaryContent
+    self.author_profile_image_url = authorProfileImageUrl
 
   def __repr__(self):
     return "<FeatureEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_feature_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
@@ -266,9 +269,9 @@ class OriginMap(Base):
   
   __tablename__ = 'origin_map'
 
-  feature_name = Column(String(255), nullable=False,primary_key=True)
-  origin = Column(String(255),primary_key=True)
-  origin_feature_name = Column(String(255), nullable=False)
+  feature_name = Column(String(255), nullable=False, primary_key=True)
+  origin = Column(String(255), nullable=False, primary_key=True)
+  origin_feature_name = Column(String(255), nullable=True)
 
   def __init__(self, featureName, origin, originFeatureName):
     self.feature_name = featureName

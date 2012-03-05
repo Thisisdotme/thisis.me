@@ -46,7 +46,13 @@ class LinkedInFullCollector(FullCollector):
 
     try:
 
-      traversal = self.beginTraversal(dbSession,afm)
+      # request the user's profile
+      response = make_request(client,'http://api.linkedin.com/v1/people/~:(picture-url)',{'x-li-format':'json'})
+      respJSON = json.loads(response)
+  
+      profileImageURL = respJSON['pictureUrl'] if respJSON.has_key('pictureUrl') else None
+        
+      traversal = self.beginTraversal(dbSession,afm,profileImageURL)
 
       # optimization to request only those since we've last updated
       args = {'scope':'self',

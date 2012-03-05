@@ -18,6 +18,7 @@ INCREMENTAL_OVERLAP = timedelta (hours = 1)
 
 
 class FullCollectorState(object):
+
   dbSession = None
   afm = None
   authorId = None
@@ -38,8 +39,11 @@ class FullCollectorState(object):
   mostRecentEventId = 0
   mostRecentEventTimestamp = None
   baselineLastUpdateTime = None
+  
+  # profile image
+  defaultProfileImageUrl = None
 
-  def __init__(self,dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp):
+  def __init__(self,dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
     self.dbSession = dbSession
     self.afm = afm
     self.authorId = afm.author_id
@@ -57,6 +61,8 @@ class FullCollectorState(object):
     self.mostRecentEventId = mostRecentEventId
     self.mostRecentEventTimestamp = mostRecentEventTimestamp
     self.baselineLastUpdateTime = lastUpdateTime - INCREMENTAL_OVERLAP if mostRecentEventTimestamp else None
+    
+    self.defaultProfileImageUrl = defaultProfileImageUrl
 
 
 '''
@@ -164,7 +170,7 @@ class FullCollector(object):
     return '%s.%s.%d.%s.csv' % (authorId, self.getFeatureName(), mktime(now.timetuple()), varient)
 
 
-  def beginTraversal(self,dbSession,afm):
+  def beginTraversal(self,dbSession,afm,defaultProfileImageUrl):
     now = datetime.now()
     filename = self.makeFilename(afm.author_id,now,"refined")
     mapper = open(filename,'wb')
@@ -176,7 +182,7 @@ class FullCollector(object):
     mostRecentEventTimestamp = afm.most_recent_event_timestamp if self.incremental else None
     lastUpdateTime = afm.last_update_time if self.incremental else None
 
-    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp)
+    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
 
 
   def endTraversal(self,state,authorName):
@@ -258,8 +264,9 @@ class FullCollector(object):
         content = event.getEventContent()
         photo = event.getEventPhoto();
         auxillaryContent = event.getAuxillaryContent()
+        profileImageUrl = event.getProfileImageUrl() if event.getProfileImageUrl() else state.defaultProfileImageUrl
 
-        featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent)
+        featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl)
         state.dbSession.add(featureEvent)
         state.dbSession.flush()
         

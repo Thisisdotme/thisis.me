@@ -38,7 +38,7 @@ class TwitterFullCollector(FullCollector):
     userId = int(auxData['id'])
 
     try:
-
+  
       # API endpoing for querying user info
       url = '%s%s' % (oauthConfig['endpoint'],USER_INFO)
       userInfoJSON = json.loads(make_request(client,url))
@@ -48,7 +48,9 @@ class TwitterFullCollector(FullCollector):
       if twitterUserId != userId:
         raise Exception("Bad state - mis-matched twitter user ids")
 
-      traversal = self.beginTraversal(dbSession,afm)
+      profileImageUrl = userInfoJSON['profile_image_url'] if userInfoJSON.has_key('profile_image_url') else None 
+
+      traversal = self.beginTraversal(dbSession,afm,profileImageUrl)
       page = 1
 
       # API endpoint for getting user timeline

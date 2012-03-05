@@ -12,6 +12,7 @@ from mi_model import Event
 from full_collector import FullCollector
 
 USER_CHECKINS = 'users/self/checkins'
+USER_SELF = 'users/self'
 
 class FoursquareFullCollector(FullCollector):
 
@@ -31,14 +32,26 @@ class FoursquareFullCollector(FullCollector):
 
     try:
 
-      traversal = self.beginTraversal(dbSession,afm)
+      args = {'oauth_token': afm.access_token,
+              'v': 20120130}
+
+      url = '%s%s?%s' % (oauthConfig['endpoint'],USER_SELF,urllib.urlencode(args))
+
+      req = urllib2.Request(url)
+      res = urllib2.urlopen(req)
+      rawJSON = json.loads(res.read())
+
+      if rawJSON['meta']['code'] != 200:
+        raise Exception('Foursquare error response: %s' % rawJSON['meta']['code'])
+
+      profileImageUrl = rawJSON['response']['user']['photo']
+
+      traversal = self.beginTraversal(dbSession,afm,profileImageUrl)
 
       # start by getting the first 250 checkin.  For now we won't bother seeding the system
       # with anymore than 250
-      # users/self/checkins
-      args = {'oauth_token': afm.access_token,
-              'v': 20120130,
-              'limit':250}
+
+      args['limit'] = 250
   
       url = '%s%s?%s' % (oauthConfig['endpoint'],USER_CHECKINS,urllib.urlencode(args))
 
