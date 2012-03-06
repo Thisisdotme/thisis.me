@@ -155,6 +155,7 @@ TABLE: author_group
 class AuthorGroup(Base):
 
   __tablename__ = 'author_group'
+  __table_args__ = (UniqueConstraint('author_id', 'group_name', name='uidx_author_group_map_1'),{})
 
   id = Column(Integer, primary_key=True)
 
