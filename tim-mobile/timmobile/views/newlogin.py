@@ -27,7 +27,7 @@ def newuser(request):
   password = ''
   message = ''
   
-  forward = request.params.get('forward') or request.route_url('newsfeed')
+  forward = request.params.get('forward') or request.route_url('accounts')
 
   if 'form.submitted' in request.POST:
     login = request.POST.get('newlogin', '')
