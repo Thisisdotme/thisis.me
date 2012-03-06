@@ -26,9 +26,16 @@ def getAccount(request):
 
 @view_config(route_name='account_details', request_method='POST', permission='author', renderer='timmobile:templates/account_details.pt')
 def postAccount(request):
+  featureName = request.matchdict['featurename']
   req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
-                          (request.registry.settings['mi.api.endpoint'], authenticated_userid(request), request.matchdict['featurename']), 
+                          (request.registry.settings['mi.api.endpoint'], authenticated_userid(request), featureName), 
                           'DELETE')
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
+  
+  if featureName == 'facebook':
+    del(request.session['facebook_access_token'])
+  elif featureName == 'flickr':
+     del(request.session['flickr_access_token'])
+     
   return HTTPFound(request.route_url('accounts'))
