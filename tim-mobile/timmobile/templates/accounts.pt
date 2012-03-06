@@ -7,7 +7,7 @@
 	
 		<div data-role="content">
 			<h2>Account List</h2>
-			<ul>
+			<ul data-role="listview">
 			<li><a href="/oauth/twitter">Twitter</a></li>
 			<li><a href="/oauth/facebook">Facebook</a></li>
 			<li><a href="/oauth/linkedin">LinkedIn</a></li>

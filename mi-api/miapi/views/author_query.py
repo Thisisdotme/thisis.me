@@ -56,11 +56,6 @@ class AuthorQuery(object):
   ## THIS NEEDS TO MOVE BACK TO self.getHighlights WHEN IMPLEMENTED
   @view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   ##
-  ## THIS NEEDS TO MOVE BACK TO AuthorGroupQuery.getHighlights WHEN IMPLEMENTED
-  @view_config(route_name='author.groups.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-  ##
-  ## THIS NEEDS TO MOVE BACK TO AuthorGroupQuery.getEvents WHEN IMPLEMENTED
-  @view_config(route_name='author.groups.query.events', request_method='GET', renderer='jsonp', http_cache=0)
   ##  
   @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
   @view_config(route_name='author.featureEvents', request_method='GET', renderer='jsonp', http_cache=0) # deprecated

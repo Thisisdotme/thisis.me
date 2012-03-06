@@ -5,6 +5,7 @@
 				authorName: '${author_name}'
 			}
 		</script>
+		<script type="text/javascript">if (window.location.hash == '#_=_')window.location.hash = '';</script>
 		<header data-role="header">
 
 			<h1>News Feed</h1>
