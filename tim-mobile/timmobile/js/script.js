@@ -516,10 +516,19 @@ TIM.ProfileController = function (spec) {
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '?callback=?', function (data) {
 				var author = data.author || {};
-				var al = $("#profile .ui-content");
-// 				
-				// al.empty();
-				// al.text(data.author);
+				var $profile = $("#profile .profile");
+				var $profileImg = $profile.find(".avatar img")
+				var $title = $profile.find(".title");
+				var $link = $profile.find(".link a");
+				var $description = $profile.find(".description");
+				var $firstEmail = $profile.find(".meta-data .email");
+				var $secondEmail = $profile.find(".meta-data .semail");
+				var $phone = $profile.find(".meta-data .phone");
+				
+				$title.text(author.fullname);
+				$firstEmail.text(author.email);
+				$secondEmail.html("<hr/>" + author.email);
+				
 			});
 		}
 	};
