@@ -1,12 +1,12 @@
 '''
-Created on Mar 1, 2012
+Created on Feb 23, 2012
 
-@author: martin
+@author: howard
 '''
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid
 
-@view_config(route_name='profile', request_method='GET', permission='author', renderer='timmobile:templates/profile.pt')
+@view_config(route_name='timeline', request_method='GET', permission='author', renderer='timmobile:templates/timeline.pt')
 def newsfeed(request):
   return { 'author_name': authenticated_userid(request),
            'api_endpoint':request.registry.settings['mi.api.endpoint'] }

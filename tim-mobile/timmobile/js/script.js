@@ -53,7 +53,11 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	var that = {};
 
 	that.getAuthorName = function () {
-		return spec.author || '';
+		return spec.event.author.name || '';
+	};
+	
+	that.getAuthorFullName = function () {
+		return spec.event.author.full_name || '';
 	};
 	
 	that.getAuthorProfilePicture = function() {
@@ -91,7 +95,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getCaption = function () {
 		return spec.event.content.label || '';
 	};
-	
+		
 	that.getShortCaption = function (shortCaptionLength) {
 		if (shortCaptionLength === undefined) {
 			shortCaptionLength = 50;
@@ -99,6 +103,15 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		var caption = that.getCaption();
 		return (caption.length <= shortCaptionLength) ? caption : (caption.substr(0, shortCaptionLength) + "...");
 	};
+	
+	that.hasImage = function () {
+		return (spec.event.content.photo_url !== undefined
+				&& spec.event.content.photo_url.length > 0);
+	}
+	
+	that.getImage = function () {
+		return spec.event.content.photo_url || '';
+	}
 
 	that.getData = function () {
 		return spec.event.content.data || '';
@@ -144,7 +157,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 	
 	that.renderInfo = function () {
-		var author = '<div class="author">' + that.getAuthorName() + '</div>';
+		var author = '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
 		var caption = '<div class="caption">' + that.getShortCaption() + '</div>';
 		return '<div class="info">' + author + caption + '</div>';
 	}
@@ -201,7 +214,7 @@ TIM.eventRenderer.instagramRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
 
 	that.renderContent = function () {
-		return '<div class="img-content"><img src="' + this.getAuxillaryData().images.low_resolution.url + '" /></div>';
+		return '<div class="img-content"><img src="' + this.getImage() + '" /></div>';
 	};
 
 	return that;
@@ -493,131 +506,64 @@ TIM.AuthorsController = function (spec) {
 	};
 };
 
+//
+//	Profile
+//
+TIM.ProfileController = function (spec) {
+	
+	return {
+		
+		load: function () {
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '?callback=?', function (data) {
+				var author = data.author || {};
+				var al = $("#profile .ui-content");
+// 				
+				// al.empty();
+				// al.text(data.author);
+			});
+		}
+	};
+};
+
 TIM.timelineController = function (spec) {
 	
-	var that = {},
-			theScroller = undefined;
-
-	var pullDownAction = function () {
-		that.load();
-	};
-	
-	var pullUpAction = function () {
-		that.load();
-	};
+	var that = {};
 
 	that.loaded = function () {
-
-		if (theScroller !== undefined) {
-			theScroller.refresh();
-		}
-		else {
-
-			var pullDown = $('#pullDown'),
-					pullDownOffset = pullDown.outerHeight(true),
-					pullUp = $('#pullUp'),	
-					pullUpOffset = pullUp.outerHeight(true);
-
-			// theScroller = new iScroll('wrapper', {
-				// useTransition: true,
-				// topOffset: pullDownOffset,
-				// onRefresh: function () {
-					// if (pullDown.hasClass('loading')) {
-						// pullDown.removeClass('loading');
-						// pullDown.find('.pullDownLabel').text('Pull down to refresh...');
-					// }
-					// else
-					// if (pullUp.hasClass('loading')) {
-						// pullUp.removeClass('loading');
-						// pullUp.find('.pullUpLabel').text('Pull up to load more...');
-					// }						
-// 
-				// },
-				// onScrollMove: function () {
-					// if (this.y > 5 && !pullDown.hasClass('flip')) {
-						// pullDown.addClass('flip');
-						// pullDown.find('.pullDownLabel').text('Release to refresh...');
-						// this.minScrollY = 0;
-					// } 
-					// else 
-					// if (this.y < 5 && pullDown.hasClass('flip')) {
-						// pullDown.removeClass('flip');
-						// pullDown.find('.pullDownLabel').text('Pull down to refresh...');
-						// this.minScrollY = -pullDownOffset;
-					// }
-					// else
-					// if (this.y < (this.maxScrollY - 5) && !pullUp.hasClass('flip')) {
-						// pullUp.addClass('flip');
-						// pullUp.find('.pullUpLabel').text('Release to refresh...');
-						// this.maxScrollY = this.maxScrollY;
-					// }
-					// else
-					// if (this.y > (this.maxScrollY + 5) && pullUp.hasClass('flip')) {
-						// pullUp.removeClass('flip');
-						// pullUp.find('.pullUpLabel').text('Pull up to load more...');
-						// this.maxScrollY = pullUpOffset;
-					// }						
-				// },
-				// onScrollEnd: function () {
-					// if (pullDown.hasClass('flip')) {
-						// pullDown.removeClass('flip').addClass('loading');
-						// pullDown.find('.pullDownLabel').text('Loading...');
-						// pullDownAction();
-					// }
-					// else if (pullUp.hasClass('flip')) {
-						// pullUp.removeClass('flip').addClass('loading');
-						// pullUp.find('.pullUpLabel').text('Loading...');				
-						// pullUpAction();
-					// }					
-				// }
-			// });
-			
-			
-			// $("#wrapper").bind("swipe", function(){
-          		// console.log("swipe");
-          		// if (that.flipSet.canGoNext()) {
-          			// that.flipSet.next();	
-          		// }
-//           		
-          		// // that.setPage($("#newsfeed .mi-content"), ++TIM.currentPage);
-				// // that.loaded();
-              // });
-//               
-			$("#newsfeed-content").bind("swipeup", function(){
-          		console.log("swipeup");
-          		if (that.flipSet.canGoNext()) {
-          			that.flipSet.next(function() {
-          				TIM.currentPage ++;
-          				
-          				// If the next page has not been rendered, add it to the flipset
-          				if (TIM.currentPage < TIM.allEvents.length) {
-          					if (that.flipSet.getCurrentIndex() === that.flipSet.getLength() - 1) {
-          						that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
-          					}
-          				}
-          			});	
-          		}
-              });
-			$("#newsfeed-content").bind("swipedown", function(){
-          		console.log("swipedown");
-				if (that.flipSet.canGoPrevious()) {
-	          		that.flipSet.previous(function() {
-          				TIM.currentPage --;
-          				
-          				// If the previous page has not been rendered, add it to the flipset
-          				if (TIM.currentPage > 0) {
-          					if (that.flipSet.currentIndex === 0) {
-          						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
-          					}
-          				}
-          			});
-	          	}
-              });
-              
-              $("#newsfeed-content").bind("touchmove", function(event) {
-              		event.preventDefault();
-              });
-		}
+		$(".flippage-container").bind("swipeup", function(){
+      		console.log("swipeup");
+      		if (that.flipSet.canGoNext()) {
+      			that.flipSet.next(function() {
+      				TIM.currentPage ++;
+      				
+      				// If the next page has not been rendered, add it to the flipset
+      				if (TIM.currentPage < that.events.length) {
+      					if (that.flipSet.getCurrentIndex() === that.flipSet.getLength() - 1) {
+      						that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
+      					}
+      				}
+      			});	
+      		}
+          });
+		$(".flippage-container").bind("swipedown", function(){
+      		console.log("swipedown");
+			if (that.flipSet.canGoPrevious()) {
+          		that.flipSet.previous(function() {
+      				TIM.currentPage --;
+      				
+      				// If the previous page has not been rendered, add it to the flipset
+      				if (TIM.currentPage > 0) {
+      					if (that.flipSet.currentIndex === 0) {
+      						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
+      					}
+      				}
+      			});
+          	}
+          });
+          
+          $(".flippage-container").bind("touchmove", function(event) {
+          		event.preventDefault();
+          });
 			
 		window.setTimeout(function () { document.getElementById('newsfeed-content').style.left = '0'; }, 800);
 
@@ -625,21 +571,33 @@ TIM.timelineController = function (spec) {
 	};
 	
 	that.flipSet = {};
+	that.events = {};
+	
+	that.makeURL = function () {
+		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
+	}
+	
+	that.contentSelector = "#timeline .ui-content"; 
 	
 	that.load = function () {
-				
-		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events?callback=?', function (data) {
+		
+				console.log("loading");
+		$.getJSON(that.makeURL(), function (data) {
+			$(that.contentSelector).empty();
+			
 			var feedPages = new Array();
-			var tl = $("#newsfeed .mi-content"),
-					renderer;
+			
 			try {
-				tl.remove();
-				TIM.allEvents = data.events || [];
+				that.events = data.events || [];
 				TIM.currentPage = 0;
 				
 				feedPages.push(that.makePageObj(TIM.currentPage));
 				feedPages.push(that.makePageObj(TIM.currentPage + 1));
-				that.flipSet = new FlipSet($("#newsfeed .ui-content"), 320, 370, feedPages);
+				
+				// var event_viewport = (window.innerHeight ? window.innerHeight : $(window).height()) - $("header:visible").outerHeight();
+				// $("#newsfeed .ui-content").css("height", event_viewport);
+				// that.flipSet = new FlipSet($("#newsfeed .ui-content"), 320, event_viewport, feedPages);
+				that.flipSet = new FlipSet($(that.contentSelector), 320, 370, feedPages);
 				
 				that.loaded();
 			}
@@ -652,20 +610,20 @@ TIM.timelineController = function (spec) {
 	};
 	
 	that.makePageObj = function (idx) {
-		if (TIM.allEvents === undefined
+		if (that.events === undefined
 			|| idx < 0 
-			|| idx > TIM.allEvents.length) {
+			|| idx > that.events.length) {
 			return null;
 		}
 		
 		var obj = $("<div class='mi-content'/>");
-		if (TIM.allEvents.length > 0) {
+		if (that.events.length > 0) {
 			var numberOfFeedsPerPage = 1;
 			var firstDisplayedFeed = idx * numberOfFeedsPerPage;
 			var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
 			console.log(firstDisplayedFeed);
 			for (var i = firstDisplayedFeed; i < lastDisplayedFeed; i++) {
-				renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": TIM.allEvents[i]});
+				renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": that.events[i]});
 				obj.append(renderer.renderTimeline());
 			}
 		}
@@ -678,6 +636,17 @@ TIM.timelineController = function (spec) {
 
 };
 
+TIM.newsfeedController = function (spec) {	
+	var that = TIM.timelineController(spec);
+	that.makeURL = function () {
+		var followGroup = "follow";
+		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/' + followGroup + '/highlights?callback=?';
+	}
+	
+	that.contentSelector = "#newsfeed .ui-content"; 
+	
+	return that;
+};
 
 
 
@@ -848,9 +817,22 @@ $(document).delegate("#authors", "pageinit", function () {
 	 });
 });
 
+$(document).delegate("#profile", "pageinit", function () {
+	 TIM.Resources.load(function() {
+		TIM.ProfileController({}).load();
+	 });
+});
+
 $(document).delegate("#newsfeed", "pageinit", function () {
 	TIM.currentPage = 0;
-	TIM.allEvents = [];
+	
+	TIM.Resources.load(function() {
+		TIM.newsfeedController({}).load();
+	});
+});
+
+$(document).delegate("#timeline", "pageinit", function () {
+	TIM.currentPage = 0;
 
 	TIM.Resources.load(function() {
 		TIM.timelineController({}).load();

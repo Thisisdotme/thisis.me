@@ -5,7 +5,7 @@ function FlipSet($wrapper, width, height, nodes) {
   this.height = height;
 
   for (var i = 0, node; node = nodes[i]; i++) {
-    this.flips_.push(new Flip(node, width, height, this));
+  	this.flips_.push(new Flip(node, width, height, this));
   }
     
   this.containerNode_ = $("<div class='flip-set'/>");
@@ -131,6 +131,7 @@ function Flip(node, width, height, parentSet) {
 }
 
 Flip.prototype.init_ = function(width, height) {
+  this.originalNode_.css("height", height + "px");
   var node = this.originalNode_;
   
   var containerNode = $("<div class='flip-container'/>");

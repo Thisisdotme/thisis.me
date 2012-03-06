@@ -5,7 +5,7 @@
 .mi-header { }
 .ui-content { margin-top: 43px; }
 
-#newsfeed .ui-content > div, #feature .ui-content > div { clear: both; }
+#newsfeed .ui-content > div, #timeline .ui-content > div, #feature .ui-content > div { clear: both; }
 
 #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
 
@@ -25,82 +25,46 @@
 
 /* Newsfeed */
 
-/*#newsfeed .event .content { position: absolute; top: 50%; }*/
-#newsfeed .ui-content {
+/*.flippage-container .event .content { position: absolute; top: 50%; }*/
+.ui-content {
 	padding: 0;
 	margin: 0;
 }
 
-#newsfeed .mi-content {
-	display:table-cell; 
-	vertical-align:bottom;
-	
-	width: 320px;
-	height: 370px;
-	
-	background-color: #fff;
+.profile {
+	width: 300px;
+	padding: 10px;
 }
 
-#newsfeed .event {
-	height: 184px;
-	border-bottom:1px dotted black;
-		    
+.profile .top {
+	padding-bottom: 5px;
+	height: 70px;
 }
 
-#newsfeed .event > div:first-child {
-	height: 86px;	
-}
-
-/*	Feature specific configurations  */
-#newsfeed .event.half-page { height: 184px; }
-#newsfeed .event.half-page  > div:first-child { height: 86px; }
-#newsfeed .event.full-page { height: 369px; }
-#newsfeed .event.full-page > div:first-child.text-content { height: 256px; }
-#newsfeed .event.full-page > div:first-child.img-content { height: 246px; }
-
-#newsfeed .event .text-content {
-	padding: 10px 10px 10px 10px;
-	
-	display: table-cell;
-	vertical-align: middle;
-	text-align: left;
-}
-
-#newsfeed .event .img-content {
-	padding: 15px 0;
-	
-	background-color: black;
-	text-align: center;
-	
-}
-
-#newsfeed .event .img-content img {
-	max-height: 100%;
-	max-width: 100%;
-}
-
-#newsfeed .event .footer {
-	height: 68px;
-	padding: 20px 5px 5px 5px;
-	margin:0;
-}
-
-#newsfeed .event .footer .info {
+.profile .top .title-container {
 	float: none;	
 	display: table-cell;
 	vertical-align: middle;
 	
-	height: 36px;
+	height: 70px;
 	
 	padding-left: 5px;
 	padding-right: 10px;
 }
 
-#newsfeed .event .footer .info .author {
+.profile .top .title-container .title{
 	font-weight: bold;
+	color: #000;
 }
 
-#newsfeed .event .footer .info .caption {
+.profile .top .title-container .link a{
+	font-weight: bold;
+	
+	color: #757575;
+	text-decoration: none;
+}
+
+.profile .top .title-container .caption {
 	height: 18px;
 	
 	font-size: 14px;
@@ -113,15 +77,168 @@
 }
 
 
-#newsfeed .event .footer > div{
+.profile .top > div{
 	float: left;
 }
 
-#newsfeed .event .footer .avatar {
+/*.profile .top .avatar {
+	height: 50px;
+}*/
+.profile .top .avatar .frame {
+	height: 65px;
+	width: 65px;
+	margin-left: 4px;
+	margin-right: 4px;
+	padding: 1px;
+	background-color: #fff;
+	
+	-webkit-box-shadow: 0px 0px 2px .1px #555;
+	-moz-box-shadow:    0px 0px 2px .1px #555;
+}
+
+.profile .top .avatar img {
+	max-height: 100%;
+	max-width: 100%;
+	min-height: 100%;
+}
+
+.profile .description {
+	float: none;
+	
+	font-size: 16px;
+	color: #000;
+	
+	line-height: 20px;
+	width: 300px;
+	height: 140px;
+	
+    word-wrap: break-word;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.profile .meta-data {
+	margin-top: 10px;
+	float: left;
+	width: 100%;
+}
+
+.profile .meta-data h3 {
+	margin-top: 15px;
+	margin-bottom: 0px;
+}
+
+.profile .meta-data hr {
+	color: #757575;
+}
+
+.profile .meta-data .phone a {
+	text-decoration: none;
+	font-style: normal;
+	font-weight: 100;
+	color: #000;
+}
+
+.flippage-container .mi-content {
+	margin: 0;
+	padding: 0;
+	display:table-cell; 
+	vertical-align:bottom;
+	
+	width: 320px;
+
+	background-color: #fff;
+}
+
+.flippage-container .event {	
+	min-height: 100%; 
+/*    height: auto !important; /*Cause footer to stick to bottom in IE 6*/*/
+    height: 100%; 
+    margin: 0 auto; /*Allow for footer height*/
+}
+
+/*	Feature specific configurations  */
+/*.flippage-container .event.half-page { height: 184px; }
+.flippage-container .event.half-page  > div:first-child { height: 86px; }*/
+
+
+/*.flippage-container .event.full-page { height: 369px;}*/
+.flippage-container .event.full-page > div:first-child.text-content { height: 258px; }
+.flippage-container .event.full-page > div:first-child.img-content { 
+	height: 65%; 
+}
+
+.flippage-container .event .text-content {
+	padding: 10px 10px 10px 10px;
+	
+	display: table-cell;
+	vertical-align: middle;
+	text-align: left;
+		
+}
+
+.flippage-container .event .img-content {
+	padding: 15px 0;
+	
+	background-color: black;
+	text-align: center;
+}
+
+.flippage-container .event .img-content img {
+/*	padding: 15px 0;*/
+	
+	max-height: 100%;
+	/*
+	max-width: 100%;*/
+}
+
+.flippage-container .event .footer {
+	height: 35%;
+	padding: 20px 5px 5px 5px;
+	margin:0;
+}
+
+.flippage-container .event .footer .info {
+	float: none;	
+	display: table-cell;
+	vertical-align: middle;
+	
+	height: 100%;
+	
+	padding-left: 5px;
+	padding-right: 10px;
+}
+
+.flippage-container .event .footer .info .author a{
+	font-weight: bold;
+	color: #000;
+	text-decoration: none;
+}
+
+
+
+.flippage-container .event .footer .info .caption {
+	height: 18px;
+	
+	font-size: 14px;
+	
+	width: 200px;
+    white-space: nowrap;
+    word-wrap: break-word;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+
+.flippage-container .event .footer > div{
+	float: left;
+}
+
+.flippage-container .event .footer .avatar {
 	height: 50px;
 }
 
-#newsfeed .event .footer .avatar .frame {
+.flippage-container .event .footer .avatar .frame {
 	height: 33px;
 	width: 33px;
 	margin-left: 4px;
@@ -129,29 +246,29 @@
 	padding: 1px;
 	background-color: #fff;
 	
-	-webkit-box-shadow: 0px 0px 1px .1px #555;
-	-moz-box-shadow:    0px 0px 1px 1px #000;
+	-webkit-box-shadow: 0px 0px 2px .1px #555;
+	-moz-box-shadow:    0px 0px 2px .1px #000;
 }
 
-#newsfeed .event .footer .avatar img {
+.flippage-container .event .footer .avatar img {
 	max-height: 100%;
 	max-width: 100%;
   
 }
 
-#newsfeed .event .baseline {
+.flippage-container .event .baseline {
 	height: 30px;
 	padding-top: 7px;
 }
 
-#newsfeed .event .baseline img {
+.flippage-container .event .baseline img {
 	float: left;
 	padding-left: 5px;
 	height: 15px;
 	width: 15px;
 }
 
-#newsfeed .event .baseline .fuzzy-time {
+.flippage-container .event .baseline .fuzzy-time {
 	float: left;
 	
 	padding-left: 5px;

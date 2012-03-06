@@ -13,11 +13,8 @@
 
 		</header><!-- /header -->
 	
-		<div id="newsfeed-content" data-role="content">
-			<div class="mi-content" style="background-color:#fff;">
-			</div>
+		<div id="newsfeed-content" data-role="content" class="flippage-container">
 		</div><!-- /content -->
-	
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script"></script>

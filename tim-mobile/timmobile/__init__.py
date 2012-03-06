@@ -53,6 +53,10 @@ def main(global_config, **settings):
   config.add_route('account_details', '/accounts/{featurename}')
   config.add_route('newsfeed', '/newsfeed')
   
+  config.add_route('timeline', '/{authorname}/timeline')
+  
+  config.add_route('profile', '/{authorname}/profile')
+  
   #
   # oauth setup paths
   #
