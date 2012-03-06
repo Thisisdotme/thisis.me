@@ -121,6 +121,8 @@ def get_googlePlus(request):
 @view_config(route_name='googleplus', request_method='POST', permission='author')
 def post_googlePlus(request):
 
+  print request.route_url('googleplus_callback')
+  
   apiKey = oAuthConfig[FEATURE]['key']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('redirect_uri',request.route_url('googleplus_callback'))])
@@ -147,9 +149,14 @@ def googlePlus_callback(request):
                                   ('client_secret',apiSecret),
                                   ('redirect_uri',request.route_url('googleplus_callback')),
                                   ('grant_type','authorization_code')])
+
     req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs)
-    res = urllib2.urlopen(req)
-    resJSON = json.loads(res.read())
+
+    try:
+      res = urllib2.urlopen(req)
+      resJSON = json.loads(res.read())
+    except urllib2.URLError, e:
+      print 'urlopen failed'
 
     accessToken = resJSON['access_token']
     refreshToken = resJSON['refresh_token']
