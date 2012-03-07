@@ -82,7 +82,7 @@ class AuthorGroupQuery(object):
   
     events = []  
     for fe,author,featureName in self.dbSession.query(FeatureEvent,Author,Feature.feature_name).join(AuthorFeatureMap,FeatureEvent.author_feature_map_id==AuthorFeatureMap.id).join(AuthorGroupMap,AuthorFeatureMap.author_id==AuthorGroupMap.author_id).join(Author,AuthorFeatureMap.author_id==Author.id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorGroupMap.author_group_id==authorGroup.id).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).limit(LIMIT):
-      events.append(createFeatureEvent(self.request,fe,featureName,author))
+      events.append(createFeatureEvent(self.dbSession,self.request,fe,featureName,author))
   
     return {'events':events,'paging':{'prev':None,'next':None}}
     

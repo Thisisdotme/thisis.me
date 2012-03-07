@@ -23,8 +23,8 @@
 							 "access_token_url": "https://api.linkedin.com/uas/oauth/accessToken",
 							 "authorize_url": "https://www.linkedin.com/uas/oauth/authorize"},
 
-	"googleplus": {"key":"505204251832.apps.googleusercontent.com",
-						  "secret":"o5S7aHObOnue5aAGxZHT-JQ9",
+	"googleplus": {"key":"924804117742.apps.googleusercontent.com",
+						  "secret":"7s1Atmr5gWV6LZpgoVIMnCnW",
 						  "oauth_url":"https://accounts.google.com/o/oauth2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fplus.me+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&response_type=code&access_type=offline&",
 						  "oauth_exchange_url":"https://accounts.google.com/o/oauth2/token",
 						  "endpoint":"https://www.googleapis.com/plus/v1/"},

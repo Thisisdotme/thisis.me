@@ -16,6 +16,7 @@ from author_utils import createFeatureEvent
 
 log = logging.getLogger(__name__)
 
+LIMIT = 200
 
 ##
 ## author FeatureEvents functionality
@@ -71,8 +72,8 @@ class AuthorQuery(object):
       return {'error':'unknown author %s' % authorName}  
     
     events = []  
-    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==author.id).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).all():
-      events.append(createFeatureEvent(self.request,fe,featureName,author))
+    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(AuthorFeatureMap.author_id==author.id).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).limit(LIMIT):
+      events.append(createFeatureEvent(self.dbSession,self.request,fe,featureName,author))
   
     return {'events':events,'paging':{'prev':None,'next':None}}
 
@@ -99,4 +100,4 @@ class AuthorQuery(object):
   
     fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==author.id).one()
   
-    return {'event':createFeatureEvent(self.request,fe,featureName,author)}
+    return {'event':createFeatureEvent(dbSession,self.request,fe,featureName,author)}

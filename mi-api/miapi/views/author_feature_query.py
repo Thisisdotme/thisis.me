@@ -17,6 +17,7 @@ from author_utils import createFeatureEvent
 
 log = logging.getLogger(__name__)
 
+LIMIT = 200
 
 #
 # AUTHOR FEATURE QUERY: query for the highlights/details of the specified feature and author
@@ -79,7 +80,7 @@ class AuthorFeatureQuery(object):
       return {'error':'unknown feature %s' % authorName}  
   
     events = []  
-    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(and_(AuthorFeatureMap.feature_id==featureId,AuthorFeatureMap.author_id==author.id)).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).all():
-      events.append(createFeatureEvent(self.request,fe,featureName,author))
+    for fe,featureName in self.dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(and_(AuthorFeatureMap.feature_id==featureId,AuthorFeatureMap.author_id==author.id)).filter(FeatureEvent.parent_id==None).order_by(FeatureEvent.create_time.desc()).limit(LIMIT):
+      events.append(createFeatureEvent(self.dbSession,self.request,fe,featureName,author))
   
     return {'events':events,'paging':{'prev':None,'next':None}}

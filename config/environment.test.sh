@@ -7,4 +7,4 @@ export MI_CONFIG=$MI_HOME/config
 export MI_OAUTH_KEYS=$MI_CONFIG/oauth_keys.test.json
 
 # define the pythonpath
-export PYTHONPATH=$MI_HOME/mi-utils:$MI_HOME/mi-db:$MI_HOME/mi-collectors
+export PYTHONPATH=$MI_HOME/mi-utils:$MI_HOME/mi-model:$MI_HOME/mi-db:$MI_HOME/mi-collectors
