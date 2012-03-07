@@ -534,6 +534,68 @@ TIM.ProfileController = function (spec) {
 	};
 };
 
+// Pages contain events
+TIM.feedController = function (events) {
+	var that = {};
+	
+	that.events = events || [];
+	that.pages = [];
+	
+	that.sort = function (events) {
+		var ignoredEvents = [];
+		console.log("number of events:" + events.length);
+		for (var i = 0; i < events.length; i ++) {
+			if (ignoredEvents.indexOf(i) >= 0) {
+				continue;
+			}
+
+			var event = events[i];
+			var page = [];
+			page.push(event);
+			ignoredEvents.push(i);
+			
+			that.pages.push(page);
+			continue;
+			
+			// Check the type of feature.
+			// When we can we aggregate two events on one page 
+			var feature = event.feature;
+			if (i+1 < events.count
+				|| feature === "twitter"
+				|| feature === "facebook"
+				|| feature === "linkedin"
+				|| feature === "googleplus") // TODOm: confirm feature names
+			{ 
+				for (var j = i + 1, maxSkip = 0; j < events.length && maxSkip < 5; j++, maxSkip++) {
+					if (ignoredEvents.indexOf(j) >= 0) {
+						continue;
+					}
+					ignoredEvents.push(j);
+					
+					var nextEvent = events[j];
+					var nextFeature = nextEvent.feature;
+					
+					if (nextFeature === "twitter"
+						|| nextFeature === "facebook"
+						|| nextFeature === "linkedin"
+						|| nextFeature === "googleplus") 
+					{
+						page.push(nextEvent);
+						break;
+					}
+				}
+			}
+			console.log("events on page(" + i + "):" + page.length);
+			that.pages.push(page);
+		}
+		
+		console.log("number of pages:" + that.pages.length);
+		return events;
+	}
+	
+	return that;
+}
+
 TIM.timelineController = function (spec) {
 	
 	var that = {};
@@ -546,9 +608,9 @@ TIM.timelineController = function (spec) {
       				TIM.currentPage ++;
       				
       				// If the next page has not been rendered, add it to the flipset
-      				if (TIM.currentPage < that.events.length) {
+      				if (TIM.currentPage < that.pages.length) {
       					if (that.flipSet.getCurrentIndex() === that.flipSet.getLength() - 1) {
-      						that.flipSet.push(that.makePageObj(TIM.currentPage + 1));
+      						that.flipSet.push(that.makePageObj(that.pages[TIM.currentPage + 1]));
       					}
       				}
       			});	
@@ -563,7 +625,7 @@ TIM.timelineController = function (spec) {
       				// If the previous page has not been rendered, add it to the flipset
       				if (TIM.currentPage > 0) {
       					if (that.flipSet.currentIndex === 0) {
-      						that.flipSet.unshift(that.makePageObj(TIM.currentPage - 1));
+      						that.flipSet.unshift(that.makePageObj(that.pages[TIM.currentPage - 1]));
       					}
       				}
       			});
@@ -580,7 +642,7 @@ TIM.timelineController = function (spec) {
 	};
 	
 	that.flipSet = {};
-	that.events = {};
+	that.pages = {};
 	
 	that.makeURL = function () {
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
@@ -597,11 +659,14 @@ TIM.timelineController = function (spec) {
 			var feedPages = new Array();
 			
 			try {
-				that.events = data.events || [];
 				TIM.currentPage = 0;
 				
-				feedPages.push(that.makePageObj(TIM.currentPage));
-				feedPages.push(that.makePageObj(TIM.currentPage + 1));
+				var feedController = TIM.feedController(data.events || []);
+				feedController.sort(data.events || []);
+				that.pages = feedController.pages;
+				
+				feedPages.push(that.makePageObj(that.pages[0]));
+				feedPages.push(that.makePageObj(that.pages[1]));
 				
 				// var event_viewport = (window.innerHeight ? window.innerHeight : $(window).height()) - $("header:visible").outerHeight();
 				// $("#newsfeed .ui-content").css("height", event_viewport);
@@ -618,26 +683,17 @@ TIM.timelineController = function (spec) {
 		return that;
 	};
 	
-	that.makePageObj = function (idx) {
-		if (that.events === undefined
-			|| idx < 0 
-			|| idx > that.events.length) {
-			return null;
-		}
-		
+	that.makePageObj = function (pageEvents) {
 		var obj = $("<div class='mi-content'/>");
-		if (that.events.length > 0) {
-			var numberOfFeedsPerPage = 1;
-			var firstDisplayedFeed = idx * numberOfFeedsPerPage;
-			var lastDisplayedFeed = firstDisplayedFeed + numberOfFeedsPerPage;
-			console.log(firstDisplayedFeed);
-			for (var i = firstDisplayedFeed; i < lastDisplayedFeed; i++) {
-				renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": that.events[i]});
-				obj.append(renderer.renderTimeline());
-			}
-		}
-		else {
+		if (pageEvents === undefined
+			|| pageEvents.length === 0) {
 			obj.append('<p>No Events.  Get busy and create some content!</p>');
+			return obj;
+		}
+			
+		for (var i = 0; i < pageEvents.length; i++) {
+			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
+			obj.append(renderer.renderTimeline());
 		}
 		return obj;
 	};	

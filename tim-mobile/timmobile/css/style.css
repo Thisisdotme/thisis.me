@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .mi-header { }
-.ui-content { margin-top: 43px; }
+/*.ui-content { margin-top: 43px; }*/
 
 #newsfeed .ui-content > div, #timeline .ui-content > div, #feature .ui-content > div { clear: both; }
 
@@ -22,14 +22,95 @@
 
 #feature label { font-weight: bold; }
 
+.header-logo {
+	height: 43px;
+	text-align: center;
+}
+
+.header-logo img {
+	max-height:100%;
+}
+
+#accounts h3 {
+	margin-top: 0;
+	margin-bottom: 30px;
+}
+
+#newlogin .ui-content h3 {
+	margin: 0;
+	padding: 0;
+}
+
+#login .ui-content {
+	margin-top: 43px; 
+}
+
+#login .logo {
+	text-align: center;
+	margin-bottom: 30px;
+}
+
+#login .logo img{
+	text-align: center;
+	max-height: 100%;
+	max-width: 100%;
+}
+
+#login input[type="text"], #newlogin input[type="text"] {
+	margin-bottom: 5px;
+}
+
+#login form .ui-btn, #newlogin form .ui-btn {
+	margin-top: 15px;
+}
+
+#login .newlogin {
+	margin-top: 15px;
+	margin-left: 15px;
+}
+
+/*********************************
+ * 
+ * 	OAuth Starting Page
+ * 
+ *********************************/
+.addfeature {
+	width: 250px;
+	height: 90px;
+	text-align: center;
+	margin: 0px auto;
+}
+
+.addfeature div {
+	float: left;
+}
+
+.addfeature img {
+	max-height: 100%;
+	max-width: 100%;
+}
+
+.addfeature .me-logo {
+	margin-top: 10px;
+	width: 80px;
+}
+
+.addfeature .arrow {
+/*	padding: 40px 0;*/
+	margin-top: 20px;
+	width: 60px;
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.addfeature .feature-logo {
+	width: 70px;
+}
 
 /* Newsfeed */
 
 /*.flippage-container .event .content { position: absolute; top: 50%; }*/
-.ui-content {
-	padding: 0;
-	margin: 0;
-}
+
 
 .profile {
 	width: 300px;
@@ -139,6 +220,11 @@
 	color: #000;
 }
 
+#newsfeed .ui-content, #timeline .ui-content {
+	margin: 0;
+	padding: 0;
+}
+
 .flippage-container .mi-content {
 	margin: 0;
 	padding: 0;
@@ -147,7 +233,7 @@
 	
 	width: 320px;
 
-	background-color: #fff;
+	background-color: #F9F7F7;
 }
 
 .flippage-container .event {	

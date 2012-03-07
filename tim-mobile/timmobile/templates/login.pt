@@ -1,25 +1,25 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="login" data-role="page" data-title="Login" data-url="/login" metal:fill-slot="page_content">
+	<div id="login" data-role="page" data-theme="a" data-title="Login" data-url="/login" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
 				authorName: ''
 			}
 		</script>
-	
-		<header data-role="header">
-			<h1>Login</h1>
-		</header>
 		
 		<div data-role="content">
+			<div class="logo"><img src="/img/thisisme_logo.png" alt="ThisIs Me"/></div>
+			
 			<span>${message}</span>
 			<form action="${url}" method="post">
 				<input type="hidden" name="forward" value="${forward}"/>
-				<input type="text" name="login" value="${login}"/><br/>
-				<input type="password" name="password" value="${password}"/><br/>
+				<input type="text" name="login" value="${login}"/>
+				<input type="password" name="password" value="${password}"/>
 				<input type="submit" name="form.submitted" value="Log In"/>
 			</form>
 			
-			<a href="/newlogin">Create New Login</a>
+			<div class="newlogin">
+				<a href="/newlogin">Create New Login</a>
+			</div>
 		</div><!-- /content -->
 	</div><!-- /page -->
 	

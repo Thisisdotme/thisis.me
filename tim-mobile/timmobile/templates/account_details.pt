@@ -1,8 +1,8 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="accountdetails" data-role="page" data-title="Account Details" metal:fill-slot="page_content">
+	<div id="accountdetails" data-role="page" data-theme="a" data-title="Account Details" metal:fill-slot="page_content">
 		<header data-role="header">
 			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">All Accounts</a>
-			<h1>${feature} Details</h1>
+			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="${feature}"/></div>
 		</header>
 	
 		<div data-role="content">
