@@ -8,14 +8,20 @@ import json
 from time import mktime
 
 from miapi.models import SimpleDBSession
-from mi_schema.models import Author, Feature, AuthorFeatureMap
+from mi_schema.models import Author, Feature, AuthorFeatureMap, FeatureEvent
 
 from miapi import oAuthConfig
 
 from event_collectors.collector_factory import EventCollectorFactory
 
-def createFeatureEvent(request,fe,featureName,author):
+def createFeatureEvent(dbSession,request,fe,featureName,author):
 
+  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
+
+  # determine all the shared sources -- all feature_event rows whose parent_id is this feature_event
+  for featureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
+    sourcesItems.append({'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
+  
   # collect the pieces of available content 
   content = {}
   if fe.caption:
@@ -33,8 +39,6 @@ def createFeatureEvent(request,fe,featureName,author):
     
   author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
   
-  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
-
   event = {'event_id':fe.id,
            'feature':featureName,
            'create_time':int(mktime(fe.create_time.timetuple())),
