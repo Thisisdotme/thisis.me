@@ -603,6 +603,7 @@ TIM.timelineController = function (spec) {
 	that.loaded = function () {
 		$(".flippage-container").bind("swipeup", function(){
       		console.log("swipeup");
+      		$.mobile.silentScroll(0);
       		if (that.flipSet.canGoNext()) {
       			that.flipSet.next(function() {
       				TIM.currentPage ++;
@@ -618,6 +619,7 @@ TIM.timelineController = function (spec) {
           });
 		$(".flippage-container").bind("swipedown", function(){
       		console.log("swipedown");
+      		$.mobile.silentScroll(0);
 			if (that.flipSet.canGoPrevious()) {
           		that.flipSet.previous(function() {
       				TIM.currentPage --;
@@ -651,8 +653,6 @@ TIM.timelineController = function (spec) {
 	that.contentSelector = "#timeline .ui-content"; 
 	
 	that.load = function () {
-		
-				console.log("loading");
 		$.getJSON(that.makeURL(), function (data) {
 			$(that.contentSelector).empty();
 			

@@ -1,15 +1,15 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="timeline" data-role="page" data-title="Timeline" data-url="/${author_name}/timeline" metal:fill-slot="page_content">
+	<div id="timeline" data-role="page" data-title="Timeline" data-url="/${timeline_author_name}/timeline" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
-				authorName: '${author_name}'
+				authorName: '${timeline_author_name}'
 			}
 		</script>
 		<header data-role="header">
 			<a data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
-			<h1>Timeline ${author_name}</h1>
+			<h1>Timeline ${timeline_author_name}</h1>
 			<!-- 	TODO: Change link to go to followers page.		 -->
-			<a href="/${author_name}/profile" data-role="button" class="ui-btn-right" data-prefetch>Profile</a>
+			<a href="/${timeline_author_name}/profile" data-role="button" class="ui-btn-right" data-prefetch>Profile</a>
 		</header><!-- /header -->
 	
 		<div id="timeline-content" data-role="content" class="flippage-container">

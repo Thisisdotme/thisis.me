@@ -9,9 +9,9 @@
 		<div data-role="content">
 			<div>
 				<div class="addfeature">
-					<div class="me-logo"><img src="/img/thisisme/me_gloss.png"/></div>
-					<div class="arrow"><img src="/img/icons/arrow-green-l.png" /></div>
-					<div class="feature-logo"><img src="/img/social_icons/${feature}.png" /></div>
+					<div class="logo"><img src="/img/thisisme/me_gloss.png"/></div>
+					<div class="arrow"><img src="/img/icons/arrow-grey-l.png" /></div>
+					<div class="logo"><img src="/img/social_icons/${feature}.png" /></div>
 				</div>
 			</div>
 			<div>

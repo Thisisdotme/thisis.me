@@ -23,7 +23,7 @@
 #feature label { font-weight: bold; }
 
 .header-logo {
-	height: 43px;
+	height: 40px;
 	text-align: center;
 }
 
@@ -74,38 +74,11 @@
  * 	OAuth Starting Page
  * 
  *********************************/
-.addfeature {
-	width: 250px;
-	height: 90px;
-	text-align: center;
-	margin: 0px auto;
-}
-
-.addfeature div {
-	float: left;
-}
-
-.addfeature img {
-	max-height: 100%;
-	max-width: 100%;
-}
-
-.addfeature .me-logo {
-	margin-top: 10px;
-	width: 80px;
-}
-
-.addfeature .arrow {
-/*	padding: 40px 0;*/
-	margin-top: 20px;
-	width: 60px;
-	font-weight: bold;
-	font-size: 30px;
-}
-
-.addfeature .feature-logo {
-	width: 70px;
-}
+.addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
+.addfeature div { float: left; }
+.addfeature img { margin-top: 10px; max-height: 100%;	max-width: 100%; }
+.addfeature .logo { width: 80px; }
+.addfeature .arrow { margin-top: 25px; width: 60px; font-weight: bold; font-size: 30px; }
 
 /* Newsfeed */
 

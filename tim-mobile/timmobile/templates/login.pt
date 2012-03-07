@@ -14,7 +14,7 @@
 				<input type="hidden" name="forward" value="${forward}"/>
 				<input type="text" name="login" value="${login}"/>
 				<input type="password" name="password" value="${password}"/>
-				<input type="submit" name="form.submitted" value="Log In"/>
+				<input type="submit" name="form.submitted" value="Log In" />
 			</form>
 			
 			<div class="newlogin">
