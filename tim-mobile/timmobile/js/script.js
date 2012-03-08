@@ -696,8 +696,8 @@ TIM.timelineController = function (spec) {
 				feedController.sort(data.events || []);
 				that.pages = feedController.pages;
 				
-				feedPages.push(that.makePageObj(that.pages[5]));
-				feedPages.push(that.makePageObj(that.pages[6]));
+				feedPages.push(that.makePageObj(that.pages[0]));
+				feedPages.push(that.makePageObj(that.pages[1]));
 				
 				// var event_viewport = (window.innerHeight ? window.innerHeight : $(window).height()) - $("header:visible").outerHeight();
 				// $("#newsfeed .ui-content").css("height", event_viewport);
