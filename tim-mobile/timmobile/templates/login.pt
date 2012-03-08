@@ -18,7 +18,7 @@
 			</form>
 			
 			<div class="newlogin">
-				<a href="/newlogin">Create New Login</a>
+				<a data-role="button" data-icon="plus" href="/newlogin">Create Account</a>
 			</div>
 		</div><!-- /content -->
 	</div><!-- /page -->

@@ -70,8 +70,13 @@
 }
 
 #login .newlogin {
-	margin-top: 15px;
-	margin-left: 15px;
+	text-align: right;
+	width: 70%;
+	position: absolute;
+	right: 15px;
+}
+
+#login .newlogin a {
 }
 
 /*********************************
