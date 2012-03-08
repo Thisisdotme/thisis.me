@@ -22,6 +22,11 @@
 
 #feature label { font-weight: bold; }
 
+.data-spinner {
+	max-height: 100%;
+	max-width: 100%;
+}
+
 .header-logo {
 	height: 40px;
 	text-align: center;
@@ -234,6 +239,15 @@
 	vertical-align: middle;
 	text-align: left;
 		
+}
+
+.flippage-container .event .text-content img{
+	max-height: 60%;
+	float: left;
+	
+	border: solid #000 1px;
+	margin-right: 10px;
+	margin-bottom: 10px;
 }
 
 .flippage-container .event .img-content {

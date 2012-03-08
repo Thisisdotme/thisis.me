@@ -134,7 +134,12 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 	
 	that.renderContent = function () {
-		return '<div class="text-content">' + TIM.utils.linkify(that.getCaption()) + '</div>';
+		var markup = '<div class="text-content">';
+		if (that.hasImage()) {
+			markup += '<img src="' + that.getImage() + '" alt=""/>';
+		}
+		markup += '<p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		return markup;
 	};
 	
 	that.renderEnd = function () {
@@ -235,7 +240,7 @@ TIM.eventRenderer.twitterRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
 	
 	that.renderInfo = function () {
-		var author = '<div class="author">' + that.getAuthorName() + '</div>';
+		var author = '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
 		return '<div class="info" style="display: table-cell;">' + author + '</div>';
 	}
 	return that;
@@ -875,7 +880,56 @@ $(document).bind("pagebeforechange", function (e, data) {
 });
 
 TIM.ImageController.load();
+
+/*
+ * Factory Methods for retrieving Objects from the server
+ * All of the methods are Asynchronous
+ */
+TIM.modelFactory = {};
+
+TIM.modelFactory.getAuthor = function(authorname, callback) {
+	$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '?callback=?', function(data){
+		if (callback !== undefined) {
+			callback(TIM.models.Author(data.author))
+		}
+	});
+}
+
+TIM.modelFactory.getAuthorProfile = function(authorname, callback) {
+	$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/profile?callback=?', function(data){
+		if (callback !== undefined) {
+			callback(TIM.models.Author(data))
+		}
+	});
+}
+
+/*
+ * Model Objects
+ */
+TIM.models = {};
+
+TIM.models.Author = function(author) {
+	var that = {};
+	console.log("creating author:" + author.name);
+	that.getID = function () {
+		return author.author_id || -1;
+	}
 	
+	that.getName = function () {
+		return author.name || '';
+	};
+	
+	that.getFullName = function () {
+		return author.full_name || '';
+	};
+	
+	that.getEmail = function () {
+		return author.email || '';
+	};
+	
+	return that;
+}
+
 $(document).delegate("#authors", "pageinit", function () {
 	 TIM.Resources.load(function() {
 		TIM.AuthorsController({}).load();
@@ -884,7 +938,7 @@ $(document).delegate("#authors", "pageinit", function () {
 
 $(document).delegate("#profile", "pageinit", function () {
 	 TIM.Resources.load(function() {
-		TIM.ProfileController({}).load();
+		//TIM.ProfileController({}).load();
 	 });
 });
 
