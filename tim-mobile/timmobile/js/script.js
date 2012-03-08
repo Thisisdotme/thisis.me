@@ -153,7 +153,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	 that.renderAuthorProfilePicture = function () {
 	 	 return '<div class="avatar">' +
 	 	 			'<div class="frame">' +
-						'<img src="' + that.getAuthorProfilePicture() + '" />' +
+						'<a href="/' + that.getAuthorName() + '/timeline"><img src="' + that.getAuthorProfilePicture() + '" /></a>' +
 					'</div>' +
 				'</div>';
 	 }
