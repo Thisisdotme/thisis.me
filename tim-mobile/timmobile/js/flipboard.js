@@ -47,33 +47,6 @@ FlipSet.prototype.next = function(callback) {
   
   currentFlip.beginFlipFrom();
   nextFlip.beginFlipTo();
-
-  var self = this;
-  nextFlip.immediate(nextFlip.foldBottom, function() {
-    currentFlip.foldTop();
-    nextFlip.unfold();
-    currentFlip.moveToBack();
-    nextFlip.onTransitionEnd(function() {
-      nextFlip.endFlipTo();
-      currentFlip.endFlipFrom();
-      self.isTransitioning_ = false;
-      callback();
-    });
-  });
-
-  this.currentIndex_++;
-};
-
-FlipSet.prototype.simulateNext = function(callback) {
-  if (this.isTransitioning_) return;
-  
-  this.isTransitioning_ = true;
-  var currentFlip = this.flips_[this.currentIndex_]
-  var nextFlip = this.flips_[this.currentIndex_ + 1];
-  
-  currentFlip.beginFlipFrom();
-  nextFlip.beginFlipTo();
-
   var self = this;
   nextFlip.immediate(nextFlip.foldBottom, function() {
     currentFlip.foldTop();
@@ -100,12 +73,21 @@ FlipSet.prototype.previous = function(callback) {
   currentFlip.beginFlipFrom();
   previousFlip.beginFlipTo();
   
+  // Hack to make the lower part of the page appear
+  previousFlip.bottomInnerContainerNode_.css("top", Math.floor(370/2) + 'px');
+  var t=setTimeout(function() {
+  		previousFlip.bottomInnerContainerNode_.css("top", -Math.floor(370/2) + 'px');
+  	}, 200);
+  
+  
+  // currentFlip.bottomInnerContainerNode_.hide();
   var self = this;
   previousFlip.immediate(previousFlip.foldTop, function() {
-    currentFlip.foldBottom();
+  	currentFlip.foldBottom();
     previousFlip.unfold();
     currentFlip.moveToBack();
     previousFlip.onTransitionEnd(function() {
+  	  currentFlip.bottomInnerContainerNode_.show();
       previousFlip.endFlipTo();
       currentFlip.endFlipFrom();
       self.isTransitioning_ = false;
@@ -142,6 +124,7 @@ Flip.prototype.init_ = function(width, height) {
   topContainerNode.append(node.clone());
   topContainerNode.css("width", width + 'px');
   topContainerNode.css("height", Math.floor(height/2) + 'px');
+  topContainerNode.find(".footer").css("bottom", -Math.floor(height/2) + 'px');
   
   var bottomContainerNode = $("<div class='flip-bottom-container flip-transitionable'/>");
   var bottomInnerContainerNode = $("<div class='flip-bottom-inner-container'/>");
@@ -154,8 +137,8 @@ Flip.prototype.init_ = function(width, height) {
   bottomContainerNode.css("width", width + 'px');
   bottomInnerContainerNode.css("width", width + 'px');
 
-  bottomInnerContainerNode.css("top",  -Math.floor(height/2) + 'px');
-
+  bottomInnerContainerNode.css("top", -Math.floor(height/2) + 'px');
+  
   containerNode.append(topContainerNode);
   containerNode.append(bottomContainerNode);
   

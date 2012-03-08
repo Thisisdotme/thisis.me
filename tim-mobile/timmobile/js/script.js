@@ -133,7 +133,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 	
 	that.getEventDisplaySize = function () {
-		return 'full-page';
+		return (that.hasImage() ? 'full-page' : 'half-page');
 	}
 
 	that.renderBegin = function () {
@@ -175,12 +175,19 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 	
 	that.renderInfo = function () {
-		var author = '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
-		var caption = '';
-		if (that.hasImage()) {
-			caption = '<div class="caption">' + that.getShortCaption() + '</div>';
+		return '<div class="info">' + that.renderAuthor() + that.renderCaption() + '</div>';
+	}
+	
+	that.renderAuthor = function() {
+		return '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
+	}
+	
+	that.renderCaption = function() {
+		if (that.hasImage()
+			&& that.getCaption().length <= 25) {
+			return '<div class="caption">' + that.getShortCaption() + '</div>';
 		}
-		return '<div class="info">' + author + caption + '</div>';
+		return '';
 	}
 	
 	that.renderBaseline = function () {
@@ -201,8 +208,11 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 
 	that.renderTimeline = function () {
-		that.renderFooter = function () {
-			return '<div class="footer">' +  that.renderBaseline() + '</div>';
+		that.renderAuthorProfilePicture = function () {
+			return '';
+		}
+		that.renderAuthor = function () {
+			return '';
 		}
 		
 		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
@@ -681,7 +691,6 @@ TIM.timelineController = function (spec) {
 			
 			try {
 				TIM.currentPage = 0;
-				
 				var feedController = TIM.feedController(data.events || []);
 				feedController.sort(data.events || []);
 				that.pages = feedController.pages;

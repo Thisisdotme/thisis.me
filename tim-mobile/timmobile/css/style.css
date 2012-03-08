@@ -206,19 +206,21 @@
 .flippage-container .mi-content {
 	margin: 0;
 	padding: 0;
-	display:table-cell; 
-	vertical-align:bottom;
 	
-	width: 320px;
+	width: 100%;
 
 	background-color: #F9F7F7;
 }
 
 .flippage-container .event {	
-	min-height: 100%; 
-/*    height: auto !important; /*Cause footer to stick to bottom in IE 6*/*/
     height: 100%; 
-    margin: 0 auto; /*Allow for footer height*/
+    margin: 0; /*Allow for footer height*/
+}
+
+
+.flippage-container .event .content {
+	width: 100%;
+	text-align: center;
 }
 
 /*	Feature specific configurations  */
@@ -227,11 +229,16 @@
 
 
 /*.flippage-container .event.full-page { height: 369px;}*/
-.flippage-container .event.full-page .content { height: 258px; }
-.flippage-container .event .content {
+.flippage-container .event.half-page .content { 
+	height: 258px; 
+	max-height:258px; 
 	display: table-cell;
 	vertical-align: middle;
-	text-align: left;
+}
+.flippage-container .event.full-page .content { 
+	height: 258px; 
+	max-height:258px; 
+	float: left; 
 }
 
 .flippage-container .event .content .inner-text {
@@ -247,14 +254,15 @@
 }
 
 .flippage-container .event .content .inner-image img {
-	max-height: 100%;
+	max-height: 228px;
 	max-width: 100%;
 }
 
 .flippage-container .event .footer {
-	height: 35%;
 	padding: 20px 5px 5px 5px;
-	margin:0;
+	margin: 0;
+	bottom: 0;
+	position: absolute;
 }
 
 .flippage-container .event .footer .info {
@@ -294,7 +302,7 @@
 }
 
 .flippage-container .event .footer .avatar {
-	height: 50px;
+	height: 35px;
 }
 
 .flippage-container .event .footer .avatar .frame {
