@@ -56,6 +56,7 @@ def main(global_config, **settings):
   config.add_route('timeline', '/{authorname}/timeline')
   
   config.add_route('profile', '/{authorname}/profile')
+  config.add_route('followers', '/followers')
   
   #
   # oauth setup paths
