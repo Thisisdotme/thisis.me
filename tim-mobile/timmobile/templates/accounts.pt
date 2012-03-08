@@ -15,7 +15,7 @@
 				<li><a href="/oauth/googleplus">Google+</a></li>
 				<li><a href="/oauth/instagram">Instagram</a></li>
 				<li><a href="/oauth/foursquare">Foursquare</a></li>
-				<li><a href="/oauth/flickr">Flickr</a></li>
+<!--				<li><a href="/oauth/flickr">Flickr</a></li>-->
 			</ul>
 		</div><!-- /content -->
 	</div><!-- /page -->
