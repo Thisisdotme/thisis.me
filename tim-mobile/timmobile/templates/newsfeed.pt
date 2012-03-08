@@ -7,9 +7,9 @@
 		</script>
 		<script type="text/javascript">if (window.location.hash == '#_=_')window.location.hash = '';</script>
 		<header data-role="header">
-			<!-- 	TODO: Change link to go to followers page.		 -->
 			<a href="/accounts" data-role="button" data-icon="gear" data-iconpos="notext">Accounts</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="News Feed"/></div>
+			<a href="/followers" data-role="button" data-icon="grid" data-iconpos="notext">Followers</a>
 		</header><!-- /header -->
 	
 		<div id="newsfeed-content" data-role="content" class="flippage-container">
