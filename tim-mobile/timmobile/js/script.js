@@ -51,6 +51,9 @@ TIM.eventRenderer = {};
 TIM.eventRenderer.baseRenderer = function (spec) {
 
 	var that = {};
+	
+	that.displaysAuthorInfo = true;
+
 
 	that.getAuthorName = function () {
 		return spec.event.author.name || '';
@@ -95,6 +98,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getCaption = function () {
 		return spec.event.content.label || '';
 	};
+	
+	that.getData = function () {
+		return spec.event.content.data || '';
+	};
 		
 	that.getShortCaption = function (shortCaptionLength) {
 		if (shortCaptionLength === undefined) {
@@ -134,11 +141,17 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	};
 	
 	that.renderContent = function () {
-		var markup = '<div class="text-content">';
+		var markup = '<div class="content">';
 		if (that.hasImage()) {
-			markup += '<img src="' + that.getImage() + '" alt=""/>';
+			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
-		markup += '<p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		else {
+		
+		}
+		if (that.getCaption().length > 25) {
+			markup += '<div class="inner-text"><p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		}
+		markup += '</div>';
 		return markup;
 	};
 	
@@ -163,7 +176,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.renderInfo = function () {
 		var author = '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
-		var caption = '<div class="caption">' + that.getShortCaption() + '</div>';
+		var caption = '';
+		if (that.hasImage()) {
+			caption = '<div class="caption">' + that.getShortCaption() + '</div>';
+		}
 		return '<div class="info">' + author + caption + '</div>';
 	}
 	
@@ -177,13 +193,23 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		}
 		else {
 			featureIcons = '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
-		}					
+		}	
+						
 							
 		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
 		return '<div class="baseline">' + featureIcons + timeago + '</div>';
 	}
 
 	that.renderTimeline = function () {
+		that.renderFooter = function () {
+			return '<div class="footer">' +  that.renderBaseline() + '</div>';
+		}
+		
+		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
+	};
+	
+	that.renderNewsfeed = function () {
+
 		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
@@ -217,11 +243,6 @@ TIM.eventRenderer.googleplusRenderer = function (spec) {
 TIM.eventRenderer.instagramRenderer = function (spec) {
 
 	var that = TIM.eventRenderer.baseRenderer(spec);
-
-	that.renderContent = function () {
-		return '<div class="img-content"><img src="' + this.getImage() + '" /></div>';
-	};
-
 	return that;
 };
 
@@ -238,11 +259,6 @@ TIM.eventRenderer.meRenderer = function (spec) {
 
 TIM.eventRenderer.twitterRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
-	
-	that.renderInfo = function () {
-		var author = '<div class="author"><a href="/' + that.getAuthorName() + '/timeline">' + that.getAuthorFullName() + '</a></div>';
-		return '<div class="info" style="display: table-cell;">' + author + '</div>';
-	}
 	return that;
 };
 
@@ -714,6 +730,22 @@ TIM.newsfeedController = function (spec) {
 	}
 	
 	that.contentSelector = "#newsfeed .ui-content"; 
+	
+	that.makePageObj = function (pageEvents) {
+		var obj = $("<div class='mi-content'/>");
+		if (pageEvents === undefined
+			|| pageEvents.length === 0) {
+			obj.append('<p>No Events.  Get busy and create some content!</p>');
+			return obj;
+		}
+			
+		for (var i = 0; i < pageEvents.length; i++) {
+			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
+			obj.append(renderer.renderNewsfeed());
+		}
+		return obj;
+	};	
+	return that;
 	
 	return that;
 };

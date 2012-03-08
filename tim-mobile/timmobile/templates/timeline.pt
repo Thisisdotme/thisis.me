@@ -11,7 +11,7 @@
 			$(document).delegate("#timeline", "pageinit", function() {
 				TIM.modelFactory.getAuthor('${author_name}', function(author) {
 					TIM.currentTimeline.author = author;
-					$("header:visible h1").text(author.getFullName() + '\'s Timeline');
+					$("header:visible h1").text(author.getFullName());
 				});
 			});
 		</script>
