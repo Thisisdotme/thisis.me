@@ -59,7 +59,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		return spec.event.author.name || '';
 	};
 	
-	that.getAuthorFullName = function () {
+	that.getAuthorFullName = function () {		
+		if (!spec.event.author.full_name) {
+			return spec.event.author.name;
+		}
 		return spec.event.author.full_name || '';
 	};
 	
@@ -142,14 +145,12 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.renderContent = function () {
 		var markup = '<div class="content">';
-		if (that.hasImage()) {
+		var hasImage = that.hasImage();
+		if (hasImage) {
 			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
-		else {
-		
-		}
-		if (that.getCaption().length > 25) {
-			markup += '<div class="inner-text"><p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		if (!hasImage || that.getCaption().length > 25) {
+				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
 		}
 		markup += '</div>';
 		return markup;
@@ -695,8 +696,8 @@ TIM.timelineController = function (spec) {
 				feedController.sort(data.events || []);
 				that.pages = feedController.pages;
 				
-				feedPages.push(that.makePageObj(that.pages[0]));
-				feedPages.push(that.makePageObj(that.pages[1]));
+				feedPages.push(that.makePageObj(that.pages[5]));
+				feedPages.push(that.makePageObj(that.pages[6]));
 				
 				// var event_viewport = (window.innerHeight ? window.innerHeight : $(window).height()) - $("header:visible").outerHeight();
 				// $("#newsfeed .ui-content").css("height", event_viewport);
@@ -961,6 +962,9 @@ TIM.models.Author = function(author) {
 	};
 	
 	that.getFullName = function () {
+		if (!author.full_name) {
+			return author.name;
+		}
 		return author.full_name || '';
 	};
 	
