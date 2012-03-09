@@ -543,29 +543,22 @@ TIM.AuthorsController = function (spec) {
 TIM.followersController = function (spec) {
 	return {
 		load: function () {
-			var al = $("#followers ul:first");
+			var al = $("#followers fieldset:first");
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
 				var authors = data.authors || [];
 				al.empty();
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
-					al.append('<li data-role="fieldcontain"><label for="' + flipId +
-							'">' + (item.full_name || item.author_name) + '</label><select name="slider" id="' + flipId +
-							'" data-role="slider"><option value="no">Off</option><option value="yes">On' +
-							'</option></select></li>');
+					al.append('<input type="checkbox" name="' + flipId + '" id="' + flipId +
+							'" class="custom" /><label for="' + flipId + '">' +
+							(item.full_name || item.author_name) + '</label>');
 					var url = TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 							'/groups/follow/members/' + item.author_name;
 					$('#' + flipId).bind( "change", function(event, ui) {
-						if (this.selectedIndex == 1) {	// add person
-							$.ajax({
-								type: "PUT",
-								url: url
-							});
+						if (this.checked) {	// add person
+							$.ajax({ type: "PUT", url: url });
 						} else {
-							$.ajax({
-								type: "DELETE",
-								url: url
-							});
+							$.ajax({ type: "DELETE", url: url });
 						}
 					});
 				});
@@ -574,10 +567,8 @@ TIM.followersController = function (spec) {
 				var authors = data.members || [];
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
-					$('#' + flipId)[0].selectedIndex = 1;
-					//$('#'+flipId).slider('refresh');
+					$('#' + flipId).prop("checked",true);
 				});
-				al.listview("refresh");
 				al.trigger("create");
 			});
 		}
