@@ -202,7 +202,6 @@
 .flippage-container .mi-content {
 	margin: 0;
 	padding: 0;
-	
 	width: 100%;
 
 	background-color: #F9F7F7;
@@ -214,14 +213,13 @@
    	position: relative;
 }
 
-
-.flippage-container .event .content {
-	width: 100%;
-}
-
 .flippage-container .event.half-page {
 	height: 50%;
 	position: relative;
+}
+
+.flippage-container .event .content {
+	width: 100%;
 }
 
 .flippage-container .event.half-page:first-child {
@@ -235,23 +233,25 @@
 
 
 /*.flippage-container .event.full-page { height: 369px;}*/
-.flippage-container .event.half-page .content { 
-	height: 100px;  
+.flippage-container .event.half-page .content {
+	padding-top: 10px; 
+	height: 90px;  
 	display: table-cell;
 	vertical-align: middle;
 }
 #timeline .flippage-container .event.half-page .content {
-	height: 132px; 
-	font-size: 20px;
-	font-weight: bold;
+	padding-top: 10px; 
+	height: 122px; 
 }
 
 .flippage-container .event.full-page .content {
-	height: 300px; 
+	padding-top: 10px; 
+	height: 290px; 
 	float: left; 
 }
 #timeline .flippage-container .event.full-page .content {
-	height: 320px; 
+	padding-top: 10px; 
+	height: 310px; 
 }
 
 .flippage-container .event .content .inner-text {
