@@ -220,6 +220,13 @@ class AuthorGroupBasics(object):
     return responseJSON
 
 
+  # OPTIONS /v1/authors/{authorname}/groups/{groupname}/members/{member}
+  # preflight cross-domain requests
+  @view_config(route_name='author.groups.members.CRUD', request_method='OPTIONS', renderer='jsonp', http_cache=0)
+  def preflightGroupMemberHndlr(self):
+    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT, DELETE'
+
   # PUT /v1/authors/{authorname}/groups/{groupname}/members/{member}
   #  
   @view_config(route_name='author.groups.members.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
@@ -229,6 +236,9 @@ class AuthorGroupBasics(object):
     groupName = self.request.matchdict['groupname']
     memberName = self.request.matchdict['member']
   
+    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT'
+
     try:
       authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
     except NoResultFound:
@@ -279,6 +289,9 @@ class AuthorGroupBasics(object):
     groupName = self.request.matchdict['groupname']
     memberName = self.request.matchdict['member']
   
+    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'DELETE'
+
     try:
       authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
     except NoResultFound:

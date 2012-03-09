@@ -526,6 +526,21 @@ TIM.followersController = function (spec) {
 							'">' + (item.full_name || item.author_name) + '</label><select name="slider" id="' + flipId +
 							'" data-role="slider"><option value="no">Off</option><option value="yes">On' +
 							'</option></select></li>');
+					var url = TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
+							'/groups/follow/members/' + item.author_name;
+					$('#' + flipId).bind( "change", function(event, ui) {
+						if (this.selectedIndex == 1) {	// add person
+							$.ajax({
+								type: "PUT",
+								url: url
+							});
+						} else {
+							$.ajax({
+								type: "DELETE",
+								url: url
+							});
+						}
+					});
 				});
 			});
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/follow/members?callback=?', function (data) {
