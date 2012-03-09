@@ -1,6 +1,6 @@
 <metal:index use-macro="load: master_template.html">
 	<div id="oauth" data-role="page" data-title="Accounts" data-theme="a" metal:fill-slot="page_content">
-		<header data-role="header">
+		<header data-role="header" data-position="fixed">
 			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">All Accounts</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="${feature}"/></div>
 <!-- 			<h1>${feature}</h1> -->

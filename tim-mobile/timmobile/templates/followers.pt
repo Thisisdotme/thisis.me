@@ -6,7 +6,7 @@
 			}
 		</script>
 
-		<header data-role="header">
+		<header data-role="header" data-position="fixed">
 			<a href="/newsfeed" data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="ThisIs Me"/></div>
 		</header>

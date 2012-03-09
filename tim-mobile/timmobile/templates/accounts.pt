@@ -1,6 +1,6 @@
 <metal:index use-macro="load: master_template.html">
 	<div id="accounts" data-role="page" data-title="Accounts" data-theme="a" metal:fill-slot="page_content">
-		<header data-role="header">
+		<header data-role="header" data-position="fixed">
 			<a href="/newsfeed" data-role="button" data-icon="home" data-iconpos="notext">Back</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="Accounts"/></div>
 			<a href="/logout" data-role="button">Logout</a>

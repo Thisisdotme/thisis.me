@@ -15,7 +15,7 @@
 				});
 			});
 		</script>
-		<header data-role="header">
+		<header data-role="header" data-position="fixed">
 			<a data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
 			<h1><img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/></h1>
 			<!-- 	TODO: Change link to go to followers page.		 -->

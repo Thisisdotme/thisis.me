@@ -1,6 +1,6 @@
 <metal:index use-macro="load: master_template.html">
 	<div id="newlogin"  data-theme="a" data-role="page" data-title="New Login" metal:fill-slot="page_content">
-		<header data-role="header">
+		<header data-role="header" data-position="fixed">
 			<a href="/login" data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="ThisIs Me"/></div>
 		</header>
