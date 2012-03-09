@@ -516,16 +516,24 @@ TIM.AuthorsController = function (spec) {
 TIM.followersController = function (spec) {
 	return {
 		load: function () {
+			var al = $("#followers ul:first");
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
-				var al = $("#followers ul:first"),
-						authors = data.authors || [];
+				var authors = data.authors || [];
 				al.empty();
 				$.each(authors, function (idx, item) {
-					var flipId = "flip-" + item.author_name;
+					var flipId = "flip_" + item.author_name;
 					al.append('<li data-role="fieldcontain"><label for="' + flipId +
 							'">' + (item.full_name || item.author_name) + '</label><select name="slider" id="' + flipId +
 							'" data-role="slider"><option value="no">Off</option><option value="yes">On' +
 							'</option></select></li>');
+				});
+			});
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/follow/members?callback=?', function (data) {
+				var authors = data.members || [];
+				$.each(authors, function (idx, item) {
+					var flipId = "flip_" + item.author_name;
+					$('#' + flipId)[0].selectedIndex = 1;
+					//$('#'+flipId).slider('refresh');
 				});
 				al.listview("refresh");
 				al.trigger("create");

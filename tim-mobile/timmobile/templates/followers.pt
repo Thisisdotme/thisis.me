@@ -1,6 +1,10 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="followers"  data-theme="a" data-role="page" data-title="Followers" metal:fill-slot="page_content">
+		<script type="text/javascript">
+			TIM.pageInfo = {
+				authorName: '${author_name}'
+			}
+		</script>
 
 		<header data-role="header">
 			<a href="/newsfeed" data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
@@ -8,7 +12,7 @@
 		</header>
 
 		<div data-role="content">
-			<ul id="followersList" data-role="listview">
+			<ul id="followersList" data-role="listview" data-inset="true">
 				<!--
 				<li data-role="fieldcontain">
 					<label for="flip-a">Flip switch:</label>
