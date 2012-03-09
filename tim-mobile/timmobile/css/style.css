@@ -225,7 +225,6 @@
 
 .flippage-container .event .content {
 	width: 100%;
-	text-align: center;
 }
 
 /*	Feature specific configurations  */
@@ -240,20 +239,45 @@
 	display: table-cell;
 	vertical-align: middle;
 }
-.flippage-container .event.full-page .content { 
-	height: 258px; 
-	max-height:258px; 
+
+.flippage-container .event.full-page .content {
+	height: 300px; 
 	float: left; 
+	position: relative;
+}
+#timeline .flippage-container .event.full-page .content {
+	height: 320px; 
 }
 
 .flippage-container .event .content .inner-text {
 	float: left;
 	padding: 10px 10px 10px 10px;
 	text-align: left;
+	margin: 0 auto;
+}
+
+.flippage-container .event.full-page .content .inner-text {
+	padding-bottom: 0;
+}
+
+.flippage-container .event .content .inner-text p {
+	padding: 0;
+	margin: 0;
+	
+	overflow:hidden;
+	display: -webkit-box; 
+    -webkit-box-orient:vertical; 
+    -webkit-line-clamp:3;
+/*	max-height: 56px;*/
+}
+#timeline .flippage-container .event .content .inner-text p {
+	-webkit-line-clamp:4;
 }
 
 .flippage-container .event .content .inner-image {
-	padding: 15px 0;
+	padding: 5px 0;
+	max-height: 228px;
+	height: 228px;
 	
 	background-color: black;
 	text-align: center;
@@ -262,10 +286,12 @@
 .flippage-container .event .content .inner-image img {
 	max-height: 228px;
 	max-width: 100%;
+	min-height: 50%;
+	min-width: 50%;
 }
 
 .flippage-container .event .footer {
-	padding: 20px 5px 5px 5px;
+	padding: 5px 5px 5px 5px;
 	margin: 0;
 	bottom: 0;
 	position: absolute;
@@ -308,7 +334,7 @@
 }
 
 .flippage-container .event .footer .avatar {
-	height: 35px;
+	height: 50px;
 }
 
 .flippage-container .event .footer .avatar .frame {

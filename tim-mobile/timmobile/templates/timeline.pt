@@ -22,7 +22,7 @@
 			<a href="/${author_name}/profile" data-role="button" class="ui-btn-right">Profile</a>
 		</header><!-- /header -->
 	
-		<div id="timeline-content" data-role="content" class="flippage-container">
+		<div id="timeline-content" data-role="content" class="flippage-container long-page">
 		</div><!-- /content -->
 	</div><!-- /page -->
 
