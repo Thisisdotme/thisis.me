@@ -122,11 +122,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getImage = function () {
 		return spec.event.content.photo_url || '';
 	}
-
-	that.getData = function () {
-		return spec.event.content.data || '';
-	};
-
+	
 	that.getAuxillaryData = function () {
 		return spec.event.content.auxillary_data || '';
 	};
@@ -149,8 +145,12 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		if (hasImage) {
 			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
-		if (!hasImage || that.getCaption().length > 25) {
-				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		var data = that.getData();
+		if (data.length === 0) {
+			data = that.getCaption();
+		}
+		if (!hasImage || data.length > 25) {
+				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
 		}
 		markup += '</div>';
 		return markup;

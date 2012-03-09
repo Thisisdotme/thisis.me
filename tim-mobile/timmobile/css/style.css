@@ -230,6 +230,7 @@
 
 .flippage-container .event.half-page {
 	height: 50%;
+	position: relative;
 }
 
 .flippage-container .event.half-page:first-child {
@@ -307,6 +308,10 @@
 	margin: 0;
 	bottom: 0;
 	position: absolute;
+}
+
+.flippage-container .event.half-page:first-child .footer {
+/*	bottom: 50%;*/
 }
 
 .flippage-container .event .footer .info {
