@@ -1,5 +1,5 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="profile" data-role="page" data-title="Profile" data-url="/${author_name}/profile" metal:fill-slot="page_content">
+	<div id="profile" data-role="page" data-theme="a" data-title="Profile" data-url="/${author_name}/profile" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
 				authorName: '${author_name}'
@@ -9,22 +9,26 @@
 			TIM.currentTimeline.author = {};
 			
 			$(document).delegate("#profile", "pageinit", function () {
+				var $profile = $("#profile .profile");
+				var $profileImg = $profile.find(".avatar img")
+				var $title = $profile.find(".title");
+				var $link = $profile.find(".link a");
+				var $description = $profile.find(".description");
+				var $firstEmail = $profile.find(".meta-data .email");
+				var $secondEmail = $profile.find(".meta-data .semail");
+				var $phone = $profile.find(".meta-data .phone");
+			
 		 		TIM.modelFactory.getAuthor('${author_name}', function(author) {
 					TIM.currentTimeline.author = author;
-					$("header:visible h1").text(author.getFullName() + '\'s Timeline');
+					$("header:visible h1").text(author.getFullName());
 					
-					var $profile = $("#profile .profile");
-					var $profileImg = $profile.find(".avatar img")
-					var $title = $profile.find(".title");
-					var $link = $profile.find(".link a");
-					var $description = $profile.find(".description");
-					var $firstEmail = $profile.find(".meta-data .email");
-					var $secondEmail = $profile.find(".meta-data .semail");
-					var $phone = $profile.find(".meta-data .phone");
-					
-					$title.text(author.getFullName());
 					$firstEmail.text(author.getEmail());
 					$secondEmail.html("<hr/>" + author.getEmail());
+				});
+				TIM.modelFactory.getAuthorProfile('${author_name}', function(profile) {
+					$title.text(profile.getHeadline());
+					$profileImg.css("src", profile.getPictureUrl());
+					$description.html(profile.getSummary());
 				});
 			});
 

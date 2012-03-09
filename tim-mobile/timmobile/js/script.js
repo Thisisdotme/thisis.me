@@ -2,21 +2,25 @@
 //	TIM.errorHandler - global handler for exceptions
 //
 TIM.errorHandler = function () {
+	
 	return {
 		handle: function (e) {
-			alert("Please excuse us!  thisis.me encountered an unexpected error.  We're very sorry for the inconvenience.\n\n" +
-							(e.name || 'Unknown name') + " - " +
-							(e.message || 'Unknown message') +
+			alert("Please excuse us!  thisis.me encountered an unexpected error.  We're very sorry for the inconvenience.\n\n" + 
+							(e.name || 'Unknown name') + " - " + 
+							(e.message || 'Unknown message') + 
 							(e.getSourceLine === 'function' ? " - lineNo: " + e.getSourceLine() : ''));
 		}
 	};
+
 }();
 
 //
-// General utility functions
+// Genenral utility functions
 //
 TIM.utils = function () {
+	
 	return {
+		
 		linkify: function (text) {
 
 			// http://, https://, ftp://
@@ -35,6 +39,7 @@ TIM.utils = function () {
 			return replacedText;
 		}
 	};
+
 }();
 
 //
@@ -48,11 +53,12 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.displaysAuthorInfo = true;
 
+
 	that.getAuthorName = function () {
 		return spec.event.author.name || '';
 	};
 	
-	that.getAuthorFullName = function () {
+	that.getAuthorFullName = function () {		
 		if (!spec.event.author.full_name) {
 			return spec.event.author.name;
 		}
@@ -115,11 +121,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	that.getImage = function () {
 		return spec.event.content.photo_url || '';
 	}
-
-	that.getData = function () {
-		return spec.event.content.data || '';
-	};
-
+	
 	that.getAuxillaryData = function () {
 		return spec.event.content.auxillary_data || '';
 	};
@@ -132,8 +134,8 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		return (that.hasImage() ? 'full-page' : 'half-page');
 	}
 
-	that.renderBegin = function () {
-		return '<div class="event ' + that.getEventDisplaySize() + '">';
+	that.renderBegin = function (obj) {
+		return '<div class="event ' + obj.style + '">';
 	};
 	
 	that.renderContent = function () {
@@ -142,8 +144,12 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		if (hasImage) {
 			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
-		if (!hasImage || that.getCaption().length > 25) {
-				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(that.getCaption()) + '</p></div>';
+		var data = that.getData();
+		if (data.length === 0) {
+			data = that.getCaption();
+		}
+		if (!hasImage || data.length > 25) {
+				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
 		}
 		markup += '</div>';
 		return markup;
@@ -156,15 +162,14 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	// that.renderUserInfo = function () {
 		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
 	// }
-	
-	that.renderAuthorProfilePicture = function () {
-		return '<div class="avatar">' +
-					'<div class="frame">' +
+// 	
+	 that.renderAuthorProfilePicture = function () {
+	 	 return '<div class="avatar">' +
+	 	 			'<div class="frame">' +
 						'<a href="/' + that.getAuthorName() + '/timeline"><img src="' + that.getAuthorProfilePicture() + '" /></a>' +
 					'</div>' +
 				'</div>';
-	}
-	
+	 }
 	that.renderFooter = function () {
 		return '<div class="footer">' + that.renderAuthorProfilePicture() + that.renderInfo() +  that.renderBaseline() + '</div>';
 	}
@@ -195,24 +200,26 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		}
 		else {
 			featureIcons = '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
-		}
-		
+		}	
+						
+							
 		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
 		return '<div class="baseline">' + featureIcons + timeago + '</div>';
 	}
 
-	that.renderTimeline = function () {
+	that.renderTimeline = function (style) {
 		that.renderAuthorProfilePicture = function () {
 			return '';
 		}
 		that.renderAuthor = function () {
 			return '';
 		}
-		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
+		
+		return $(that.renderBegin(style) + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
-	that.renderNewsfeed = function () {
-		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
+	that.renderNewsfeed = function (style) {
+		return $(that.renderBegin(style) + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
 	that.renderDetail = function () {
@@ -243,12 +250,14 @@ TIM.eventRenderer.googleplusRenderer = function (spec) {
 };
 
 TIM.eventRenderer.instagramRenderer = function (spec) {
+
 	var that = TIM.eventRenderer.baseRenderer(spec);
 	return that;
 };
 
 TIM.eventRenderer.linkedinRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
+	
 	return that;
 };
 
@@ -273,6 +282,7 @@ TIM.eventRenderer.youtubeRenderer = function (spec) {
 };
 
 TIM.eventRenderer.rendererFactory = function () {
+
 	var dict = {"facebook": TIM.eventRenderer.facebookRenderer,
 							"flickr": TIM.eventRenderer.flickrRenderer,
 							"foursquare": TIM.eventRenderer.foursquareRenderer,
@@ -288,7 +298,8 @@ TIM.eventRenderer.rendererFactory = function () {
 			renderer;
 	
 	that.create = function (spec) {
-		renderer = dict[spec.event.feature || ''];
+
+		renderer = dict[spec.event.feature || ''];		
 		if (renderer === undefined) {
 			throw {name: "FeatureEventTypeError", message: "Unrecognized feature name: " + spec.event.feature};
 		}
@@ -297,16 +308,19 @@ TIM.eventRenderer.rendererFactory = function () {
 	};
 	
 	return that;
+
 }();
 
 
 //
 // TIM.feature and associated components.  Defines the feature controller
-// infrastructure for controlling and rendering
+// infrastructure for controlling and rendering 
 //
 TIM.feature = {};
 
+
 TIM.feature.baseController = function (spec) {
+
 	var that = {};
 
 	that.getContainer = function () {
@@ -320,10 +334,13 @@ TIM.feature.baseController = function (spec) {
 	return that;
 };
 
+
 TIM.feature.eventsController = function (spec) {
+
 	var that = TIM.feature.baseController(spec);
 
 	that.load = function () {
+
 		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features/' + spec.feature + '/events?callback=?', function (data) {
 			var tl = that.getContainer(),
 					events,
@@ -340,9 +357,12 @@ TIM.feature.eventsController = function (spec) {
 				tl.append('<p>No Events.  Get busy and create some content!</p>')
 			}
 		});
+		
 	};
-	return that;
+
+	return that;	
 };
+
 
 TIM.feature.facebookController = function (spec) {
 	var that = TIM.feature.eventsController(spec);
@@ -375,10 +395,11 @@ TIM.feature.linkedinController = function (spec) {
 };
 
 TIM.feature.meController = function (spec) {
+
 	var that = TIM.feature.baseController(spec);
 
 	var buildProfile = function (data) {
-		var profile = '';
+		var profile = ''; 
 
 		if (data.picture_url) {
 			profile = profile + '<img src="' + data.picture_url + '" />';
@@ -462,7 +483,9 @@ TIM.feature.youtubeController = function (spec) {
 	return that;
 };
 
+
 TIM.feature.controllerFactory = function () {
+
 	var dict = {"facebook": TIM.feature.facebookController,
 							"flickr": TIM.feature.flickrController,
 							"foursquare": TIM.feature.foursquareController,
@@ -478,7 +501,8 @@ TIM.feature.controllerFactory = function () {
 			controller;
 	
 	that.create = function (spec) {
-		controller = dict[spec.feature || ''];
+
+		controller = dict[spec.feature || ''];		
 		if (controller === undefined) {
 			throw {name: "FeatureTypeError", message: "Unrecognized feature name: " + spec.feature};
 		}
@@ -487,6 +511,7 @@ TIM.feature.controllerFactory = function () {
 	};
 	
 	return that;
+
 }();
 
 
@@ -494,7 +519,9 @@ TIM.feature.controllerFactory = function () {
 //	AuthorController
 //
 TIM.AuthorsController = function (spec) {
+	
 	return {
+	
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
 				var al = $("#authors ul:first"),
@@ -562,7 +589,9 @@ TIM.followersController = function (spec) {
 //	Profile
 //
 TIM.ProfileController = function (spec) {
+	
 	return {
+		
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '?callback=?', function (data) {
 				var author = data.author || {};
@@ -578,6 +607,7 @@ TIM.ProfileController = function (spec) {
 				$title.text(author.fullname);
 				$firstEmail.text(author.email);
 				$secondEmail.html("<hr/>" + author.email);
+				
 			});
 		}
 	};
@@ -590,61 +620,48 @@ TIM.feedController = function (events) {
 	that.events = events || [];
 	that.pages = [];
 	
-	that.sort = function (events) {
-		var ignoredEvents = [];
+	that.sort = function () {
+		var events = that.events.concat();
 		console.log("number of events:" + events.length);
-		for (var i = 0; i < events.length; i ++) {
-			if (ignoredEvents.indexOf(i) >= 0) {
-				continue;
-			}
-
-			var event = events[i];
-			var page = [];
-			page.push(event);
-			ignoredEvents.push(i);
+		var t = 1;
+		while (events.length > 0) {
+			var event = events.shift();
+			var page = [event];
 			
+			/*	//	Uncomment to force one event/page 
 			that.pages.push(page);
 			continue;
+			// */
 			
 			// Check the type of feature.
-			// When we can we aggregate two events on one page
-			var feature = event.feature;
-			if (i+1 < events.count
-				|| feature === "twitter"
-				|| feature === "facebook"
-				|| feature === "linkedin"
-				|| feature === "googleplus") // TODOm: confirm feature names
-			{
-				for (var j = i + 1, maxSkip = 0; j < events.length && maxSkip < 5; j++, maxSkip++) {
-					if (ignoredEvents.indexOf(j) >= 0) {
-						continue;
-					}
-					ignoredEvents.push(j);
-					
-					var nextEvent = events[j];
-					var nextFeature = nextEvent.feature;
-					
-					if (nextFeature === "twitter"
-						|| nextFeature === "facebook"
-						|| nextFeature === "linkedin"
-						|| nextFeature === "googleplus")
-					{
-						page.push(nextEvent);
+			// When we can we aggregate two events on one page 
+			var len = events.length;
+			
+			if (len > 0
+				&& event.content.photo_url === undefined) {
+				for (var i = 0, maxSkips = 0; i < len && maxSkips < 5; i++, maxSkips++) {
+					var pastEvent = events[i];
+					if (pastEvent.content.photo_url === undefined) {
+						page.push(pastEvent);
+						events.splice(i, 1);
 						break;
 					}
 				}
 			}
-			console.log("events on page(" + i + "):" + page.length);
+			console.log("events on page(" + t + "):" + page.length);
 			that.pages.push(page);
+			t++;
 		}
 		
 		console.log("number of pages:" + that.pages.length);
 		return events;
 	}
+	
 	return that;
 }
 
 TIM.timelineController = function (spec) {
+	
 	var that = {};
 
 	that.loaded = function () {
@@ -661,7 +678,7 @@ TIM.timelineController = function (spec) {
       						that.flipSet.push(that.makePageObj(that.pages[TIM.currentPage + 1]));
       					}
       				}
-      			});
+      			});	
       		}
           });
 		$(".flippage-container").bind("swipedown", function(){
@@ -697,7 +714,7 @@ TIM.timelineController = function (spec) {
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
 	}
 	
-	that.contentSelector = "#timeline .ui-content";
+	that.contentSelector = "#timeline .ui-content"; 
 	
 	that.load = function () {
 		$.getJSON(that.makeURL(), function (data) {
@@ -737,23 +754,26 @@ TIM.timelineController = function (spec) {
 			return obj;
 		}
 			
+		var len = pageEvents.length;
+		var style = {"style": (len === 2 ? "half-page" : "full-page")};
 		for (var i = 0; i < pageEvents.length; i++) {
 			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
-			obj.append(renderer.renderTimeline());
+			obj.append(renderer.renderTimeline(style));
 		}
 		return obj;
-	};
+	};	
 	return that;
+
 };
 
-TIM.newsfeedController = function (spec) {
+TIM.newsfeedController = function (spec) {	
 	var that = TIM.timelineController(spec);
 	that.makeURL = function () {
 		var followGroup = "follow";
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/' + followGroup + '/highlights?callback=?';
 	}
 	
-	that.contentSelector = "#newsfeed .ui-content";
+	that.contentSelector = "#newsfeed .ui-content"; 
 	
 	that.makePageObj = function (pageEvents) {
 		var obj = $("<div class='mi-content'/>");
@@ -763,17 +783,25 @@ TIM.newsfeedController = function (spec) {
 			return obj;
 		}
 			
+		var len = pageEvents.length;
+		var style = {"style": (len === 2 ? "half-page" : "full-page")};
 		for (var i = 0; i < pageEvents.length; i++) {
 			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
-			obj.append(renderer.renderNewsfeed());
+			obj.append(renderer.renderNewsfeed(style));
 		}
 		return obj;
-	};
+	};	
+	return that;
+	
 	return that;
 };
 
+
+
 TIM.AuthorFeaturesController = function (spec) {
+
 	return {
+	
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features?callback=?', function (data) {
 				var fl = $("#authorFeatures .ui-content"),
@@ -791,8 +819,11 @@ TIM.AuthorFeaturesController = function (spec) {
 };
 
 TIM.DetailController = function (spec) {
+
 	return {
+	
 		load: function () {
+
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events/' + TIM.globals.eventId + '?callback=?', function (data) {
 				var dt = $("#detail .ui-content"),
 						event;
@@ -804,11 +835,14 @@ TIM.DetailController = function (spec) {
 	};
 };
 
+
 TIM.ImageController = function (spec) {
+	
 	var isLoaded = false;
 	var isLoading = false;
 	var images = {};
 	return {
+	
 		load: function (callback) {
 			if (isLoaded) {
 				if (callback !== undefined) callback(this);
@@ -851,7 +885,9 @@ TIM.ImageController = function (spec) {
 		getLResMono: function (featureName) {
 			return images[featureName].mono_icon_low_res;
 		}
+		
 	};
+
 }();
 
 TIM.Resources = function() {
@@ -865,7 +901,7 @@ TIM.Resources = function() {
 	
 	var queue = [];
 	
-	return {
+	return {	
 		load: function (callback) {
 			if (isLoaded) {
 				if (callback !== undefined) callback();
@@ -879,7 +915,7 @@ TIM.Resources = function() {
 			
 			isLoading = true;
 			for (var i = 0; i < availableResources.length; i++) {
-				availableResources[i].load(this.didLoadResource);
+				availableResources[i].load(this.didLoadResource);	
 			}
 		},
 		
@@ -890,7 +926,7 @@ TIM.Resources = function() {
 				isLoaded = true;
 				
 				for (var i = 0; i < queue.length; i++) {
-					queue[i]();
+					queue[i]();	
 				}
 			}
 		}
@@ -900,6 +936,7 @@ TIM.Resources = function() {
 
 //Listen for any attempts to call changePage().
 $(document).bind("pagebeforechange", function (e, data) {
+
 	// if we're navigating to the timeline for a user set the username global
 	if (typeof data.toPage === "string") {
 		var u = $.mobile.path.parseUrl(data.toPage);
@@ -916,6 +953,7 @@ $(document).bind("pagebeforechange", function (e, data) {
 				TIM.globals.eventId = u.filename;
 			}
 		}
+			
 	}
 });
 
@@ -936,9 +974,9 @@ TIM.modelFactory.getAuthor = function(authorname, callback) {
 }
 
 TIM.modelFactory.getAuthorProfile = function(authorname, callback) {
-	$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/profile?callback=?', function(data){
+	$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/features/linkedin/profile?callback=?', function(data){
 		if (callback !== undefined) {
-			callback(TIM.models.Author(data))
+			callback(TIM.models.AuthorLinkedinProfile(data))
 		}
 	});
 }
@@ -969,6 +1007,52 @@ TIM.models.Author = function(author) {
 	that.getEmail = function () {
 		return author.email || '';
 	};
+	
+	return that;
+}
+
+TIM.models.AuthorLinkedinProfile = function(author) {
+	var that = {};
+	
+	that.getFirstName = function () {
+		return author.first_name || '';
+	};
+	
+	that.getLastName = function () {
+		return author.last_name || '';
+	};
+	
+	that.getHeadline = function() {
+		return author.headline || '';
+	}
+	
+	that.getIndustry = function() {
+		return author.industry;
+	}
+	
+	that.getLocation = function() {
+		return author.location;
+	}
+	
+	that.getName = function() {
+		return author.name;
+	}
+	
+	that.getPictureUrl = function() {
+		return author.picture_url;
+	}
+	
+	that.getProfileUrl = function() {
+		return author.public_profile_url;
+	}
+	
+	that.getSpecialties = function() {
+		return author.specialties;
+	}
+	
+	that.getSummary = function() {
+		return author.summary;
+	}
 	
 	return that;
 }
