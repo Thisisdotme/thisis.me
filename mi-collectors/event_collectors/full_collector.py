@@ -153,8 +153,10 @@ class FullCollector(object):
 
       # clean s3
       bucket = self.s3Connection.get_bucket(self.s3Bucket)
-      for key in bucket.get_all_keys(prefix='%s/%s/' % (afm.author_id,self.getFeatureName())):
-        bucket.delete_key(key)
+      # refined
+      for jsonType in ['refined','raw']:
+        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,afm.author_id,self.getFeatureName())):
+          bucket.delete_key(key)
 
   @abstractmethod
   def getFeatureName(self):
@@ -187,7 +189,9 @@ class FullCollector(object):
 
   def endTraversal(self,state,authorName):
 
+    # before uploading to s3 it's important to close the files to flush the buffers 
     state.mapper.close()
+    state.raw_mapper.close();
 
     # copy new mapper file to s3 if the file exists and has a non-zero size
     #
@@ -251,12 +255,6 @@ class FullCollector(object):
           state.mostRecentEventTimestamp = eventTimestamp
 
         #
-        # output to s3
-        #
-        state.writer.writerow([state.authorId,json.dumps(event.toJSON(),sort_keys=True)])
-        state.raw_writer.writerow([state.authorId,json.dumps(event.raw_json,sort_keys=True)])
-        
-        #
         # output to MySQL
         #
         url = event.getEventURL()
@@ -274,6 +272,18 @@ class FullCollector(object):
         state.dbSession.add(featureEventJSON)
         state.dbSession.flush()
 
+        #
+        # output to s3
+        #
+        # refined
+        state.writer.writerow([state.authorId,json.dumps(event.toJSON(),sort_keys=True)])
+        
+        # raw
+        rawObj = event.toMetadataObj()
+        rawObj['id'] = featureEvent.id
+        rawObj['raw_json'] = event.raw_json
+        state.raw_writer.writerow([state.authorId,json.dumps(rawObj)])
+        
         state.totalAccepted = state.totalAccepted + 1
      
     # check if we're within the lookback window

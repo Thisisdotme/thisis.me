@@ -29,7 +29,7 @@ class Author(Base):
     return "<Author('%s','%s','%s','%s')>" % (self.author_name, self.email, self.full_name, self.password)
 
   def toJSONObject(self):
-    return {'author_id':self.id,'author_name':self.author_name,'authorname':self.author_name,'email':self.email,'full_name':self.full_name,'fullname':self.full_name}
+    return {'author_id':self.id,'author_name':self.author_name,'email':self.email,'full_name':self.full_name}
 
 
 '''
@@ -209,6 +209,7 @@ class FeatureEvent(Base):
   __tablename__ = 'feature_event'
   __table_args__ = (UniqueConstraint('author_feature_map_id', 'event_id', name='uidx_feature_event_1'),
                     Index('idx_feature_event_2', "author_feature_map_id", "create_time"),
+                    Index('idx_feature_event_3', "parent_id", "create_time"),
                     {})
   
   id = Column(Integer, primary_key=True)

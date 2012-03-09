@@ -6,8 +6,8 @@ Created on Feb 13, 2012
 
 import json
 from datetime import datetime
+from time import mktime
 from abc import abstractmethod
-
 
 '''
 '''
@@ -48,8 +48,8 @@ class Event(object):
       output type, create_time
     '''
     json["event_id"] = self.event_id
-    json["user_id"] = self.user_id
-    json["create_time"] = self.getEventTime().isoformat()
+    json["author_id"] = self.user_id
+    json["create_time"] = str(mktime(self.getEventTime().timetuple()))[:-2]
     json["type"] = self.getType()
     json["origin"] = self.getEventOrigin()
     json["caption"] = self.getEventCaption()
@@ -59,6 +59,24 @@ class Event(object):
     photo = self.getEventPhoto()
     if photo:
       json["photo"] = photo
+  
+    return json
+
+  def toMetadataObj(self):
+    propertyDict = {}
+    return self.toMetadataObjFields(propertyDict)
+    
+  @abstractmethod
+  def toMetadataObjFields(self,json):
+    '''
+      output type, create_time
+    '''
+    json["event_id"] = self.event_id
+    json["author_id"] = self.user_id
+    json["create_time"] = str(mktime(self.getEventTime().timetuple()))[:-2]
+    json["type"] = self.getType()
+    
+    return json
   
 
   def getEventId(self):

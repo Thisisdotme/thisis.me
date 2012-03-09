@@ -98,6 +98,10 @@ class AuthorQuery(object):
       self.request.response.status_int = 404;
       return {'error':'unknown author %s' % authorName}  
   
-    fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==author.id).one()
+    try:
+      fe,featureName = dbSession.query(FeatureEvent,Feature.feature_name).join(AuthorFeatureMap, AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).join(Feature,AuthorFeatureMap.feature_id==Feature.id).filter(FeatureEvent.id==featureEventID).filter(AuthorFeatureMap.author_id==author.id).one()
+    except:
+      self.request.response.status_int = 404;
+      return {'error':'unknown event id %d' % featureEventID}  
   
     return {'event':createFeatureEvent(dbSession,self.request,fe,featureName,author)}

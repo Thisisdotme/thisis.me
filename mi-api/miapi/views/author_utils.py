@@ -19,8 +19,8 @@ def createFeatureEvent(dbSession,request,fe,featureName,author):
   sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
 
   # determine all the shared sources -- all feature_event rows whose parent_id is this feature_event
-  for featureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
-    sourcesItems.append({'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
+  for sharedFeatureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
+    sourcesItems.append({'feature_name':sharedFeatureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
   
   # collect the pieces of available content 
   content = {}
