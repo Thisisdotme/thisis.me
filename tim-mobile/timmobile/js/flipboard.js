@@ -74,9 +74,9 @@ FlipSet.prototype.previous = function(callback) {
   previousFlip.beginFlipTo();
   
   // Hack to make the lower part of the page appear
-  previousFlip.bottomInnerContainerNode_.css("top", Math.floor(370/2) + 'px');
+  previousFlip.bottomInnerContainerNode_.css("top", Math.floor(this.height/2) + 'px');
   var t=setTimeout(function() {
-  		previousFlip.bottomInnerContainerNode_.css("top", -Math.floor(370/2) + 'px');
+  		previousFlip.bottomInnerContainerNode_.css("top", -Math.floor(this.height/2) + 'px');
   	}, 200);
   
   
