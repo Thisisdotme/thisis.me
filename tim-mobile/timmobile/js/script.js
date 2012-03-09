@@ -44,7 +44,6 @@ TIM.utils = function () {
 TIM.eventRenderer = {};
 
 TIM.eventRenderer.baseRenderer = function (spec) {
-
 	var that = {};
 	
 	that.displaysAuthorInfo = true;
@@ -510,6 +509,32 @@ TIM.AuthorsController = function (spec) {
 	};
 };
 
+
+//
+// Followers
+//
+TIM.followersController = function (spec) {
+	return {
+		load: function () {
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
+				var al = $("#followers ul:first"),
+						authors = data.authors || [];
+				al.empty();
+				$.each(authors, function (idx, item) {
+					var flipId = "flip-" + item.author_name;
+					al.append('<li data-role="fieldcontain"><label for="' + flipId +
+							'">' + (item.full_name || item.author_name) + '</label><select name="slider" id="' + flipId +
+							'" data-role="slider"><option value="no">Off</option><option value="yes">On' +
+							'</option></select></li>');
+				});
+				al.listview("refresh");
+				al.trigger("create");
+			});
+		}
+	};
+};
+
+
 //
 //	Profile
 //
@@ -928,6 +953,12 @@ TIM.models.Author = function(author) {
 $(document).delegate("#authors", "pageinit", function () {
 	 TIM.Resources.load(function() {
 		TIM.AuthorsController({}).load();
+	 });
+});
+
+$(document).delegate("#followers", "pageinit", function () {
+	 TIM.Resources.load(function() {
+		TIM.followersController({}).load();
 	 });
 });
 
