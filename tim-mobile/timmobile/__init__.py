@@ -36,10 +36,10 @@ def main(global_config, **settings):
                         authorization_policy=authz_policy,
                         session_factory=session_factory)
 
-  config.add_static_view('static', 'timmobile:static', cache_max_age=None)
-  config.add_static_view('img', 'timmobile:img', cache_max_age=None)
-  config.add_static_view('css', 'timmobile:css', cache_max_age=None)
-  config.add_static_view('js', 'timmobile:js', cache_max_age=None)
+  config.add_static_view('static', 'timmobile:static', cache_max_age=0)
+  config.add_static_view('img', 'timmobile:img', cache_max_age=0)
+  config.add_static_view('css', 'timmobile:css', cache_max_age=0)
+  config.add_static_view('js', 'timmobile:js', cache_max_age=0)
 
   # define routes
   #
