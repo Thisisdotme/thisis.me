@@ -2,25 +2,21 @@
 //	TIM.errorHandler - global handler for exceptions
 //
 TIM.errorHandler = function () {
-	
 	return {
 		handle: function (e) {
-			alert("Please excuse us!  thisis.me encountered an unexpected error.  We're very sorry for the inconvenience.\n\n" + 
-							(e.name || 'Unknown name') + " - " + 
-							(e.message || 'Unknown message') + 
+			alert("Please excuse us!  thisis.me encountered an unexpected error.  We're very sorry for the inconvenience.\n\n" +
+							(e.name || 'Unknown name') + " - " +
+							(e.message || 'Unknown message') +
 							(e.getSourceLine === 'function' ? " - lineNo: " + e.getSourceLine() : ''));
 		}
 	};
-
 }();
 
 //
-// Genenral utility functions
+// General utility functions
 //
 TIM.utils = function () {
-	
 	return {
-		
 		linkify: function (text) {
 
 			// http://, https://, ftp://
@@ -39,7 +35,6 @@ TIM.utils = function () {
 			return replacedText;
 		}
 	};
-
 }();
 
 //
@@ -54,12 +49,11 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.displaysAuthorInfo = true;
 
-
 	that.getAuthorName = function () {
 		return spec.event.author.name || '';
 	};
 	
-	that.getAuthorFullName = function () {		
+	that.getAuthorFullName = function () {
 		if (!spec.event.author.full_name) {
 			return spec.event.author.name;
 		}
@@ -163,14 +157,15 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	// that.renderUserInfo = function () {
 		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
 	// }
-// 	
-	 that.renderAuthorProfilePicture = function () {
-	 	 return '<div class="avatar">' +
-	 	 			'<div class="frame">' +
+	
+	that.renderAuthorProfilePicture = function () {
+		return '<div class="avatar">' +
+					'<div class="frame">' +
 						'<a href="/' + that.getAuthorName() + '/timeline"><img src="' + that.getAuthorProfilePicture() + '" /></a>' +
 					'</div>' +
 				'</div>';
-	 }
+	}
+	
 	that.renderFooter = function () {
 		return '<div class="footer">' + that.renderAuthorProfilePicture() + that.renderInfo() +  that.renderBaseline() + '</div>';
 	}
@@ -201,9 +196,8 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		}
 		else {
 			featureIcons = '<img src="' + TIM.ImageController.getLResColor(that.getFeatureName()) + '" />';
-		}	
-						
-							
+		}
+		
 		var timeago = 		'<div class="fuzzy-time">' + that.getFuzzyCreateTime() + '</div>';
 		return '<div class="baseline">' + featureIcons + timeago + '</div>';
 	}
@@ -215,12 +209,10 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		that.renderAuthor = function () {
 			return '';
 		}
-		
 		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
 	that.renderNewsfeed = function () {
-
 		return $(that.renderBegin() + that.renderContent() + that.renderFooter() + that.renderEnd());
 	};
 	
@@ -252,14 +244,12 @@ TIM.eventRenderer.googleplusRenderer = function (spec) {
 };
 
 TIM.eventRenderer.instagramRenderer = function (spec) {
-
 	var that = TIM.eventRenderer.baseRenderer(spec);
 	return that;
 };
 
 TIM.eventRenderer.linkedinRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
-	
 	return that;
 };
 
@@ -284,7 +274,6 @@ TIM.eventRenderer.youtubeRenderer = function (spec) {
 };
 
 TIM.eventRenderer.rendererFactory = function () {
-
 	var dict = {"facebook": TIM.eventRenderer.facebookRenderer,
 							"flickr": TIM.eventRenderer.flickrRenderer,
 							"foursquare": TIM.eventRenderer.foursquareRenderer,
@@ -300,8 +289,7 @@ TIM.eventRenderer.rendererFactory = function () {
 			renderer;
 	
 	that.create = function (spec) {
-
-		renderer = dict[spec.event.feature || ''];		
+		renderer = dict[spec.event.feature || ''];
 		if (renderer === undefined) {
 			throw {name: "FeatureEventTypeError", message: "Unrecognized feature name: " + spec.event.feature};
 		}
@@ -310,19 +298,16 @@ TIM.eventRenderer.rendererFactory = function () {
 	};
 	
 	return that;
-
 }();
 
 
 //
 // TIM.feature and associated components.  Defines the feature controller
-// infrastructure for controlling and rendering 
+// infrastructure for controlling and rendering
 //
 TIM.feature = {};
 
-
 TIM.feature.baseController = function (spec) {
-
 	var that = {};
 
 	that.getContainer = function () {
@@ -336,13 +321,10 @@ TIM.feature.baseController = function (spec) {
 	return that;
 };
 
-
 TIM.feature.eventsController = function (spec) {
-
 	var that = TIM.feature.baseController(spec);
 
 	that.load = function () {
-
 		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features/' + spec.feature + '/events?callback=?', function (data) {
 			var tl = that.getContainer(),
 					events,
@@ -359,12 +341,9 @@ TIM.feature.eventsController = function (spec) {
 				tl.append('<p>No Events.  Get busy and create some content!</p>')
 			}
 		});
-		
 	};
-
-	return that;	
+	return that;
 };
-
 
 TIM.feature.facebookController = function (spec) {
 	var that = TIM.feature.eventsController(spec);
@@ -397,11 +376,10 @@ TIM.feature.linkedinController = function (spec) {
 };
 
 TIM.feature.meController = function (spec) {
-
 	var that = TIM.feature.baseController(spec);
 
 	var buildProfile = function (data) {
-		var profile = ''; 
+		var profile = '';
 
 		if (data.picture_url) {
 			profile = profile + '<img src="' + data.picture_url + '" />';
@@ -485,9 +463,7 @@ TIM.feature.youtubeController = function (spec) {
 	return that;
 };
 
-
 TIM.feature.controllerFactory = function () {
-
 	var dict = {"facebook": TIM.feature.facebookController,
 							"flickr": TIM.feature.flickrController,
 							"foursquare": TIM.feature.foursquareController,
@@ -503,8 +479,7 @@ TIM.feature.controllerFactory = function () {
 			controller;
 	
 	that.create = function (spec) {
-
-		controller = dict[spec.feature || ''];		
+		controller = dict[spec.feature || ''];
 		if (controller === undefined) {
 			throw {name: "FeatureTypeError", message: "Unrecognized feature name: " + spec.feature};
 		}
@@ -513,7 +488,6 @@ TIM.feature.controllerFactory = function () {
 	};
 	
 	return that;
-
 }();
 
 
@@ -521,9 +495,7 @@ TIM.feature.controllerFactory = function () {
 //	AuthorController
 //
 TIM.AuthorsController = function (spec) {
-	
 	return {
-	
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
 				var al = $("#authors ul:first"),
@@ -542,9 +514,7 @@ TIM.AuthorsController = function (spec) {
 //	Profile
 //
 TIM.ProfileController = function (spec) {
-	
 	return {
-		
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '?callback=?', function (data) {
 				var author = data.author || {};
@@ -560,7 +530,6 @@ TIM.ProfileController = function (spec) {
 				$title.text(author.fullname);
 				$firstEmail.text(author.email);
 				$secondEmail.html("<hr/>" + author.email);
-				
 			});
 		}
 	};
@@ -590,14 +559,14 @@ TIM.feedController = function (events) {
 			continue;
 			
 			// Check the type of feature.
-			// When we can we aggregate two events on one page 
+			// When we can we aggregate two events on one page
 			var feature = event.feature;
 			if (i+1 < events.count
 				|| feature === "twitter"
 				|| feature === "facebook"
 				|| feature === "linkedin"
 				|| feature === "googleplus") // TODOm: confirm feature names
-			{ 
+			{
 				for (var j = i + 1, maxSkip = 0; j < events.length && maxSkip < 5; j++, maxSkip++) {
 					if (ignoredEvents.indexOf(j) >= 0) {
 						continue;
@@ -610,7 +579,7 @@ TIM.feedController = function (events) {
 					if (nextFeature === "twitter"
 						|| nextFeature === "facebook"
 						|| nextFeature === "linkedin"
-						|| nextFeature === "googleplus") 
+						|| nextFeature === "googleplus")
 					{
 						page.push(nextEvent);
 						break;
@@ -624,12 +593,10 @@ TIM.feedController = function (events) {
 		console.log("number of pages:" + that.pages.length);
 		return events;
 	}
-	
 	return that;
 }
 
 TIM.timelineController = function (spec) {
-	
 	var that = {};
 
 	that.loaded = function () {
@@ -646,7 +613,7 @@ TIM.timelineController = function (spec) {
       						that.flipSet.push(that.makePageObj(that.pages[TIM.currentPage + 1]));
       					}
       				}
-      			});	
+      			});
       		}
           });
 		$(".flippage-container").bind("swipedown", function(){
@@ -682,7 +649,7 @@ TIM.timelineController = function (spec) {
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
 	}
 	
-	that.contentSelector = "#timeline .ui-content"; 
+	that.contentSelector = "#timeline .ui-content";
 	
 	that.load = function () {
 		$.getJSON(that.makeURL(), function (data) {
@@ -727,19 +694,18 @@ TIM.timelineController = function (spec) {
 			obj.append(renderer.renderTimeline());
 		}
 		return obj;
-	};	
+	};
 	return that;
-
 };
 
-TIM.newsfeedController = function (spec) {	
+TIM.newsfeedController = function (spec) {
 	var that = TIM.timelineController(spec);
 	that.makeURL = function () {
 		var followGroup = "follow";
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/' + followGroup + '/highlights?callback=?';
 	}
 	
-	that.contentSelector = "#newsfeed .ui-content"; 
+	that.contentSelector = "#newsfeed .ui-content";
 	
 	that.makePageObj = function (pageEvents) {
 		var obj = $("<div class='mi-content'/>");
@@ -754,18 +720,12 @@ TIM.newsfeedController = function (spec) {
 			obj.append(renderer.renderNewsfeed());
 		}
 		return obj;
-	};	
-	return that;
-	
+	};
 	return that;
 };
 
-
-
 TIM.AuthorFeaturesController = function (spec) {
-
 	return {
-	
 		load: function () {
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/features?callback=?', function (data) {
 				var fl = $("#authorFeatures .ui-content"),
@@ -783,11 +743,8 @@ TIM.AuthorFeaturesController = function (spec) {
 };
 
 TIM.DetailController = function (spec) {
-
 	return {
-	
 		load: function () {
-
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/events/' + TIM.globals.eventId + '?callback=?', function (data) {
 				var dt = $("#detail .ui-content"),
 						event;
@@ -799,14 +756,11 @@ TIM.DetailController = function (spec) {
 	};
 };
 
-
 TIM.ImageController = function (spec) {
-	
 	var isLoaded = false;
 	var isLoading = false;
 	var images = {};
 	return {
-	
 		load: function (callback) {
 			if (isLoaded) {
 				if (callback !== undefined) callback(this);
@@ -849,9 +803,7 @@ TIM.ImageController = function (spec) {
 		getLResMono: function (featureName) {
 			return images[featureName].mono_icon_low_res;
 		}
-		
 	};
-
 }();
 
 TIM.Resources = function() {
@@ -865,7 +817,7 @@ TIM.Resources = function() {
 	
 	var queue = [];
 	
-	return {	
+	return {
 		load: function (callback) {
 			if (isLoaded) {
 				if (callback !== undefined) callback();
@@ -879,7 +831,7 @@ TIM.Resources = function() {
 			
 			isLoading = true;
 			for (var i = 0; i < availableResources.length; i++) {
-				availableResources[i].load(this.didLoadResource);	
+				availableResources[i].load(this.didLoadResource);
 			}
 		},
 		
@@ -890,7 +842,7 @@ TIM.Resources = function() {
 				isLoaded = true;
 				
 				for (var i = 0; i < queue.length; i++) {
-					queue[i]();	
+					queue[i]();
 				}
 			}
 		}
@@ -900,7 +852,6 @@ TIM.Resources = function() {
 
 //Listen for any attempts to call changePage().
 $(document).bind("pagebeforechange", function (e, data) {
-
 	// if we're navigating to the timeline for a user set the username global
 	if (typeof data.toPage === "string") {
 		var u = $.mobile.path.parseUrl(data.toPage);
@@ -917,7 +868,6 @@ $(document).bind("pagebeforechange", function (e, data) {
 				TIM.globals.eventId = u.filename;
 			}
 		}
-			
 	}
 });
 
