@@ -71,7 +71,7 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 
 	that.getEventId = function () {
-		return spec.event.feature_event_id;
+		return spec.event.event_id;
 	};
 
 	that.getFeatureName = function () {
