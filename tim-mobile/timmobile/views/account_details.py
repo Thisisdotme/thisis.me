@@ -33,9 +33,22 @@ def postAccount(request):
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
   
-  if featureName == 'facebook':
-    del(request.session['facebook_access_token'])
+  
+  if featureName == 'googleplus':
+    del(request.session['googlePlus_access_token'], request.session['googlePlus_user_id'])
+  elif featureName == 'facebook':
+    del(request.session['facebook_access_token'], request.session['facebook_user_id'])
   elif featureName == 'flickr':
-     del(request.session['flickr_access_token'])
+    del(request.session['flickr_access_token'])
+  elif featureName == 'foursquare':
+    del(request.session['foursquare_access_token'], request.session['foursquare_user_id'])
+  elif featureName == 'instagram':
+    del(request.session['instagram_access_token'])
+  elif featureName == 'linkedin':
+    del(request.session['linkedin_access_token'], request.session['linkedin_access_token_secret'])
+  elif featureName == 'twitter':
+    del(request.session['twitter_access_token'], request.session['twitter_access_token_secret'])
+  else:
+    print("No account cleanup set up for feature: " + featureName)
      
   return HTTPFound(request.route_url('accounts'))
