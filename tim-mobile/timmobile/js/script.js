@@ -145,12 +145,13 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
 		var data = that.getData();
-		if (data.length === 0) {
-			data = that.getCaption();
-		}
-		if (!hasImage || data.length > 25) {
+		if (data.length > 0) {
+			// data = that.getCaption();
 				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
 		}
+		// if (!hasImage || data.length > 25) {
+				// markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
+		// }
 		markup += '</div>';
 		return markup;
 	};
@@ -183,9 +184,9 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	}
 	
 	that.renderCaption = function() {
-		if (that.hasImage()
-			&& that.getCaption().length <= 25) {
-			return '<div class="caption">' + that.getShortCaption() + '</div>';
+		var caption = that.getCaption();
+		if (caption.length > 0) {
+			return '<div class="caption">' + caption + '</div>';
 		}
 		return '';
 	}
