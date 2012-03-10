@@ -2,7 +2,7 @@
 	<div id="followers"  data-theme="a" data-role="page" data-title="Followers" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
-				authorName: '${author_name}'
+			authorName: '${author_name}'
 			}
 		</script>
 
@@ -16,7 +16,7 @@
 				<fieldset data-role="controlgroup">
 					<!--
 					<input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" />
-					<label for="checkbox-1">Yes</label>
+					<label for="checkbox-1"><a href="/newsfeed" onclick="arguments[0].stopPropagation();">Yes</a></label>
 					-->
 				</fieldset>
 			</div>

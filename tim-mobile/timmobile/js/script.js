@@ -541,6 +541,7 @@ TIM.AuthorsController = function (spec) {
 // Followers
 //
 TIM.followersController = function (spec) {
+	//return {load: function() {}};	// for debugging
 	return {
 		load: function () {
 			var al = $("#followers fieldset:first");
@@ -550,8 +551,9 @@ TIM.followersController = function (spec) {
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
 					al.append('<input type="checkbox" name="' + flipId + '" id="' + flipId +
-							'" class="custom" /><label for="' + flipId + '">' +
-							(item.full_name || item.author_name) + '</label>');
+							'" class="custom" /><label for="' + flipId + '"><a href="/' +
+							item.author_name + '/timeline" onclick="arguments[0].stopPropagation()">' + 
+							(item.full_name || item.author_name) + '</a></label>');
 					var url = TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 							'/groups/follow/members/' + item.author_name;
 					$('#' + flipId).bind( "change", function(event, ui) {
