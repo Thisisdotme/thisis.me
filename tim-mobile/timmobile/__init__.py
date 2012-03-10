@@ -64,15 +64,15 @@ def main(global_config, **settings):
 
   # twitter oauth
   config.add_route('twitter','/oauth/twitter')
-  config.add_route('twitter_callback', '/twitter_callback')
+  config.add_route('twitter_callback', '/oauth/twitter/callback')
 
   # facebook auth
   config.add_route('facebook','/oauth/facebook')
-  config.add_route('facebook_callback', '/facebook_callback')
+  config.add_route('facebook_callback', '/oauth/facebook/callback')
   
   # linkedin auth
   config.add_route('linkedin','/oauth/linkedin')
-  config.add_route('linkedin_callback', '/linkedin_callback')
+  config.add_route('linkedin_callback', '/oauth/linkedin/callback')
  
   # google+ auth
   config.add_route('googleplus','/oauth/googleplus')
@@ -80,15 +80,15 @@ def main(global_config, **settings):
 
   # instagram auth
   config.add_route('instagram','/oauth/instagram')
-  config.add_route('instagram_callback', '/instagram_callback')
+  config.add_route('instagram_callback', '/oauth/instagram/callback')
 
   # flickr auth
   config.add_route('flickr','/oauth/flickr')
-  config.add_route('flickr_callback', '/flickr_callback')
+  config.add_route('flickr_callback', '/oauth/flickr/callback')
 
   # foursquare auth
   config.add_route('foursquare','/oauth/foursquare')
-  config.add_route('foursquare_callback', '/foursquare_callback')
+  config.add_route('foursquare_callback', '/oauth/foursquare/callback')
   
   # generic oauth
   config.add_route('oauth','/oauth/{featurename}')

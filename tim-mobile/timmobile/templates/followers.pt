@@ -12,17 +12,14 @@
 		</header>
 
 		<div data-role="content">
-			<ul id="followersList" data-role="listview" data-inset="true">
-				<!--
-				<li data-role="fieldcontain">
-					<label for="flip-a">Flip switch:</label>
-					<select name="slider" id="flip-a" data-role="slider">
-						<option value="no">Off</option>
-						<option value="yes">On</option>
-					</select> 
-				</li>
-				-->
-			</ul>
+			<div data-role="fieldcontain">
+				<fieldset data-role="controlgroup">
+					<!--
+					<input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" />
+					<label for="checkbox-1">Yes</label>
+					-->
+				</fieldset>
+			</div>
 		</div><!-- /content -->
 
 	</div><!-- /page -->
