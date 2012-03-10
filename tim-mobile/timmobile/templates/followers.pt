@@ -16,7 +16,7 @@
 				<fieldset data-role="controlgroup">
 					<!--
 					<input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" />
-					<label for="checkbox-1"><a href="/newsfeed" onclick="arguments[0].stopPropagation();">Yes</a></label>
+					<label for="checkbox-1"><a href="#" onclick="arguments[0].stopPropagation(); window.location='/newsfeed'">Yes</a></label>
 					-->
 				</fieldset>
 			</div>

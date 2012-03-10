@@ -550,10 +550,10 @@ TIM.followersController = function (spec) {
 				al.empty();
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
-					al.append('<input type="checkbox" name="' + flipId + '" id="' + flipId +
-							'" class="custom" /><label for="' + flipId + '"><a href="/' +
-							item.author_name + '/timeline" onclick="arguments[0].stopPropagation()">' + 
-							(item.full_name || item.author_name) + '</a></label>');
+					al.append('<input type="checkbox" name="' + flipId + '" id="' + flipId + '"' +
+							'class="custom" /><label for="' + flipId + '"><a href="/' +
+							item.author_name + '/timeline">' + (item.full_name || item.author_name) +
+							'</a></label>');
 					var url = TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 							'/groups/follow/members/' + item.author_name;
 					$('#' + flipId).bind( "change", function(event, ui) {
@@ -564,8 +564,15 @@ TIM.followersController = function (spec) {
 						}
 					});
 				});
+				var stop = function(event) { event.stopPropagation(); }
+				al.find("a").bind('tap', stop);
+				// also don't make the button appear clicked
+				al.find("a").bind('touchstart', stop);
+				al.find("a").bind('click', stop);	// for non-device testing
+				al.find("a").bind('mousedown', stop);
 			});
-			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/follow/members?callback=?', function (data) {
+			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
+					'/groups/follow/members?callback=?', function (data) {
 				var authors = data.members || [];
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
