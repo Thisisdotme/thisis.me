@@ -967,10 +967,18 @@ TIM.modelFactory.getAuthor = function(authorname, callback) {
 }
 
 TIM.modelFactory.getAuthorProfile = function(authorname, callback) {
-	$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/features/linkedin/profile?callback=?', function(data){
-		if (callback !== undefined) {
-			callback(TIM.models.AuthorLinkedinProfile(data))
-		}
+	$.jsonp({
+		"url": TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/features/linkedin/profile?callback=?',
+		"success": function(data){
+			if (callback !== undefined) {
+				callback(TIM.models.AuthorLinkedinProfile(data))
+			}
+		},
+		"error": function(data, msg){
+			if (callback !== undefined) {
+				callback(TIM.models.Profile({}))
+			}
+		}	
 	});
 }
 
@@ -1004,47 +1012,148 @@ TIM.models.Author = function(author) {
 	return that;
 }
 
-TIM.models.AuthorLinkedinProfile = function(author) {
+TIM.models.Profile = function() {
 	var that = {};
 	
 	that.getFirstName = function () {
-		return author.first_name || '';
+		return '';
 	};
 	
 	that.getLastName = function () {
-		return author.last_name || '';
+		return '';
 	};
 	
 	that.getHeadline = function() {
-		return author.headline || '';
+		return 'Founder and CEO';
 	}
 	
 	that.getIndustry = function() {
-		return author.industry;
+		return '';
 	}
 	
 	that.getLocation = function() {
-		return author.location;
+		return '';
 	}
 	
 	that.getName = function() {
-		return author.name;
+		return '';
 	}
 	
 	that.getPictureUrl = function() {
-		return author.picture_url;
+		return 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif';
 	}
 	
 	that.getProfileUrl = function() {
-		return author.public_profile_url;
+		return '';
+	}
+	
+	that.getProfileIcon = function() {
+		return '/img/social_icons/linkedin.png';
 	}
 	
 	that.getSpecialties = function() {
-		return author.specialties;
+		return '';
 	}
 	
 	that.getSummary = function() {
-		return author.summary;
+		return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+	}
+	
+	return that;
+}
+
+TIM.models.ProfileDefaults = {};
+
+TIM.models.ProfileDefaults.getFirstName = function () {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getLastName = function () {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getHeadline = function() {
+	return 'Founder and CEO';
+};
+
+TIM.models.ProfileDefaults.getIndustry = function() {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getLocation = function() {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getName = function() {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getPictureUrl = function() {
+	return 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif';
+};
+
+TIM.models.ProfileDefaults.getProfileUrl = function() {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getProfileIcon = function() {
+	return '/img/social_icons/linkedin.png';
+};
+
+TIM.models.ProfileDefaults.getSpecialties = function() {
+	return '';
+};
+
+TIM.models.ProfileDefaults.getSummary = function() {
+	return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+};
+
+TIM.models.AuthorLinkedinProfile = function(author) {
+	var that = TIM.models.Profile();
+	var defaults = TIM.models.ProfileDefaults;
+	
+	that.getFirstName = function () {
+		return author.first_name || defaults.getFirstName();
+	};
+	
+	that.getLastName = function () {
+		return author.last_name || defaults.getLastName();
+	};
+	
+	that.getHeadline = function() {
+		return author.headline || defaults.getHeadline();
+	}
+	
+	that.getIndustry = function() {
+		return author.industry || defaults.getIndustry();
+	}
+	
+	that.getLocation = function() {
+		return author.location || defaults.getLocation();
+	}
+	
+	that.getName = function() {
+		return author.name || defaults.getName();
+	}
+	
+	that.getPictureUrl = function() {
+		return author.picture_url || defaults.getPictureUrl;
+	}
+	
+	that.getProfileUrl = function() {
+		return author.public_profile_url || defaults.getProfileUrl();
+	}
+	
+	that.getProfileIcon = function() {
+		return '/img/social_icons/linkedin.png';
+	}
+	
+	that.getSpecialties = function() {
+		return author.specialties || defaults.getSpecialties;
+	}
+	
+	that.getSummary = function() {
+		return author.summary || defaults.getSummary();
 	}
 	
 	return that;

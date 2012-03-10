@@ -14,26 +14,38 @@
 				var $title = $profile.find(".title");
 				var $link = $profile.find(".link a");
 				var $description = $profile.find(".description");
-				var $firstEmail = $profile.find(".meta-data .email");
-				var $secondEmail = $profile.find(".meta-data .semail");
+				var $linkedinUrl = $profile.find(".meta-data .profile-url a");
+				var $linkedinImg = $profile.find(".meta-data .profile-url img");
+				var $email = $profile.find(".meta-data .email");
 				//var $phone = $profile.find(".meta-data .phone");
+				
 				$description.expander({
 				    slicePoint:       300,  // default is 100
 				});
 				
+				// Retrieve author information
 		 		TIM.modelFactory.getAuthor('${author_name}', function(author) {
 					TIM.currentTimeline.author = author;
 					$("header:visible h1").text(author.getFullName());
+					$email.html('<hr/><a href="mailto:' + author.getEmail() + '">' + author.getEmail() + '</a>');
 					
-					$firstEmail.text(author.getEmail());
-					$secondEmail.html("<hr/>" + author.getEmail());
 				});
+				
+				// Retrieve Profile information
 				TIM.modelFactory.getAuthorProfile('${author_name}', function(profile) {
 					$title.text(profile.getHeadline());
-					$profileImg.css("src", profile.getPictureUrl());
-					$description.text(profile.getSummary() + profile.getSummary());
+					
+					var picUrl = profile.getPictureUrl();
+					
+					$profileImg.attr("src", profile.getPictureUrl());
+					$profileImg.removeClass("data-spinner");
+					
+					$description.html(profile.getSummary());
 <!-- 					$link.attr("src", profile.getLocation()); -->
 					$link.text(profile.getLocation());
+					
+					$linkedinUrl.attr("href", profile.getProfileUrl());
+					$linkedinImg.attr("src", profile.getProfileIcon());
 					
 					//Reset the expander
 					$description.data("expander", false).expander({
@@ -46,37 +58,37 @@
 		</script>
 		<header data-role="header" data-position="fixed">
 			<a data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
-			<h1>${author_name}</h1>
+			<h1><img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/></h1>
 			<!-- 	TODO: Change link to go to followers page.		 -->
 		</header><!-- /header -->
 		<div data-role="content" class="profile">
 			<div class="top">
 				<div class="avatar">
 	 	 			<div class="frame">
-						<img src="https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif" alt="No Profile Image"/>
+						<img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/>
 					</div>
 				</div>
 				
 				<div class="title-container">
 					<div class="title">
-						Founder and CEO
+						<img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/>
 					</div>
-					<div class="link"><a href="#">Kiip</a>
+					<div class="link"><a href="#"><img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/></a>
 					</div>
 				</div>
 			</div>
 			<div class="description expandable">
-				Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				<img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/><!-- Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 			</div>
 			<div class="meta-data">
-				<div class="email">brianwong.me</div>
+				<div class="profile-url"><a href="#" target="_blank"><img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/></a></div>
 				<div class="contact">
 					<h3>
 						Contact
 					</h3>
-					<div class="semail">
+					<div class="email">
 						<hr/>
-						brianwong.me@gmail.com
+						<img class="data-spinner" src="/img/icons/move-spinner.gif" alt=""/>
 					</div>
 					<!-- <div class="phone">
 						<hr/>
