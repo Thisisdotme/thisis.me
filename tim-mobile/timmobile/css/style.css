@@ -165,11 +165,7 @@
 	
 	line-height: 20px;
 	width: 300px;
-	height: 140px;
-	
-    word-wrap: break-word;
-	text-overflow: ellipsis;
-	overflow: hidden;
+	min-height: 140px;
 }
 
 .profile .meta-data {
