@@ -563,6 +563,10 @@ TIM.followersController = function (spec) {
 						} else {
 							$.ajax({ type: "DELETE", url: url });
 						}
+						var newsfeedPage = $("#newsfeed");
+						if (newsfeedPage !== undefined) {
+							newsfeedPage.remove();
+						}
 					});
 				});
 				var stop = function(event) { event.stopPropagation(); }
@@ -792,8 +796,6 @@ TIM.newsfeedController = function (spec) {
 		}
 		return obj;
 	};	
-	return that;
-	
 	return that;
 };
 
@@ -1180,25 +1182,40 @@ $(document).delegate("#followers", "pageinit", function () {
 });
 
 $(document).delegate("#profile", "pageinit", function () {
-	 TIM.Resources.load(function() {
+	 // TIM.Resources.load(function() {
 		//TIM.ProfileController({}).load();
-	 });
+	 // });
 });
 
 $(document).delegate("#newsfeed", "pageinit", function () {
-	TIM.currentPage = 0;
+	TIM.newsfeedCurrentPage = 0;
+	TIM.currentPage = TIM.newsfeedCurrentPage;
 	
 	TIM.Resources.load(function() {
 		TIM.newsfeedController({}).load();
 	});
 });
 
-$(document).delegate("#timeline", "pageinit", function () {
-	TIM.currentPage = 0;
+$(document).delegate("#newsfeed", "pageshow", function () {
+	// Force timeline reloading.
+	var timelinePage = $("#timeline");
+	if (timelinePage !== undefined) {
+		timelinePage.remove();
+	}
+	TIM.currentPage = TIM.newsfeedCurrentPage;
+});
 
+$(document).delegate("#timeline", "pageinit", function () {
+	TIM.timelineCurrentPage = 0;
+	TIM.currentPage = TIM.timelineCurrentPage;
+	
 	TIM.Resources.load(function() {
 		TIM.timelineController({}).load();
 	});
+});
+
+$(document).delegate("#timeline", "pageshow", function () {
+	TIM.currentPage = TIM.timelineCurrentPage; 
 });
 
 $(document).delegate("#authorFeatures", "pageinit", function () {

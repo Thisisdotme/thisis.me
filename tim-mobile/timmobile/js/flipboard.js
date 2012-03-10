@@ -74,9 +74,10 @@ FlipSet.prototype.previous = function(callback) {
   previousFlip.beginFlipTo();
   
   // Hack to make the lower part of the page appear
-  previousFlip.bottomInnerContainerNode_.css("top", Math.floor(this.height/2) + 'px');
+  var height = this.height; 
+  previousFlip.bottomInnerContainerNode_.css("top", Math.floor(height/2) + 'px');
   var t=setTimeout(function() {
-  		previousFlip.bottomInnerContainerNode_.css("top", -Math.floor(this.height/2) + 'px');
+  		previousFlip.bottomInnerContainerNode_.css("top", -Math.floor(height/2) + 'px');
   	}, 200);
   
   
@@ -124,7 +125,7 @@ Flip.prototype.init_ = function(width, height) {
   topContainerNode.append(node.clone());
   topContainerNode.css("width", width + 'px');
   topContainerNode.css("height", Math.floor(height/2) + 'px');
-  topContainerNode.find(".footer").css("bottom", -Math.floor(height/2) + 'px');
+  //topContainerNode.find(".footer").css("bottom", -Math.floor(height/2) + 'px');
   
   var bottomContainerNode = $("<div class='flip-bottom-container flip-transitionable'/>");
   var bottomInnerContainerNode = $("<div class='flip-bottom-inner-container'/>");

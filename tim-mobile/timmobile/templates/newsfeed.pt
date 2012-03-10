@@ -1,5 +1,5 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="newsfeed" data-role="page" data-title="News Feed" data-url="/newsfeed" metal:fill-slot="page_content">
+	<div id="newsfeed" data-role="page" data-title="News Feed" data-external-page="true" data-url="/newsfeed" metal:fill-slot="page_content">
 		<script type="text/javascript">
 			TIM.pageInfo = {
 				authorName: '${author_name}'
