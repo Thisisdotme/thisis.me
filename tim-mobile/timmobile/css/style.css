@@ -149,14 +149,26 @@
 	
 	-webkit-box-shadow: 0px 0px 2px .1px #555;
 	-moz-box-shadow:    0px 0px 2px .1px #555;
+	
+	text-align: center;
 }
 
 .profile .top .avatar img {
 	max-height: 100%;
 	max-width: 100%;
 	min-height: 100%;
+	min-width: 100%;
 }
 
+.profile .top .avatar img.data-spinner {
+	min-height: 0;
+	min-width: 0;
+}
+
+
+/*.profile .top .avatar img.loaded {
+	min-height: 100%;
+}*/
 .profile .description {
 	float: none;
 	
@@ -165,11 +177,17 @@
 	
 	line-height: 20px;
 	width: 300px;
-	height: 140px;
-	
-    word-wrap: break-word;
-	text-overflow: ellipsis;
-	overflow: hidden;
+	min-height: 140px;
+}
+
+.profile .profile-url {
+	height: 20px;
+	width: 20px;
+}
+
+.profile .profile-url img {
+	max-height: 100%;
+	max-width: 100%;
 }
 
 .profile .meta-data {
@@ -329,13 +347,16 @@
 	
 	font-size: 14px;
 	
-	width: 200px;
+	width: 250px;
     white-space: nowrap;
     word-wrap: break-word;
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
 
+#timeline .flippage-container .event .footer .info .caption {
+	width: 300px;
+}
 
 .flippage-container .event .footer > div{
 	float: left;
