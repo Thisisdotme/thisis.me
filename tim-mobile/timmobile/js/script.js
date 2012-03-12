@@ -599,7 +599,7 @@ TIM.ProfileController = function (spec) {
 			
 			// Retrieve author information
 			TIM.modelFactory.getAuthor(TIM.pageInfo.authorName, function(author) {
-				$("header:visible h1").text(author.getFullName());
+				$("#profile header h1").text(author.getFullName());
 				$email.html('<hr/><a href="mailto:' + author.getEmail() + '">' + author.getEmail() + '</a>');
 				
 			});
