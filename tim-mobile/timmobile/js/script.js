@@ -1194,6 +1194,10 @@ $(document).delegate("#newsfeed", "pageshow", function () {
 $(document).delegate("#timeline", "pageinit", function () {
 	TIM.timelineCurrentPage = 0;
 	TIM.currentPage = TIM.timelineCurrentPage;
+
+	TIM.modelFactory.getAuthor(TIM.pageInfo.authorName, function(author) {
+		$("#timeline header h1").text(author.getFullName());
+	});
 	
 	TIM.Resources.load(function() {
 		TIM.timelineController({}).load();

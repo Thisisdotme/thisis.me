@@ -4,16 +4,6 @@
 			TIM.pageInfo = {
 				authorName: '${author_name}'
 			}
-			
-			TIM.currentTimeline = {};
-			TIM.currentTimeline.author = {};
-			
-			$(document).delegate("#timeline", "pageinit", function() {
-				TIM.modelFactory.getAuthor('${author_name}', function(author) {
-					TIM.currentTimeline.author = author;
-					$("header:visible h1").text(author.getFullName());
-				});
-			});
 		</script>
 		<header data-role="header" data-position="fixed">
 			<a data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
