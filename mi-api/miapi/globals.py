@@ -7,3 +7,4 @@ Created on Feb 25, 2012
 ACCESS_GROUP_AUTHORS = 'group:authors'
 DEFAULT_AUTHOR_GROUP = 'follow'
 
+LIMIT = 100
