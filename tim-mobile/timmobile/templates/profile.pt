@@ -5,56 +5,6 @@
 			TIM.pageInfo = {
 				authorName: '${author_name}'
 			}
-			
-			TIM.currentTimeline = {};
-			TIM.currentTimeline.author = {};
-			$(document).delegate("#profile", "pageinit", function () {
-				var $profile = $("#profile .profile");
-				var $profileImg = $profile.find(".avatar img")
-				var $title = $profile.find(".title");
-				var $link = $profile.find(".link a");
-				var $description = $profile.find(".description");
-				var $linkedinUrl = $profile.find(".meta-data .profile-url a");
-				var $linkedinImg = $profile.find(".meta-data .profile-url img");
-				var $email = $profile.find(".meta-data .email");
-				//var $phone = $profile.find(".meta-data .phone");
-				
-				$description.expander({
-				    slicePoint:       300,  // default is 100
-				});
-				
-				// Retrieve author information
-		 		TIM.modelFactory.getAuthor('${author_name}', function(author) {
-					TIM.currentTimeline.author = author;
-					$("header:visible h1").text(author.getFullName());
-					$email.html('<hr/><a href="mailto:' + author.getEmail() + '">' + author.getEmail() + '</a>');
-					
-				});
-				
-				// Retrieve Profile information
-				TIM.modelFactory.getAuthorProfile('${author_name}', function(profile) {
-					$title.text(profile.getHeadline());
-					
-					var picUrl = profile.getPictureUrl();
-					
-					$profileImg.attr("src", profile.getPictureUrl());
-					$profileImg.removeClass("data-spinner");
-					
-					$description.html(profile.getSummary());
-<!-- 					$link.attr("src", profile.getLocation()); -->
-					$link.text(profile.getLocation());
-					
-					$linkedinUrl.attr("href", profile.getProfileUrl());
-					$linkedinImg.attr("src", profile.getProfileIcon());
-					
-					//Reset the expander
-					$description.data("expander", false).expander({
-				    	slicePoint:       300,  // default is 100
-					});
-				});
-			});
-
-			
 		</script>
 		<header data-role="header" data-position="fixed">
 			<a data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>

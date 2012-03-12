@@ -105,14 +105,6 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		return spec.event.content.data || '';
 	};
 		
-	that.getShortCaption = function (shortCaptionLength) {
-		if (shortCaptionLength === undefined) {
-			shortCaptionLength = 50;
-		}
-		var caption = that.getCaption();
-		return (caption.length <= shortCaptionLength) ? caption : (caption.substr(0, shortCaptionLength) + "...");
-	};
-	
 	that.hasImage = function () {
 		return (spec.event.content.photo_url !== undefined
 				&& spec.event.content.photo_url.length > 0);
@@ -140,18 +132,18 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 	
 	that.renderContent = function () {
 		var markup = '<div class="content">';
-		var hasImage = that.hasImage();
-		if (hasImage) {
+		
+		// Add Image Content
+		if (that.hasImage()) {
 			markup += '<div class="inner-image"><img src="' + that.getImage() + '" alt=""/></div>';
 		}
+		
+		// Add Data Content
 		var data = that.getData();
 		if (data.length > 0) {
-			// data = that.getCaption();
 				markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
 		}
-		// if (!hasImage || data.length > 25) {
-				// markup += '<div class="inner-text"><p>' + TIM.utils.linkify(data) + '</p></div>';
-		// }
+		
 		markup += '</div>';
 		return markup;
 	};
@@ -160,10 +152,6 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 		return '</div>';
 	};
 	
-	// that.renderUserInfo = function () {
-		// return '<div class="userinfo">' + that.renderUserIcon + that.render+ '</div>';
-	// }
-// 	
 	 that.renderAuthorProfilePicture = function () {
 	 	 return '<div class="avatar">' +
 	 	 			'<div class="frame">' +
@@ -594,31 +582,60 @@ TIM.followersController = function (spec) {
 //	Profile
 //
 TIM.ProfileController = function (spec) {
-	
 	return {
 		
-		load: function () {
-			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '?callback=?', function (data) {
-				var author = data.author || {};
-				var $profile = $("#profile .profile");
-				var $profileImg = $profile.find(".avatar img")
-				var $title = $profile.find(".title");
-				var $link = $profile.find(".link a");
-				var $description = $profile.find(".description");
-				var $firstEmail = $profile.find(".meta-data .email");
-				var $secondEmail = $profile.find(".meta-data .semail");
-				var $phone = $profile.find(".meta-data .phone");
+		load: function () {			
+			var $profile = $("#profile .profile");
+			var $profileImg = $profile.find(".avatar img")
+			var $title = $profile.find(".title");
+			var $link = $profile.find(".link a");
+			var $description = $profile.find(".description");
+			var $linkedinUrl = $profile.find(".meta-data .profile-url a");
+			var $linkedinImg = $profile.find(".meta-data .profile-url img");
+			var $email = $profile.find(".meta-data .email");
+			//var $phone = $profile.find(".meta-data .phone");
+			
+			$description.expander({
+			    slicePoint:       300,  // default is 100
+			});
+			
+			// Retrieve author information
+			TIM.modelFactory.getAuthor(TIM.pageInfo.authorName, function(author) {
+				$("header:visible h1").text(author.getFullName());
+				$email.html('<hr/><a href="mailto:' + author.getEmail() + '">' + author.getEmail() + '</a>');
 				
-				$title.text(author.fullname);
-				$firstEmail.text(author.email);
-				$secondEmail.html("<hr/>" + author.email);
+			});
+			
+			// Retrieve Profile information
+			TIM.modelFactory.getAuthorProfile(TIM.pageInfo.authorName, function(profile) {
+				$title.text(profile.getHeadline());
 				
+				var picUrl = profile.getPictureUrl();
+				
+				$profileImg.attr("src", profile.getPictureUrl());
+				$profileImg.removeClass("data-spinner");
+							
+				$description.html(profile.getSummary());
+				$link.text(profile.getLocation());
+				
+				$linkedinUrl.attr("href", profile.getProfileUrl());
+				$linkedinImg.attr("src", profile.getProfileIcon());
+				
+				//Reset the expander
+				$description.data("expander", false).expander({
+			    	slicePoint:       300,  // default is 100
+				});
 			});
 		}
 	};
 };
 
-// Pages contain events
+/*
+ * Split the list of events into pages.
+ * 1. Traverse the Event array
+ * 2.1. If the event contains a photo, it should take the whole page, so add that event to the page and go to the next page.
+ * 2.2. Otherwise check the next 5 events, and try to fill the page with a second event.
+ */
 TIM.feedController = function (events) {
 	var that = {};
 	
@@ -627,21 +644,16 @@ TIM.feedController = function (events) {
 	
 	that.sort = function () {
 		var events = that.events.concat();
-		console.log("number of events:" + events.length);
 		var t = 1;
+		
+		// Traverse the Event array
 		while (events.length > 0) {
 			var event = events.shift();
 			var page = [event];
-			
-			/*	//	Uncomment to force one event/page 
-			that.pages.push(page);
-			continue;
-			// */
-			
-			// Check the type of feature.
-			// When we can we aggregate two events on one page 
+			 
 			var len = events.length;
 			
+			// If that event does not contain a photo
 			if (len > 0
 				&& event.content.photo_url === undefined) {
 				for (var i = 0, maxSkips = 0; i < len && maxSkips < 5; i++, maxSkips++) {
@@ -653,13 +665,10 @@ TIM.feedController = function (events) {
 					}
 				}
 			}
-			console.log("events on page(" + t + "):" + page.length);
 			that.pages.push(page);
 			t++;
 		}
-		
-		console.log("number of pages:" + that.pages.length);
-		return events;
+		return that.pages;
 	}
 	
 	return that;
@@ -668,6 +677,14 @@ TIM.feedController = function (events) {
 TIM.timelineController = function (spec) {
 	
 	var that = {};
+
+	that.flipSet = {};
+	that.pages = {};
+	that.makeURL = function () {
+		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
+	}
+	that.renderMethod = 'renderTimeline';
+	that.contentSelector = "#timeline .ui-content";
 
 	that.loaded = function () {
 		$(".flippage-container").bind("swipeup", function(){
@@ -703,6 +720,7 @@ TIM.timelineController = function (spec) {
           	}
           });
           
+          // Prevent the browser from scrolling the page on swipe.
           $(".flippage-container").bind("touchmove", function(event) {
           		event.preventDefault();
           });
@@ -711,15 +729,7 @@ TIM.timelineController = function (spec) {
 
 		return that;
 	};
-	
-	that.flipSet = {};
-	that.pages = {};
-	
-	that.makeURL = function () {
-		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/highlights?callback=?';
-	}
-	
-	that.contentSelector = "#timeline .ui-content"; 
+	 
 	
 	that.load = function () {
 		$.getJSON(that.makeURL(), function (data) {
@@ -729,16 +739,14 @@ TIM.timelineController = function (spec) {
 			
 			try {
 				TIM.currentPage = 0;
-				var feedController = TIM.feedController(data.events || []);
-				feedController.sort(data.events || []);
-				that.pages = feedController.pages;
 				
+				that.pages = TIM.feedController(data.events || []).sort();
+				
+				// Add the first two pages to the FlipSet
 				feedPages.push(that.makePageObj(that.pages[0]));
 				feedPages.push(that.makePageObj(that.pages[1]));
 				
-				// var event_viewport = (window.innerHeight ? window.innerHeight : $(window).height()) - $("header:visible").outerHeight();
-				// $("#newsfeed .ui-content").css("height", event_viewport);
-				// that.flipSet = new FlipSet($("#newsfeed .ui-content"), 320, event_viewport, feedPages);
+				// Initialize Flipset
 				that.flipSet = new FlipSet($(that.contentSelector), 320, 370, feedPages);
 				
 				that.loaded();
@@ -751,6 +759,8 @@ TIM.timelineController = function (spec) {
 		return that;
 	};
 	
+	
+	// Create the Event DOM element
 	that.makePageObj = function (pageEvents) {
 		var obj = $("<div class='mi-content'/>");
 		if (pageEvents === undefined
@@ -763,7 +773,7 @@ TIM.timelineController = function (spec) {
 		var style = {"style": (len === 2 ? "half-page" : "full-page")};
 		for (var i = 0; i < pageEvents.length; i++) {
 			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
-			obj.append(renderer.renderTimeline(style));
+			obj.append(renderer[that.renderMethod](style));
 		}
 		return obj;
 	};	
@@ -773,29 +783,14 @@ TIM.timelineController = function (spec) {
 
 TIM.newsfeedController = function (spec) {	
 	var that = TIM.timelineController(spec);
+	
 	that.makeURL = function () {
 		var followGroup = "follow";
 		return TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName + '/groups/' + followGroup + '/highlights?callback=?';
 	}
+	that.contentSelector = "#newsfeed .ui-content";
+	that.renderMethod =  'renderNewsfeed';
 	
-	that.contentSelector = "#newsfeed .ui-content"; 
-	
-	that.makePageObj = function (pageEvents) {
-		var obj = $("<div class='mi-content'/>");
-		if (pageEvents === undefined
-			|| pageEvents.length === 0) {
-			obj.append('<p>No Events.  Get busy and create some content!</p>');
-			return obj;
-		}
-			
-		var len = pageEvents.length;
-		var style = {"style": (len === 2 ? "half-page" : "full-page")};
-		for (var i = 0; i < pageEvents.length; i++) {
-			renderer = TIM.eventRenderer.rendererFactory.create({"author": TIM.pageInfo.authorName, "event": pageEvents[i]});
-			obj.append(renderer.renderNewsfeed(style));
-		}
-		return obj;
-	};	
 	return that;
 };
 
@@ -838,7 +833,11 @@ TIM.DetailController = function (spec) {
 	};
 };
 
-
+/*
+ * Includes a singleton pattern
+ * 
+ * The Loading is asynchronous. Once done, we call the callback method.
+ */
 TIM.ImageController = function (spec) {
 	
 	var isLoaded = false;
@@ -893,6 +892,15 @@ TIM.ImageController = function (spec) {
 
 }();
 
+/*
+ * Utility class that loads the Resources necessary for the application
+ * Currently only loads the images.
+ * 
+ * This object acts as a singleton to load the resources.
+ * When "load" is called, the callback method (for when the resources are all there) is added to a list.
+ * Once all the resources are loaded, those methods are called in their order of appearance.
+ * So as not to overwhelm the Browser, we call those methods at a regular interval of 50ms.
+ */
 TIM.Resources = function() {
 	var availableResources = [];
 	availableResources.push(TIM.ImageController);
@@ -928,10 +936,15 @@ TIM.Resources = function() {
 				isLoading = false;
 				isLoaded = true;
 				
-				for (var i = 0; i < queue.length; i++) {
-					queue[i]();	
-				}
+				dequeue();
 			}
+		}
+	};
+	
+	function dequeue () {
+		queue.shift()();
+		if (queue.length > 0) {
+			setTimer(dequeue(), 50);
 		}
 	};
 }();
@@ -977,6 +990,7 @@ TIM.modelFactory.getAuthor = function(authorname, callback) {
 }
 
 TIM.modelFactory.getAuthorProfile = function(authorname, callback) {
+	// getJSON does not call the callback method when the request fails to connect to the remote server, that is why we use google's jsonp jQuery plugin.
 	$.jsonp({
 		"url": TIM.globals.apiBaseURL + '/v1/authors/' + authorname + '/features/linkedin/profile?callback=?',
 		"success": function(data){
@@ -986,7 +1000,7 @@ TIM.modelFactory.getAuthorProfile = function(authorname, callback) {
 		},
 		"error": function(data, msg){
 			if (callback !== undefined) {
-				callback(TIM.models.Profile({}))
+				callback(TIM.models.DummyProfile({}))
 			}
 		}	
 	});
@@ -999,7 +1013,6 @@ TIM.models = {};
 
 TIM.models.Author = function(author) {
 	var that = {};
-	console.log("creating author:" + author.name);
 	that.getID = function () {
 		return author.author_id || -1;
 	}
@@ -1022,136 +1035,105 @@ TIM.models.Author = function(author) {
 	return that;
 }
 
-TIM.models.Profile = function() {
+TIM.models.ProfileFillers = {
+	firstName: '',
+	lastName: '',
+	headline: 'Founder and CEO',
+	industry: '',
+	location: '',
+	name: '',
+	pictureUrl: 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif',
+	profileUrl: '',
+	profileIcon: '/img/social_icons/linkedin.png',
+	specialties: '',
+	summary: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+};
+
+TIM.models.DummyProfile = function() {
 	var that = {};
+	var filler = TIM.models.ProfileFillers;
 	
 	that.getFirstName = function () {
-		return '';
+		return filler.firstName;
 	};
 	
 	that.getLastName = function () {
-		return '';
+		return filler.lastName;
 	};
 	
 	that.getHeadline = function() {
-		return 'Founder and CEO';
+		return filler.headline;
 	}
 	
 	that.getIndustry = function() {
-		return '';
+		return filler.industry;
 	}
 	
 	that.getLocation = function() {
-		return '';
+		return filler.location;
 	}
 	
 	that.getName = function() {
-		return '';
+		return filler.name;
 	}
 	
 	that.getPictureUrl = function() {
-		return 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif';
+		return filler.pictureUrl;
 	}
 	
 	that.getProfileUrl = function() {
-		return '';
+		return filler.profileUrl;
 	}
 	
 	that.getProfileIcon = function() {
-		return '/img/social_icons/linkedin.png';
+		return filler.profileIcon;
 	}
 	
 	that.getSpecialties = function() {
-		return '';
+		return filler.specialties;
 	}
 	
 	that.getSummary = function() {
-		return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+		return filler.summary;
 	}
 	
 	return that;
 }
 
-TIM.models.ProfileDefaults = {};
-
-TIM.models.ProfileDefaults.getFirstName = function () {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getLastName = function () {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getHeadline = function() {
-	return 'Founder and CEO';
-};
-
-TIM.models.ProfileDefaults.getIndustry = function() {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getLocation = function() {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getName = function() {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getPictureUrl = function() {
-	return 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif';
-};
-
-TIM.models.ProfileDefaults.getProfileUrl = function() {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getProfileIcon = function() {
-	return '/img/social_icons/linkedin.png';
-};
-
-TIM.models.ProfileDefaults.getSpecialties = function() {
-	return '';
-};
-
-TIM.models.ProfileDefaults.getSummary = function() {
-	return 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<br/><br/>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
-};
-
 TIM.models.AuthorLinkedinProfile = function(author) {
-	var that = TIM.models.Profile();
-	var defaults = TIM.models.ProfileDefaults;
+	var that = {};
+	var filler = TIM.models.ProfileFillers;
 	
 	that.getFirstName = function () {
-		return author.first_name || defaults.getFirstName();
+		return author.first_name || filler.firstName;
 	};
 	
 	that.getLastName = function () {
-		return author.last_name || defaults.getLastName();
+		return author.last_name || filler.lastName;
 	};
 	
 	that.getHeadline = function() {
-		return author.headline || defaults.getHeadline();
+		return author.headline || filler.headline;
 	}
 	
 	that.getIndustry = function() {
-		return author.industry || defaults.getIndustry();
+		return author.industry || filler.industry;
 	}
 	
 	that.getLocation = function() {
-		return author.location || defaults.getLocation();
+		return author.location || filler.location;
 	}
 	
 	that.getName = function() {
-		return author.name || defaults.getName();
+		return author.name || filler.name;
 	}
 	
 	that.getPictureUrl = function() {
-		return author.picture_url || defaults.getPictureUrl;
+		return author.picture_url || filler.pictureUrl;
 	}
 	
 	that.getProfileUrl = function() {
-		return author.public_profile_url || defaults.getProfileUrl();
+		return author.public_profile_url || filler.profileUrl;
 	}
 	
 	that.getProfileIcon = function() {
@@ -1159,11 +1141,11 @@ TIM.models.AuthorLinkedinProfile = function(author) {
 	}
 	
 	that.getSpecialties = function() {
-		return author.specialties || defaults.getSpecialties;
+		return author.specialties || filler.specialties;
 	}
 	
 	that.getSummary = function() {
-		return author.summary || defaults.getSummary();
+		return author.summary || filler.summary;
 	}
 	
 	return that;
@@ -1182,11 +1164,13 @@ $(document).delegate("#followers", "pageinit", function () {
 });
 
 $(document).delegate("#profile", "pageinit", function () {
-	 // TIM.Resources.load(function() {
-		//TIM.ProfileController({}).load();
-	 // });
+	TIM.ProfileController({}).load();
 });
 
+/*
+ * 1. Set Newsfeed index to the first page
+ * 2. Load newsfeed
+ */
 $(document).delegate("#newsfeed", "pageinit", function () {
 	TIM.newsfeedCurrentPage = 0;
 	TIM.currentPage = TIM.newsfeedCurrentPage;
@@ -1202,9 +1186,15 @@ $(document).delegate("#newsfeed", "pageshow", function () {
 	if (timelinePage !== undefined) {
 		timelinePage.remove();
 	}
+	
+	// Set the page index to the latest timeline index.
 	TIM.currentPage = TIM.newsfeedCurrentPage;
 });
 
+/*
+ * 1. Set Timeline index to the first page
+ * 2. Load timeline
+ */
 $(document).delegate("#timeline", "pageinit", function () {
 	TIM.timelineCurrentPage = 0;
 	TIM.currentPage = TIM.timelineCurrentPage;
@@ -1215,6 +1205,7 @@ $(document).delegate("#timeline", "pageinit", function () {
 });
 
 $(document).delegate("#timeline", "pageshow", function () {
+	// Set the page index to the latest timeline index.
 	TIM.currentPage = TIM.timelineCurrentPage; 
 });
 
@@ -1243,10 +1234,9 @@ $(window).bind('orientationchange', function (event) {
 
 });
 
-
+// jQuery Mobile v1.1 has "fade" for default transition (due to android performance issues with the sliding).
 $(document).bind("mobileinit", function(){
 	//apply overrides here
-	console.log("mobileinit");
 	$.extend(  $.mobile , {
 	   defaultPageTransition: 'slide'
   	});

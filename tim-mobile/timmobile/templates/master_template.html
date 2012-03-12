@@ -57,6 +57,8 @@
   <script type="text/javascript" src="/js/libs/jquery.timeago.js"></script>
   <script type="text/javascript" src="/js/flipboard.js"></script>
   <script type="text/javascript" src="/js/script.js"></script>
+  
+<!-- It is important to include that script after the custom ones, as we are setting mobile defaults in script.js, which are called at mobileinit time (which is called right after the jQMob is included)   -->
   <script type="text/javascript" src="/js/libs/jquery.mobile-1.1.0-rc.1-with-vertical-swipe.js"></script>
 
   <script type="text/javascript" metal:define-slot="page_script"></script>
