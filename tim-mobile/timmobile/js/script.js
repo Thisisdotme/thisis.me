@@ -542,10 +542,10 @@ TIM.AuthorsController = function (spec) {
 // Followers
 //
 TIM.followersController = function (spec) {
-	//return {load: function() {}};	// for debugging
 	return {
 		load: function () {
 			var al = $("#followers ul:first");
+			// populate followers list with all authors
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
 				var authors = data.authors || [];
 				al.empty();
@@ -572,6 +572,7 @@ TIM.followersController = function (spec) {
 					});
 				});
 			});
+			// mark authors already being followed & refresh view
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 					'/groups/follow/members?callback=?', function (data) {
 				var authors = data.members || [];
