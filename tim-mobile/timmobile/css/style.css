@@ -502,4 +502,7 @@ only screen and (min-device-pixel-ratio: 1.5) {
   /* Styles */
 }
 
-
+/* jQuery Mobile sets this to 20% by default, which is too small */
+.ui-field-contain label.ui-slider {
+	width: auto;
+}
