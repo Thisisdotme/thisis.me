@@ -545,44 +545,41 @@ TIM.followersController = function (spec) {
 	//return {load: function() {}};	// for debugging
 	return {
 		load: function () {
-			var al = $("#followers fieldset:first");
+			var al = $("#followers ul:first");
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors?callback=?', function (data) {
 				var authors = data.authors || [];
 				al.empty();
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
-					al.append('<input type="checkbox" name="' + flipId + '" id="' + flipId + '"' +
-							'class="custom" /><label for="' + flipId + '"><a href="/' +
+					al.append('<li data-role="fieldcontain"><select name="' + flipId + '" id="' + flipId + '"' +
+							'data-role="slider" data-mini="true"><option value="no">Off</option>' +
+							'<option value="yes">On</option></select><label for="' + flipId + '"><a href="/' +
 							item.author_name + '/timeline">' + (item.full_name || item.author_name) +
-							'</a></label>');
+							'</a></label></li>');
 					var url = TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 							'/groups/follow/members/' + item.author_name;
 					$('#' + flipId).bind( "change", function(event, ui) {
-						if (this.checked) {	// add person
+						if (this.selectedIndex == 1) {	// add person
 							$.ajax({ type: "PUT", url: url });
 						} else {
 							$.ajax({ type: "DELETE", url: url });
 						}
+						// force refresh of newsfeed after add/remove
 						var newsfeedPage = $("#newsfeed");
 						if (newsfeedPage !== undefined) {
 							newsfeedPage.remove();
 						}
 					});
 				});
-				var stop = function(event) { event.stopPropagation(); }
-				al.find("a").bind('tap', stop);
-				// also don't make the button appear clicked
-				al.find("a").bind('touchstart', stop);
-				al.find("a").bind('click', stop);	// for non-device testing
-				al.find("a").bind('mousedown', stop);
 			});
 			$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.pageInfo.authorName +
 					'/groups/follow/members?callback=?', function (data) {
 				var authors = data.members || [];
 				$.each(authors, function (idx, item) {
 					var flipId = "flip_" + item.author_name;
-					$('#' + flipId).prop("checked",true);
+					$('#' + flipId)[0].selectedIndex = 1;
 				});
+				al.listview("refresh");
 				al.trigger("create");
 			});
 		}
