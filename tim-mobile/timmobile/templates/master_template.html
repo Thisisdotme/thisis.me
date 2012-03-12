@@ -34,7 +34,6 @@
 
   <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
   <script type="text/javascript" src="/js/libs/jquery-jsonp-2.2.1.min.js"></script>
-  <script type="text/javascript" src="/js/libs/jquery.mobile-1.1.0-rc.1-with-vertical-swipe.js"></script>
   
   <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile.structure-1.1.0-rc.1.min.css" />
   <link rel="stylesheet" href="/css/thisis.me.style.css" />
@@ -56,17 +55,17 @@
 	TIM.timelineCurrentPage = 0;
 	</script>
   <script type="text/javascript" src="/js/libs/jquery.timeago.js"></script>
-
-  <script type="text/javascript" metal:define-slot="page_script"></script>
   <script type="text/javascript" src="/js/flipboard.js"></script>
   <script type="text/javascript" src="/js/script.js"></script>
+  <script type="text/javascript" src="/js/libs/jquery.mobile-1.1.0-rc.1-with-vertical-swipe.js"></script>
+
+  <script type="text/javascript" metal:define-slot="page_script"></script>
   
   <script>window.jQuery.mobile || document.write('<script type="text/javascript" src="/js/libs/jquery.mobile-1.1.0-rc.1-with-vertical-swipe.js"><\/script>')</script>
 
 </head> 
 
 <body tal:define="fragments load: fragments.html">
-
 	<div id="container" data-role="page" metal:define-slot="page_content" > 
 		<div data-role="header"><h1>thisis.me</h1></div> 
 		<div id="content" data-role="content"><p>content...</p></div> 

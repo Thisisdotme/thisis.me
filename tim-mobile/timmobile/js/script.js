@@ -1243,5 +1243,14 @@ $(window).bind('orientationchange', function (event) {
 
 });
 
+
+$(document).bind("mobileinit", function(){
+	//apply overrides here
+	console.log("mobileinit");
+	$.extend(  $.mobile , {
+	   defaultPageTransition: 'slide'
+  	});
+});
+
 $(document).ready(function () {
 });
