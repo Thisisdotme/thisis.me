@@ -110,6 +110,7 @@ class GooglePlusFullCollector(FullCollector):
       
     except Exception, e:
       self.log.error('****ERROR****')
+      self.log.error('Error occurred processing events for: %s' % authorName)
       self.log.error(e)
       dbSession.rollback()
       raise #continue

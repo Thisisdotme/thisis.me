@@ -14,11 +14,11 @@ from miapi.models import DBSession
 
 from mi_schema.models import Author, AuthorGroup, AuthorGroupMap, FeatureEvent, Feature, AuthorFeatureMap
 
+from miapi.globals import LIMIT
+
 from author_utils import createFeatureEvent
 
 log = logging.getLogger(__name__)
-
-LIMIT = 200
 
 #
 # AUTHOR GROUP QUERY: query for the highlights/details for a particular group (i.e. following)

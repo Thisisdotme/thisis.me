@@ -171,7 +171,7 @@ class TwitterEvent(StatusEvent):
   def getEventTime(self):
     return datetime.strptime(self.raw_json['created_at'], self.DATETIME_STRING_FORMAT)
 
-  def getEventCaption(self):
+  def getEventContent(self):
     return self.raw_json.get('text','')
 
   def getEventOrigin(self):
@@ -328,7 +328,7 @@ class LinkedInEvent(StatusEvent):
   def getEventTime(self):
     return datetime.utcfromtimestamp(int(self.raw_json['timestamp'] / 1000))
 
-  def getEventCaption(self):
+  def getEventContent(self):
     caption = ''
     if self.raw_json['updateType'] == 'SHAR':
       caption = self.raw_json['updateContent']['person']['currentShare'].get('comment')

@@ -61,7 +61,7 @@ class CollectorDriver(AppBase):
     # for controlling incremental vs. full builds
     incremental = self.options.incremental
 
-    feature = "foursquare"
+    feature = "googleplus"
     collector = EventCollectorFactory.get_collector_for(feature,config.get('AWS','s3_bucket'), config.get('AWS','aws_access_key'), config.get('AWS','aws_secret_key'))
     if collector:
       collector.build_all(dbSession,oauthConfig[feature],incremental)
