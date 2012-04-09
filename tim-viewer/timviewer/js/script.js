@@ -123,7 +123,21 @@ TIM.eventRenderer.baseRenderer = function (spec) {
 };
 
 TIM.eventRenderer.facebookRenderer = function (spec) {
+
 	var that = TIM.eventRenderer.baseRenderer(spec);
+
+	that.renderContent = function () {
+		
+		var photo = this.getContentImage();
+		photo = photo ? '<img style="width:300px;height:300px;" src="' + photo + '" />' : '';
+
+		var data = that.getData();
+		data = data ? '<p>' + this.getData() + '</p>' : '';
+		
+		return '<p>' + TIM.utils.linkify(that.getCaption()) + '</p>' + 
+					 photo + data;
+	};
+
 	return that;
 };
 
@@ -162,7 +176,6 @@ TIM.eventRenderer.foursquareRenderer = function (spec) {
 					 '<span style="font-size:smaller">' + venue + '</span>';
 	};
 
-
 	return that;
 };
 
@@ -194,6 +207,19 @@ TIM.eventRenderer.meRenderer = function (spec) {
 
 TIM.eventRenderer.twitterRenderer = function (spec) {
 	var that = TIM.eventRenderer.baseRenderer(spec);
+
+	that.renderContent = function () {
+		
+		var photo = this.getContentImage();
+		photo = photo ? '<img style="width:300px;height:300px;" src="' + photo + '" />' : '';
+
+		var data = that.getData();
+		data = data ? '<p>' + this.getData() + '</p>' : '';
+		
+		return '<p>' + TIM.utils.linkify(that.getCaption()) + '</p>' + 
+					 photo + data;
+	};
+
 	return that;
 };
 
@@ -549,7 +575,7 @@ TIM.timelineController = function (spec) {
 
 	that.load = function () {
 		
-		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/events?callback=?', function (data) {
+		$.getJSON(TIM.globals.apiBaseURL + '/v1/authors/' + TIM.globals.authorName + '/groups/follow/highlights?callback=?', function (data) {
 			var tl = $("#timeline .mi-content"),
 					events,
 					renderer;

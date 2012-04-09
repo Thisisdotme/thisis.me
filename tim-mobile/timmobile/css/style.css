@@ -73,6 +73,16 @@
 	margin-top: 15px;
 }
 
+/****
+ *
+ * Followers page
+ *
+ ****/
+ 
+#followersList label {
+	padding-left:.5em;
+	vertical-align:.4em; 
+}
 
 /*********************************
  * 

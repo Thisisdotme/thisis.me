@@ -76,7 +76,7 @@ class TwitterFullCollector(FullCollector):
           # process the item
           #print json.dumps(post, sort_keys=True, indent=2)
   
-          event = Event.TwitterEvent(afm.author_id,post['id_str']).fromJSON(post)
+          event = Event.TwitterEvent(afm.author_id).fromJSON(post)
   
           self.writeEvent(event,traversal)
       

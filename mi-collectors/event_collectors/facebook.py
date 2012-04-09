@@ -92,7 +92,7 @@ class FacebookFullCollector(FullCollector):
             if post.get('type') == 'status' and post.get('actions') is None:
               continue
 
-            event = Event.FacebookEvent(afm.author_id,post['id'],fbUserId).fromJSON(post)
+            event = Event.FacebookEvent(afm.author_id,fbUserId).fromJSON(post)
             self.writeEvent(event, traversal)
     
           # if

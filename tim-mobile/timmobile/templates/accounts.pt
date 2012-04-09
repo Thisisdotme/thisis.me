@@ -3,12 +3,11 @@
 		<header data-role="header" data-position="fixed">
 			<a href="/newsfeed" data-role="button" data-icon="home" data-iconpos="notext">Back</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="Accounts"/></div>
-			<a href="/logout" data-role="button">Logout</a>
 		</header>
 	
 		<div data-role="content">
-			<h3>Accounts</h3>
-			<ul data-role="listview" data-inset="false">
+			<h3>Add/Remove Accounts</h3>
+			<ul style="margin-bottom:1em;" data-role="listview" data-inset="false">
 				<li><a href="/oauth/twitter">Twitter</a></li>
 				<li><a href="/oauth/facebook">Facebook</a></li>
 				<li><a href="/oauth/linkedin">LinkedIn</a></li>
@@ -17,6 +16,7 @@
 				<li><a href="/oauth/foursquare">Foursquare</a></li>
 <!--				<li><a href="/oauth/flickr">Flickr</a></li>-->
 			</ul>
+			<a href="/logout" data-role="button">Logout</a>
 		</div><!-- /content -->
 	</div><!-- /page -->
 

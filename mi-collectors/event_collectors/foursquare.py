@@ -71,7 +71,7 @@ class FoursquareFullCollector(FullCollector):
         # for element in the feed
         for post in rawJSON['response']['checkins']['items']:
     
-          event = Event.FoursquareEvent(afm.author_id,post['id']).fromJSON(post)
+          event = Event.FoursquareEvent(afm.author_id).fromJSON(post)
           self.writeEvent(event, traversal)
   
         # for

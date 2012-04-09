@@ -44,6 +44,10 @@ class CollectorDriver(AppBase):
     config = ConfigParser()
     config.read('config.ini')
     
+    # load AWS config
+    awsConfig = ConfigParser()
+    awsConfig.read(config.get('Common','aws'))
+    
     # load the oauth config
     oauthfd=open(config.get('OAuthConfig','mi.oauthkey_file'))
     oauthConfig = json.load(oauthfd)
@@ -61,18 +65,18 @@ class CollectorDriver(AppBase):
     # for controlling incremental vs. full builds
     incremental = self.options.incremental
 
-    feature = "googleplus"
-    collector = EventCollectorFactory.get_collector_for(feature,config.get('AWS','s3_bucket'), config.get('AWS','aws_access_key'), config.get('AWS','aws_secret_key'))
-    if collector:
-      collector.build_all(dbSession,oauthConfig[feature],incremental)
+#    feature = "linkedin"
+#    collector = EventCollectorFactory.get_collector_for(feature,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
+#    if collector:
+#      collector.build_all(dbSession,oauthConfig[feature],incremental)
   
-#    for feature, oauthConfig in oauthConfig.iteritems():
-#      collector = EventCollectorFactory.get_collector_for(feature,config.get('AWS','s3_bucket'), config.get('AWS','aws_access_key'), config.get('AWS','aws_secret_key'))
-#      if collector:
-#        try:
-#          collector.build_all(dbSession,oauthConfig,incremental)
-#        except Exception, e:
-#          self.log.error('Collector error: %s' % e)
+    for feature, oauthConfig in oauthConfig.iteritems():
+      collector = EventCollectorFactory.get_collector_for(feature,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
+      if collector:
+        try:
+          collector.build_all(dbSession,oauthConfig,incremental)
+        except Exception, e:
+          self.log.error('Collector error: %s' % e)
     
     dbSession.close()
   

@@ -1,12 +1,13 @@
 <metal:index use-macro="load: master_template.html">
 	<div id="newlogin"  data-theme="a" data-role="page" data-title="New Login" metal:fill-slot="page_content">
+	
 		<header data-role="header" data-position="fixed">
 			<a href="/login" data-rel="back" data-direction="reverse" data-icon="arrow-l" data-iconpos="notext">Back</a>
 			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="ThisIs Me"/></div>
 		</header>
 	
-		<div data-role="content">
-			<h3>Create New Login</h3>
+		<div id="new-account" data-role="content">
+			<h3>Create New Account</h3>
 			<span style="color: red; font-size: 14pt">${message}&nbsp;</span>
 			<form action="${url}" method="post">
 				<input type="hidden" name="forward" value="${forward}"/>

@@ -1,6 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint, Index
-from sqlalchemy.orm import relationship, backref
-
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, UniqueConstraint, Index
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -267,6 +265,9 @@ class FeatureEventJSON(Base):
     return "<FeatureEventJSON('%s,%s')>" % (self.feature_event_id,self.json)
 
 
+# ???
+# ??? WHAT IS THIS USED FOR ???
+# ???
 class OriginMap(Base):
   
   __tablename__ = 'origin_map'
@@ -283,3 +284,76 @@ class OriginMap(Base):
   def __repr__(self):
     return "<OriginMap('%s,%s,%s')>" % (self.feature_name,self.origin,self.origin_feature_name)
 
+
+'''
+TABLE: highlight_type
+'''
+
+class HighlightType(Base):
+  
+  __tablename__ = 'highlight_type'
+
+  id = Column(Integer, primary_key=True)
+
+  label = Column(String(256))
+
+  def __init__(self, label):
+    self.label = label
+
+  def __repr__(self):
+    return "<HighlightType('%d,%s')>" % (self.id,self.label)
+
+
+'''
+TABLE: highlight
+'''
+
+class Highlight(Base):
+  
+  __tablename__ = 'highlight'
+#  __table_args__ = (UniqueConstraint('author_feature_map_id', 'event_id', name='uidx_feature_event_1'),
+#                    Index('idx_feature_event_2', "author_feature_map_id", "create_time"),
+#                    Index('idx_feature_event_3', "parent_id", "create_time"),
+#                    {})
+
+  id = Column(Integer, primary_key=True)
+  
+  highlight_type_id = Column(Integer, ForeignKey('highlight_type.id', ondelete='CASCADE'))
+
+  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'))
+
+  weight = Column(Integer)
+
+  caption = Column(String(4096))
+  content = Column(String(4096))
+  auxillary_content = Column(Text(65565))
+
+  def __init__(self, highlightTypeId, featureEventId, weight, caption=None, content=None, auxillaryContent=None):
+    self.highlight_type_id = highlightTypeId
+    self.feature_event_id = featureEventId
+    self.weight = weight
+    self.caption = caption
+    self.content = content
+    self.auxillary_content = auxillaryContent
+
+  def __repr__(self):
+    return "<Highlight('%d,%d,%d,%d,%s,%s,%s')>" % (self.id,self.highlight_type_id,self.feature_event_id,self.weight, self.caption,self.content,self.auxillary_content)
+
+
+'''
+TABLE: highlight
+'''
+
+class HighlightFeatureEventMap(Base):
+  
+  __tablename__ = 'highlight_feature_event_map'
+
+  highlight_id = Column(Integer, ForeignKey('highlight.id', ondelete='CASCADE'), nullable=True, primary_key=True)
+  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=True, primary_key=True)
+
+  def __init__(self, highlightId, featureEventId):
+    self.highlight_id = highlightId
+    self.feature_event_id = featureEventId
+
+  def __repr__(self):
+    return "<HighlightFeatureEventMap('%s,%s')>" % (self.highlight_id,self.feature_event_id)

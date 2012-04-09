@@ -203,7 +203,7 @@ class FullCollector(object):
         k = Key(bucket)
         
         # output refined JSON
-        k.key = 'refined/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
+        k.key = 'normalized/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
         k.set_contents_from_filename(state.filename)
         
         # output raw JSON
@@ -275,8 +275,10 @@ class FullCollector(object):
         #
         # output to s3
         #
-        # refined
-        state.writer.writerow([state.authorId,json.dumps(event.toJSON(),sort_keys=True)])
+        # normalized
+        normalizedDict = event.toNormalizedObj()
+        normalizedDict['id'] = featureEvent.id
+        state.writer.writerow([state.authorId,json.dumps(normalizedDict,sort_keys=True)])
         
         # raw
         rawObj = event.toMetadataObj()

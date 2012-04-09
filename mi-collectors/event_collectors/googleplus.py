@@ -92,7 +92,7 @@ class GooglePlusFullCollector(FullCollector):
 
           if post['kind'] == 'plus#activity':
       
-            event = Event.GooglePlusEvent(afm.author_id,post['id']).fromJSON(post)
+            event = Event.GooglePlusEvent(afm.author_id).fromJSON(post)
             self.writeEvent(event, traversal)
     
           # if

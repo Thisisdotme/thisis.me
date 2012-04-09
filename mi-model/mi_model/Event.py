@@ -8,6 +8,11 @@ import json
 from datetime import datetime
 from time import mktime
 from abc import abstractmethod
+import urllib2
+
+import copy
+
+from mi_utils.oauth import make_request
 
 '''
 '''
@@ -20,45 +25,51 @@ class Event(object):
   event_id = None
   user_id = None
   
-  def __init__(self,userId,eventId):
+  def __init__(self,userId,eventId=None):
     '''
     Constructor
     '''
     self.user_id = userId
     self.event_id = eventId
   
-  def fromJSON(self,json):
+  def fromJSON(self,json,auxData=None):
     self.raw_json = json
-    self.fromJSONFields(json)
+    self.fromJSONFields(json,auxData)
     return self
 
   @abstractmethod
-  def fromJSONFields(self,json):
+  def fromJSONFields(self,json,auxData=None):
     pass
 
+  def toNormalizedObj(self):
+    propertyDict = {}
+    return self.toJSONFields(propertyDict)
 
   def toJSON(self):
-    propertyDict = {}
-    self.toJSONFields(propertyDict)
-    return json.dumps(propertyDict,sort_keys=True)
+    return json.dumps(self.toNormalizedObj(),sort_keys=True)
 
   @abstractmethod
   def toJSONFields(self,json):
-    '''
-      output type, create_time
-    '''
-    json["event_id"] = self.event_id
-    json["author_id"] = self.user_id
-    json["create_time"] = str(mktime(self.getEventTime().timetuple()))[:-2]
-    json["type"] = self.getType()
+
+    self.toMetadataObjFields(json)
+
     json["origin"] = self.getEventOrigin()
-    json["caption"] = self.getEventCaption()
+    
+    caption = self.getEventCaption()
+    if caption:
+      json["caption"] = caption
+      
     content = self.getEventContent()
     if content:
       json["content"] = content
+      
     photo = self.getEventPhoto()
     if photo:
       json["photo"] = photo
+    
+    rawJSON = self.getRawJSON()
+    if rawJSON:
+      json['_raw_json'] = rawJSON
   
     return json
 
@@ -68,12 +79,13 @@ class Event(object):
     
   @abstractmethod
   def toMetadataObjFields(self,json):
+
     '''
-      output type, create_time
+      standard properties
     '''
     json["event_id"] = self.event_id
     json["author_id"] = self.user_id
-    json["create_time"] = str(mktime(self.getEventTime().timetuple()))[:-2]
+    json["create_time"] = int(str(mktime(self.getEventTime().timetuple()))[:-2])
     json["type"] = self.getType()
     
     return json
@@ -124,18 +136,12 @@ class StatusEvent(Event):
   '''
   classdocs
   '''
-  
-  
-  def fromJSONFields(self,json):
-    super(StatusEvent, self).fromJSONFields(json)
-    ''' Customization
-    '''
-    return self
-  
+    
   def toJSONFields(self,json):
     super(StatusEvent, self).toJSONFields(json)
     ''' customization
     '''
+    return json
 
   
 '''
@@ -147,10 +153,12 @@ class TwitterEvent(StatusEvent):
   DATETIME_STRING_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
 
-  def fromJSONFields(self,json):
-    super(TwitterEvent, self).fromJSONFields(json)
+  def fromJSONFields(self,json,auxData=None):
+    super(TwitterEvent, self).fromJSONFields(json,auxData)
     ''' Customization
     '''
+    self.event_id = self.raw_json['id_str']
+
     return self
   
   def toJSONFields(self,json):
@@ -162,6 +170,7 @@ class TwitterEvent(StatusEvent):
     json['retweet_count'] = int(self.raw_json.get('retweet_count',0))
     json['favorited'] = bool(self.raw_json.get('favorited',False))
 
+    return json
 
 
 
@@ -192,21 +201,26 @@ class FacebookEvent(StatusEvent):
   
   facebookUserId = None
 
-  def __init__(self,userId,eventId,facebookUserId):
+  def __init__(self,userId,facebookUserId):
     '''
     Constructor
     '''
-    super(FacebookEvent, self).__init__(userId,eventId)
+    super(FacebookEvent, self).__init__(userId)
     self.facebookUserId = facebookUserId
     
 
-  def fromJSONFields(self,json):
-    super(FacebookEvent, self).fromJSONFields(json)
+  def fromJSONFields(self,json,auxData=None):
+
+    super(FacebookEvent, self).fromJSONFields(json,auxData)
+
     ''' Customization
     '''
+    self.event_id = self.raw_json['id']
+
     return self
   
   def toJSONFields(self,json):
+  
     super(FacebookEvent, self).toJSONFields(json)
     ''' customization
     '''
@@ -216,6 +230,7 @@ class FacebookEvent(StatusEvent):
     else:
       json['likes_count'] = 0
   
+    return json
 
   def getType(self):
     return "facebook"
@@ -254,16 +269,21 @@ class GooglePlusEvent(StatusEvent):
   '''
   
 
-  def fromJSONFields(self,json):
-    super(GooglePlusEvent, self).fromJSONFields(json)
+  def fromJSONFields(self,json,auxData=None):
+
+    super(GooglePlusEvent, self).fromJSONFields(json,auxData)
+
     ''' Customization
     '''
+    self.event_id = self.raw_json['id']
+
     return self
   
   def toJSONFields(self,json):
     super(GooglePlusEvent, self).toJSONFields(json)
     ''' customization
     '''  
+    return json
 
   def getType(self):
     return "googleplus"
@@ -289,38 +309,64 @@ class LinkedInEvent(StatusEvent):
   classdocs
   '''
   @classmethod
-  def eventsFromJSON(cls,collector,rawJSON,state,timId,userId):
+  def eventsFromJSON(cls,collector,rawJSON,state,timId,userId,oAuthClient):
     
     for post in rawJSON.get('values',[]):
 
       updateType = post['updateType']
-      supportedTypes = ['SHAR','JOBS','CONN']
+      supportedTypes = ['SHAR','JOBP','CONN','MSFC','PREC','SVPR']
+      ignoredTypes = ['PROF','PICU','APPM']
       if updateType in supportedTypes:
 
         if updateType == 'CONN' and post['updateContent']['person']['id'] == userId:
 #          print json.dumps(post, sort_keys=True, indent=2)
           for connection in post['updateContent']['person']['connections']['values']:
             eventId = '%s-%s' % (updateType,connection["id"])
-            event = LinkedInEvent(timId,eventId).fromJSON(post)
+            postClone = copy.deepcopy(post)
+            postClone['updateContent']['person']['connections'] = {"_total":1,"values":[copy.deepcopy(connection)]}
+            event = LinkedInConnectEvent(timId,eventId).fromJSON(postClone,oAuthClient)
             collector.writeEvent(event,state)
 
         elif updateType == 'SHAR':
 #          print json.dumps(post, sort_keys=True, indent=2)
           eventId = post['updateKey']
-          event = LinkedInEvent(timId,eventId).fromJSON(post)      
+          event = LinkedInShareEvent(timId,eventId).fromJSON(post)      
+          collector.writeEvent(event,state)
+          
+        elif updateType == 'MSFC':
+          print json.dumps(post, sort_keys=True, indent=2)
+          if post['updateContent']['companyPersonUpdate']['person']['id'] != userId:
+            continue
+          eventId = post['updateKey']
+          event = LinkedInCompanyFollowEvent(timId,eventId).fromJSON(post)      
+          collector.writeEvent(event,state)
+          
+        elif updateType == 'PREC' or updateType == 'SVPR':
+          print json.dumps(post, sort_keys=True, indent=2)
+          if post['updateContent']['person']['id'] != userId:
+            continue
+          eventId = post['updateKey']
+          event = LinkedInRecommendationEvent(timId,eventId).fromJSON(post)      
           collector.writeEvent(event,state)
 
+        elif updateType == 'JOBP':
+          print json.dumps(post, sort_keys=True, indent=2)
+          if post['updateContent']['job']['jobPoster']['id'] != userId:
+            continue
+          eventId = post['updateKey']
+          event = LinkedInJobPostingEvent(timId,eventId).fromJSON(post)      
+          collector.writeEvent(event,state)
 
-  def fromJSONFields(self,json):
-    super(LinkedInEvent, self).fromJSONFields(json)
-    ''' Customization
-    '''
-    return self
+      else:
+        if not updateType in ignoredTypes:
+          print '???? skipping linkedIn event: %s' % updateType
+
   
   def toJSONFields(self,json):
     super(LinkedInEvent, self).toJSONFields(json)
     ''' customization
     '''
+    return json
 
   def getType(self):
     return "linkedin"
@@ -330,17 +376,128 @@ class LinkedInEvent(StatusEvent):
 
   def getEventContent(self):
     caption = ''
-    if self.raw_json['updateType'] == 'SHAR':
-      caption = self.raw_json['updateContent']['person']['currentShare'].get('comment')
-    elif self.raw_json['updateType'] == 'CONN':
-      connection = self.raw_json['updateContent']['person']['connections']['values']
-      caption = '%s is now connected to %s %s' % (self.raw_json['updateContent']['person']['firstName'],connection[0]['firstName'],connection[0]['lastName'])
-    elif self.raw_json['updateType'] == 'JOBS':
-      caption = None
+    updateType = self.raw_json['updateType']
+    if updateType == 'JOBP':
+      caption = "Job Posting"
+
     return caption
 
   def getEventURL(self):
     return None
+
+
+'''
+'''
+class LinkedInConnectEvent(LinkedInEvent):
+
+  def __init__(self,userId,eventId=None):
+    '''
+    Constructor
+    '''
+    super(LinkedInConnectEvent, self).__init__(userId,eventId)
+
+    self.headline = None
+    self.summary = None
+    self.photo = None
+
+    
+  def fromJSONFields(self,fromJSON,auxData=None):
+
+    super(LinkedInConnectEvent, self).fromJSONFields(fromJSON,auxData)
+
+    # query for the connection's profile image and bio
+    connection = self.raw_json['updateContent']['person']['connections']['values'][0]
+
+    if connection['id'] != 'private':
+
+      url = 'http://api.linkedin.com/v1/people/id=%s:(headline,summary,picture-url)' % connection['id']
+  
+      try:
+        # request the user's updates 
+        contentJSON = make_request(auxData,url,{'x-li-format':'json'})
+        contentObj = json.loads(contentJSON)
+  
+        self.headline = contentObj.get('headline')
+        self.summary = contentObj.get('summary')
+        self.photo = contentObj.get('pictureUrl')
+  
+      except urllib2.URLError:
+        self.log.error('***ERROR*** parse error')
+        self.log.error(contentJSON)
+        pass
+
+    return self
+  
+  def getEventContent(self):
+    connection = self.raw_json['updateContent']['person']['connections']['values'][0]
+    content = '%s is now connected to %s %s.' % (self.raw_json['updateContent']['person']['firstName'],connection['firstName'],connection['lastName'])
+    if self.headline:
+      content = '%s  %s' % (content,self.headline)
+    return content
+    
+  def getEventPhoto(self):
+    return self.photo
+    
+    
+
+'''
+'''
+class LinkedInShareEvent(LinkedInEvent):
+
+  def getEventCaption(self):
+    return self.raw_json['updateContent']['person']['currentShare'].get('comment')
+
+  def getEventContent(self):
+
+    currShare = self.raw_json['updateContent']['person']['currentShare']
+
+    phrase = None
+    if 'content' in currShare:
+      title = currShare['content'].get('title')
+      description = currShare['content'].get('description')
+      if title and description:
+        phrase = '%s; %s' % (title,description)
+      else:
+        phrase = title if title else description
+
+      shortenedUrl = currShare['content'].get('shortenedUrl')
+      if shortenedUrl:
+        phrase = '%s (%s)' % (phrase,shortenedUrl) if phrase else shortenedUrl
+
+    return phrase
+    
+
+'''
+'''
+class LinkedInCompanyFollowEvent(LinkedInEvent):
+
+  def getEventContent(self):
+    person = self.raw_json['updateContent']['companyPersonUpdate']['person']
+    action = self.raw_json['updateContent']['companyPersonUpdate']['action']
+    return '%s %s %s' % (person['firstName'],action['code'],self.raw_json['updateContent']['company']['name'])
+    
+
+'''
+'''
+class LinkedInRecommendationEvent(LinkedInEvent):
+
+  def getEventContent(self):
+    person = self.raw_json['updateContent']['person']
+    recommendation = person['recommendationsGiven']['recommendation']
+    return '%s recommends %s %s %s' % (person['firstName'],recommendation['recommendationType']['code'],recommendation['recommendee']['firstName'],recommendation['recommendee']['lastName'])
+    
+
+'''
+'''
+class LinkedInJobPostingEvent(LinkedInEvent):
+
+  def getEventContent(self):
+    job = self.raw_json['updateContent']['job']
+    person = self.raw_json['updateContent']['job']['jobPoster']
+    return '%s posted the job: %s at %s' % (person['firstName'],job['position'],job['company'])
+    
+
+
 
 '''
 '''
@@ -356,16 +513,18 @@ class FoursquareEvent(PlaceEvent):
   content = None
   source = None
 
-  def fromJSONFields(self,fromJSON):
+  def fromJSONFields(self,fromJSON,auxData=None):
 
-    super(FoursquareEvent, self).fromJSONFields(fromJSON)
+    super(FoursquareEvent, self).fromJSONFields(fromJSON,auxData)
+
+    self.event_id = self.raw_json['id']
 
 #    print json.dumps(fromJSON, sort_keys=True, indent=2)
 
     ''' Customization
     '''
     caption = fromJSON['venue'].get('name','')
-    shout = fromJSON.get('shout','')
+    shout = fromJSON.get('shout',None)
     address = fromJSON['venue']['location'].get('address')
     city = fromJSON['venue']['location'].get('city')
 
@@ -439,15 +598,14 @@ class InstagramEvent(PhotoEvent):
   content = None
   source = None
 
-  def fromJSONFields(self,fromJSON):
+  def fromJSONFields(self,fromJSON,auxData=None):
 
-    super(InstagramEvent, self).fromJSONFields(fromJSON)
-
-#    print json.dumps(fromJSON, sort_keys=True, indent=2)
+    super(InstagramEvent, self).fromJSONFields(fromJSON,auxData)
 
     ''' Customization
     '''
- 
+    self.event_id = self.raw_json['id'] 
+
     return self
 
 

@@ -91,7 +91,7 @@ class LinkedInFullCollector(FullCollector):
           url = None
           continue
 
-        LinkedInEvent.eventsFromJSON(self,rawJSON,traversal,afm.author_id,userId)
+        LinkedInEvent.eventsFromJSON(self,rawJSON,traversal,afm.author_id,userId,client)
 
         # setup for the next page (if any)
         if rawJSON['_total'] < PAGE_SIZE:
