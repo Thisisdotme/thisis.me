@@ -12,7 +12,7 @@ from time import mktime
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent, FeatureEventJSON
+from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent
 
 INCREMENTAL_OVERLAP = timedelta (hours = 1)
 
@@ -52,10 +52,6 @@ class FullCollectorState(object):
     self.filename = filename
     self.mapper = mapper
     self.writer = writer
-
-    self.raw_filename = rawFilename
-    self.raw_mapper = rawMapper
-    self.raw_writer = rawWriter
 
     self.lastUpdateTime = lastUpdateTime
     self.mostRecentEventId = mostRecentEventId
@@ -125,11 +121,6 @@ class FullCollector(object):
 
     # query the db for all users that have the feature installed
     for afm in dbSession.query(AuthorFeatureMap).filter_by(feature_id=featureId).all():
-
-#      # get the name of the author  
-#      authorName, = dbSession.query(Author.author_name).filter_by(id=afm.author_id).one()
-#      self.log.info('querying %s for author "%s"' % (self.getFeatureName(),authorName))
-  
       self.build_one(afm,dbSession,oauthConfig,incremental)
 
   '''
@@ -191,7 +182,6 @@ class FullCollector(object):
 
     # before uploading to s3 it's important to close the files to flush the buffers 
     state.mapper.close()
-    state.raw_mapper.close();
 
     # copy new mapper file to s3 if the file exists and has a non-zero size
     #
@@ -206,13 +196,8 @@ class FullCollector(object):
         k.key = 'normalized/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
         k.set_contents_from_filename(state.filename)
         
-        # output raw JSON
-        k.key = 'raw/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
-        k.set_contents_from_filename(state.raw_filename)
-
       # remove the file from the local file-system
       os.remove(state.filename)
-      os.remove(state.raw_filename)
 
     # terminate the transaction
     #
@@ -275,12 +260,6 @@ class FullCollector(object):
         normalizedDict = event.toNormalizedObj()
         normalizedDict['id'] = featureEvent.id
         state.writer.writerow([state.authorId,json.dumps(normalizedDict,sort_keys=True)])
-        
-        # raw
-        rawObj = event.toMetadataObj()
-        rawObj['id'] = featureEvent.id
-        rawObj['raw_json'] = event.raw_json
-        state.raw_writer.writerow([state.authorId,json.dumps(rawObj)])
         
         state.totalAccepted = state.totalAccepted + 1
      
