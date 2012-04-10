@@ -126,6 +126,9 @@ class Event(object):
 
   def getRawJSON(self):
     return self.raw_json
+  
+  def getNativePropertiesObj(self):
+    return self.raw_json
 
   def getProfileImageUrl(self):
     return None

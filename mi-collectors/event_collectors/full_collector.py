@@ -264,12 +264,8 @@ class FullCollector(object):
         auxillaryContent = event.getAuxillaryContent()
         profileImageUrl = event.getProfileImageUrl() if event.getProfileImageUrl() else state.defaultProfileImageUrl
 
-        featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl)
+        featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
         state.dbSession.add(featureEvent)
-        state.dbSession.flush()
-        
-        featureEventJSON = FeatureEventJSON(featureEvent.id,json.dumps(event.getRawJSON()))
-        state.dbSession.add(featureEventJSON)
         state.dbSession.flush()
 
         #

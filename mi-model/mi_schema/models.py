@@ -230,11 +230,13 @@ class FeatureEvent(Base):
   content = Column(String(4096))
   photo_url = Column(String(4096))
   
-  auxillary_content = Column(String(65565))
+  auxillary_content = Column(Text(65565))
 
   author_profile_image_url = Column(String(1024))
 
-  def __init__(self, authorFeatureMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None):
+  json = Column(Text (65535))
+
+  def __init__(self, authorFeatureMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None, json=None):
     self.author_feature_map_id = authorFeatureMapId
     self.event_id = eventId
     self.create_time = createTime
@@ -244,30 +246,13 @@ class FeatureEvent(Base):
     self.photo_url = photoURL
     self.auxillary_content = auxillaryContent
     self.author_profile_image_url = authorProfileImageUrl
-
-  def __repr__(self):
-    return "<FeatureEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_feature_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
-
-
-class FeatureEventJSON(Base):
-  
-  __tablename__ = 'feature_event_json'
-  
-  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=False, primary_key=True)
-
-  json = Column(String(65535))
-
-  def __init__(self, featureEventId, json=None):
-    self.feature_event_id = featureEventId
     self.json = json
 
   def __repr__(self):
-    return "<FeatureEventJSON('%s,%s')>" % (self.feature_event_id,self.json)
+    # not including the JSON
+    return "<FeatureEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_feature_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
 
 
-# ???
-# ??? WHAT IS THIS USED FOR ???
-# ???
 class OriginMap(Base):
   
   __tablename__ = 'origin_map'
