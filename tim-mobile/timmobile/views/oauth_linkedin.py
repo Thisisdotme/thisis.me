@@ -15,7 +15,7 @@ from mi_utils.oauth import make_request
 
 from timmobile.exceptions import UnexpectedAPIResponse
 from timmobile import oAuthConfig
-from timweb.globals import DBSession
+from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
 

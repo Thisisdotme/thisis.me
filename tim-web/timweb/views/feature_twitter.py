@@ -3,7 +3,7 @@ import urlparse
 import urllib
 import urllib2
 import oauth2 as oauth
-import simplejson as json
+import json
 from datetime import datetime
 
 from pyramid.view import view_config

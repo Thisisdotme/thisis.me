@@ -43,7 +43,7 @@ class FullCollectorState(object):
   # profile image
   defaultProfileImageUrl = None
 
-  def __init__(self,dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
+  def __init__(self,dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
     self.dbSession = dbSession
     self.afm = afm
     self.authorId = afm.author_id
@@ -168,14 +168,11 @@ class FullCollector(object):
     filename = self.makeFilename(afm.author_id,now,"refined")
     mapper = open(filename,'wb')
     writer = csv.writer(mapper)
-    rawFilename = self.makeFilename(afm.author_id,now,"raw")
-    rawMapper = open(rawFilename,'wb')
-    rawWriter = csv.writer(rawMapper)
     mostRecentEventId = afm.most_recent_event_id if self.incremental else None
     mostRecentEventTimestamp = afm.most_recent_event_timestamp if self.incremental else None
     lastUpdateTime = afm.last_update_time if self.incremental else None
 
-    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,rawFilename,rawMapper,rawWriter,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
+    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
 
 
   def endTraversal(self,state,authorName):

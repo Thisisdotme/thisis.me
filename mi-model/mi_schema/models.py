@@ -212,7 +212,7 @@ class FeatureEvent(Base):
   
   id = Column(Integer, primary_key=True)
   
-  parent_id = Column(Integer, ForeignKey('feature_event.id'), nullable=True)
+  parent_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=True)
   
   author_feature_map_id = Column(Integer, ForeignKey('author_feature_map.id', ondelete='CASCADE'), nullable=False)
 

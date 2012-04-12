@@ -1,0 +1,32 @@
+{
+  "Name": "Wordcount Using Python Example", 
+  "LogUri": "s3://emr-logs.dev.thisis.me"
+  "Instances": 
+  { 
+   "SlaveInstanceType": "m1.small", 
+   "MasterInstanceType": "m1.small", 
+   "InstanceCount": "1", 
+   "Ec2KeyName": "mi_rsa", 
+   "KeepJobFlowAliveWhenNoSteps": "false" 
+  }, 
+
+"Steps": 
+ [ 
+ 
+   { 
+      "Name": "Streaming Job flow Step -- count unique words", 
+      "ActionOnFailure": "CONTINUE", 
+      "HadoopJarStep": 
+      { 
+         "Jar": "/home/hadoop/contrib/streaming/hadoop-0.18-streaming.jar", 
+         "Args": 
+         [ 
+            "-input", "s3://elasticmapreduce/samples/wordcount/input", 
+            "-output", "s3://emr-output.dev.thisis.me/testoutput", 
+            "-mapper", "s3://elasticmapreduce/samples/wordcount/wordSplitter.py", 
+            "-reducer", "aggregate" 
+         ] 
+      } 
+    } 
+  ] 
+}

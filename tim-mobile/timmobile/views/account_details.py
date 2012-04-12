@@ -5,7 +5,7 @@ Created on Feb 23, 2012
 '''
 from mi_url.RequestWithMethod import RequestWithMethod
 from pyramid.view import view_config
-import simplejson as json
+import json
 import urllib2
 from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPFound
