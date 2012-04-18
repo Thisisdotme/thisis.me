@@ -24,6 +24,8 @@ from mi_schema.models import Base, Highlight, HighlightFeatureEventMap, Highligh
 
 DBSession = sessionmaker()
 
+DAY_COUNT = 30
+
 EVENTS_KEY = 'foursquare-author-venue'
 SUMMARY_KEY = 'foursquare-highlights'
 
@@ -82,6 +84,7 @@ def main(argv):
  
   # if either are none then there's nothing to process
   if venueSignalKey is None or summarySignalKey is None:
+    print 'No data available (missing %s)' % SIGNAL_KEY
     return False
 
   # initialize the db engine & session
@@ -198,10 +201,6 @@ def transform_to_highlight(dbSession,highlightTypeId):
   # select all summary events with 5 or more repetitions
   for summary,featureEvent,authorName in dbSession.query(TmpFoursquareSummary,FeatureEvent,Author.full_name).outerjoin(Highlight,and_(TmpFoursquareSummary.feature_event_id==Highlight.feature_event_id,Highlight.highlight_type_id==highlightTypeId)).join(FeatureEvent,TmpFoursquareSummary.feature_event_id==FeatureEvent.id).join(Author,TmpFoursquareSummary.author_id==Author.id).filter(and_(TmpFoursquareSummary.count >= MIN_COUNT,Highlight.feature_event_id == None)):
   
-    phrase = '%s has had %d visits to %s' % (authorName,summary.count,featureEvent.content)
-
-    print phrase
-    
     highlight = Highlight(highlightTypeId, featureEvent.id, summary.weight, featureEvent.caption, make_highlight_content(authorName,summary,featureEvent),json.dumps({"count":summary.count}))
     dbSession.add(highlight)
     dbSession.flush()
@@ -215,13 +214,13 @@ def transform_to_highlight(dbSession,highlightTypeId):
   result = dbSession.execute('DELETE h FROM highlight h left outer join %s tfs on h.feature_event_id = tfs.feature_event_id AND tfs.count >= %d WHERE tfs.feature_event_id IS NULL AND h.highlight_type_id = %d' % (TmpFoursquareSummary.__table__.name,MIN_COUNT,highlightTypeId))
 
   # update anything that has a different weight
-  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(a.full_name,\' has had \', tmp.count, \' visits to \', fe.content, \' in the past 30 days\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpFoursquareSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(tmp.count, \' visits to \', fe.content, \' in the past %d days\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpFoursquareSummary.__table__.name,highlightTypeId, DAY_COUNT))
 
   dbSession.commit()
 
 def make_highlight_content(authorName,summary,featureEvent):
   # !!!! The following string also appears in the SQL UPDATE clause above
-  return '%s has had %d visits to %s in the past %d days' % (authorName,summary.count,featureEvent.content,30)
+  return '%d visits to %s in the past %d days' % (summary.count,featureEvent.content,DAY_COUNT)
   
 
 if __name__ == '__main__':

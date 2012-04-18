@@ -50,6 +50,48 @@ def createFeatureEvent(dbSession,request,fe,featureName,author):
   return event
 
 
+def createHighlightEvent(dbSession,request,highlight,fe,featureName,author):
+
+  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
+
+  # determine all the shared sources -- all feature_event rows whose parent_id is this feature_event
+  for sharedFeatureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
+    sourcesItems.append({'feature_name':sharedFeatureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
+  
+  # collect the pieces of available content 
+  content = {}
+  if highlight.content:
+    content['label'] = highlight.content
+
+  if fe.content:
+    content['data'] = fe.content
+  elif fe.caption:
+    content['data'] = fe.caption
+
+  if fe.auxillary_content:
+    content['auxillary_data'] = json.loads(fe.auxillary_content)
+
+  if fe.url:
+    content['url'] = fe.url
+
+  if fe.photo_url:
+    content['photo_url'] = fe.photo_url
+
+  profileImageUrl = fe.author_profile_image_url if fe.author_profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png') 
+    
+  author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
+  
+  event = {'event_id':fe.id,
+           'feature':featureName,
+           'create_time':int(mktime(fe.create_time.timetuple())),
+           'link':request.route_url('author.query.events.eventId',authorname=request.matchdict['authorname'],eventID=fe.id),
+           'content':content,
+           'author':author,
+           'sources':{'count':len(sourcesItems),'items':sourcesItems}}
+
+  return event
+
+
 def featureBuild(authorName, featureName, incremental, s3Bucket, aws_access_key, aws_secret_key):
 
   print("refresh %s featureEvents for %s" % (authorName,featureName))

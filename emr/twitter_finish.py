@@ -71,6 +71,7 @@ def main(argv):
  
   # if either are none then there's nothing to process
   if summarySignalKey is None:
+    print 'No data available (missing %s)' % SIGNAL_KEY
     return False
 
   # initialize the db engine & session
@@ -145,8 +146,6 @@ def transform_to_highlight(dbSession,highlightTypeId):
   # select all events
   for summary,featureEvent,authorName in dbSession.query(TmpTwitterSummary,FeatureEvent,Author.full_name).outerjoin(Highlight,and_(TmpTwitterSummary.feature_event_id==Highlight.feature_event_id,Highlight.highlight_type_id == highlightTypeId)).join(FeatureEvent,TmpTwitterSummary.feature_event_id==FeatureEvent.id).join(Author,TmpTwitterSummary.author_id==Author.id).filter(Highlight.feature_event_id == None):
   
-    print make_highlight_content(authorName,summary,featureEvent)
-
     # Insert the highlight....
     highlight = Highlight(highlightTypeId, featureEvent.id, summary.weight, featureEvent.caption, make_highlight_content(authorName,summary,featureEvent),json.dumps({"count":summary.count}))
     dbSession.add(highlight)
@@ -161,13 +160,13 @@ def transform_to_highlight(dbSession,highlightTypeId):
   result = dbSession.execute('DELETE h FROM highlight h left outer join %s tmp on h.feature_event_id = tmp.feature_event_id WHERE tmp.feature_event_id IS NULL AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
 
   # update anything that has a different weight
-  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(a.full_name,\'\'\'s post has a recency & retweet weight of \',tmp.weight), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(\'Generating good buzz\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
 
   dbSession.commit()
 
 def make_highlight_content(authorName,summary,featureEvent):
   # !!!! The following string also appears in the SQL UPDATE clause above
-  return '%s\'s post has a recency & retweet weight of %d' % (authorName,summary.weight)
+  return 'Generating good buzz'
   
 if __name__ == '__main__':
   if main(sys.argv):

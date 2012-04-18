@@ -27,7 +27,7 @@ def main(global_config, **settings):
 
   authn_policy = AuthTktAuthenticationPolicy('tim_secret', callback=groupfinder, timeout=1800, reissue_time=180, max_age=1800, debug=True)
   authz_policy = ACLAuthorizationPolicy()
-  
+
   session_factory = pyramid_beaker.session_factory_from_settings(settings) 
 
   config = Configurator(settings=settings,

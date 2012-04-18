@@ -78,6 +78,7 @@ def main(argv):
  
   # if either are none then there's nothing to process
   if summarySignalKey is None:
+    print 'No data available (missing %s)' % SIGNAL_KEY
     return False
 
   # initialize the db engine & session
@@ -191,10 +192,6 @@ def transform_to_highlight(dbSession,highlightTypeId):
   # select all events
   for summary,featureEvent,authorName in dbSession.query(TmpLinkedInSummary,FeatureEvent,Author.full_name).outerjoin(Highlight,and_(TmpLinkedInSummary.feature_event_id==Highlight.feature_event_id,Highlight.highlight_type_id == highlightTypeId)).join(FeatureEvent,TmpLinkedInSummary.feature_event_id==FeatureEvent.id).join(Author,TmpLinkedInSummary.author_id==Author.id).filter(Highlight.feature_event_id == None):
   
-    phrase = '%s connected with %s new people in the last 30 days' % (authorName,summary.count)
-
-    print phrase
-    
     highlight = Highlight(highlightTypeId, featureEvent.id, summary.weight, featureEvent.caption, make_highlight_content(authorName,summary),json.dumps({"count":summary.count}))
     dbSession.add(highlight)
     dbSession.flush()
@@ -208,13 +205,13 @@ def transform_to_highlight(dbSession,highlightTypeId):
   result = dbSession.execute('DELETE h FROM highlight h left outer join %s tfs on h.feature_event_id = tfs.feature_event_id WHERE tfs.feature_event_id IS NULL AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
 
   # update anything that has a different weight
-  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(a.full_name,\' connected with \', tmp.count, \' new people in the last 30 days\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(tmp.count, \' recent new connections\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
 
   dbSession.commit()
 
 def make_highlight_content(authorName,summary):
   # !!!! The following string also appears in the SQL UPDATE clause above
-  return '%s connected with %s new people in the last 30 days' % (authorName,summary.count)
+  return '%s recent new connections' % (summary.count)
   
 if __name__ == '__main__':
   if main(sys.argv):
