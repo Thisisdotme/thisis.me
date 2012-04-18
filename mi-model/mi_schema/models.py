@@ -16,6 +16,7 @@ class Author(Base):
   email = Column(String(255), unique=True, nullable=False)
   full_name = Column(String(255))
   password = Column(String(255), nullable=False)
+  template = Column(String(255), nullable=True)
 
   def __init__(self, authorname, email, fullname, password):
     self.author_name = authorname
