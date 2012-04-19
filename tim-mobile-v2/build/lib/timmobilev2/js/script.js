@@ -1,1 +1,0 @@
-alert('tim-mobile-v2 script.js')
