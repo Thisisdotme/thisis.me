@@ -73,16 +73,16 @@ class AuthorAccessGroupMap(Base):
     return "<AuthorGroupMap('%s,%s')>" % (self.author_id,self.group_id)
 
 '''
-TABLE: feature
+TABLE: service
 '''
 
-class Feature(Base):
+class Service(Base):
   
-  __tablename__ = 'feature'
+  __tablename__ = 'service'
   
   id = Column(Integer, primary_key=True)
 
-  feature_name = Column(String(255), unique=True, nullable=False)
+  service_name = Column(String(255), unique=True, nullable=False)
   
   color_icon_high_res = Column(String(255), nullable=False)
   color_icon_medium_res = Column(String(255), nullable=False)
@@ -91,8 +91,8 @@ class Feature(Base):
   mono_icon_medium_res = Column(String(255), nullable=False)
   mono_icon_low_res = Column(String(255), nullable=False)
   
-  def __init__(self, featureName, colorIconHighRes, colorIconMediumRes, colorIconLowRes, monoIconHighRes, monoIconMediumRes, monoIconLowRes):
-    self.feature_name = featureName
+  def __init__(self, serviceName, colorIconHighRes, colorIconMediumRes, colorIconLowRes, monoIconHighRes, monoIconMediumRes, monoIconLowRes):
+    self.service_name = serviceName
     self.color_icon_high_res = colorIconHighRes
     self.color_icon_medium_res = colorIconMediumRes
     self.color_icon_low_res = colorIconLowRes
@@ -101,25 +101,25 @@ class Feature(Base):
     self.mono_icon_low_res = monoIconLowRes
   
   def __repr__(self):
-    return "<Feature('%s')>" % (self.feature_name)
+    return "<Feature('%s')>" % (self.service_name)
 
   def toJSONObject(self):
-    return {'feature_id':self.id,'name':self.feature_name}
+    return {'service_id':self.id,'name':self.service_name}
 
 
 '''
-TABLE: author_feature_map
+TABLE: author_service_map
 '''
 
-class AuthorFeatureMap(Base):
+class AuthorServiceMap(Base):
 
-  __tablename__ = 'author_feature_map'
-  __table_args__ = (UniqueConstraint('author_id', 'feature_id', name='uidx_author_feature_map_1'),{})
+  __tablename__ = 'author_service_map'
+  __table_args__ = (UniqueConstraint('author_id', 'service_id', name='uidx_author_service_map_1'),{})
 
   id = Column(Integer, primary_key=True)
 
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
-  feature_id = Column(Integer, ForeignKey('feature.id', ondelete='CASCADE'), nullable=False)
+  service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), nullable=False)
 
   access_token = Column(String(255))
   access_token_secret = Column(String(255))
@@ -131,9 +131,9 @@ class AuthorFeatureMap(Base):
   
   auxillary_data = Column(String(65565))
   
-  def __init__(self, authorId, featureId, accessToken, accessTokenSecret, auxillaryData=None):
+  def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, auxillaryData=None):
     self.author_id = authorId
-    self.feature_id = featureId
+    self.service_id = serviceId
     self.access_token = accessToken
     self.access_token_secret = accessTokenSecret
     self.last_update_time = None
@@ -142,7 +142,7 @@ class AuthorFeatureMap(Base):
     self.auxillary_data = auxillaryData
     
   def __repr__(self):
-    return "<AuthorFeatureMap('%s,%s')>" % (self.author_id,self.feature_id)
+    return "<AuthorServiceMap('%s,%s')>" % (self.author_id,self.service_id)
 
 
 '''
@@ -200,26 +200,26 @@ class AuthorGroupMap(Base):
 
 
 '''
-TABLE: feature_event
+TABLE: service_event
 '''
 
-class FeatureEvent(Base):
+class ServiceEvent(Base):
   
-  __tablename__ = 'feature_event'
-  __table_args__ = (UniqueConstraint('author_feature_map_id', 'event_id', name='uidx_feature_event_1'),
-                    Index('idx_feature_event_2', "author_feature_map_id", "create_time"),
-                    Index('idx_feature_event_3', "parent_id", "create_time"),
+  __tablename__ = 'service_event'
+  __table_args__ = (UniqueConstraint('author_service_map_id', 'event_id', name='uidx_service_event_1'),
+                    Index('idx_service_event_2', "author_service_map_id", "create_time"),
+                    Index('idx_service_event_3', "parent_id", "create_time"),
                     {})
   
   id = Column(Integer, primary_key=True)
   
-  parent_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=True)
+  parent_id = Column(Integer, ForeignKey('service_event.id', ondelete='CASCADE'), nullable=True)
   
-  author_feature_map_id = Column(Integer, ForeignKey('author_feature_map.id', ondelete='CASCADE'), nullable=False)
+  author_service_map_id = Column(Integer, ForeignKey('author_service_map.id', ondelete='CASCADE'), nullable=False)
 
-  # added for convenience.  Not sure if we want them long term but they make querying feature_events by feature and
-  # author easy and more efficient (no join to author_feature_map)
-#  feature_id = Column(Integer, ForeignKey('feature.id'), nullable=False)
+  # added for convenience.  Not sure if we want them long term but they make querying service_events by service and
+  # author easy and more efficient (no join to author_service_map)
+#  service_id = Column(Integer, ForeignKey('service.id'), nullable=False)
 #  author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
 
   event_id = Column(String(255), nullable=False)
@@ -237,8 +237,8 @@ class FeatureEvent(Base):
 
   json = Column(Text (65535))
 
-  def __init__(self, authorFeatureMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None, json=None):
-    self.author_feature_map_id = authorFeatureMapId
+  def __init__(self, authorServiceMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None, json=None):
+    self.author_service_map_id = authorServiceMapId
     self.event_id = eventId
     self.create_time = createTime
     self.url = url
@@ -251,24 +251,24 @@ class FeatureEvent(Base):
 
   def __repr__(self):
     # not including the JSON
-    return "<FeatureEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_feature_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
+    return "<ServiceEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,self.author_service_map_id,self.create_time,self.url,self.caption,self.content,self.photo_url,self.auxillary_content)
 
 
 class OriginMap(Base):
   
   __tablename__ = 'origin_map'
 
-  feature_name = Column(String(255), nullable=False, primary_key=True)
+  service_name = Column(String(255), nullable=False, primary_key=True)
   origin = Column(String(255), nullable=False, primary_key=True)
-  origin_feature_name = Column(String(255), nullable=True)
+  origin_service_name = Column(String(255), nullable=True)
 
-  def __init__(self, featureName, origin, originFeatureName):
-    self.feature_name = featureName
+  def __init__(self, serviceName, origin, originServiceName):
+    self.service_name = serviceName
     self.origin = origin
-    self.origin_feature_name = originFeatureName
+    self.origin_service_name = originServiceName
 
   def __repr__(self):
-    return "<OriginMap('%s,%s,%s')>" % (self.feature_name,self.origin,self.origin_feature_name)
+    return "<OriginMap('%s,%s,%s')>" % (self.service_name,self.origin,self.origin_service_name)
 
 
 '''
@@ -297,16 +297,16 @@ TABLE: highlight
 class Highlight(Base):
   
   __tablename__ = 'highlight'
-#  __table_args__ = (UniqueConstraint('author_feature_map_id', 'event_id', name='uidx_feature_event_1'),
-#                    Index('idx_feature_event_2', "author_feature_map_id", "create_time"),
-#                    Index('idx_feature_event_3', "parent_id", "create_time"),
+#  __table_args__ = (UniqueConstraint('author_service_map_id', 'event_id', name='uidx_service_event_1'),
+#                    Index('idx_service_event_2', "author_service_map_id", "create_time"),
+#                    Index('idx_service_event_3', "parent_id", "create_time"),
 #                    {})
 
   id = Column(Integer, primary_key=True)
   
   highlight_type_id = Column(Integer, ForeignKey('highlight_type.id', ondelete='CASCADE'))
 
-  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'))
+  service_event_id = Column(Integer, ForeignKey('service_event.id', ondelete='CASCADE'))
 
   weight = Column(Integer)
 
@@ -314,32 +314,32 @@ class Highlight(Base):
   content = Column(String(4096))
   auxillary_content = Column(Text(65565))
 
-  def __init__(self, highlightTypeId, featureEventId, weight, caption=None, content=None, auxillaryContent=None):
+  def __init__(self, highlightTypeId, serviceEventId, weight, caption=None, content=None, auxillaryContent=None):
     self.highlight_type_id = highlightTypeId
-    self.feature_event_id = featureEventId
+    self.service_event_id = serviceEventId
     self.weight = weight
     self.caption = caption
     self.content = content
     self.auxillary_content = auxillaryContent
 
   def __repr__(self):
-    return "<Highlight('%d,%d,%d,%d,%s,%s,%s')>" % (self.id,self.highlight_type_id,self.feature_event_id,self.weight, self.caption,self.content,self.auxillary_content)
+    return "<Highlight('%d,%d,%d,%d,%s,%s,%s')>" % (self.id,self.highlight_type_id,self.service_event_id,self.weight, self.caption,self.content,self.auxillary_content)
 
 
 '''
 TABLE: highlight
 '''
 
-class HighlightFeatureEventMap(Base):
+class HighlightServiceEventMap(Base):
   
-  __tablename__ = 'highlight_feature_event_map'
+  __tablename__ = 'highlight_service_event_map'
 
   highlight_id = Column(Integer, ForeignKey('highlight.id', ondelete='CASCADE'), nullable=True, primary_key=True)
-  feature_event_id = Column(Integer, ForeignKey('feature_event.id', ondelete='CASCADE'), nullable=True, primary_key=True)
+  service_event_id = Column(Integer, ForeignKey('service_event.id', ondelete='CASCADE'), nullable=True, primary_key=True)
 
-  def __init__(self, highlightId, featureEventId):
+  def __init__(self, highlightId, serviceEventId):
     self.highlight_id = highlightId
-    self.feature_event_id = featureEventId
+    self.service_event_id = serviceEventId
 
   def __repr__(self):
-    return "<HighlightFeatureEventMap('%s,%s')>" % (self.highlight_id,self.feature_event_id)
+    return "<HighlightServiceEventMap('%s,%s')>" % (self.highlight_id,self.service_event_id)

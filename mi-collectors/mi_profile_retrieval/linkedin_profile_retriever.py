@@ -16,7 +16,7 @@ class LinkedInProfileRetriever(ProfileRetriever):
   '''
   classdocs
   '''
-  feature_name = 'linkedin'
+  service_name = 'linkedin'
   
   def get_author_profile(self,afm,db_session,oauth_config):
     

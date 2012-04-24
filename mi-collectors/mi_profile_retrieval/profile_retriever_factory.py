@@ -11,18 +11,18 @@ from twitter_profile_retriever import TwitterProfileRetriever
 class ProfileRetrievalFactory(object):
 
   @classmethod
-  def get_retriever_for(cls,featureName):
+  def get_retriever_for(cls,serviceName):
   
     retriever = None
     
-    if featureName == 'linkedin':
+    if serviceName == 'linkedin':
       retriever = LinkedInProfileRetriever()
-    elif featureName == 'googleplus':
+    elif serviceName == 'googleplus':
       retriever = GooglePlusProfileRetriever()
-    elif featureName == 'twitter':
+    elif serviceName == 'twitter':
       retriever = TwitterProfileRetriever()    
-  #  elif featureName == 'facebook':
+  #  elif serviceName == 'facebook':
   #    retriever = FacebookCollector()
-  #  elif featureName == 'instagram':
+  #  elif serviceName == 'instagram':
   #    retriever = InstagramCollector()
     return retriever

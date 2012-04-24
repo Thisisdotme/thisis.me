@@ -14,7 +14,7 @@ from full_collector import FullCollector
 
 class FacebookFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'facebook'
 
   # update_author

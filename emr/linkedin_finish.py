@@ -20,7 +20,7 @@ from boto.s3.connection import S3Connection
 from sqlalchemy import Column, Integer
 from sqlalchemy.schema import Table
 
-from mi_schema.models import Base, Highlight, HighlightFeatureEventMap, HighlightType, FeatureEvent, Author
+from mi_schema.models import Base, Highlight, HighlightServiceEventMap, HighlightType, ServiceEvent, Author
 
 DBSession = sessionmaker()
 
@@ -38,7 +38,7 @@ Temporary tables for processing Foursquare highlights
 class TmpLinkedInConnects(Base):
   __table__ = Table('tmp_linkedin_connect', Base.metadata,
                     Column('author_id', Integer),
-                    Column('feature_event_id', Integer, primary_key=True),
+                    Column('service_event_id', Integer, primary_key=True),
                     prefixes=['TEMPORARY'])
 
 
@@ -46,7 +46,7 @@ class TmpLinkedInSummary(Base):
   __table__ = Table('tmp_linkedin_summary', Base.metadata,
                   Column('author_id', Integer),
                   Column('time',Integer),
-                  Column('feature_event_id', Integer, primary_key=True),
+                  Column('service_event_id', Integer, primary_key=True),
                   Column('count', Integer),
                   Column('weight', Integer),
                   prefixes=['TEMPORARY'])
@@ -190,22 +190,22 @@ def main(argv):
 def transform_to_highlight(dbSession,highlightTypeId):
   
   # select all events
-  for summary,featureEvent,authorName in dbSession.query(TmpLinkedInSummary,FeatureEvent,Author.full_name).outerjoin(Highlight,and_(TmpLinkedInSummary.feature_event_id==Highlight.feature_event_id,Highlight.highlight_type_id == highlightTypeId)).join(FeatureEvent,TmpLinkedInSummary.feature_event_id==FeatureEvent.id).join(Author,TmpLinkedInSummary.author_id==Author.id).filter(Highlight.feature_event_id == None):
+  for summary,serviceEvent,authorName in dbSession.query(TmpLinkedInSummary,ServiceEvent,Author.full_name).outerjoin(Highlight,and_(TmpLinkedInSummary.service_event_id==Highlight.service_event_id,Highlight.highlight_type_id == highlightTypeId)).join(ServiceEvent,TmpLinkedInSummary.service_event_id==ServiceEvent.id).join(Author,TmpLinkedInSummary.author_id==Author.id).filter(Highlight.service_event_id == None):
   
-    highlight = Highlight(highlightTypeId, featureEvent.id, summary.weight, featureEvent.caption, make_highlight_content(authorName,summary),json.dumps({"count":summary.count}))
+    highlight = Highlight(highlightTypeId, serviceEvent.id, summary.weight, serviceEvent.caption, make_highlight_content(authorName,summary),json.dumps({"count":summary.count}))
     dbSession.add(highlight)
     dbSession.flush()
     
     for venue in dbSession.query(TmpLinkedInConnects).filter(TmpLinkedInConnects.author_id==summary.author_id):
-      highlightMap = HighlightFeatureEventMap(highlight.id,venue.feature_event_id)
+      highlightMap = HighlightServiceEventMap(highlight.id,venue.service_event_id)
       dbSession.add(highlightMap)
       dbSession.flush()
 
   # delete anything that no longer exists as a highlight  
-  result = dbSession.execute('DELETE h FROM highlight h left outer join %s tfs on h.feature_event_id = tfs.feature_event_id WHERE tfs.feature_event_id IS NULL AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('DELETE h FROM highlight h left outer join %s tfs on h.service_event_id = tfs.service_event_id WHERE tfs.service_event_id IS NULL AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
 
   # update anything that has a different weight
-  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(tmp.count, \' recent new connections\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.service_event_id = h.service_event_id INNER JOIN service_event fe ON h.service_event_id = fe.id INNER JOIN author_service_map afm ON fe.author_service_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(tmp.count, \' recent new connections\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpLinkedInSummary.__table__.name,highlightTypeId))
 
   dbSession.commit()
 

@@ -16,7 +16,7 @@ USER_MEDIA = 'users/self/media/recent'
 
 class InstagramFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'instagram'
 
   # update_author

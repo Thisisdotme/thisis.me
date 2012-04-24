@@ -16,7 +16,7 @@ USER_INFO = 'people/me'
 
 class GooglePlusFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'googleplus'
 
   # update_author

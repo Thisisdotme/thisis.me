@@ -12,7 +12,7 @@ from time import mktime
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-from mi_schema.models import Feature, AuthorFeatureMap, FeatureEvent
+from mi_schema.models import Service, AuthorServiceMap, ServiceEvent
 
 INCREMENTAL_OVERLAP = timedelta (hours = 1)
 
@@ -110,17 +110,17 @@ class FullCollector(object):
 
   '''
   build_all
-    queries DB for all users that have feature installed and call updateAuthor for each
+    queries DB for all users that have services installed and call updateAuthor for each
   '''
   def build_all(self,dbSession,oauthConfig,incremental):
     
-    self.log.info('%s build all models for %s beginning...' % ('incremental' if incremental else 'full', self.getFeatureName()))
+    self.log.info('%s build all models for %s beginning...' % ('incremental' if incremental else 'full', self.getServiceName()))
 
-    # get the feature-id for this feature
-    featureId, = dbSession.query(Feature.id).filter_by(feature_name=self.getFeatureName()).first()
+    # get the id for this service
+    serviceId, = dbSession.query(Service.id).filter_by(service_name=self.getServiceName()).first()
 
-    # query the db for all users that have the feature installed
-    for afm in dbSession.query(AuthorFeatureMap).filter_by(feature_id=featureId).all():
+    # query the db for all users that have the service installed
+    for afm in dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId).all():
       self.build_one(afm,dbSession,oauthConfig,incremental)
 
   '''
@@ -137,7 +137,7 @@ class FullCollector(object):
       afm.most_recent_event_id = None
       afm.most_recent_event_timestamp = None
 
-      dbSession.query(FeatureEvent).filter(FeatureEvent.author_feature_map_id==afm.id).delete()
+      dbSession.query(ServiceEvent).filter(ServiceEvent.author_service_map_id==afm.id).delete()
       
       dbSession.flush()
       dbSession.commit()
@@ -146,11 +146,11 @@ class FullCollector(object):
       bucket = self.s3Connection.get_bucket(self.s3Bucket)
       # refined
       for jsonType in ['refined','raw']:
-        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,afm.author_id,self.getFeatureName())):
+        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,afm.author_id,self.getServiceName())):
           bucket.delete_key(key)
 
   @abstractmethod
-  def getFeatureName(self):
+  def getServiceName(self):
     pass
 
   '''
@@ -160,7 +160,7 @@ class FullCollector(object):
     return self.lookbackWindow
 
   def makeFilename(self,authorId,now,varient):
-    return '%s.%s.%d.%s.csv' % (authorId, self.getFeatureName(), mktime(now.timetuple()), varient)
+    return '%s.%s.%d.%s.csv' % (authorId, self.getServiceName(), mktime(now.timetuple()), varient)
 
 
   def beginTraversal(self,dbSession,afm,defaultProfileImageUrl):
@@ -190,7 +190,7 @@ class FullCollector(object):
         k = Key(bucket)
         
         # output refined JSON
-        k.key = 'normalized/%s.%s.%d.csv' % (state.authorId,self.getFeatureName(),mktime(state.now.timetuple()))
+        k.key = 'normalized/%s.%s.%d.csv' % (state.authorId,self.getServiceName(),mktime(state.now.timetuple()))
         k.set_contents_from_filename(state.filename)
         
       # remove the file from the local file-system
@@ -198,7 +198,7 @@ class FullCollector(object):
 
     # terminate the transaction
     #
-    # set the author/feature map's last update time
+    # set the author/service map's last update time
     state.afm.last_update_time = state.now
 
     # update the most_recent_event_id and most_recent_event_timestamp if changed    
@@ -210,7 +210,7 @@ class FullCollector(object):
     state.dbSession.flush()
     state.dbSession.commit()
 
-    self.log.info(json.dumps({'feature':self.getFeatureName(),
+    self.log.info(json.dumps({'service':self.getServiceName(),
                               'author_name':authorName[0],
                               'total_accepted':state.totalAccepted,
                               'stale_rejected':state.staleRejected,
@@ -223,7 +223,7 @@ class FullCollector(object):
     def flushIfUnique():
       # check if this is a duplicate of something already in the DB
       #
-      count = state.dbSession.query(FeatureEvent.id).filter_by(author_feature_map_id=state.afm.id,event_id=event.getEventId()).count()
+      count = state.dbSession.query(ServiceEvent.id).filter_by(author_service_map_id=state.afm.id,event_id=event.getEventId()).count()
       if count > 0:
         state.duplicateRejected = state.duplicateRejected + 1
       else:
@@ -246,8 +246,8 @@ class FullCollector(object):
         auxillaryContent = event.getAuxillaryContent()
         profileImageUrl = event.getProfileImageUrl() if event.getProfileImageUrl() else state.defaultProfileImageUrl
 
-        featureEvent = FeatureEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
-        state.dbSession.add(featureEvent)
+        serviceEvent = ServiceEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
+        state.dbSession.add(serviceEvent)
         state.dbSession.flush()
 
         #
@@ -255,7 +255,7 @@ class FullCollector(object):
         #
         # normalized
         normalizedDict = event.toNormalizedObj()
-        normalizedDict['id'] = featureEvent.id
+        normalizedDict['id'] = serviceEvent.id
         state.writer.writerow([state.authorId,json.dumps(normalizedDict,sort_keys=True)])
         
         state.totalAccepted = state.totalAccepted + 1

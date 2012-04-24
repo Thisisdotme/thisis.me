@@ -25,7 +25,7 @@ PAGE_SIZE = 200
 
 class LinkedInFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'linkedin'
 
   # update_author
