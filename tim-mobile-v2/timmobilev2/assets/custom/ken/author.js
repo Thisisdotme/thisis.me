@@ -1,0 +1,1 @@
+(function(){dust.register("author",body_0);function body_0(chk,ctx){return chk.write("<div>").reference(ctx.get("full_name"),ctx,"h").write("</div>");}return body_0;})();

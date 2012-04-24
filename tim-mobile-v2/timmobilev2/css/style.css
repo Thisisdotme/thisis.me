@@ -213,6 +213,526 @@ td { vertical-align: top; }
    ========================================================================== */
 
 
+   /* ==|== primary styles =====================================================
+      Author:
+      ========================================================================== */
+      
+  h1 { margin:0 }
+
+   #followers a {
+   	color: #000;
+   }
+
+   .mi-header { }
+   /*.ui-content { margin-top: 43px; }*/
+
+   #newsfeed .ui-content > div, #timeline .ui-content > div, #feature .ui-content > div { clear: both; }
+
+   #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
+
+   .featureIcon { float:left; margin-right:1em; } 
+
+   /*.event { min-height: 5em; }
+   .event em { font-size:75%; }
+   .event p { margin-top:.33em; }*/
+
+   #authorFeatures .ui-content a { margin: 1em; display: inline-block;}
+
+   /* getting the button in the feature footer to be centered */
+   .center-button { text-align:center; }
+
+   #feature label { font-weight: bold; }
+
+   .data-spinner {
+   	max-height: 100%;
+   	max-width: 100%;
+   }
+
+   .header-logo {
+   	height: 40px;
+   	text-align: center;
+   }
+
+   .header-logo img {
+   	max-height:100%;
+   }
+
+   #accounts h3 {
+   	margin-top: 0;
+   	margin-bottom: 30px;
+   }
+
+   #newlogin .ui-content h3 {
+   	margin: 0;
+   	padding: 0;
+   }
+
+   #login .ui-content {
+   	margin-top: 43px; 
+   }
+
+   #login .logo {
+   	text-align: center;
+   	margin-bottom: 30px;
+   }
+
+   #login .logo img{
+   	text-align: center;
+   	max-height: 100%;
+   	max-width: 100%;
+   }
+
+   #login input[type="text"], #newlogin input[type="text"] {
+   	margin-bottom: 5px;
+   }
+
+   #login form .ui-btn, #newlogin form .ui-btn {
+   	margin-top: 15px;
+   }
+
+   /****
+    *
+    * Followers page
+    *
+    ****/
+
+   #followersList label {
+   	padding-left:.5em;
+   	vertical-align:.4em; 
+   }
+
+   /*********************************
+    * 
+    * 	OAuth Starting Page
+    * 
+    *********************************/
+   .addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
+   .addfeature div { float: left; }
+   .addfeature img { margin-top: 10px; max-height: 100%;	max-width: 100%; }
+   .addfeature .logo { width: 80px; }
+   .addfeature .arrow { margin-top: 25px; width: 60px; font-weight: bold; font-size: 30px; }
+
+   /* Newsfeed */
+
+   /*.flippage-container .event .content { position: absolute; top: 50%; }*/
+
+
+   .profile {
+   	width: 300px;
+   	padding: 10px;
+   }
+
+   .profile .top {
+   	padding-bottom: 5px;
+   	height: 70px;
+   }
+
+   .profile .top .title-container {
+   	float: none;	
+   	display: table-cell;
+   	vertical-align: middle;
+
+   	height: 70px;
+
+   	padding-left: 5px;
+   	padding-right: 10px;
+   }
+
+   .profile .top .title-container .title{
+   	font-weight: bold;
+   	color: #000;
+   }
+
+   .profile .top .title-container .link a{
+   	font-weight: bold;
+
+   	color: #757575;
+   	text-decoration: none;
+   }
+
+   .profile .top .title-container .caption {
+   	height: 18px;
+
+   	font-size: 14px;
+
+   	width: 200px;
+       white-space: nowrap;
+       word-wrap: break-word;
+   	text-overflow: ellipsis;
+   	overflow: hidden;
+   }
+
+
+   .profile .top > div{
+   	float: left;
+   }
+
+   /*.profile .top .avatar {
+   	height: 50px;
+   }*/
+   .profile .top .avatar .frame {
+   	height: 65px;
+   	width: 65px;
+   	margin-left: 4px;
+   	margin-right: 4px;
+   	padding: 1px;
+   	background-color: #fff;
+
+   	-webkit-box-shadow: 0px 0px 2px .1px #555;
+   	-moz-box-shadow:    0px 0px 2px .1px #555;
+
+   	text-align: center;
+   }
+
+   .profile .top .avatar img {
+   	max-height: 100%;
+   	max-width: 100%;
+   	min-height: 100%;
+   	min-width: 100%;
+   }
+
+   .profile .top .avatar img.data-spinner {
+   	min-height: 0;
+   	min-width: 0;
+   }
+
+
+   /*.profile .top .avatar img.loaded {
+   	min-height: 100%;
+   }*/
+   .profile .description {
+   	float: none;
+
+   	font-size: 16px;
+   	color: #000;
+
+   	line-height: 20px;
+   	width: 300px;
+   	min-height: 140px;
+   }
+
+   .profile .profile-url {
+   	height: 20px;
+   	width: 20px;
+   }
+
+   .profile .profile-url img {
+   	max-height: 100%;
+   	max-width: 100%;
+   }
+
+   .profile .meta-data {
+   	margin-top: 10px;
+   	float: left;
+   	width: 100%;
+   }
+
+   .profile .meta-data h3 {
+   	margin-top: 15px;
+   	margin-bottom: 0px;
+   }
+
+   .profile .meta-data hr {
+   	color: #757575;
+   }
+
+   .profile .meta-data .phone a {
+   	text-decoration: none;
+   	font-style: normal;
+   	font-weight: 100;
+   	color: #000;
+   }
+
+   #newsfeed .ui-content, #timeline .ui-content {
+   	margin: 0;
+   	padding: 0;
+   }
+
+   .flippage-container .mi-content {
+   	margin: 0;
+   	padding: 0;
+   	width: 100%;
+
+   	background-color: #F9F7F7;
+   }
+
+   .flippage-container .event {	
+       height: 100%; 
+       margin: 0; /*Allow for footer height*/
+      	position: relative;
+   }
+
+   .flippage-container .event.half-page {
+   	height: 50%;
+   	position: relative;
+   }
+
+   .flippage-container .event .content {
+   	width: 100%;
+   }
+
+   .flippage-container .event.half-page:first-child {
+   	border-bottom:1px inset #777;
+   }
+
+
+   /*	Feature specific configurations  */
+   /*.flippage-container .event.half-page { height: 184px; }
+   .flippage-container .event.half-page  > div:first-child { height: 86px; }*/
+
+
+   /*.flippage-container .event.full-page { height: 369px;}*/
+   .flippage-container .event.half-page .content {
+   	padding-top: 10px; 
+   	height: 90px;  
+   	display: table-cell;
+   	vertical-align: middle;
+   }
+   #timeline .flippage-container .event.half-page .content {
+   	padding-top: 10px; 
+   	height: 122px; 
+   }
+
+   .flippage-container .event.full-page .content {
+   	padding-top: 10px; 
+   	height: 290px; 
+   	float: left; 
+   }
+   #timeline .flippage-container .event.full-page .content {
+   	padding-top: 10px; 
+   	height: 310px; 
+   }
+
+   .flippage-container .event .content .inner-text {
+   	float: left;
+   	padding: 10px 10px 10px 10px;
+   	text-align: left;
+   	margin: 0 auto;
+   }
+
+   .flippage-container .event.full-page .content .inner-text {
+   	padding-bottom: 0;
+   }
+
+   .flippage-container .event .content .inner-text p {
+   	padding: 0;
+   	margin: 0;
+
+   	overflow:hidden;
+   	display: -webkit-box; 
+       -webkit-box-orient:vertical; 
+       -webkit-line-clamp:3;
+   /*	max-height: 56px;*/
+   }
+   #timeline .flippage-container .event .content .inner-text p {
+   	-webkit-line-clamp:4;
+   }
+
+   .flippage-container .event .content .inner-image {
+   /*	padding: 5px 0;*/
+   	height: 238px;
+
+   /*	background-color: black;*/
+   	text-align: center;
+   }
+
+   .flippage-container .event .content .inner-image img {
+   	max-height: 100%;
+   	max-width: 100%;
+   	min-height: 50%;
+   	min-width: 50%;
+   }
+
+   .flippage-container .event .footer {
+   	padding: 5px 5px 5px 5px;
+   	margin: 0;
+   	bottom: 0;
+   	position: absolute;
+   }
+
+   .flippage-container .event.half-page:first-child .footer {
+   /*	bottom: 50%;*/
+   }
+
+   .flippage-container .event .footer .info {
+   	float: none;	
+   	display: table-cell;
+   	vertical-align: middle;
+
+   	height: 100%;
+
+   	padding-left: 5px;
+   	padding-right: 10px;
+   }
+
+   .flippage-container .event .footer .info .author a{
+   	font-weight: bold;
+   	color: #000;
+   	text-decoration: none;
+   }
+
+
+
+   .flippage-container .event .footer .info .caption {
+   	height: 18px;
+
+   	font-size: 14px;
+
+   	width: 250px;
+       white-space: nowrap;
+       word-wrap: break-word;
+   	text-overflow: ellipsis;
+   	overflow: hidden;
+   }
+
+   #timeline .flippage-container .event .footer .info .caption {
+   	width: 300px;
+   }
+
+   .flippage-container .event .footer > div{
+   	float: left;
+   }
+
+   .flippage-container .event .footer .avatar {
+   	height: 40px;
+   }
+
+   .flippage-container .event .footer .avatar .frame {
+   	height: 33px;
+   	width: 33px;
+   	margin-left: 4px;
+   	margin-right: 4px;
+   	padding: 1px;
+   	background-color: #fff;
+
+   	-webkit-box-shadow: 0px 0px 2px .1px #555;
+   	-moz-box-shadow:    0px 0px 2px .1px #000;
+   }
+
+   .flippage-container .event .footer .avatar img {
+   	max-height: 100%;
+   	max-width: 100%;
+
+   }
+
+   .flippage-container .event .baseline {
+   	height: 15px;
+   	padding-top: 7px;
+   }
+
+   .flippage-container .event .baseline img {
+   	float: left;
+   	padding-left: 5px;
+   	height: 15px;
+   	width: 15px;
+   }
+
+   .flippage-container .event .baseline .fuzzy-time {
+   	float: left;
+
+   	padding-left: 5px;
+   	padding-top: 2px;
+
+   	color: gray;
+   	font-size: 12px;
+   }
+
+   /* experimental for pull-down and pull-up */
+
+   #wrapper {
+   	position:absolute; z-index:1;
+   	top:0px; bottom:0px; left:-9999px;
+   	width:100%;
+   	overflow:auto;
+   }
+
+   #scroller {
+   	position:absolute; z-index:1;
+   /*	-webkit-touch-callout:none;*/
+   	-webkit-tap-highlight-color:rgba(0,0,0,0);
+   	width:100%;
+   	padding:0;
+   }
+
+   #pullDown, #pullUp {
+   	background:#fff;
+   	height:40px;
+   	line-height:40px;
+   	padding:5px 10px;
+   	border-bottom:1px solid #ccc;
+   	color:#888;
+   	text-size:.75em;
+   	text-align:center;
+   	}
+
+   #pullDown .pullDownIcon, #pullUp .pullUpIcon  {
+   	display:block; float:left;
+   	width:40px; height:40px;
+   	background:url(/img/pull-icon@2x.png) 0 0 no-repeat;
+   	-webkit-background-size:40px 80px; background-size:40px 80px;
+   	-webkit-transition-property:-webkit-transform;
+   	-webkit-transition-duration:250ms;	
+   }
+
+   #pullDown .pullDownIcon {
+   	-webkit-transform:rotate(0deg) translateZ(0);
+   }
+
+   #pullUp .pullUpIcon  {
+   	-webkit-transform:rotate(-180deg) translateZ(0);
+   }
+
+   #pullDown.flip .pullDownIcon {
+   	-webkit-transform:rotate(-180deg) translateZ(0);
+   }
+
+   #pullUp.flip .pullUpIcon {
+   	-webkit-transform:rotate(0deg) translateZ(0);
+   }
+
+   #pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon {
+   	background-position:0 100%;
+   	-webkit-transform:rotate(0deg) translateZ(0);
+   	-webkit-transition-duration:0ms;
+
+   	-webkit-animation-name:loading;
+   	-webkit-animation-duration:2s;
+   	-webkit-animation-iteration-count:infinite;
+   	-webkit-animation-timing-function:linear;
+   }
+
+   @-webkit-keyframes loading {
+   	from { -webkit-transform:rotate(0deg) translateZ(0); }
+   	to { -webkit-transform:rotate(360deg) translateZ(0); }
+   }
+
+
+   /*
+    * Media queries for responsive design https://github.com/shichuan/mobile-html5-boilerplate/wiki/The-Style
+    */
+
+
+   /* Styles for desktop and large screen ----------- */
+
+   /*styles for 800px and up!*/
+   @media only screen and (min-width: 800px) {
+     /* Styles */
+   }/*/mediaquery*/
+
+
+   /* iPhone 4, Opera Mobile 11 and other high pixel ratio devices ----------- */
+   @media
+   only screen and (-webkit-min-device-pixel-ratio: 1.5),
+   only screen and (-o-min-device-pixel-ratio: 3/2),
+   only screen and (min--moz-device-pixel-ratio: 1.5),
+   only screen and (min-device-pixel-ratio: 1.5) {
+     /* Styles */
+   }
+
+   /* jQuery Mobile sets this to 20% by default, which is too small */
+   .ui-field-contain label.ui-slider {
+   	width: auto;
+   }
 
 
 
