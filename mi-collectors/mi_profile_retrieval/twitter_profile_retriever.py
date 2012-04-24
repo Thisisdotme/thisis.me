@@ -16,7 +16,7 @@ class TwitterProfileRetriever(ProfileRetriever):
   '''
   classdocs
   '''
-  feature_name = 'twitter'
+  service_name = 'twitter'
   
   def get_author_profile(self,afm,db_session,oauth_config):
     

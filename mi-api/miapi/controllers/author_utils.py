@@ -8,19 +8,19 @@ import json
 from time import mktime
 
 from miapi.models import SimpleDBSession
-from mi_schema.models import Author, Feature, AuthorFeatureMap, FeatureEvent
+from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent
 
 from miapi import oAuthConfig
 
 from event_collectors.collector_factory import EventCollectorFactory
 
-def createFeatureEvent(dbSession,request,fe,featureName,author):
+def createServiceEvent(dbSession,request,fe,serviceName,author):
 
-  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
+  sourcesItems = [{'service_name':serviceName,'service_image_url':request.static_url('miapi:img/l/services/color/%s.png' % serviceName)}]
 
-  # determine all the shared sources -- all feature_event rows whose parent_id is this feature_event
-  for sharedFeatureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
-    sourcesItems.append({'feature_name':sharedFeatureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
+  # determine all the shared sources -- all service_event rows whose parent_id is this service_event
+  for sharedFeatureName in dbSession.query(Service.service_name).join(AuthorServiceMap,AuthorServiceMap.service_id==Service.id).join(ServiceEvent,AuthorServiceMap.id==ServiceEvent.author_service_map_id).filter(ServiceEvent.parent_id==fe.id).all():
+    sourcesItems.append({'service_name':sharedFeatureName,'service_image_url':request.static_url('miapi:img/l/services/color_by_fn/%s.png' % serviceName)})
   
   # collect the pieces of available content 
   content = {}
@@ -40,7 +40,7 @@ def createFeatureEvent(dbSession,request,fe,featureName,author):
   author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
   
   event = {'event_id':fe.id,
-           'feature':featureName,
+           'service':serviceName,
            'create_time':int(mktime(fe.create_time.timetuple())),
            'link':request.route_url('author.query.events.eventId',authorname=request.matchdict['authorname'],eventID=fe.id),
            'content':content,
@@ -50,13 +50,13 @@ def createFeatureEvent(dbSession,request,fe,featureName,author):
   return event
 
 
-def createHighlightEvent(dbSession,request,highlight,fe,featureName,author):
+def createHighlightEvent(dbSession,request,highlight,fe,serviceName,author):
 
-  sourcesItems = [{'feature_name':featureName,'feature_image_url':request.static_url('miapi:img/l/features/color/%s.png' % featureName)}]
+  sourcesItems = [{'service_name':serviceName,'service_image_url':request.static_url('miapi:img/l/services/color/%s.png' % serviceName)}]
 
-  # determine all the shared sources -- all feature_event rows whose parent_id is this feature_event
-  for sharedFeatureName in dbSession.query(Feature.feature_name).join(AuthorFeatureMap,AuthorFeatureMap.feature_id==Feature.id).join(FeatureEvent,AuthorFeatureMap.id==FeatureEvent.author_feature_map_id).filter(FeatureEvent.parent_id==fe.id).all():
-    sourcesItems.append({'feature_name':sharedFeatureName,'feature_image_url':request.static_url('miapi:img/l/features/color_by_fn/%s.png' % featureName)})
+  # determine all the shared sources -- all service_event rows whose parent_id is this service_event
+  for sharedFeatureName in dbSession.query(Service.service_name).join(AuthorServiceMap,AuthorServiceMap.service_id==Service.id).join(ServiceEvent,AuthorServiceMap.id==ServiceEvent.author_service_map_id).filter(ServiceEvent.parent_id==fe.id).all():
+    sourcesItems.append({'service_name':sharedFeatureName,'service_image_url':request.static_url('miapi:img/l/services/color_by_fn/%s.png' % serviceName)})
   
   # collect the pieces of available content 
   content = {}
@@ -82,7 +82,7 @@ def createHighlightEvent(dbSession,request,highlight,fe,featureName,author):
   author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
   
   event = {'event_id':fe.id,
-           'feature':featureName,
+           'service':serviceName,
            'create_time':int(mktime(fe.create_time.timetuple())),
            'link':request.route_url('author.query.events.eventId',authorname=request.matchdict['authorname'],eventID=fe.id),
            'content':content,
@@ -92,23 +92,23 @@ def createHighlightEvent(dbSession,request,highlight,fe,featureName,author):
   return event
 
 
-def featureBuild(authorName, featureName, incremental, s3Bucket, aws_access_key, aws_secret_key):
+def serviceBuild(authorName, serviceName, incremental, s3Bucket, aws_access_key, aws_secret_key):
 
-  print("refresh %s featureEvents for %s" % (authorName,featureName))
+  print("refresh %s serviceEvents for %s" % (authorName,serviceName))
 
   dbSession = SimpleDBSession()
 
-  # get the feature-id for featureName
-  featureId, = dbSession.query(Feature.id).filter(Feature.feature_name == featureName).one()
+  # get the service-id for serviceName
+  serviceId, = dbSession.query(Service.id).filter(Service.service_name == serviceName).one()
   
   # get author-id for authorName
   authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
 
-  mapping = dbSession.query(AuthorFeatureMap).filter_by(feature_id=featureId,author_id=authorId).one()
+  mapping = dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId,author_id=authorId).one()
 
-  collector = EventCollectorFactory.get_collector_for(featureName,s3Bucket, aws_access_key, aws_secret_key)
+  collector = EventCollectorFactory.get_collector_for(serviceName,s3Bucket, aws_access_key, aws_secret_key)
   if collector:
-    collector.build_one(mapping,dbSession,oAuthConfig.get(featureName),incremental)
+    collector.build_one(mapping,dbSession,oAuthConfig.get(serviceName),incremental)
 
   dbSession.close()
   

@@ -24,21 +24,21 @@ class EventCollectorFactory(object):
     '''
 
   @classmethod
-  def get_collector_for(cls,feature_name,s3Bucket, aws_access_key, aws_secret_key):
+  def get_collector_for(cls,service_name,s3Bucket, aws_access_key, aws_secret_key):
 
     collector = None
     
-    if feature_name == 'facebook':
+    if service_name == 'facebook':
       collector = FacebookFullCollector(s3Bucket, aws_access_key, aws_secret_key)
-    elif feature_name == 'twitter':
+    elif service_name == 'twitter':
       collector = TwitterFullCollector(s3Bucket, aws_access_key, aws_secret_key)
-    elif feature_name == 'foursquare':
+    elif service_name == 'foursquare':
       collector = FoursquareFullCollector(s3Bucket, aws_access_key, aws_secret_key)
-    elif feature_name == 'linkedin':
+    elif service_name == 'linkedin':
       collector = LinkedInFullCollector(s3Bucket, aws_access_key, aws_secret_key)
-    elif feature_name == 'instagram':
+    elif service_name == 'instagram':
       collector = InstagramFullCollector(s3Bucket, aws_access_key, aws_secret_key)
-    elif feature_name == 'googleplus':
+    elif service_name == 'googleplus':
       collector = GooglePlusFullCollector(s3Bucket, aws_access_key, aws_secret_key)
     
     return collector

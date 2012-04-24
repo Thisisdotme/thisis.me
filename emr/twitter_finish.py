@@ -20,7 +20,7 @@ from boto.s3.connection import S3Connection
 from sqlalchemy import Column, Integer
 from sqlalchemy.schema import Table
 
-from mi_schema.models import Base, Highlight, HighlightFeatureEventMap, HighlightType, FeatureEvent, Author
+from mi_schema.models import Base, Highlight, HighlightServiceEventMap, HighlightType, ServiceEvent, Author
 
 DBSession = sessionmaker()
 
@@ -39,7 +39,7 @@ Temporary tables for processing highlights
 class TmpTwitterSummary(Base):
   __table__ = Table('tmp_twitter_summary', Base.metadata,
                   Column('author_id', Integer),
-                  Column('feature_event_id', Integer, primary_key=True),
+                  Column('service_event_id', Integer, primary_key=True),
                   Column('weight', Integer),
                   Column('count', Integer),
                   prefixes=['TEMPORARY'])
@@ -144,27 +144,27 @@ def main(argv):
 def transform_to_highlight(dbSession,highlightTypeId):
   
   # select all events
-  for summary,featureEvent,authorName in dbSession.query(TmpTwitterSummary,FeatureEvent,Author.full_name).outerjoin(Highlight,and_(TmpTwitterSummary.feature_event_id==Highlight.feature_event_id,Highlight.highlight_type_id == highlightTypeId)).join(FeatureEvent,TmpTwitterSummary.feature_event_id==FeatureEvent.id).join(Author,TmpTwitterSummary.author_id==Author.id).filter(Highlight.feature_event_id == None):
+  for summary,serviceEvent,authorName in dbSession.query(TmpTwitterSummary,ServiceEvent,Author.full_name).outerjoin(Highlight,and_(TmpTwitterSummary.service_event_id==Highlight.service_event_id,Highlight.highlight_type_id == highlightTypeId)).join(ServiceEvent,TmpTwitterSummary.service_event_id==ServiceEvent.id).join(Author,TmpTwitterSummary.author_id==Author.id).filter(Highlight.service_event_id == None):
   
     # Insert the highlight....
-    highlight = Highlight(highlightTypeId, featureEvent.id, summary.weight, featureEvent.caption, make_highlight_content(authorName,summary,featureEvent),json.dumps({"count":summary.count}))
+    highlight = Highlight(highlightTypeId, serviceEvent.id, summary.weight, serviceEvent.caption, make_highlight_content(authorName,summary,serviceEvent),json.dumps({"count":summary.count}))
     dbSession.add(highlight)
     dbSession.flush()
     
     # ...and the single event mapping.
-    highlightMap = HighlightFeatureEventMap(highlight.id,featureEvent.id)
+    highlightMap = HighlightServiceEventMap(highlight.id,serviceEvent.id)
     dbSession.add(highlightMap)
     dbSession.flush()
 
   # delete anything that no longer exists as a highlight  
-  result = dbSession.execute('DELETE h FROM highlight h left outer join %s tmp on h.feature_event_id = tmp.feature_event_id WHERE tmp.feature_event_id IS NULL AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('DELETE h FROM highlight h left outer join %s tmp on h.service_event_id = tmp.service_event_id WHERE tmp.service_event_id IS NULL AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
 
   # update anything that has a different weight
-  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.feature_event_id = h.feature_event_id INNER JOIN feature_event fe ON h.feature_event_id = fe.id INNER JOIN author_feature_map afm ON fe.author_feature_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(\'Generating good buzz\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
+  result = dbSession.execute('UPDATE highlight h INNER JOIN %s tmp ON tmp.service_event_id = h.service_event_id INNER JOIN service_event fe ON h.service_event_id = fe.id INNER JOIN author_service_map afm ON fe.author_service_map_id = afm.id  INNER JOIN author a ON afm.author_id = a.id SET h.content = CONCAT(\'Generating good buzz\'), h.weight = tmp.weight, h.auxillary_content = CONCAT(\'{"count":\',tmp.count,\'}\') WHERE tmp.weight != h.weight AND h.highlight_type_id = %d' % (TmpTwitterSummary.__table__.name,highlightTypeId))
 
   dbSession.commit()
 
-def make_highlight_content(authorName,summary,featureEvent):
+def make_highlight_content(authorName,summary,serviceEvent):
   # !!!! The following string also appears in the SQL UPDATE clause above
   return 'Generating good buzz'
   

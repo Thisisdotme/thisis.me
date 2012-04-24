@@ -7,7 +7,7 @@ from mi_utils.oauth import load_oauth_config
 
 from miapi.models import initialize_sql
 
-# object created from JSON file that stores oAuth configuration for social features
+# object created from JSON file that stores oAuth configuration for social services
 oAuthConfig = {}
 
 def main(global_config, **settings):
@@ -32,20 +32,20 @@ def main(global_config, **settings):
 
   # setup route and view for home page
   config.add_route('home', '/')
-  config.add_view('miapi.views.about.about',
+  config.add_view('miapi.controllers.about.about',
                   route_name='home',
                   renderer='templates/about.pt')
-#
-# check author name availablility
-#
-
   config.add_route('status','/v1/status')
   
+  #
+  # check author name availablility
+  #
+
   # --
   # SEARCH for matching authors; JSON list of 0 or more authors returned.
   #  Query args: name
   # 
-  config.add_route('search.author','/v1/search/authors')
+  config.add_route('search.author','/v1/authors/search')
 
   #
   # Return list of all authors
@@ -70,7 +70,7 @@ def main(global_config, **settings):
   config.add_route('author.metrics.visitor.CRUD','/v1/authors/{authorname}/metrics/visitor/{visitorID}')
 
   #
-  # AUTHOR MODEL: rebuild/update the data for all the author's features
+  # AUTHOR MODEL: rebuild/update the data for all the author's services
   #
   config.add_route('author.model.build','/v1/authors/{authorname}/build')
   config.add_route('author.model.update','/v1/authors/{authorname}/update')
@@ -81,9 +81,6 @@ def main(global_config, **settings):
   config.add_route('author.query.highlights','/v1/authors/{authorname}/highlights')
   config.add_route('author.query.events','/v1/authors/{authorname}/events')
   config.add_route('author.query.events.eventId','/v1/authors/{authorname}/events/{eventID}')
-  
-  config.add_route('author.featureEvents','/v1/authors/{authorname}/featureEvents') # deprecated
-  config.add_route('author.featureEvents.featureEvent','/v1/authors/{authorname}/featureEvents/{eventID}') # deprecated
 
 
   # --
@@ -109,36 +106,33 @@ def main(global_config, **settings):
 
 
   # --
-  # AUTHOR FEATURE: list features, add/remove features
+  # AUTHOR FEATURE: list services, add/remove services
   #
-  config.add_route('author.features','/v1/authors/{authorname}/features')
-  config.add_route('author.features.CRUD','/v1/authors/{authorname}/features/{featurename}')
+  config.add_route('author.services','/v1/authors/{authorname}/services')
+  config.add_route('author.services.CRUD','/v1/authors/{authorname}/services/{servicename}')
 
   #
-  # AUTHOR FEATURE MODEL: rebuild/update the data for the specified feature
+  # AUTHOR FEATURE MODEL: rebuild/update the data for the specified service
   #
-  config.add_route('author.features.build','/v1/authors/{authorname}/features/{featurename}/build')
-  config.add_route('author.features.update','/v1/authors/{authorname}/features/{featurename}/update')
+  config.add_route('author.services.build','/v1/authors/{authorname}/services/{servicename}/build')
+  config.add_route('author.services.update','/v1/authors/{authorname}/services/{servicename}/update')
 
   #
-  # AUTHOR FEATURE QUERY: query for the highlights/details of the specified feature and author
+  # AUTHOR FEATURE QUERY: query for the highlights/details of the specified service and author
   #
-  config.add_route('author.features.query.highlights','/v1/authors/{authorname}/features/{featurename}/highlights')
-  config.add_route('author.features.query.events','/v1/authors/{authorname}/features/{featurename}/events')
-
-### PICK UP HERE
-
-  config.add_route('author.features.featureEvents','/v1/authors/{authorname}/features/{featurename}/featureEvents') # deprecated
+  config.add_route('author.services.query.highlights','/v1/authors/{authorname}/services/{servicename}/highlights')
+  config.add_route('author.services.query.events','/v1/authors/{authorname}/services/{servicename}/events')
 
   #
-  # AUTHOR FEATURE PROFILE: get profile information from the specified feature
+  # AUTHOR FEATURE PROFILE: get profile information from the specified service
   #
-  config.add_route('author.features.profile','/v1/authors/{authorname}/features/{featurename}/profile')
-  
+  config.add_route('author.services.profile','/v1/authors/{authorname}/services/{servicename}/profile')
+
   #
-  # AUTHOR MISC
+  # SERVICE functionality
   #
-  config.add_route('author.featureEvents.featureEvent.read.user.CRUD','/v1/authors/{authorname}/featureEvents/{featureEventID}/read/{userID}')
+  config.add_route('services','/v1/services')
+  config.add_route('services.CRUD','/v1/services/{servicename}')
   
   #
   # FEATURE functionality

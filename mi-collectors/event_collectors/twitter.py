@@ -18,7 +18,7 @@ USER_TIMELINE = 'statuses/user_timeline.json'
 
 class TwitterFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'twitter'
 
   # update_author

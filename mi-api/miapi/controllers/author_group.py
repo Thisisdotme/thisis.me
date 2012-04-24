@@ -20,14 +20,7 @@ from miapi.globals import DEFAULT_AUTHOR_GROUP
 
 log = logging.getLogger(__name__)
 
-class AuthorGroupBasics(object):
-  '''
-  classdocs
-  '''
-  
-  '''
-  class variables
-  '''
+class AuthorGroupController(object):
   
   '''
   Constructor
@@ -226,6 +219,7 @@ class AuthorGroupBasics(object):
   def preflightGroupMemberHndlr(self):
     self.request.response.headers['Access-Control-Allow-Origin'] = '*'
     self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT, DELETE'
+
 
   # PUT /v1/authors/{authorname}/groups/{groupname}/members/{member}
   #  

@@ -16,7 +16,7 @@ USER_SELF = 'users/self'
 
 class FoursquareFullCollector(FullCollector):
 
-  def getFeatureName(self):
+  def getServiceName(self):
     return 'foursquare'
 
   # update_author

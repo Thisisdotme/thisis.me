@@ -13,15 +13,15 @@ class ProfileRetriever(object):
   '''
   classdocs
   '''
-  feature_name = None
+  service_name = None
   
   '''
   Constructor
   '''
   def __init__(self):
-    print '%s profile retriever executing...' % self.feature_name 
+    print '%s profile retriever executing...' % self.service_name 
 
 
   @abstractmethod
-  def get_author_profile(self,feature_map,db_session,oauth_config):
+  def get_author_profile(self,service_map,db_session,oauth_config):
     pass

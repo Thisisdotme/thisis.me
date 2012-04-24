@@ -65,18 +65,18 @@ class CollectorDriver(AppBase):
     # for controlling incremental vs. full builds
     incremental = self.options.incremental
 
-    feature = "googleplus"
-    collector = EventCollectorFactory.get_collector_for(feature,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
-    if collector:
-      collector.build_all(dbSession,oauthConfig[feature],incremental)
+#    service = "googleplus"
+#    collector = EventCollectorFactory.get_collector_for(service,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
+#    if collector:
+#      collector.build_all(dbSession,oauthConfig[service],incremental)
   
-#    for feature, oauthConfig in oauthConfig.iteritems():
-#      collector = EventCollectorFactory.get_collector_for(feature,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
-#      if collector:
-#        try:
-#          collector.build_all(dbSession,oauthConfig,incremental)
-#        except Exception, e:
-#          self.log.error('Collector error: %s' % e)
+    for service, oauthConfig in oauthConfig.iteritems():
+      collector = EventCollectorFactory.get_collector_for(service,awsConfig.get('AWS','event_bucket'), awsConfig.get('AWS','aws_access_key'), awsConfig.get('AWS','aws_secret_key'))
+      if collector:
+        try:
+          collector.build_all(dbSession,oauthConfig,incremental)
+        except Exception, e:
+          self.log.error('Collector error: %s' % e)
     
     dbSession.close()
   
