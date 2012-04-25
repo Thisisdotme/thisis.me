@@ -15,6 +15,16 @@ curl -i -X PUT -d '{"color_icon_high_res":"img/h/services/color/placeholder.png"
 #curl -i -X PUT -d '{}' api.thisis.me/v1/services/blogger
 #curl -i -X PUT -d '{}' api.thisis.me/v1/services/last.fm
 
+# define features
+#
+curl -X PUT -d '{"template_asset":"cover.dust.js","behavior_asset":"cover.behavior.js"}' api.thisis.me/v1/features/cover
+curl -X PUT -d '{"template_asset":"highlights.dust.js","behavior_asset":"highlights.behavior.js"}' api.thisis.me/v1/features/highlights
+curl -X PUT -d '{"template_asset":"photos.dust.js","behavior_asset":"photos.behavior.js"}' api.thisis.me/v1/features/photos
+curl -X PUT -d '{"template_asset":"timeline.dust.js","behavior_asset":"timeline.behavior.js"}' api.thisis.me/v1/features/timeline
+curl -X PUT -d '{"template_asset":"bio.dust.js","behavior_asset":"bio.behavior.js"}' api.thisis.me/v1/features/bio
+curl -X PUT -d '{"template_asset":"videos.dust.js","behavior_asset":"videos.behavior.js"}' api.thisis.me/v1/features/videos
+curl -X PUT -d '{"template_asset":"places.dust.js","behavior_asset":"places.behavior.js"}' api.thisis.me/v1/features/places
+
 # create new author howard and associate services
 #
 curl -i -X PUT -d '{"password":"mi","fullname":"Howard Burrows","email":"howard@mobileidentity.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard
@@ -23,6 +33,12 @@ curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.th
 curl -i -X PUT -d '{"access_token":"14058912-DWWuU3QOcNVwEXMQO8oZT0XsEX8BV3ABbnNhsp80Q","access_token_secret":"qxg2IOkLfj82KQlJTuZ1LwtkpVZ0xdDBel6Q2MS9ik"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/services/twitter
 curl -i -X PUT -d '{"access_token":"12937196.d43579f.d38f14f7f8f742048f14d826dbc1bce7"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/services/instagram
 curl -i -X PUT -d '{"access_token":"72157628366602963-cae202cd31e7af05"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/services/flickr
+
+curl -X PUT api.thisis.me/v1/authors/howard/features/highlights
+curl -X PUT api.thisis.me/v1/authors/howard/features/timeline
+curl -X PUT api.thisis.me/v1/authors/howard/features/photos
+curl -X PUT api.thisis.me/v1/authors/howard/features/bio
+curl -X PUT api.thisis.me/v1/authors/howard/features/cover
 
 
 # create new author loree and associate services
@@ -36,6 +52,12 @@ curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.th
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/services/wordpress
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/services/flickr
 curl -i -X PUT -d '{"access_token":"ee529f7f-6d21-49f0-badf-f8d337926cd6","access_token_secret":"a524b247-8207-4e5f-a84b-f7d69eab4774"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/services/linkedin
+
+curl -X PUT api.thisis.me/v1/authors/loree/features/highlights
+curl -X PUT api.thisis.me/v1/authors/loree/features/timeline
+curl -X PUT api.thisis.me/v1/authors/loree/features/photos
+curl -X PUT api.thisis.me/v1/authors/loree/features/bio
+curl -X PUT api.thisis.me/v1/authors/loree/features/cover
 
 # create new user alan - user has non-ascii character
 #
@@ -59,6 +81,13 @@ curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.th
 curl -X PUT -F password=mi -F fullname="Philip Goffin" -F email=phil@mobileidentity.me api.thisis.me/v1/authors/phil
 curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/phil/services/me
 
+curl -X PUT api.thisis.me/v1/authors/phil/features/highlights
+curl -X PUT api.thisis.me/v1/authors/phil/features/timeline
+curl -X PUT api.thisis.me/v1/authors/phil/features/photos
+curl -X PUT api.thisis.me/v1/authors/phil/features/bio
+curl -X PUT api.thisis.me/v1/authors/phil/features/cover
+
+
 # Harry Thompson <harry@mobileidentity.me>
 curl -X PUT -F password=mi -F fullname="Harry Thompson" -F email=harry@mobileidentity.me api.thisis.me/v1/authors/harry
 curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/harry/services/me
@@ -66,4 +95,10 @@ curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisi
 # Phil Black <pblack@trueventures.com>
 curl -X PUT -F password=mi -F fullname="Philip Black" -F email=pblack@trueventures.com api.thisis.me/v1/authors/philblack
 curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/philblack/services/me
+
+curl -X PUT api.thisis.me/v1/authors/philblack/features/highlights
+curl -X PUT api.thisis.me/v1/authors/philblack/features/timeline
+curl -X PUT api.thisis.me/v1/authors/philblack/features/photos
+curl -X PUT api.thisis.me/v1/authors/philblack/features/bio
+curl -X PUT api.thisis.me/v1/authors/philblack/features/cover
 

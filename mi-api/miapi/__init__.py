@@ -106,25 +106,25 @@ def main(global_config, **settings):
 
 
   # --
-  # AUTHOR FEATURE: list services, add/remove services
+  # AUTHOR SERVICE: list services, add/remove services
   #
   config.add_route('author.services','/v1/authors/{authorname}/services')
   config.add_route('author.services.CRUD','/v1/authors/{authorname}/services/{servicename}')
 
   #
-  # AUTHOR FEATURE MODEL: rebuild/update the data for the specified service
+  # AUTHOR SERVICE MODEL: rebuild/update the data for the specified service
   #
   config.add_route('author.services.build','/v1/authors/{authorname}/services/{servicename}/build')
   config.add_route('author.services.update','/v1/authors/{authorname}/services/{servicename}/update')
 
   #
-  # AUTHOR FEATURE QUERY: query for the highlights/details of the specified service and author
+  # AUTHOR SERVICE QUERY: query for the highlights/details of the specified service and author
   #
   config.add_route('author.services.query.highlights','/v1/authors/{authorname}/services/{servicename}/highlights')
   config.add_route('author.services.query.events','/v1/authors/{authorname}/services/{servicename}/events')
 
   #
-  # AUTHOR FEATURE PROFILE: get profile information from the specified service
+  # AUTHOR SERVICE PROFILE: get profile information from the specified service
   #
   config.add_route('author.services.profile','/v1/authors/{authorname}/services/{servicename}/profile')
 
@@ -140,7 +140,14 @@ def main(global_config, **settings):
   config.add_route('features','/v1/features')
   config.add_route('feature.CRUD','/v1/features/{featurename}')
   config.add_route('feature.bundle','/v1/features/{featurename}/bundle')
-  
+
+  # --
+  # AUTHOR FEATURE: list services, add/remove services
+  #
+  config.add_route('author.features','/v1/authors/{authorname}/features')
+  config.add_route('author.features.CRUD','/v1/authors/{authorname}/features/{featurename}')
+
+
   config.scan('miapi')
 
   return config.make_wsgi_app()

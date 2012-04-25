@@ -3,8 +3,7 @@ Created on Jan 5, 2012
 
 @author: howard
 '''
-import logging
-import json
+import logging, json
 
 from datetime import datetime
 
@@ -13,9 +12,7 @@ from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from mi_schema.models import Author
-from mi_schema.models import Service
-from mi_schema.models import AuthorServiceMap
+from mi_schema.models import Author, Service, AuthorServiceMap
 
 from miapi.models import DBSession
 
@@ -46,16 +43,16 @@ class AuthorServiceController(object):
   
     authorName = self.request.matchdict['authorname']
   
-    dbsession = DBSession()
+    dbSession = DBSession()
   
     try:
-      authorId, = dbsession.query(Author.id).filter_by(author_name=authorName).one()
+      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown author %s' % authorName}
   
     services = []
-    for service in dbsession.query(Service).join(AuthorServiceMap).filter(Service.id==AuthorServiceMap.service_id).join(Author).filter(AuthorServiceMap.author_id==authorId).order_by(Service.service_name):
+    for service in dbSession.query(Service).join(AuthorServiceMap).filter(Service.id==AuthorServiceMap.service_id).join(Author).filter(AuthorServiceMap.author_id==authorId).order_by(Service.service_name):
       services.append({'service_id':service.id,
                        'name':service.service_name,
                        'color_icon_high_res':self.request.static_url('miapi:%s' % service.color_icon_high_res),
@@ -78,36 +75,36 @@ class AuthorServiceController(object):
     authorName = self.request.matchdict['authorname']
     serviceName = self.request.matchdict['servicename']
   
-    dbsession = DBSession()
+    dbSession = DBSession()
   
     try:
-      authorId, = dbsession.query(Author.id).filter_by(author_name=authorName).one()
+      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown author %s' % authorName}
   
     try:
-      serviceId, = dbsession.query(Service.id).filter_by(service_name=serviceName).one()
+      serviceId, = dbSession.query(Service.id).filter_by(service_name=serviceName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown service %s' % serviceName}
   
     try:
-      afm = dbsession.query(AuthorServiceMap).filter_by(author_id=authorId,service_id=serviceId).one()
+      asm = dbSession.query(AuthorServiceMap).filter_by(author_id=authorId,service_id=serviceId).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown service for author'}
     
-    response = {'author':authorName,'service':serviceName,'last_update_time': datetime.isoformat(afm.last_update_time) if afm.last_update_time else None}
+    response = {'author':authorName,'service':serviceName,'last_update_time': datetime.isoformat(asm.last_update_time) if asm.last_update_time else None}
   
-    if afm.access_token:
-      response['access_token'] = afm.access_token
+    if asm.access_token:
+      response['access_token'] = asm.access_token
   
-    if afm.access_token_secret:
-      response['access_token_secret'] = afm.access_token_secret
+    if asm.access_token_secret:
+      response['access_token_secret'] = asm.access_token_secret
   
-    if afm.auxillary_data:
-      response['auxillary_data'] = json.loads(afm.auxillary_data)
+    if asm.auxillary_data:
+      response['auxillary_data'] = json.loads(asm.auxillary_data)
   
     return response
 
@@ -131,29 +128,29 @@ class AuthorServiceController(object):
     if auxillaryData:
       auxillaryData = json.dumps(auxillaryData)
     
-    dbsession = DBSession()
+    dbSession = DBSession()
   
     try:
-      authorId, = dbsession.query(Author.id).filter_by(author_name=authorName).one()
+      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown author %s' % authorName}
   
     try:
-      serviceId, = dbsession.query(Service.id).filter_by(service_name=serviceName).one()
+      serviceId, = dbSession.query(Service.id).filter_by(service_name=serviceName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error':'unknown service %s' % serviceName}
   
-    authorFeatureMap = AuthorServiceMap(authorId,serviceId,accessToken,accessTokenSecret,auxillaryData)
+    authorServiceMap = AuthorServiceMap(authorId,serviceId,accessToken,accessTokenSecret,auxillaryData)
   
     try:
-      dbsession.add(authorFeatureMap)
-      dbsession.commit()
+      dbSession.add(authorServiceMap)
+      dbSession.commit()
       log.info("created author/service link: %s -> %s" % (authorName,serviceName))
   
     except IntegrityError, e:
-      dbsession.rollback()
+      dbSession.rollback()
       self.request.response.status_int = 409
       return {'error':e.message}
   
@@ -174,7 +171,7 @@ class AuthorServiceController(object):
     if auxillaryData:
       response['auxillary_data'] = json.loads(auxillaryData)
     
-    dbsession.close()
+    dbSession.close()
   
     return response
 
@@ -187,29 +184,27 @@ class AuthorServiceController(object):
     authorname = self.request.matchdict['authorname']
     servicename = self.request.matchdict['servicename']
   
-    dbsession = DBSession()
-  
-    author = dbsession.query(Author).filter_by(author_name=authorname).first()
+    author = self.dbSession.query(Author).filter_by(author_name=authorname).first()
     if author == None:
       self.request.response.status_int = 404
       return {'error':'unknown authorname'}
   
-    service = dbsession.query(Service).filter_by(service_name=servicename).first()
+    service = self.dbSession.query(Service).filter_by(service_name=servicename).first()
     if service == None:
       self.request.response.status_int = 404
       return {'error':'unknown service'}
   
-    authorFeatureMap = dbsession.query(AuthorServiceMap).filter_by(author_id=author.id,service_id=service.id).first()
-    if not authorFeatureMap:
+    authorServiceMap = self.dbSession.query(AuthorServiceMap).filter_by(author_id=author.id,service_id=service.id).first()
+    if not authorServiceMap:
       self.request.response.status_int = 404
       return {'error':'unknown service for author'}
   
     try:
-      dbsession.delete(authorFeatureMap)
-      dbsession.commit()
+      self.dbSession.delete(authorServiceMap)
+      self.dbSession.commit()
     
     except Exception:
-      dbsession.rollback();
+      self.dbSession.rollback();
       raise
   
     return {}
