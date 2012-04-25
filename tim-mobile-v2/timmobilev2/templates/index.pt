@@ -1,21 +1,16 @@
 <metal:index use-macro="load: master_template.html">
 
-	<div id="timeline" data-role="page" data-title="Timeline" data-url="/${author_name}" metal:fill-slot="page_content">
+	<div id="index" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
 
 		<header data-role="header" data-position="fixed">
-			<h1>thisis.me</h1>
+			<h1>thisis.too.me</h1>
 		</header><!-- /header -->
 	
 		<div id="index-content" data-role="content">
-			Hi ${author_name}
+			This is the sales and marketing site
+			<a href="ken">view ken!!!</a>
 		</div><!-- /content -->
 
 	</div><!-- /page -->
-
-	<script type="text/javascript" metal:fill-slot="page_script">
-		TIM.pageInfo = {
-			authorName: '${author_name}'
-		}
-	</script>
 
 </metal:index>

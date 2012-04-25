@@ -26,9 +26,10 @@ def main(global_config, **settings):
   config.add_static_view('css', 'timmobilev2:css', cache_max_age=0)
   config.add_static_view('js', 'timmobilev2:js', cache_max_age=0)
 
-  config.add_route('index', '/{authorname}')
+  config.add_route('index', '/')
+  config.add_route('app', '/{authorname}/')
 
-  config.add_route('resource.any', '/{authorname}/{resource}.{ext}')
+  config.add_route('resource.any', '/{authorname}/asset/{resource}.{ext}')
 
   config.scan()
 

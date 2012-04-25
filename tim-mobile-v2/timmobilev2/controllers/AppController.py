@@ -11,7 +11,7 @@ from timmobilev2.models import DBSession
 
 log = logging.getLogger(__name__)
 
-class IndexController(object):
+class AppController(object):
   '''
   classdocs
   '''
@@ -23,6 +23,12 @@ class IndexController(object):
     self.request = request
     self.dbSession = DBSession()
 
-  @view_config(route_name='index', request_method='GET', renderer='timmobilev2:templates/index.pt')
+  @view_config(route_name='app', request_method='GET', renderer='timmobilev2:templates/app.pt')
   def requestHandler(self):
-    return { 'api_endpoint':self.request.registry.settings['mi.api.endpoint'] }    
+    return { 'author_name': self.request.matchdict['authorname'],
+             'api_endpoint':self.request.registry.settings['mi.api.endpoint'] }
+             
+             
+             
+             
+             
