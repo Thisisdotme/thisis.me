@@ -45,9 +45,7 @@ class FeatureController(object):
 
     featureName = self.request.matchdict['featurename']
 
-    info = self.request.json_body
-
-    feature = Feature(featureName,info.get('template_asset'),info.get('behavior_asset'))
+    feature = Feature(featureName)
   
     try:
       self.dbSession.add(feature)

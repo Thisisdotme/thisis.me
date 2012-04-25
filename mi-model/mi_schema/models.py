@@ -353,19 +353,14 @@ class Feature(Base):
 
   name = Column(String(255), unique=True, nullable=False)
   
-  template = Column(String(255), unique=True, nullable=True)
-  behavior = Column(String(255), unique=True, nullable=True)
-
-  def __init__(self,name,template,behavior):
+  def __init__(self,name):
     self.name = name
-    self.template = template
-    self.behavior = behavior
 
   def __repr__(self):
-    return "<Feature('%d,%s,%s,%s')>" % (self.id,self.name,self.template,self.behavior)
+    return "<Feature('%d','%s')>" % (self.id,self.name)
 
   def toJSONObject(self):
-    return {'feature_id':self.id,'feature_name':self.name,'template_asset':self.template,'behavior_asset':self.behavior}
+    return {'feature_id':self.id,'feature_name':self.name}
 
 class AuthorFeatureMap(Base):
 

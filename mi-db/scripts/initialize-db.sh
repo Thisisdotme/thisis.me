@@ -17,13 +17,13 @@ curl -i -X PUT -d '{"color_icon_high_res":"img/h/services/color/placeholder.png"
 
 # define features
 #
-curl -X PUT -d '{"template_asset":"cover.dust.js","behavior_asset":"cover.behavior.js"}' api.thisis.me/v1/features/cover
-curl -X PUT -d '{"template_asset":"highlights.dust.js","behavior_asset":"highlights.behavior.js"}' api.thisis.me/v1/features/highlights
-curl -X PUT -d '{"template_asset":"photos.dust.js","behavior_asset":"photos.behavior.js"}' api.thisis.me/v1/features/photos
-curl -X PUT -d '{"template_asset":"timeline.dust.js","behavior_asset":"timeline.behavior.js"}' api.thisis.me/v1/features/timeline
-curl -X PUT -d '{"template_asset":"bio.dust.js","behavior_asset":"bio.behavior.js"}' api.thisis.me/v1/features/bio
-curl -X PUT -d '{"template_asset":"videos.dust.js","behavior_asset":"videos.behavior.js"}' api.thisis.me/v1/features/videos
-curl -X PUT -d '{"template_asset":"places.dust.js","behavior_asset":"places.behavior.js"}' api.thisis.me/v1/features/places
+curl -X PUT api.thisis.me/v1/features/cover
+curl -X PUT api.thisis.me/v1/features/highlights
+curl -X PUT api.thisis.me/v1/features/photos
+curl -X PUT api.thisis.me/v1/features/timeline
+curl -X PUT api.thisis.me/v1/features/bio
+curl -X PUT api.thisis.me/v1/features/videos
+curl -X PUT api.thisis.me/v1/features/places
 
 # create new author howard and associate services
 #

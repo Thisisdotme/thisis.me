@@ -63,11 +63,10 @@ class AuthorController(object):
       self.request.response.status_int = 404
       return {'error':'unknown author %s' % authorName}
   
-    authorJSON = author.toJSONObject()
-    features = getAuthorFeatures(self.dbSession,author.id)
-    authorJSON['features'] = features
+    authorJSONObj = author.toJSONObject()
+    authorJSONObj['features'] = getAuthorFeatures(self.dbSession,author.id)
 
-    return {'author': authorJSON}
+    return {'author': authorJSONObj}
 
 
   ##
