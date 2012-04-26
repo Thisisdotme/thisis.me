@@ -7,7 +7,7 @@ Created on Dec, 2011
 import logging
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound 
 
 from pyramid.view import view_config
 
@@ -79,69 +79,114 @@ class AuthorController(object):
   @view_config(route_name='author.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def authorPut(self):
   
-    authorname = self.request.matchdict['authorname']
+    authorName = self.request.matchdict['authorname']
   
     authorInfo = self.request.json_body
     
-    password = authorInfo.get('password')
-    if password == None:
-      self.request.response.status_int = 400
-      return {'error':'Missing required property: password'}
-    
-    fullname = authorInfo.get('fullname')
-    if fullname == None:
-      self.request.response.status_int = 400
-      return {'error':'Missing required property: fullname'}
-    
-    email = authorInfo.get('email')
-    if email == None:
-      self.request.response.status_int = 400
-      return {'error':'Missing required property: email'}
-    
-    template = authorInfo.get('template')
-    
+    # get record for authorName.  There must at most be only 1 authorName.  No result found indicates
+    # we're to perform an add; multiple results found is an internal error; 
     try:
-    
-      author = Author(authorname,email,fullname,password,template)
-      self.dbSession.add(author)
-      self.dbSession.flush() # flush so we can get the id
-      
-      ''' ??? this might only be temporary ???
-          Create a default group (follow) and add the author to that group
-          so that author is following themselves.
+      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+    except NoResultFound:
+      author = None
+    except MultipleResultsFound:
+      self.request.response.status_int = 500
+      return {'error':'multiple results found for author name: %s' % authorName}
+
+    if author:
       '''
+      update
+      '''
+      password = authorInfo.get('password')
+      if password:
+        author.password = password
       
-      authorGroup = AuthorGroup(author.id,DEFAULT_AUTHOR_GROUP)
-      self.dbSession.add(authorGroup)
-      self.dbSession.flush()
-   
-      mapping = AuthorGroupMap(authorGroup.id,author.id)
-      self.dbSession.add(mapping)
-      self.dbSession.flush()
-  
-      ''' Add the new author to the authors access group '''
-      groupId, = self.dbSession.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
-      authorAccessGroupMap = AuthorAccessGroupMap(author.id,groupId)
-      self.dbSession.add(authorAccessGroupMap)
-      self.dbSession.flush()
-  
-      authorJSON = author.toJSONObject()
+      fullname = authorInfo.get('fullname')
+      if fullname:
+        author.full_name = fullname
+      
+      email = authorInfo.get('email')
+      if email:
+        author.email = email
+      
+      template = authorInfo.get('template')
+      if template:
+        author.template = template
+
+      try:
+        self.dbSession.flush()
+        authorJSON = author.toJSONObject()
+        self.dbSession.commit()
+
+      except Exception, e:
+        self.dbSession.rollback()
+        log.error(e.message)
+        self.request.response.status_int = 500
+        return {'error':e.message}
+        
+    else:
+      '''
+      add
+      '''
+      try:
+      
+        password = authorInfo.get('password')
+        if password == None:
+          self.request.response.status_int = 400
+          return {'error':'Missing required property: password'}
+        
+        fullname = authorInfo.get('fullname')
+        if fullname == None:
+          self.request.response.status_int = 400
+          return {'error':'Missing required property: fullname'}
+        
+        email = authorInfo.get('email')
+        if email == None:
+          self.request.response.status_int = 400
+          return {'error':'Missing required property: email'}
+        
+        template = authorInfo.get('template')
+        
+        author = Author(authorName,email,fullname,password,template)
+        self.dbSession.add(author)
+        self.dbSession.flush() # flush so we can get the id
+        
+        ''' ??? this might only be temporary ???
+            Create a default group (follow) and add the author to that group
+            so that author is following themselves.
+        '''
+        
+        authorGroup = AuthorGroup(author.id,DEFAULT_AUTHOR_GROUP)
+        self.dbSession.add(authorGroup)
+        self.dbSession.flush()
+     
+        mapping = AuthorGroupMap(authorGroup.id,author.id)
+        self.dbSession.add(mapping)
+        self.dbSession.flush()
     
-      self.dbSession.commit()
-  
-      log.info("create author %s and added to group %s" % (authorname, ACCESS_GROUP_AUTHORS))
-  
-    except IntegrityError, e:
-      self.dbSession.rollback()
-      log.error(e.message)
-      self.request.response.status_int = 409
-      return {'error':e.message}
-  
-    except NoResultFound, e:
-      self.dbSession.rollback()
-      log.error(e.message)
-      self.request.response.status_int = 409
-      return {'error': e.message}
+        ''' Add the new author to the authors access group '''
+        groupId, = self.dbSession.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
+        authorAccessGroupMap = AuthorAccessGroupMap(author.id,groupId)
+        self.dbSession.add(authorAccessGroupMap)
+        self.dbSession.flush()
+    
+        authorJSON = author.toJSONObject()
+      
+        self.dbSession.commit()
+    
+        log.info("create author %s and added to group %s" % (authorName, ACCESS_GROUP_AUTHORS))
+    
+      except IntegrityError, e:
+        self.dbSession.rollback()
+        log.error(e.message)
+        self.request.response.status_int = 409
+        return {'error':e.message}
+    
+      except NoResultFound, e:
+        self.dbSession.rollback()
+        log.error(e.message)
+        self.request.response.status_int = 409
+        return {'error': e.message}
   
     return {'author': authorJSON}
 
@@ -183,7 +228,7 @@ class AuthorController(object):
     if author == None:
       self.request.response.status_int = 404
       return {'error':'unknown authorname'}
-  
+
     return {'author':authorname,'user_id':userid,'registered':True}
 
 

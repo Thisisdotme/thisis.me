@@ -55,7 +55,7 @@ def main(global_config, **settings):
   # --
   # AUTHOR BASIC functionality
   #
-  #  GET info, PUT new, DELETE existing
+  #  GET info, PUT new, PUT existing, DELETE existing
   #
   config.add_route('author.CRUD','/v1/authors/{authorname}')
   
@@ -143,11 +143,14 @@ def main(global_config, **settings):
   config.add_route('feature.bundle','/v1/features/{featurename}/bundle')
 
   # --
-  # AUTHOR FEATURE: list services, add/remove features
+  # AUTHOR FEATURE: list features, add/remove features
   #
+  
+  # resources for controlling an author's default features
   config.add_route('author.features.default','/v1/authors/{authorname}/features/default')
   config.add_route('author.features.default.CRUD','/v1/authors/{authorname}/features/default/{featurename}')
 
+  # resources for listing, adding, and removing an author's features
   config.add_route('author.features','/v1/authors/{authorname}/features')
   config.add_route('author.features.CRUD','/v1/authors/{authorname}/features/{featurename}')
   
