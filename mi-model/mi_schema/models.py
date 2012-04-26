@@ -379,7 +379,20 @@ class AuthorFeatureMap(Base):
     self.author_id = authorId
     self.feature_id = featureId
     self.sequence = sequence
-    pass
 
   def __repr__(self):
     return "<AuthorFeatureMap('%d,%d,%d,%d')>" % (self.id,self.author_id,self.feature_id,self.sequence)
+  
+class AuthorFeatureDefault(Base):
+
+  __tablename__ = 'author_feature_default'
+
+  author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), primary_key=True)
+  feature_id = Column(Integer, ForeignKey('feature.id', ondelete='CASCADE'))
+
+  def __init__(self,authorId,featureId):
+    self.author_id = authorId
+    self.feature_id = featureId
+
+  def __repr__(self):
+    return "<AuthorFeatureDefault('%d,%d')>" % (self.author_id,self.feature_id)

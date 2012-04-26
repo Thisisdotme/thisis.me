@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
 
-from mi_schema.models import Author, Feature, AuthorFeatureMap
+from mi_schema.models import Author, Feature, AuthorFeatureMap, AuthorFeatureDefault
 
 from miapi.models import DBSession
 
@@ -167,4 +167,58 @@ class AuthorFeatureController(object):
     return response
 
 
+  # GET /v1/authors/{authorname}/features/default
+  #
+  @view_config(route_name='author.features.default', request_method='GET', renderer='jsonp', http_cache=0)
+  def getDefaultFeature(self):
+
+    authorName = self.request.matchdict['authorname']
   
+    try:
+      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+    except NoResultFound:
+      self.request.response.status_int = 404
+      return {'error':'unknown author %s' % authorName}
+  
+    # it's OK for no default to exists.  The convention if no explicit default exists is to use the first feature
+    try:
+      featureName, = self.dbSession.query(Feature.name).join(AuthorFeatureDefault,Feature.id==AuthorFeatureDefault.feature_id).filter(AuthorFeatureDefault.author_id==authorId).one()
+    except NoResultFound:
+      featureName = None
+
+    result = {'author':authorName,'default_feature':featureName}
+    
+    return result
+
+
+  @view_config(route_name='author.features.default.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
+  def setDefaultFeature(self):
+
+    authorName = self.request.matchdict['authorname']
+    featureName = self.request.matchdict['featurename']
+  
+    try:
+      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+    except NoResultFound:
+      self.request.response.status_int = 404
+      return {'error':'unknown author %s' % authorName}
+  
+    try:
+      featureId, = self.dbSession.query(Feature.id).filter_by(name=featureName).one()
+    except NoResultFound:
+      self.request.response.status_int = 404
+      return {'error':'unknown feature %s' % featureName}
+
+    # if a default already exists then remove it
+    try:
+      afd = self.dbSession.query(AuthorFeatureDefault).filter_by(author_id=authorId).one()
+      self.dbSession.delete(afd)
+    except NoResultFound:
+      pass
+    
+    afd = AuthorFeatureDefault(authorId,featureId)
+    self.dbSession.add(afd)
+    
+    self.dbSession.commit()
+    
+    return {'author':authorName,'default_feature':featureName}

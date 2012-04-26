@@ -143,10 +143,14 @@ def main(global_config, **settings):
   config.add_route('feature.bundle','/v1/features/{featurename}/bundle')
 
   # --
-  # AUTHOR FEATURE: list services, add/remove services
+  # AUTHOR FEATURE: list services, add/remove features
   #
+  config.add_route('author.features.default','/v1/authors/{authorname}/features/default')
+  config.add_route('author.features.default.CRUD','/v1/authors/{authorname}/features/default/{featurename}')
+
   config.add_route('author.features','/v1/authors/{authorname}/features')
   config.add_route('author.features.CRUD','/v1/authors/{authorname}/features/{featurename}')
+  
 
 
   config.scan('miapi')
