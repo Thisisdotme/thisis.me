@@ -55,6 +55,3 @@ class AuthorServiceModelController(object):
     serviceBuild(authorName,serviceName,True,s3Bucket,awsAccessKey,awsSecretKey)
   
     return {}
-
-
-

@@ -36,6 +36,7 @@ class AuthorServiceQueryController(object):
   #
   # return highlights for the service
   #
+  @view_config(route_name='author.services.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   def getHighlights(self):
     
     authorName = self.request.matchdict['authorname']
@@ -48,9 +49,6 @@ class AuthorServiceQueryController(object):
   #
   # get all the serviceEvents for the author and service  
   #
-  ## THIS NEEDS TO MOVE BACK TO getHighlights WHEN IMPLEMENTED
-  @view_config(route_name='author.services.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-  ##
   @view_config(route_name='author.services.query.events', request_method='GET', renderer='jsonp', http_cache=0)
   def getEvents(self):
   

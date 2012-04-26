@@ -18,17 +18,18 @@ class Author(Base):
   password = Column(String(255), nullable=False)
   template = Column(String(255), nullable=True)
 
-  def __init__(self, authorname, email, fullname, password):
+  def __init__(self, authorname, email, fullname, password, template):
     self.author_name = authorname
     self.email = email
     self.full_name = fullname
     self.password = password
+    self.template = template
   
   def __repr__(self):
-    return "<Author('%s','%s','%s','%s')>" % (self.author_name, self.email, self.full_name, self.password)
+    return "<Author('%s','%s','%s','%s','%s')>" % (self.author_name, self.email, self.full_name, self.password, self.template)
 
   def toJSONObject(self):
-    return {'author_id':self.id,'author_name':self.author_name,'email':self.email,'full_name':self.full_name}
+    return {'author_id':self.id,'author_name':self.author_name,'email':self.email,'full_name':self.full_name, 'template':self.template}
 
 
 '''
@@ -343,3 +344,42 @@ class HighlightServiceEventMap(Base):
 
   def __repr__(self):
     return "<HighlightServiceEventMap('%s,%s')>" % (self.highlight_id,self.service_event_id)
+
+class Feature(Base):
+
+  __tablename__ = 'feature'
+
+  id = Column(Integer, primary_key=True)
+
+  name = Column(String(255), unique=True, nullable=False)
+  
+  def __init__(self,name):
+    self.name = name
+
+  def __repr__(self):
+    return "<Feature('%d','%s')>" % (self.id,self.name)
+
+  def toJSONObject(self):
+    return {'feature_id':self.id,'feature_name':self.name}
+
+class AuthorFeatureMap(Base):
+
+  __tablename__ = 'author_feature_map'
+
+  __table_args__ = (UniqueConstraint('author_id', 'feature_id', name='uidx_author_feature_map_1'),{})
+
+  id = Column(Integer, primary_key=True)
+
+  author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
+  feature_id = Column(Integer, ForeignKey('feature.id', ondelete='CASCADE'), nullable=False)
+
+  sequence = Column(Integer, nullable=False)
+
+  def __init__(self,authorId,featureId,sequence):
+    self.author_id = authorId
+    self.feature_id = featureId
+    self.sequence = sequence
+    pass
+
+  def __repr__(self):
+    return "<AuthorFeatureMap('%d,%d,%d,%d')>" % (self.id,self.author_id,self.feature_id,self.sequence)

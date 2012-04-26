@@ -31,10 +31,8 @@ class ServicesController(object):
   @view_config(route_name='services', request_method='GET', renderer='jsonp', permission='admin', http_cache=0)
   def list_accounts(self):
   
-    dbsession = DBSession()
-  
     serviceList = []
-    for service in dbsession.query(Service).order_by(Service.service_name):
+    for service in self.dbSession.query(Service).order_by(Service.service_name):
       serviceList.append({'service_id':service.id,
                           'name':service.service_name,
                           'color_icon_high_res':self.request.static_url('miapi:%s' % service.color_icon_high_res),
@@ -53,8 +51,7 @@ class ServicesController(object):
     
     serviceName = self.request.matchdict['servicename']
     
-    dbsession = DBSession()
-    service = dbsession.query(Service).filter_by(service_name=serviceName).one()
+    service = self.dbSession.query(Service).filter_by(service_name=serviceName).one()
   
     return {'service_id':service.id,
             'name':service.service_name,
@@ -80,20 +77,19 @@ class ServicesController(object):
     monoMedRes = images.get('mono_icon_medium_res',None)
     monoLowRes = images.get('mono_icon_low_res',None)
   
-    dbsession = DBSession()
     service = Service(serviceName,colorHighRes,colorMedRes,colorLowRes,monoHighRes,monoMedRes,monoLowRes)
   
     try:
-      dbsession.add(service)
-      dbsession.commit()
+      self.dbSession.add(service)
+      self.dbSession.commit()
       log.info("create service: %(servicename)s" % {'servicename':serviceName})
   
     except IntegrityError, e:
-      dbsession.rollback()
+      self.dbSession.rollback()
       self.request.response.status_int = 409
       return {'error':e.message}
   
-    service = dbsession.query(Service).filter_by(service_name=serviceName).first()
+    service = self.dbSession.query(Service).filter_by(service_name=serviceName).first()
   
     return {'service': service.toJSONObject()}
 

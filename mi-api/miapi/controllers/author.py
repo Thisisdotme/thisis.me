@@ -17,6 +17,8 @@ from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGr
 
 from miapi.globals import ACCESS_GROUP_AUTHORS, DEFAULT_AUTHOR_GROUP
 
+from .feature_utils import getAuthorFeatures
+
 log = logging.getLogger(__name__)
 
 class AuthorController(object):
@@ -61,7 +63,10 @@ class AuthorController(object):
       self.request.response.status_int = 404
       return {'error':'unknown author %s' % authorName}
   
-    return {'author': author.toJSONObject()}
+    authorJSONObj = author.toJSONObject()
+    authorJSONObj['features'] = getAuthorFeatures(self.dbSession,author.id)
+
+    return {'author': authorJSONObj}
 
 
   ##
@@ -93,9 +98,11 @@ class AuthorController(object):
       self.request.response.status_int = 400
       return {'error':'Missing required property: email'}
     
+    template = authorInfo.get('template')
+    
     try:
     
-      author = Author(authorname,email,fullname,password)
+      author = Author(authorname,email,fullname,password,template)
       self.dbSession.add(author)
       self.dbSession.flush() # flush so we can get the id
       
