@@ -141,6 +141,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404;
       return {'error':'unknown author %s' % authorName}  
 
+    # gather
     events = []  
     for highlight,event,author,serviceName in self.dbSession.query(Highlight,ServiceEvent,Author,Service.service_name). \
               join(ServiceEvent,Highlight.service_event_id==ServiceEvent.id). \
