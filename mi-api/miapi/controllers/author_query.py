@@ -141,7 +141,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404;
       return {'error':'unknown author %s' % authorName}  
 
-    # gather
+    # gather top 5 highlights
     events = []  
     for highlight,event,author,serviceName in self.dbSession.query(Highlight,ServiceEvent,Author,Service.service_name). \
               join(ServiceEvent,Highlight.service_event_id==ServiceEvent.id). \
@@ -153,6 +153,7 @@ class AuthorQueryController(object):
               limit(STORY_LIMIT):
       events.append(createHighlightEvent(self.dbSession,self.request,highlight,event,serviceName,author))
 
+    # if fewer than 5 highlights exists backfill with most recent events
     if len(events) < STORY_LIMIT:
       for event,serviceName in self.dbSession.query(ServiceEvent,Service.service_name). \
             join(AuthorServiceMap, AuthorServiceMap.id==ServiceEvent.author_service_map_id). \
@@ -166,5 +167,3 @@ class AuthorQueryController(object):
           break
 
     return {'events':events}
-
-    
