@@ -34,7 +34,7 @@ def get_facebook_info(request):
 
   # the presumption is that the feature already exists.  If it doesn't then this function
   # should not have been called
-  req = urllib2.Request('%s/v1/authors/%s/features/%s' %
+  req = urllib2.Request('%s/v1/authors/%s/services/%s' %
                               (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
@@ -73,9 +73,10 @@ def get_facebook(request):
      
   else:
 
-    # Query the API for installed features
+    # Query the API for installed services
+
     try:
-      req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authorName))
+      req = urllib2.Request('%s/v1/authors/%s/services' % (request.registry.settings['mi.api.endpoint'],authorName))
       res = urllib2.urlopen(req)
       resJSON = json.loads(res.read())
     except urllib2.URLError, e:
@@ -87,7 +88,7 @@ def get_facebook(request):
   
     # Check if the feature we're trying to add is listed
     # ??? TODO - need better handling of feature already existing
-    if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
+    if len([feature for feature in resJSON['services'] if feature['name'] == FEATURE]) == 1:
       facebookAccessToken, facebookUserId = get_facebook_info(request)
   
       request.session['facebook_access_token'] = facebookAccessToken
@@ -168,7 +169,7 @@ def facebook_callback(request):
   
   json_payload = json.dumps({'access_token':fbAccessToken,'auxillary_data':{'id':fbUserId}})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                                   (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                           'PUT',
                           json_payload,

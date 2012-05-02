@@ -27,7 +27,7 @@ def getAccount(request):
 @view_config(route_name='account_details', request_method='POST', permission='author', renderer='timmobile:templates/account_details.pt')
 def postAccount(request):
   featureName = request.matchdict['featurename']
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                           (request.registry.settings['mi.api.endpoint'], authenticated_userid(request), featureName), 
                           'DELETE')
   res = urllib2.urlopen(req)
