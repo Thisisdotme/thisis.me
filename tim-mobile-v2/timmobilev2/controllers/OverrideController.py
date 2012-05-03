@@ -50,10 +50,14 @@ class OverrideController(object):
       # check for a stock asset based on the author's configured template
       try:
         template, = self.dbSession.query(Author.template).filter_by(author_name=authorName).one()
+        log.debug("*************GOT TEMPLATE**************")
+        log.debug(template)
       except NoResultFound:
         return HTTPNotFound(self.request.path)
-      candidate = '%s/assets/stock/%s/%s.%s' % (base,template,resource,ext) if template else None 
+      candidate = '%s/assets/stock/%s/%s.%s' % (base,template,resource,ext) if template else None
+      log.debug(candidate) 
       if candidate and os.path.exists(candidate):
+        log.debug("************* FOUND STOCK FILE!!!!!**************")
         asset = open(candidate)
         contentType=mimetypes.guess_type(candidate)[0]
         return Response(content_type=contentType,app_iter=asset)

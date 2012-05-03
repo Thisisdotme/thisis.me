@@ -1,22 +1,16 @@
 <metal:index use-macro="load: master_template.html">
 	
 	<div id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
-		<div id="featureNav">nav</div>
+		<nav id="featureNav" class="clearfix"></nav>
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
-		<script src="/${author_name}/asset/author.js"></script>
-		<script src="/${author_name}/asset/page.js"></script>
-		<script src="/${author_name}/asset/profile.js"></script>
-		<script src="/${author_name}/asset/_event.js"></script>
-		<script src="/${author_name}/asset/event.js"></script>
+		<script src="/${author_name}/asset/featureNavItem.js"></script>
 		
 		<header data-role="header" data-position="fixed">
 			<h1>${author_name} thisis.me</h1>
 		</header><!-- /header -->
-	
-		<div id="index-content" data-role="content">
-			<div id="timeline" class="flippage flippage-container">
-			</div>
-		</div><!-- /content -->
+		<div id="page-content" data-role="content">
+			<div id="timeline" class="flippage flippage-container"></div>
+		</div>
 
 	</div><!-- /page -->
 

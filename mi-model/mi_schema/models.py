@@ -259,9 +259,9 @@ class OriginMap(Base):
   
   __tablename__ = 'origin_map'
 
-  service_name = Column(String(255), nullable=False, primary_key=True)
-  origin = Column(String(255), nullable=False, primary_key=True)
-  origin_service_name = Column(String(255), nullable=True)
+  service_name = Column(String(100), nullable=False, primary_key=True)
+  origin = Column(String(100), nullable=False, primary_key=True)
+  origin_service_name = Column(String(100), nullable=True)
 
   def __init__(self, serviceName, origin, originServiceName):
     self.service_name = serviceName

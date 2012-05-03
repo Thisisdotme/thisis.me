@@ -208,10 +208,6 @@ table { border-collapse: collapse; border-spacing: 0; }
 td { vertical-align: top; }
 
 
-/* ==|== primary styles =====================================================
-   Author:
-   ========================================================================== */
-
 
    /* ==|== primary styles =====================================================
       Author:
@@ -222,7 +218,13 @@ td { vertical-align: top; }
    #followers a {
    	color: #000;
    }
-
+   
+   #featureNav li {
+     float:left;
+     list-style:none;
+     margin-right:12px;
+   }
+   
    .mi-header { }
    /*.ui-content { margin-top: 43px; }*/
 
