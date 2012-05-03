@@ -16,7 +16,8 @@ class Subscriber(AppBase):
     pass
 
   def init_args(self):
-    pass
+    self.option_parser.add_option('--feed', dest='feed',
+                                  help='Name of feed to subscribe: facebook')
 
   def main(self): 
     # Send subscription request
