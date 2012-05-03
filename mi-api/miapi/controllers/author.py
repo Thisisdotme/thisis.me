@@ -83,7 +83,7 @@ class AuthorController(object):
   
     authorInfo = self.request.json_body
     
-    # get record for authorName.  There must at most be only 1 authorName.  No result found indicates
+    # get record for authorName.  There must be at most only 1 authorName.  No result found indicates
     # we're to perform an add; multiple results found is an internal error; 
     try:
       author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()

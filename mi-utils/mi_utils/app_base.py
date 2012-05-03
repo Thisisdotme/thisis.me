@@ -7,13 +7,16 @@ Created on Feb 19, 2012
 '''
 
 import os,sys,logging,optparse
+from configobj import ConfigObj
 from abc import abstractmethod
 
 class AppBase(object):
   '''
   classdocs
   '''
-  
+
+  CONFIG_FILE = 'config.ini'
+
   STATUS_OK = 0
   STATUS_ERROR = 1 
   STATUS_WARNING = 75
@@ -29,7 +32,7 @@ class AppBase(object):
     if(argsNums==None):
       argsNums=0
     self.parse_args(argsNums)
-    self.log.info("Beginning " + self.name)
+    self.load_config()
 
   @abstractmethod
   def display_usage(self):
@@ -77,23 +80,60 @@ class AppBase(object):
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
       
-      
-  def init_logger(self):#create logger
+
+  def init_logger(self):
+    #create logger
     logger = logging.getLogger(self.name)
     logger.setLevel(logging.DEBUG)
+    
     #create console handler and set level to debug
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
+    
     #create formatter
     formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] - %(message)s")
+    
     #add formatter to ch
     ch.setFormatter(formatter)
+    
     #add ch to logger
     logger.addHandler(ch)
     
     self.log = logger
 
 
+  def load_config(self):
+
+    if not os.path.exists(self.CONFIG_FILE):
+      self.config = None
+      return
+
+    self.config = ConfigObj()
+
+    baseConfig = ConfigObj(self.CONFIG_FILE, interpolation=False)
+
+    # after walking all key/values in the include section this list will hold
+    # the ConfigObj for each included config 
+    mergeConfigs = []
+
+    def walk_include_callback(section, key):
+      includeFile = section[key] % {'TIM_CONFIG': os.environ['TIM_CONFIG']}
+      if not os.path.exists(includeFile):
+        self.log.warn('Config file reference in include section does not exist: %s' % section[key])
+      else:
+        mergeConfigs.append(ConfigObj(includeFile))
+
+    # load the configs for the include section
+    common = baseConfig['include']
+    common.walk(walk_include_callback)
+    
+    # remove the include section
+    baseConfig.pop('include',None)
+    
+    for config in mergeConfigs:
+      self.config.merge(config)
+    self.config.merge(baseConfig)
+      
   @abstractmethod
   def main(self): 
     assert 0, "Usage must be defined"

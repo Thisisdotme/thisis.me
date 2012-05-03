@@ -20,7 +20,7 @@ INCREMENTAL_OVERLAP = timedelta (hours = 1)
 class FullCollectorState(object):
 
   dbSession = None
-  afm = None
+  asm = None
   authorId = None
   now = None
 
@@ -43,10 +43,10 @@ class FullCollectorState(object):
   # profile image
   defaultProfileImageUrl = None
 
-  def __init__(self,dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
+  def __init__(self,dbSession,asm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
     self.dbSession = dbSession
-    self.afm = afm
-    self.authorId = afm.author_id
+    self.asm = asm
+    self.authorId = asm.author_id
     self.now = now
 
     self.filename = filename
@@ -110,7 +110,7 @@ class FullCollector(object):
 
   '''
   build_all
-    queries DB for all users that have services installed and call updateAuthor for each
+    queries DB for all users that have services installed and call build_one for each
   '''
   def build_all(self,dbSession,oauthConfig,incremental):
     
@@ -120,24 +120,24 @@ class FullCollector(object):
     serviceId, = dbSession.query(Service.id).filter_by(service_name=self.getServiceName()).first()
 
     # query the db for all users that have the service installed
-    for afm in dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId).all():
-      self.build_one(afm,dbSession,oauthConfig,incremental)
+    for asm in dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId).all():
+      self.build_one(asm,dbSession,oauthConfig,incremental)
 
   '''
   update_one
   '''
   @abstractmethod
-  def build_one(self,afm,dbSession,oauthConfig,incremental):
+  def build_one(self,asm,dbSession,oauthConfig,incremental):
 
     # if this is a full rebuild clean on MySQL and s3 
     if not incremental:
 
       # clean MySQL
-      afm.last_update_time = None
-      afm.most_recent_event_id = None
-      afm.most_recent_event_timestamp = None
+      asm.last_update_time = None
+      asm.most_recent_event_id = None
+      asm.most_recent_event_timestamp = None
 
-      dbSession.query(ServiceEvent).filter(ServiceEvent.author_service_map_id==afm.id).delete()
+      dbSession.query(ServiceEvent).filter(ServiceEvent.author_service_map_id==asm.id).delete()
       
       dbSession.flush()
       dbSession.commit()
@@ -145,8 +145,8 @@ class FullCollector(object):
       # clean s3
       bucket = self.s3Connection.get_bucket(self.s3Bucket)
       # refined
-      for jsonType in ['refined','raw']:
-        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,afm.author_id,self.getServiceName())):
+      for jsonType in ['normalized']:
+        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,asm.author_id,self.getServiceName())):
           bucket.delete_key(key)
 
   @abstractmethod
@@ -163,16 +163,16 @@ class FullCollector(object):
     return '%s.%s.%d.%s.csv' % (authorId, self.getServiceName(), mktime(now.timetuple()), varient)
 
 
-  def beginTraversal(self,dbSession,afm,defaultProfileImageUrl):
+  def beginTraversal(self,dbSession,asm,defaultProfileImageUrl):
     now = datetime.now()
-    filename = self.makeFilename(afm.author_id,now,"refined")
+    filename = self.makeFilename(asm.author_id,now,"refined")
     mapper = open(filename,'wb')
     writer = csv.writer(mapper)
-    mostRecentEventId = afm.most_recent_event_id if self.incremental else None
-    mostRecentEventTimestamp = afm.most_recent_event_timestamp if self.incremental else None
-    lastUpdateTime = afm.last_update_time if self.incremental else None
+    mostRecentEventId = asm.most_recent_event_id if self.incremental else None
+    mostRecentEventTimestamp = asm.most_recent_event_timestamp if self.incremental else None
+    lastUpdateTime = asm.last_update_time if self.incremental else None
 
-    return FullCollectorState(dbSession,afm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
+    return FullCollectorState(dbSession,asm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
 
 
   def endTraversal(self,state,authorName):
@@ -199,13 +199,13 @@ class FullCollector(object):
     # terminate the transaction
     #
     # set the author/service map's last update time
-    state.afm.last_update_time = state.now
+    state.asm.last_update_time = state.now
 
     # update the most_recent_event_id and most_recent_event_timestamp if changed    
-    if state.mostRecentEventId != state.afm.most_recent_event_id or state.mostRecentEventTimestamp != state.afm.most_recent_event_timestamp:
+    if state.mostRecentEventId != state.asm.most_recent_event_id or state.mostRecentEventTimestamp != state.asm.most_recent_event_timestamp:
       # update the authorFeatureMap table
-      state.afm.most_recent_event_id = state.mostRecentEventId
-      state.afm.most_recent_event_timestamp = state.mostRecentEventTimestamp
+      state.asm.most_recent_event_id = state.mostRecentEventId
+      state.asm.most_recent_event_timestamp = state.mostRecentEventTimestamp
 
     state.dbSession.flush()
     state.dbSession.commit()
@@ -223,7 +223,7 @@ class FullCollector(object):
     def flushIfUnique():
       # check if this is a duplicate of something already in the DB
       #
-      count = state.dbSession.query(ServiceEvent.id).filter_by(author_service_map_id=state.afm.id,event_id=event.getEventId()).count()
+      count = state.dbSession.query(ServiceEvent.id).filter_by(author_service_map_id=state.asm.id,event_id=event.getEventId()).count()
       if count > 0:
         state.duplicateRejected = state.duplicateRejected + 1
       else:
@@ -246,7 +246,7 @@ class FullCollector(object):
         auxillaryContent = event.getAuxillaryContent()
         profileImageUrl = event.getProfileImageUrl() if event.getProfileImageUrl() else state.defaultProfileImageUrl
 
-        serviceEvent = ServiceEvent(state.afm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
+        serviceEvent = ServiceEvent(state.asm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
         state.dbSession.add(serviceEvent)
         state.dbSession.flush()
 
