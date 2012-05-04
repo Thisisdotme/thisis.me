@@ -49,11 +49,12 @@ class MessageReceiver:
   handler. The handler needs to implement a handler method that accepts one
   parameter. The parameter is the map representing the JSON object.
   '''
-  def __init__(self, client, handler):
+  def __init__(self, client, queue, handler):
     self._client = client
     self._handler = handler
+    self._queue = queue
 
-  def run(self):
+  def join(self):
     pass
 
 
