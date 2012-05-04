@@ -43,8 +43,21 @@ class MessageClient:
     for promise in promises:
       self._client.wait(promise)
 
+class MessageReceiver:
+  '''
+  Receives messages from the message queue and forwards them to the
+  handler. The handler needs to implement a handler method that accepts one
+  parameter. The parameter is the map representing the JSON object.
+  '''
+  def __init__(self, client, handler):
+    self._client = client
+    self._handler = handler
 
-# All of the messages we send must ahve the following structure:
+  def run(self):
+    pass
+
+
+# All of the messages we send must have the following structure:
 # { 'header': { 'version': <int>, 'type': <string> },
 #   'message': <message> }
 #
