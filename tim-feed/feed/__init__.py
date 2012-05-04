@@ -1,4 +1,12 @@
 from pyramid.config import Configurator
+from pyramid.events import NewRequest, subscriber
+from messages import get_current_message_client
+
+def bind_add_message_client(host):
+  def add_message_client(event):
+    event.request.message_client = get_current_message_client(host)
+
+  return add_message_client
 
 def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.
@@ -6,6 +14,9 @@ def main(global_config, **settings):
   config = Configurator(settings=settings)
 
   config.add_route('facebook_feed', 'feed/facebook')
+
+  config.add_subscriber(bind_add_message_client(settings['message.queue.url']),
+                        NewRequest)
 
   config.scan()
   return config.make_wsgi_app()

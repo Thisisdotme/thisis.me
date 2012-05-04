@@ -6,7 +6,6 @@ production.ini
 setup.cfg
 setup.py
 feed/__init__.py
-feed/subscribe.py
 feed/tests.py
 feed/views.py
 feed.egg-info/PKG-INFO
