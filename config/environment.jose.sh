@@ -11,7 +11,7 @@ export MI_OAUTH_KEYS=$MI_CONFIG/oauth_keys.jose.json
 # define the pythonpath
 export PYTHONPATH=$MI_HOME/mi-utils:$MI_HOME/mi-model:$MI_HOME/mi-db
 export PYTHONPATH=$MI_HOME/mi-collectors:$MI_HOME/mi-traversal:$PYTHONPATH
-export PYTHONPATH=$MI_HOME/tools:$PYTHONPATH
+export PYTHONPATH=$MI_HOME/tools:$MI_HOME/tim-commons:$PYTHONPATH
 
 # define s3 scripts bucket
 # TODO: create a script bucket for below

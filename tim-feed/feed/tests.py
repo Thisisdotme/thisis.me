@@ -1,5 +1,5 @@
 import unittest
-import mock
+import tim_commons.mock
 
 from pyramid import testing
 from webob.multidict import MultiDict
@@ -52,7 +52,7 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
 
   def test_post_json(self):
     request = testing.DummyRequest()
-    request.message_client = mock.MessageClient()
+    request.message_client = tim_commons.mock.DummyMessageClient()
     request.headers['Content-Type'] = 'application/json'
     request.body = '''{"object": "user", "entry": [ { "uid": 1335845740, 
 "changed_fields": [ "name", "picture" ], "time": 232323 }, { "uid": 1234,
@@ -72,6 +72,9 @@ class FacebookFeedInternalTestCase(unittest.TestCase):
                                  "changed_fields": [ "friends" ],
                                  "time": 232325 } ] }
 
-    id = convert_facebook_notification(notification)
-    self.assertTrue(1335845740 in id)
-    self.assertTrue(1234 in id)
+    notifications = convert_facebook_notification(notification)
+    self.assertEquals(1335845740,
+                      notifications[0]['message']['service_author_id'])
+    self.assertEquals(1234,
+                      notifications[1]['message']['service_author_id'])
+    self.assertEquals(len(notifications), 2)
