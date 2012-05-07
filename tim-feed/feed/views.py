@@ -4,7 +4,8 @@ import json
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
-from messages import create_facebook_notification, send_messages
+from tim_commons.message_queue import (create_facebook_notification, 
+                                       send_messages)
 
 # TODO: remove this variable
 verify_token = 'FJ2ZU6OqL1hgBhIN6pUkt1upge3Zu8NarPc5XRM6s' 
@@ -35,7 +36,10 @@ def post_facebook_feed(request):
 def convert_facebook_notification(facebook_notification):
   def has_id(notification):
     uid = notification.get('uid', None)
-    # TODO: log if uid is None
+    if uid is None:
+      logging.warning('The facebook notification did not contain an id: %s',
+                      notification)
+
     return uid is not None
 
   def convert(notification):
@@ -50,5 +54,6 @@ def convert_facebook_notification(facebook_notification):
   else:
     # Right now we are only subscribing to user object so we should only get
     # user objects
-    # TODO: Log about error not getting an user object
+    logging.warning('Received a notifaction for an object that is not user: %s',
+                    facebook_notification)
     return []

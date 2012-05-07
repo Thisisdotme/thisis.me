@@ -1,6 +1,6 @@
 from pyramid.config import Configurator
 from pyramid.events import NewRequest, subscriber
-from messages import get_current_message_client
+from tim_commons.message_queue import get_current_message_client
 
 def bind_add_message_client(host):
   def add_message_client(event):
