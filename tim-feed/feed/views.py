@@ -4,7 +4,7 @@ import json
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
-from messages import create_facebook_notification
+from messages import create_facebook_notification, send_messages
 
 # TODO: remove this variable
 verify_token = 'FJ2ZU6OqL1hgBhIN6pUkt1upge3Zu8NarPc5XRM6s' 
@@ -27,7 +27,7 @@ def post_facebook_feed(request):
   facebook_notification = json.loads(request.body)
 
   events = convert_facebook_notification(facebook_notification)
-  request.message_client.send_messages(queue, events)
+  send_messages(request.message_client, queue, events)
   
   return Response()
 
@@ -39,7 +39,7 @@ def convert_facebook_notification(facebook_notification):
     return uid is not None
 
   def convert(notification):
-    return notification['uid']
+    return create_facebook_notification(notification['uid'])
 
   # Only deal with changes to the user object
   object = facebook_notification.get('object', None)
