@@ -1,3 +1,51 @@
+
+@import url(http://fonts.googleapis.com/css?family=Creepster);
+
 body {
-  background-color:#fed;
+}
+
+#photos {
+  background-color:#666;
+  padding:8px;
+}
+
+#photos h2 {
+  font-family:"Creepster",sans-serif;
+  clear:both;
+  font-size:28px;
+  color:#fff200;
+  -webkit-text-stroke: 1px #333;
+  line-height:1.0;
+}
+
+#photos .thumb {
+  height:57px;
+  width:57px;
+  float:left;
+  margin-bottom:12px;
+  margin-right:4px;
+  border:1px solid #fff;
+}
+
+#photoDetailContainer {
+  background-color:#000;
+  overflow:hidden;
+  height:100%;
+}
+
+.photoDetail img {
+  
+}
+
+.photoDetail .caption {
+  position:absolute;
+  bottom:0px;
+  color:#fff;
+  background:rgba(120, 120, 120, .7);
+  min-height:50px;
+  width:100%;
+}
+
+.photoDetail .caption > div {
+  padding:8px 16px;
 }

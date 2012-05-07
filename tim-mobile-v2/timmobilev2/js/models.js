@@ -22,25 +22,39 @@
       templateLoaded: false,
       behaviorLoaded: false,
       styleLoaded: false,
-      resourcesLoaded: false
+      resourcesLoaded: false,
+      selected: false,
+      initialResourceId: 0
     },
 
     initialize: function() {
+      //add route to this feature to router
+      //add route to detail view to router?
+      var featureName = this.get('feature_name');
+      TIM.app.route(featureName, featureName);
+      TIM.app.route(featureName + "/:number", featureName, function(number){});
+      
     },
 
     clear: function() {
       this.destroy();
     },
     
-    loadFeature: function() {
-      
+    loadFeature: function(resourceId) {
+      if(resourceId) {
+        this.set('initialResourceId', resourceId);
+      }
       //are resources loaded? if not, load them!
-      console.log(this);
+      //console.log("loading feature, resource id is: ", this.get('initialResourceId'));
       if(!this.get("resourcesLoaded")) {
         this.loadResources();
       } else {
         //actually do the navigation
-        TIM.loadedFeatures[this.get('feature_name')].model.navigate();
+        TIM.eventDispatcher.trigger('featureloaded', [this, this.get('initialResourceId')]);
+        //what does the 'navigate' method do?
+        this.behavior.navigate(this.get('initialResourceId'));
+        
+        //TIM.loadedFeatures[this.get('feature_name')].model.navigate(this.get('initialResourceId'));
       }
     },
     
@@ -63,7 +77,9 @@
          //console.log('history after: ', Backbone.history.handlers);
          //
          //console.log('script loaded, new model: ', TIM.loadedModels.);
+         //make a property on the object, not an attribute, so it doesn't save
          self.set('behaviorLoaded', true, {silent:true});
+         //bind these instead of calling?
          self.resourceLoaded();
        })
        .fail(function(jqxhr, settings, exception) {
@@ -71,11 +87,14 @@
        });
       
       //load the template
-      $.getScript("/" + TIM.pageInfo.authorName + "/asset/" + featureName + ".dust.js", function(data, textStatus, jqxhr) {
-         self.set('templateLoaded', true, {silent:true});
-         self.resourceLoaded();
-      });
-      
+      $.getScript("/" + TIM.pageInfo.authorName + "/asset/" + featureName + ".dust.js")
+         .done(function(data, textStatus, jqxhr) {
+           self.set('templateLoaded', true, {silent:true});
+           self.resourceLoaded();
+         })
+         .fail(function(jqxhr, settings, exception) {
+            console.log("template load failed: ", exception);
+          });
       //load the stylesheet
       //TODO: do this with a callback when the stylesheet is loaded - different browsers handle differently... find plugin?
       $('head').append('<link rel="stylesheet" type="text/css" href="/' + TIM.pageInfo.authorName + '/asset/' + featureName + '.css">');
@@ -90,10 +109,10 @@
     resourceLoaded: function() {
       //
       if(this.get("templateLoaded") && this.get("behaviorLoaded") && this.get("styleLoaded")) {
-        console.log('in resourceloaded');
+        console.log('all resources have been loaded');
         this.set("resourcesLoaded", true, {silent:true});
         this.trigger('loaded', 'true');
-        TIM.eventDispatcher.trigger('featureloaded', this);
+        //TIM.eventDispatcher.trigger('featureloaded', this);
         this.loadFeature();
       }
     }

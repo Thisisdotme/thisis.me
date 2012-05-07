@@ -1,0 +1,1 @@
+(function(){dust.register("page",body_0);function body_0(chk,ctx){return chk.section(ctx.get("events"),ctx,{"block":body_1},null);}function body_1(chk,ctx){return chk.write("<div class=\"event half-page\" data-event_id=\"").reference(ctx.get("event_id"),ctx,"h").write("\">").partial("_event",ctx).write("</div>");}return body_0;})();

@@ -1,10 +1,14 @@
+//behavior would specify transition info?
 
 (function(TIM) {
-  console.log('tim: ', TIM);
   var feature = {};
   feature.models = {};
   feature.views = {};
   feature.collections = {};
+  feature.showDetailView = false;
+  feature.hasFetchedCollection = false;
+  feature.showDetailView = false;
+  feature.showDetailId = 0;
   
   feature.models.Timeline = TIM.models.FeatureBehavior.extend({
     initialize: function() {
@@ -69,170 +73,142 @@
   //is this view just a page of 1-3 events?  ...with appropriate templating based on the number of events in its 'collection'?
 
   TIM.views.EventList = Backbone.View.extend( {
-      el: $( "#timeline" ),
-
+      id: "timeline",
+      className: "flippage flippage-container appPage",
+      
       initialize: function() {
           _.bindAll(this, "render", "renderPage");
   				//collection fires 'reset' event when fetch is complete
   				//should collection have methods to get newer and older events so we don't have to get all at once?
   				//is this the right place to have all this info?
           this.collection.bind( "reset", this.render );
-  				this.pageNum = 0;
-  				this.pages = [];
-  				this.flipSet = {};
-  				this.flipSetInitialized = false;
-  				this.chunkSize = 4;
-  				this.renderedIndex = 0;
       },
 
   		events: {
   			"swipeup .flip-set" : "flipNext",
-  			"swipedown .flip-set" : "flipPrevious"
+  			"swipedown .flip-set" : "flipPrevious",
+  			//"click .event" : "showDetail",
+  			"swipeleft .event" : "showDetail"
   		},
 
-  		renderPage: function(page){
-
-  				//send pages, which can be 1-3 events to the event View
-  		    var pageView = new TIM.views.EventPage({page: page});
-          pageView.render();
-
-  				if (!this.flipSetInitialized) {
-  					this.flipSet = new FlipSet($(this.el), 320, 370, [$(pageView.el)]);
-  					console.log(this);
-  					this.flipSetInitialized = true;
-  				} else {
-  					this.flipSet.push($(pageView.el));
-  				}
+      render: function() {
+        //mixing in FlipSet functionality to this view, so the main purpose of 'render' is to render the flipset
+        this.renderFlipSet();
+        
+        //go straight to the detail view if we got here from an external link to a story
+        if(feature.showDetailView) {
+          this.showDetail();
+          feature.showDetailView = false;
+        } else {
+          TIM.transitionPage ($(this.el));
+        }
       },
-
-      render: function(){
-  			//make pages here?  let's try it!!
-  			this.pages = [];
-  			var self = this;
-  			var page = [];
-
-  			//make page objects with either 1 or 2 events
-  			//if the event has a photo, it takes a full page
-  			//otherwise, stuff 2 events in a page
-
-  			//should a 'page' be a backbone model?
-  			//have a collection of pages?
-
-  			//modify this so it doesn't skip too many non-photo events if there's a long series of photo events
-
-  			//only do this a little bit at a time?
-
-  			//store whether an event has been added to a page?
-
-  			this.collection.each(function(item) {
-  				if(item.get("content").photo_url !== undefined) {
-  					self.pages.push({"events" : [item.toJSON()]});
-  				} else {
-  					page.push(item);
-  					if(page.length == 2) {
-  						self.pages.push({"events" : [page[0].toJSON(), page[1].toJSON()]});
-  						page = [];
-  					}
-  				}
-  			});
-
-  			//rather than rendering all pages at once, make it intelligent?
-  			this.renderPageChunk(0);
-  			this.renderPageNum();
-  			return this;
-      },
-
-  		renderPageChunk: function(start) {
-
-  			//would this fn check for earlier/later events if they haven't been loaded?
-
-  			var end = start + this.chunkSize;
-  			if (end > this.pages.length) {
-  				end = this.pages.length;
-  			}
-  			for (var i = start; i < end; i++) {
-  				this.renderPage(this.pages[i]);
-  				this.renderedIndex++;
-  			}
-  		},
-
-  		renderPageNum: function() {
-  			$('#pageNum').html(this.pageNum + 1);
-  		},
-
-  		//should these get the next or previous page & render if necessary?
-  		//rather than rendering all the pages upon fetch/collection refresh
-
-  		//
-
-  		flipNext: function(){
-  			//$.mobile.silentScroll(0);
-  			//check if there are more pages to go
-  			//if they've been rendered
-
-  			//prerender 2 pages in advance?
-  			if(this.pageNum == (this.renderedIndex - 2)) {
-  				this.renderPageChunk(this.renderedIndex);
-  			}
-  			console.log(this);
-  			if (this.flipSet.canGoNext()) {
-  				this.flipSet.next(function(){});
-  				this.pageNum++;
-  				this.renderPageNum();
-  			}
-  		},
-
-  		flipPrevious: function(){
-  			//$.mobile.silentScroll(0);
-
-  			if (this.pageNum == 0) {
-  				//check for newer events at this point?
-  				//poll for newer events?
-  			} 
-
-  			if (this.flipSet.canGoPrevious()) {
-  				this.flipSet.previous(function(){});
-  				this.pageNum--;
-  				this.renderPageNum();
-  			}
-  		}
-
-  } );
-
-  TIM.views.EventPage = Backbone.View.extend( {
-
-      initialize: function(spec) {
-          _.bindAll(this, "render");
-  				this.page = spec.page;
-      },
-
-      render: function( ) {
-  			var that = this;
-  			var tmpl = this.page.events.length === 1 ? "event" : "page";
-  			dust.render(tmpl, this.page, function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  $(that.el).append(out);
-  			});	
+      
+      showDetail: function(event) {
+  		  if (event) {
+  		    console.log('detail click event: ', event);
+  		    feature.showDetailId = $(event.currentTarget).data('event_id');
+  		    //event.stopPropagation();
+  		  }
+  		  var model = this.collection.find(function(model){return model.get('event_id') == feature.showDetailId})
+  		  if(model) {
+  		    console.log('have a model for the detail');
+  		    feature.detailView.model = model;
+    		  feature.detailView.render();
+    		  TIM.transitionPage ($('#eventDetailContainer'), {"animationName":"slide"});
+    		} else {
+    		  console.log("can't find a model for the detail");
+    		  TIM.transitionPage (this.$el, {"animationName":"fade"});
+    		}
       }
+
   } );
+  
+  //add flipset functionality to the Highlight list view
+   _.extend(TIM.views.EventList.prototype, TIM.mixins.flipset);
+   
+   TIM.views.EventDetail = Backbone.View.extend( {
+       id: "eventDetailContainer",
+
+       className: "appPage",
+
+       initialize: function(spec) {
+           _.bindAll(this);
+           if(TIM.appContainerElem.find(this.el).length == 0)  {
+     			  TIM.appContainerElem.append(this.$el);
+     			}
+       },
+
+       events: {
+   			"swiperight" : "showListView"
+   		},
+
+       render: function( ) {
+   			var that = this;
+   			dust.render("eventDetail", this.model.toJSON(), function(err, out) {
+   			  if(err != null) {
+   					console.log(err);
+   				}
+   			  $(that.el).html(out);
+   			});	
+       },
+
+       showListView: function(event) {
+         feature.showDetailView = false;
+         TIM.app.navigate("/timeline");
+         TIM.transitionPage($('#timeline'), {animationName: "slide", reverse: true});
+       }
+
+   } );
   
   feature.model = new feature.models.Timeline();
   
-  feature.activate = function() {
+  feature.activate = function(resourceId) {
+    
+    console.log('activating timeline: ', resourceId);
+    if(resourceId) {
+      //go straight to detail view for this resource...
+      //load collection first?
+      feature.showDetailView = true;
+      feature.showDetailId = resourceId;
+    }
+    
+    //only fetch timeline, create view, etc. if need be...
+    feature.eventCollection = feature.eventCollection || new (TIM.collections.Events);
+    feature.timelineView = feature.timelineView || new TIM.views.EventList({collection: feature.eventCollection});
+    
     var myTimeline = new (TIM.collections.Events);
-    var timelineView = new TIM.views.EventList({collection: myTimeline});
-    timelineView.collection.fetch({
-			dataType: "jsonp",
-			success: function(resp) {
-			  
-			},
-			error: function(resp) {
+    feature.timelineView || new TIM.views.EventList({collection: myTimeline});
+    feature.detailView = feature.detailView || new TIM.views.EventDetail();
+    
+    if(!feature.hasFetchedCollection) {
+      feature.timelineView.collection.fetch({
+  			dataType: "jsonp",
+  			success: function(resp) {
+			    feature.hasFetchedCollection = true;
+  			},
+  			error: function(resp) {
 				
-			}
-		});
+  			}
+  		});
+  	} else {
+  	  if (feature.showDetailView) {
+  	    //TIM.transitionPage ($("#detailContainer"));
+  	    feature.timelineView.showDetail();
+  	  } else {
+  	    //feature.timelineView.showDetail();
+  	    TIM.transitionPage (feature.timelineView.$el);
+  	  }
+  	}
+		
   };
+  
+  feature.navigate = function() {
+    TIM.app.navigate("/timeline");
+  }
+  
+  //add to feature?
+  TIM.features.getByName("timeline").behavior = feature;
   
   TIM.loadedFeatures["timeline"] = feature;
   

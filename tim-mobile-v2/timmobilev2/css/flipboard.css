@@ -35,16 +35,36 @@
   -moz-transition-duration: .6s;	  	  
 }
 
+.fastforward .flip-transitionable {
+  -webkit-transition-duration: .05s;
+  -moz-transition-duration: .05s;	  	  
+}
+
 .flip-top-container {
   top: 0;
   -webkit-transform-origin: 50% 100%;	    
   -moz-transform-origin: 50% 100%;
+  /*outline: solid 1px blue;*/
 }
+
+.flip-top-container .photoDetail .caption {
+  display:none;
+}
+
+.flip-top-container .full-page .footer {
+  display:none;
+}
+
+.flip-top-container .event.half-page {
+  height:100%;
+}
+
 
 .flip-bottom-container {
   bottom: 0;
   -webkit-transform-origin: 50% 0%;
   -moz-transform-origin: 50% 0%;
+  /*outline: solid 1px red;*/
 }
 
 .folded-top .flip-bottom-container {

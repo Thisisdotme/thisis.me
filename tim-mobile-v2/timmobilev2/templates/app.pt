@@ -1,17 +1,19 @@
 <metal:index use-macro="load: master_template.html">
-	
-	<div id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
-		<nav id="featureNav" class="clearfix"></nav>
+	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
+		<nav id="featureNav" class="clearfix"><a href="#" id="navToggle"></a>
+			<ul id="featureNavItems"></ul>
+		</nav>
+		<!-- this font link should maybe be in a per-user asset?  -->
+		<!-- link href="http://fonts.googleapis.com/css?family=Holtwood+One+SC|PT+Sans+Narrow:400,700" rel="stylesheet" type="text/css" -->
+		<!-- link href='http://fonts.googleapis.com/css?family=Creepster' rel='stylesheet' type='text/css' -->
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
 		<script src="/${author_name}/asset/featureNavItem.js"></script>
 		
-		<header data-role="header" data-position="fixed">
-			<h1>${author_name} thisis.me</h1>
-		</header><!-- /header -->
-		<div id="page-content" data-role="content">
-			<div id="timeline" class="flippage flippage-container"></div>
+		<div id="contentContainer">
+		  <div id="splashScreen" class="appPage active"></div>
+		  <div id="loadingImg"></div>
 		</div>
-
+		
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script">
