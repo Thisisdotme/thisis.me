@@ -4,8 +4,8 @@ import json
 from pyramid.view import view_config, view_defaults
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
-from tim_commons.message_queue import (create_facebook_notification, 
-                                       send_messages)
+from tim_commons.message_queue import send_messages
+from tim_commons.messages import create_facebook_notification
 
 # TODO: remove this variable
 verify_token = 'FJ2ZU6OqL1hgBhIN6pUkt1upge3Zu8NarPc5XRM6s' 

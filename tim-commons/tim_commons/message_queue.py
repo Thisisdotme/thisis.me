@@ -61,17 +61,3 @@ def join(client, queue, handler):
 
   promise = client.close()
   client.wait(promise)
-
-
-# All of the messages we send must have the following structure:
-# { 'header': { 'version': <int>, 'type': <string> },
-#   'message': <message> }
-#
-# The tuple (header.version, header.type) uniquely identifies the contect of
-# the field message.
-
-
-def create_facebook_notification(facebook_id):
-  return { 'header': { 'version': 1,
-                       'type': 'facebook.notification' },
-           'message': { 'service_author_id': facebook_id} }
