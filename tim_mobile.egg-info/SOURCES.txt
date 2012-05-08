@@ -1,8 +1,0 @@
-README
-tim_mobile.egg-info/PKG-INFO
-tim_mobile.egg-info/SOURCES.txt
-tim_mobile.egg-info/dependency_links.txt
-tim_mobile.egg-info/entry_points.txt
-tim_mobile.egg-info/not-zip-safe
-tim_mobile.egg-info/requires.txt
-tim_mobile.egg-info/top_level.txt

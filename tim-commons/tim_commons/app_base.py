@@ -1,13 +1,19 @@
+'''
+Created on Feb 19, 2012
+
+@author: howard
+'''
+
 import os
 import sys
 import logging
 import optparse
-
 from configobj import ConfigObj
 from abc import abstractmethod
 
 
 class AppBase(object):
+
   CONFIG_FILE = 'config.ini'
 
   STATUS_OK = 0
@@ -15,6 +21,7 @@ class AppBase(object):
   STATUS_WARNING = 75
 
   def __init__(self, argsNums=None):
+
     '''
     Constructor
     '''
@@ -53,7 +60,8 @@ class AppBase(object):
 
       # if argsNums is a list then we are expecting a min and max args numbers [min,max]
       if(len(argsNums) != 2):
-        self.log.error("Invalid number of elements in argsNums parameter.  Two required")
+        self.log.error("Invalid number of elements in argsNums parameter.  " +
+                       "Two required")
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
@@ -111,7 +119,8 @@ class AppBase(object):
     def walk_include_callback(section, key):
       includeFile = section[key] % {'TIM_CONFIG': os.environ['TIM_CONFIG']}
       if not os.path.exists(includeFile):
-        self.log.warn('Config file reference in include section does not exist: %s' % section[key])
+        self.log.warn('Config file reference in include section ' +
+                      'does not exist: %s' % section[key])
       else:
         mergeConfigs.append(ConfigObj(includeFile))
 

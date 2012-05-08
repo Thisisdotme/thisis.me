@@ -5,7 +5,7 @@
 	<projects>
 		<project>mi-collectors</project>
 		<project>mi-model</project>
-		<project>mi-utils</project>
+		<project>tim-commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

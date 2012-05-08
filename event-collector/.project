@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>author-updater</name>
+	<name>event-collector</name>
 	<comment></comment>
 	<projects>
-		<project>mi-utils</project>
+		<project>mi-model</project>
+		<project>tim-commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
