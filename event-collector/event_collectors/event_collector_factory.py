@@ -26,10 +26,6 @@ class EventCollectorFactory(object):
 
     # retrieve the desired class and instantiate a new instance
     cls = getattr(mod, service_name.capitalize() + "EventCollector")
-    collector = cls(db_session, oauth_config, log)
-
-    # confirm things are properly aligned and as we expect
-    if collector.SERVICE_NAME != service_name:
-      raise Exception('Service collector class out of sync with service name')
+    collector = cls(service_name, db_session, oauth_config, log)
 
     return collector

@@ -174,7 +174,7 @@ def googlePlus_callback(request):
   userId = userInfoJSON['id']
 
   # add the feature via the API
-  json_payload = json.dumps({'access_token':refreshToken,'auxillary_data':{'id':userId}})
+  json_payload = json.dumps({'access_token': refreshToken, 'service_author_id': userId})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
                             (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),

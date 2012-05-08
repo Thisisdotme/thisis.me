@@ -14,60 +14,41 @@ from tim_commons.messages import create_facebook_event
 
 class FacebookEventCollector(EventCollector):
 
-  SERVICE_NAME = "facebook"
-
-  def create_event_message(self, tim_author_id, service_author_id, jsonEventDict):
-    return create_facebook_event(service_author_id, tim_author_id, jsonEventDict)
-
-  def fetch(self, tim_author_id, service_author_id, oauth_access_token, oauth_access_secret, callback):
+  def fetch(self, service_author_id, callback):
 
     super(FacebookEventCollector, self).fetch(service_author_id, callback)
 
-    asm = self.get_author_service_map_for_fetch(service_author_id)
+    state = self.fetch_begin(service_author_id)
 
-    try:
+    self.fetch_log(state)
 
-      args = {'access_token': oauth_access_token}
+    asm = state['asm']
 
-      # fetch all the pages /me/feed
-      path = self.oauth_config['endpoint'] % 'me/picture?%s' % urllib.urlencode(args)
-      req = urllib2.Request(path)
-      res = urllib2.urlopen(req)
+    args = {'access_token': asm.access_token}
 
-      # optimization to request only those since we've last updated
-      if asm.last_update_time:
-        since = int(mktime(asm.last_update_time.timetuple()))
-        args['since'] = since
+    # optimization to request only those since we've last updated
+    if asm.last_update_time:
+      since = int(mktime(asm.last_update_time.timetuple()))
+      args['since'] = since
 
-      # fetch all the pages /me/feed
-      path = self.oauth_config['endpoint'] % 'me/feed?%s' % urllib.urlencode(args)
+    # fetch all the pages /me/feed
+    path = self.oauth_config['endpoint'] % 'me/feed?%s' % urllib.urlencode(args)
 
-      total_accepted = 0
-      while path and total_accepted < 200:
+    total_accepted = 0
+    while path and total_accepted < 200:
 
-        try:
-          req = urllib2.Request(path)
-          res = urllib2.urlopen(req)
-          rawJSON = json.loads(res.read())
-        except Exception, e:
-          self.log.error('error parsing /me/feed')
-          self.log.error(e)
+      raw_json = json.load(urllib2.urlopen(path))
 
-          # abort for this author but continue on
-          path = None
-          continue
+      # process the item
+      #print json.dumps(raw_json, sort_keys=True, indent=2)
 
-        # process the item
-        #print json.dumps(rawJSON, sort_keys=True, indent=2)
+      # TODO loop termination on various constraints is not exact
 
-        # loop termination on various constraints is not exact
+      # for element in the feed
+      for post in raw_json['data']:
 
-        # for element in the feed
-        for post in rawJSON['data']:
-
-          # currently only interested in 'status' posts from the user
-#          if post['type'] == 'status' and post['from']['id'] == fbUserId:
-          if post['from']['id'] == service_author_id:
+        # currently only interested in 'status' posts from the user
+        if post['from']['id'] == service_author_id:
 
 #            # check if I'm in the story tags anywhere.
 #            found = False
@@ -82,20 +63,19 @@ class FacebookEventCollector(EventCollector):
 #            if found:
 #              continue
 
-            # if this is a status update and there are no actions then skip it
-            if post.get('type') == 'status' and post.get('actions') is None:
-              continue
+          # if this is a status update and there are no actions then skip it
+          if post.get('type') == 'status' and post.get('actions') is None:
+            continue
 
-            callback(tim_author_id, service_author_id, post)
+          total_accepted = total_accepted + 1
+          callback(create_facebook_event(service_author_id, asm.author_id, post))
 
-          # if
-        # for
+        # if
+      # for
 
-        # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
-        nextPath = rawJSON['paging']['next'] if 'paging' in rawJSON and 'next' in rawJSON['paging'] else None
-        path = nextPath if nextPath and nextPath != path else None
+      # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
+      nextPath = raw_json['paging']['next'] if 'paging' in raw_json and 'next' in raw_json['paging'] else None
+      path = nextPath if nextPath and nextPath != path else None
 
-    except Exception, e:
-      self.log.error("****ERROR****")
-      self.log.error(e)
-      raise
+    # terminate the fetch
+    self.fetch_end(state)

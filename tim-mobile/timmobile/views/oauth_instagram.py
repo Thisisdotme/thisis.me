@@ -64,7 +64,7 @@ def post_instagram(request):
 
 @view_config(route_name='instagram_callback', request_method='GET')
 def instagram_callback(request):
-  
+
   code = request.params.get('code')
 
   # ??? TODO - proper handling of error case
@@ -86,7 +86,15 @@ def instagram_callback(request):
   if not access_token:
     raise GenericError('no access_token returned from Instagram when exchanging code for access_token')
 
-  json_payload = json.dumps({'access_token':access_token})
+  # get the author's instagram user id
+  url = '%s%s?%s' % (oauthConfig[FEATURE]['endpoint'],'users/self',urllib.urlencode({'access_token':afm.access_token}))
+  req = urllib2.Request(url)
+  res = urllib2.urlopen(req)
+  rawJSON = json.loads(res.read())
+
+  instagram_author_id = rawJSON['data']['id']
+
+  json_payload = json.dumps({'access_token': access_token, 'service_author_id': instagram_author_id})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
                                                     (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),

@@ -167,7 +167,7 @@ def facebook_callback(request):
     log.error(msg)
     raise GenericError(msg)
   
-  json_payload = json.dumps({'access_token':fbAccessToken,'auxillary_data':{'id':fbUserId}})
+  json_payload = json.dumps({'access_token':fbAccessToken,'service_author_id': fbUserId})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                                   (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),

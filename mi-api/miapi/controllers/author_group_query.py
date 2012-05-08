@@ -55,10 +55,10 @@ class AuthorGroupQueryController(object):
     try:
       authorGroup = self.dbSession.query(AuthorGroup).filter(and_(AuthorGroup.author_id == author.id,AuthorGroup.group_name == groupName)).one()
     except:
-      self.request.response.status_int = 404;
-      return {'error':'unknown service %s' % authorName}  
-  
-    events = []  
+      self.request.response.status_int = 404
+      return {'error': 'unknown service %s' % authorName}
+
+    events = []
     for highlight,event,author,serviceName in self.dbSession.query(Highlight,ServiceEvent,Author,Service.service_name). \
               join(ServiceEvent,Highlight.service_event_id==ServiceEvent.id). \
               join(AuthorServiceMap,ServiceEvent.author_service_map_id==AuthorServiceMap.id). \

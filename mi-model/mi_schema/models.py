@@ -138,9 +138,7 @@ class AuthorServiceMap(Base):
   # TODO add unique constraint on service_id and service_author_id
   service_author_id = Column(String(255))
 
-  auxillary_data = Column(String(65565))
-
-  def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, auxillaryData=None):
+  def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, service_author_id=None):
     self.author_id = authorId
     self.service_id = serviceId
     self.access_token = accessToken
@@ -148,7 +146,7 @@ class AuthorServiceMap(Base):
     self.last_update_time = None
     self.most_recent_event_id = None
     self.most_recent_event_timestamp = None
-    self.auxillary_data = auxillaryData
+    self.service_author_id = service_author_id
 
   def __repr__(self):
     return "<AuthorServiceMap('%s,%s')>" % (self.author_id, self.service_id)
