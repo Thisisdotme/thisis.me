@@ -41,6 +41,23 @@ def create_message_client(url):
   return client
 
 
+def create_queues(client, queues, durable=True):
+  ''' Creates a set of queues
+
+  Arguments:
+  client -- the object returned by create_message_client or
+            get_current_message_client
+  queues -- list of queues to create
+  '''
+  promises = []
+  for queue in queues:
+    promise = client.queue_declare(queue=queue, durable=durable)
+    promises.append(promise)
+
+  for promise in promises:
+    client.wait(promise)
+
+
 def send_messages(client, queue, messages):
   ''' Sends a list of messages to the specified queue.
 

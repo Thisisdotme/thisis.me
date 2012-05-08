@@ -4,7 +4,7 @@ import os
 import json
 
 from tim_commons.app_base import AppBase
-from tim_commons.message_queue import create_message_client, send_messages
+from tim_commons.message_queue import create_message_client, send_messages, create_queues
 
 _TIM_DATA = 'TIM_DATA'
 
@@ -52,6 +52,9 @@ class NotificationLoad(AppBase):
 
     # create amqp connection
     client = create_message_client(self.option.url)
+
+    # create all of the required queues
+    create_queues(client, self.queues)
 
     # itereate and send all the interesting messages
     for message in messages:

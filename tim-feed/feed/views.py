@@ -27,13 +27,13 @@ def get_facebook_feed(request):
 def post_facebook_feed(request):
   facebook_notification = json.loads(request.body)
 
-  events = convert_facebook_notification(facebook_notification)
+  events = _convert_facebook_notification(facebook_notification)
   send_messages(request.message_client, queue, events)
 
   return Response()
 
 
-def convert_facebook_notification(facebook_notification):
+def _convert_facebook_notification(facebook_notification):
   def has_id(notification):
     uid = notification.get('uid', None)
     if uid is None:
