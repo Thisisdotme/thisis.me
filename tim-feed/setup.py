@@ -15,7 +15,7 @@ requires = [
 setup(name='feed',
       version='0.0',
       description='feed',
-      long_description=README + '\n\n' +  CHANGES,
+      long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pylons",
@@ -32,9 +32,8 @@ setup(name='feed',
       install_requires=requires,
       tests_require=requires,
       test_suite="feed",
-      entry_points = """\
+      entry_points="""\
       [paste.app_factory]
       main = feed:main
       """,
       )
-

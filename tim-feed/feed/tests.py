@@ -6,6 +6,7 @@ from webob.multidict import MultiDict
 from feed.views import (get_facebook_feed, post_facebook_feed, verify_token,
                         convert_facebook_notification)
 
+
 class FacebookFeedHTTPTestCase(unittest.TestCase):
   def setUp(self):
     self.config = testing.setUp()
@@ -14,7 +15,7 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
     testing.tearDown()
 
   def _create_multidict(self):
-    result =  MultiDict()
+    result = MultiDict()
     result.add('hub.mode', 'subscribe')
     result.add('hub.challenge', 'secret')
     result.add('hub.verify_token', verify_token)
@@ -54,7 +55,7 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
     request = testing.DummyRequest()
     request.message_client = tim_commons.mock.DummyMessageClient()
     request.headers['Content-Type'] = 'application/json'
-    request.body = '''{"object": "user", "entry": [ { "uid": 1335845740, 
+    request.body = '''{"object": "user", "entry": [ { "uid": 1335845740,
 "changed_fields": [ "name", "picture" ], "time": 232323 }, { "uid": 1234,
 "changed_fields": [ "friends" ], "time": 232325 } ] }'''
 
@@ -62,15 +63,16 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
 
     self.assertEqual(result.status_int, 200)
 
+
 class FacebookFeedInternalTestCase(unittest.TestCase):
   def test_convert_facebook_notification(self):
     notification = {"object": "user",
-                    "entry": [ { "uid": 1335845740,
-                                 "changed_fields": [ "name", "picture" ],
-                                 "time": 232323 },
-                               { "uid": 1234,
-                                 "changed_fields": [ "friends" ],
-                                 "time": 232325 } ] }
+                    "entry": [{"uid": 1335845740,
+                                 "changed_fields": ["name", "picture"],
+                                 "time": 232323},
+                               {"uid": 1234,
+                                 "changed_fields": ["friends"],
+                                 "time": 232325}]}
 
     notifications = convert_facebook_notification(notification)
     self.assertEquals(1335845740,

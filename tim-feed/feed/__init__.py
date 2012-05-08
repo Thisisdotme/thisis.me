@@ -1,12 +1,14 @@
 from pyramid.config import Configurator
-from pyramid.events import NewRequest, subscriber
+from pyramid.events import NewRequest
 from tim_commons.message_queue import get_current_message_client
+
 
 def bind_add_message_client(host):
   def add_message_client(event):
     event.request.message_client = get_current_message_client(host)
 
   return add_message_client
+
 
 def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.

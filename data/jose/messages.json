@@ -1,0 +1,6 @@
+[{"header": {"version": 1,
+             "type": "facebook.notification"},
+  "message": {"service_author_id": "100003801487232"}},
+ {"header": {"version": 1,
+             "type": "facebook.notification"},
+  "message": {"service_author_id": "100003801487232"}}]
