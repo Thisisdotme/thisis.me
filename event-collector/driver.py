@@ -40,7 +40,7 @@ class EventCollectorDriver(AppBase):
       return
 
     # read the db url from the config
-    dbUrl = self.config['db_config']['sqlalchemy.url']
+    dbUrl = self.config['db']['sqlalchemy.url']
 
     # initialize the db engine & session
     engine = create_engine(dbUrl, encoding='utf-8', echo=False)

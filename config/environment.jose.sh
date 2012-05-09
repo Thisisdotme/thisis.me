@@ -6,10 +6,10 @@ export TIM_HOME=/home/jose/dev/work/thisis.me
 export TIM_DATA=$TIM_HOME/data/jose
 
 # Define location of configuration files
-export TIM_CONFIG=$TIM_HOME/config
+export TIM_CONFIG=$TIM_HOME/config/jose
 
 # Define oath keys
-export TIM_OAUTH_KEYS=$TIM_CONFIG/oauth_keys.jose.json
+export TIM_OAUTH_KEYS=$TIM_CONFIG/oauth_keys.json
 
 # Define the pythonpath
 export PYTHONPATH=$TIM_HOME/mi-utils:$TIM_HOME/mi-model:$TIM_HOME/mi-db

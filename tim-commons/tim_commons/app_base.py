@@ -8,13 +8,14 @@ import os
 import sys
 import logging
 import optparse
-from configobj import ConfigObj
 from abc import abstractmethod
+
+from tim_commons.config import load_configuration
 
 
 class AppBase(object):
 
-  CONFIG_FILE = 'config.ini'
+  CONFIG_FILE = '{TIM_CONFIG}/config.ini'
 
   STATUS_OK = 0
   STATUS_ERROR = 1
@@ -68,12 +69,12 @@ class AppBase(object):
       minArgsNum = argsNums[0]
       maxArgsNum = argsNums[1]
       if(numSuppliedArgs < minArgsNum):
-        self.log.error("Minimum of %s arguments required, only %s supplied" % (minArgsNum, numSuppliedArgs))
+        self.log.error("Minimum of {0} arguments required, only {1} supplied".format(minArgsNum, numSuppliedArgs))
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
       if(maxArgsNum != None and numSuppliedArgs > maxArgsNum):
-        self.log.error("Maximum of %s arguments required, %s supplied" % (maxArgsNum, numSuppliedArgs))
+        self.log.error("Maximum of {0} arguments required, {1} supplied".format(maxArgsNum, numSuppliedArgs))
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
@@ -83,6 +84,10 @@ class AppBase(object):
         sys.exit(self.STATUS_ERROR)
 
   def init_logger(self):
+    # Set the root logger to DEBUG
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+
     #create logger
     logger = logging.getLogger(self.name)
     logger.setLevel(logging.DEBUG)
@@ -103,37 +108,7 @@ class AppBase(object):
     self.log = logger
 
   def load_config(self):
-
-    if not os.path.exists(self.CONFIG_FILE):
-      self.config = None
-      return
-
-    self.config = ConfigObj()
-
-    baseConfig = ConfigObj(self.CONFIG_FILE, interpolation=False)
-
-    # after walking all key/values in the include section this list will hold
-    # the ConfigObj for each included config
-    mergeConfigs = []
-
-    def walk_include_callback(section, key):
-      includeFile = section[key] % {'TIM_CONFIG': os.environ['TIM_CONFIG']}
-      if not os.path.exists(includeFile):
-        self.log.warn('Config file reference in include section ' +
-                      'does not exist: %s' % section[key])
-      else:
-        mergeConfigs.append(ConfigObj(includeFile))
-
-    # load the configs for the include section
-    common = baseConfig['include']
-    common.walk(walk_include_callback)
-
-    # remove the include section
-    baseConfig.pop('include', None)
-
-    for config in mergeConfigs:
-      self.config.merge(config)
-    self.config.merge(baseConfig)
+    self.config = load_configuration(self.CONFIG_FILE)
 
   @abstractmethod
   def main(self):
