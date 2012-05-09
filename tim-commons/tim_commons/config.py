@@ -31,3 +31,16 @@ def load_configuration(config_file):
     return config
 
   return recursive_load_configuration(ConfigObj(), config_file)
+
+
+ENVIRONMENT_KEY = 'environment'
+
+
+def update_pyramid_configuration(settings):
+  environment_config_file = settings.get('environment_file', '{TIM_CONFIG}/config.ini')
+  environment_config = load_configuration(environment_config_file)
+
+  if ENVIRONMENT_KEY in settings:
+    raise Exception('Setting dictionary already contains an environment key')
+  else:
+    settings[ENVIRONMENT_KEY] = environment_config

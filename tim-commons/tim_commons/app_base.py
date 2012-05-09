@@ -13,16 +13,13 @@ from abc import abstractmethod
 from tim_commons.config import load_configuration
 
 
-class AppBase(object):
-
-  CONFIG_FILE = '{TIM_CONFIG}/config.ini'
+class AppBase:
 
   STATUS_OK = 0
   STATUS_ERROR = 1
   STATUS_WARNING = 75
 
-  def __init__(self, argsNums=None):
-
+  def __init__(self, argsNums=None, config_file='{TIM_CONFIG}/config.ini'):
     '''
     Constructor
     '''
@@ -33,7 +30,7 @@ class AppBase(object):
     if(argsNums == None):
       argsNums = 0
     self.parse_args(argsNums)
-    self.load_config()
+    self.load_config(config_file)
 
   @abstractmethod
   def display_usage(self):
@@ -107,8 +104,8 @@ class AppBase(object):
 
     self.log = logger
 
-  def load_config(self):
-    self.config = load_configuration(self.CONFIG_FILE)
+  def load_config(self, config_file):
+    self.config = load_configuration(config_file)
 
   @abstractmethod
   def main(self):
