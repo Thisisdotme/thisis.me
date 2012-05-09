@@ -6,14 +6,13 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
 from tim_commons.message_queue import send_messages
 from tim_commons.messages import create_facebook_notification
-
-# TODO: remove this variable
-verify_token = 'FJ2ZU6OqL1hgBhIN6pUkt1upge3Zu8NarPc5XRM6s'
-queue = 'facebook.notification'
+from tim_commons.config import ENVIRONMENT_KEY
 
 
 @view_config(request_method='GET', route_name='facebook_feed')
 def get_facebook_feed(request):
+  verify_token = request.registry.settings[ENVIRONMENT_KEY]['feed']['verify_token']
+
   if (request.GET.getone('hub.mode') == 'subscribe' and
       request.GET.getone('hub.verify_token') == verify_token):
     return Response(body=request.GET.getone('hub.challenge'))
@@ -28,6 +27,7 @@ def post_facebook_feed(request):
   facebook_notification = json.loads(request.body)
 
   events = convert_facebook_notification(facebook_notification)
+  queue = request.registry.settings[ENVIRONMENT_KEY]['queue']['facebook']['notification']
   send_messages(request.message_client, queue, events)
 
   return Response()

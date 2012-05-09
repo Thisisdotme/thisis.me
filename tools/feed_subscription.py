@@ -1,44 +1,51 @@
-from urllib2 import urlopen, URLError, HTTPError
+import sys
+import logging
+from urlparse import parse_qs
+from urllib2 import urlopen
 from urllib import urlencode
-from sys import exit
-from mi_utils.app_base import AppBase
-from feed.views import verify_token
-import json
 
-# TODO: Get this somewhere else
-APP_AUTH = {'app_id': '237395986367316',
-            'access_token': '237395986367316|Beiq_CgBN5lBET_J1mE_zBi2j5I'}
-URL = 'https://graph.facebook.com/%(app_id)s/subscriptions?access_token=%(access_token)s'
-CALLBACK_URL = 'http://ec2-50-16-11-63.compute-1.amazonaws.com:8888/feed/facebook'
+from tim_commons.app_base import AppBase
 
 
 class Subscriber(AppBase):
   def display_usage(self):
-    pass
+    return ''
 
   def init_args(self):
-    self.option_parser.add_option('--feed', dest='feed',
-                                  help='Name of feed to subscribe: facebook')
+    pass
+
+  def parse_args(self, ignore):
+    pass
 
   def main(self):
+    verify_token = self.config['feed']['verify_token']
+    feed_base_url = self.config['feed']['base_url']
+    app_id = self.config['oauth']['facebook']['key']
+    app_secret = self.config['oauth']['facebook']['secret']
+
+    # get the access token
+    access_token_url = ('https://graph.facebook.com/oauth/access_token?' +
+                        'client_id={app_id}&' +
+                        'client_secret={app_secret}&' +
+                        'grant_type=client_credentials')
+    access_token_url = access_token_url.format(app_id=app_id, app_secret=app_secret)
+    access_token = parse_qs(urlopen(access_token_url).read())['access_token'][0]
+    logging.info('Using token: %s', access_token)
+
     # Send subscription request
+    url = 'https://graph.facebook.com/{app_id}/subscriptions?access_token={access_token}'
+    url = url.format(app_id=app_id, access_token=access_token)
+
+    callback_url = feed_base_url + '/feed/facebook'
     subscription = {'object': 'user',
                     'fields': 'feed',
-                    'callback_url': CALLBACK_URL,
+                    'callback_url': callback_url,
                     'verify_token': verify_token}
-
     data = urlencode(subscription)
-    url = URL % APP_AUTH
 
-    try:
-      response = urlopen(url, data)
-      self.log.info(response.info())
-      self.log.info(json.loads(response.read()))
-    except HTTPError, e:
-      self.log.error("code = %d, body=%s", e.code, e.read())
-    except URLError, e:
-      self.log.error("Failed to reach the server: %s", e.reason)
+    logging.info('POSTing: %s', data)
+    urlopen(url, data)
 
 if __name__ == "__main__":
   # Initialize with number of arguments script takes
-  exit(Subscriber(0).main())
+  sys.exit(Subscriber().main())

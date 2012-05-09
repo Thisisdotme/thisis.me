@@ -58,25 +58,28 @@ class AppBase:
 
       # if argsNums is a list then we are expecting a min and max args numbers [min,max]
       if(len(argsNums) != 2):
-        self.log.error("Invalid number of elements in argsNums parameter.  " +
-                       "Two required")
+        logging.error("Invalid number of elements in argsNums parameter. Two required")
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
       minArgsNum = argsNums[0]
       maxArgsNum = argsNums[1]
       if(numSuppliedArgs < minArgsNum):
-        self.log.error("Minimum of {0} arguments required, only {1} supplied".format(minArgsNum, numSuppliedArgs))
+        logging.error("Minimum of %s arguments required, only %s supplied",
+                       minArgsNum,
+                       numSuppliedArgs)
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
       if(maxArgsNum != None and numSuppliedArgs > maxArgsNum):
-        self.log.error("Maximum of {0} arguments required, {1} supplied".format(maxArgsNum, numSuppliedArgs))
+        logging.error("Maximum of %s arguments required, %s supplied",
+                       maxArgsNum,
+                       numSuppliedArgs)
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
     else:
-        self.log.error("Unrecognized argsNums parameter")
+        logging.error("Unrecognized argsNums parameter")
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 

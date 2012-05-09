@@ -19,7 +19,7 @@ class NotificationLoad(AppBase):
                             help='URL for the message queue')
     self.option_parser.add_option('--messagefile',
                             dest='message_file',
-                            default='{TIM_DATA}/messages.json',
+                            default='{tim_data}/messages.json',
                             help='File containing all the message events')
 
   def parse_args(self, ignore):
@@ -36,7 +36,7 @@ class NotificationLoad(AppBase):
       logging.error('Environment variable %s not defined', TIM_DATA)
       sys.exit()
 
-    file = self.option.message_file.format(**{TIM_DATA: os.environ[TIM_DATA]})
+    file = self.option.message_file.format(tim_data=data_directory)
 
     if not os.path.exists(file):
       logging.warning('File "%s" does not exist', file)
