@@ -9,8 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from tim_commons.app_base import AppBase
-from event_collectors.event_collector_factory import EventCollectorFactory
-from tim_commons.message_queue import (create_message_client, join, send_messages, create_queues)
+from tim_commons.message_queue import (create_message_client, join, create_queues)
+from event_processors.event_processor_factory import EventProcessorFactory
 
 DBSession = sessionmaker()
 
@@ -20,15 +20,9 @@ class EventCollectorDriver(AppBase):
   def display_usage(self):
     return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
 
-  def _handle_event(self, msg):
-    send_messages(self.client, self.send_queue, [msg])
-
   def _handle_message_receive(self, msg):
-
-    def handle_event_callback(callback_msg):
-      self._handle_event(callback_msg)
-
-    self.collector.fetch(msg['message']['service_author_id'], handle_event_callback)
+    body = msg['message']
+    self.processor.process(body['tim_author_id'], body['service_author_id'], body['service_event_json'])
 
   def main(self):
 
@@ -40,33 +34,27 @@ class EventCollectorDriver(AppBase):
       return
 
     # read the db url from the config
-    dbUrl = self.config['db']['sqlalchemy.url']
+    db_url = self.config['db_config']['sqlalchemy.url']
 
     # initialize the db engine & session
-    engine = create_engine(dbUrl, encoding='utf-8', echo=False)
+    engine = create_engine(db_url, encoding='utf-8', echo=False)
     DBSession.configure(bind=engine)
 
     db_session = DBSession()
 
-    # get the oauth application config for this collector
-    oauth_config = self.config['oauth'][service_name]
-
     # get the broker and queue config
     broker_url = self.config['broker']['url']
-    queue_config = self.config['queues']
-    self.send_queue = queue_config[service_name]['event']
-    receive_queue = queue_config[service_name]['notification']
+    receive_queue = self.config['queues'][service_name]['event']
 
     self.log.info('Queue broker URL: %s' % broker_url)
     self.log.info('Receive queue: %s' % receive_queue)
-    self.log.info('Send queue: %s' % self.send_queue)
 
-    self.collector = EventCollectorFactory.from_service_name(service_name, db_session, oauth_config, self.log)
+    self.processor = EventProcessorFactory.from_service_name(service_name, db_session, self.log)
 
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
 
-    create_queues(self.client, [self.send_queue, receive_queue])
+    create_queues(self.client, [receive_queue])
 
     def handle_receieve_callback(callback_msg):
       self._handle_message_receive(callback_msg)
