@@ -75,4 +75,3 @@ class EventCollector(object):
   @abstractmethod
   def fetch(self, service_author_id, callback):
     pass
-
