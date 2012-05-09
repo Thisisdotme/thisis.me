@@ -6,8 +6,6 @@ import json
 from tim_commons.app_base import AppBase
 from tim_commons.message_queue import create_message_client, send_messages, create_queues
 
-_TIM_DATA = 'TIM_DATA'
-
 
 class NotificationLoad(AppBase):
 
@@ -21,7 +19,7 @@ class NotificationLoad(AppBase):
                             help='URL for the message queue')
     self.option_parser.add_option('--messagefile',
                             dest='message_file',
-                            default='%(TIM_DATA)s/messages.json',
+                            default='{TIM_DATA}/messages.json',
                             help='File containing all the message events')
 
   def parse_args(self, ignore):
@@ -32,15 +30,16 @@ class NotificationLoad(AppBase):
       sys.exit()
 
   def main(self):
-    data_directory = os.environ.get(_TIM_DATA, None)
+    TIM_DATA = 'TIM_DATA'
+    data_directory = os.environ.get(TIM_DATA, None)
     if data_directory is None:
-      logging.error('Environment variable %s not defined', _TIM_DATA)
+      logging.error('Environment variable %s not defined', TIM_DATA)
       sys.exit()
 
-    file = self.option.message_file % {_TIM_DATA: os.environ[_TIM_DATA]}
+    file = self.option.message_file.format(**{TIM_DATA: os.environ[TIM_DATA]})
 
     if not os.path.exists(file):
-      logging.warning('File "%s" does not exist' % file)
+      logging.warning('File "%s" does not exist', file)
       sys.exit()
 
     # read the message file

@@ -1,13 +1,17 @@
 from pyramid.config import Configurator
-from pyramid.events import NewRequest
+from pyramid.events import ApplicationCreated, NewRequest, subscriber
 from tim_commons.message_queue import get_current_message_client
 
 
-def bind_add_message_client(host):
-  def add_message_client(event):
-    event.request.message_client = get_current_message_client(host)
+@subscriber(NewRequest)
+def add_message_client(event):
+  url = event.request.registry.settings['message.queue.url']
+  event.request.message_client = get_current_message_client(url)
 
-  return add_message_client
+
+@subscriber(ApplicationCreated)
+def create_feed_queue(event):
+  print event.app.registry.settings
 
 
 def main(global_config, **settings):
@@ -16,9 +20,6 @@ def main(global_config, **settings):
   config = Configurator(settings=settings)
 
   config.add_route('facebook_feed', 'feed/facebook')
-
-  config.add_subscriber(bind_add_message_client(settings['message.queue.url']),
-                        NewRequest)
 
   config.scan()
   return config.make_wsgi_app()
