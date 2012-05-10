@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>event-processor</name>
+	<name>event-interpreter</name>
 	<comment></comment>
 	<projects>
-		<project>event-interpreter</project>
-		<project>mi-model</project>
-		<project>tim-commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

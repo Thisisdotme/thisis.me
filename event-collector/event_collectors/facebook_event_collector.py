@@ -8,8 +8,9 @@ import urllib
 import urllib2
 from time import mktime
 
-from event_collector import EventCollector
 from tim_commons.messages import create_facebook_event
+from event_interpreter.facebook_event_interpreter import FacebookStatusEventInterpreter
+from event_collector import EventCollector
 
 
 class FacebookEventCollector(EventCollector):
@@ -20,7 +21,7 @@ class FacebookEventCollector(EventCollector):
 
     state = self.fetch_begin(service_author_id)
 
-    self.fetch_log(state)
+    self.fetch_log_info(state)
 
     asm = state['asm']
 
@@ -35,7 +36,7 @@ class FacebookEventCollector(EventCollector):
     path = self.oauth_config['endpoint'] % 'me/feed?%s' % urllib.urlencode(args)
 
     total_accepted = 0
-    while path and total_accepted < 200:
+    while path and total_accepted < self.MAX_EVENTS:
 
       raw_json = json.load(urllib2.urlopen(path))
 
@@ -67,8 +68,9 @@ class FacebookEventCollector(EventCollector):
           if post.get('type') == 'status' and post.get('actions') is None:
             continue
 
-          total_accepted = total_accepted + 1
-          callback(create_facebook_event(service_author_id, asm.author_id, post))
+          if self.screen_event(FacebookStatusEventInterpreter(post), state):
+            total_accepted = total_accepted + 1
+            callback(create_facebook_event(service_author_id, asm.author_id, post))
 
         # if
       # for

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Created on May 2, 2012
 
@@ -34,7 +36,7 @@ class EventCollectorDriver(AppBase):
       return
 
     # read the db url from the config
-    db_url = self.config['db_config']['sqlalchemy.url']
+    db_url = self.config['db']['sqlalchemy.url']
 
     # initialize the db engine & session
     engine = create_engine(db_url, encoding='utf-8', echo=False)

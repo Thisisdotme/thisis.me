@@ -234,6 +234,7 @@ class ServiceEvent(Base):
 
   event_id = Column(String(255), nullable=False)
   create_time = Column(DateTime, nullable=False)
+  modify_time = Column(DateTime, nullable=False)
 
   url = Column(String(1024))
 
@@ -247,10 +248,11 @@ class ServiceEvent(Base):
 
   json = Column(Text(65535))
 
-  def __init__(self, authorServiceMapId, eventId, createTime, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None, json=None):
-    self.author_service_map_id = authorServiceMapId
-    self.event_id = eventId
-    self.create_time = createTime
+  def __init__(self, author_service_map_id, event_id, create_time, url=None, caption=None, content=None, photoURL=None, auxillaryContent=None, authorProfileImageUrl=None, json=None):
+    self.author_service_map_id = author_service_map_id
+    self.event_id = event_id
+    self.create_time = create_time
+    self.modify_time = create_time
     self.url = url
     self.caption = caption
     self.content = content

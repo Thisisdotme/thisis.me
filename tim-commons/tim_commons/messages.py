@@ -52,6 +52,13 @@ def create_facebook_notification(facebook_user_id,
                                       facebook_user_id,
                                       oauth_access_token, auth_access_secret)
 
+
+def create_twitter_notification(twitter_user_id):
+
+  TYPE = 'twitter.notification'
+
+  return _create_notification_message(TYPE, None, twitter_user_id, None, None)
+
 '''
   Raw service event message.
 
@@ -76,15 +83,33 @@ def _create_event_message(message_type,
   return json_dict
 
 
-def create_facebook_event(facebook_user_id,
-                          tim_author_id,
-                          json_event_dict):
+def create_facebook_event(facebook_user_id, tim_author_id, json_event_dict):
 
   TYPE = 'facebook.event'
 
   return _create_event_message(TYPE,
                                tim_author_id,
                                facebook_user_id,
+                               json_event_dict)
+
+
+def create_twitter_event(twitter_user_id, tim_author_id, json_event_dict):
+
+  TYPE = 'twitter.event'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               twitter_user_id,
+                               json_event_dict)
+
+
+def create_instagram_event(instagram_user_id, tim_author_id, json_event_dict):
+
+  TYPE = 'twitter.event'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               instagram_user_id,
                                json_event_dict)
 
 
@@ -122,3 +147,27 @@ def create_facebook_event_update(facebook_user_id,
                                tim_author_id,
                                facebook_user_id,
                                facebook_event_id)
+
+
+def create_twitter_event_update(twitter_user_id,
+                                tim_author_id,
+                                twitter_event_id):
+
+  TYPE = 'twitter.update'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               twitter_user_id,
+                               twitter_event_id)
+
+
+def create_instagram_event_update(instagram_user_id,
+                                  tim_author_id,
+                                  instagram_event_id):
+
+  TYPE = 'instagram.update'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               instagram_user_id,
+                               instagram_event_id)

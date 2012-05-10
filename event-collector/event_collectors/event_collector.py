@@ -14,13 +14,17 @@ from mi_schema.models import (Service, AuthorServiceMap, Author)
 
 class EventCollector(object):
 
+  LAST_UPDATE_OVERLAP = timedelta(hours=1)
+  LOOKBACK_WINDOW = timedelta(days=365)
+
+  MAX_EVENTS = 1000
+
   def __init__(self, service_name, db_session, oauth_config, log):
 
     self.service_name = service_name
     self.db_session = db_session
     self.oauth_config = oauth_config
     self.log = log
-    self.lookbackWindow = datetime.now() - timedelta(days=365)
 
     # get the service-id for this collector's service
     service_id, = self.db_session.query(Service.id).filter(Service.service_name == self.service_name).one()
@@ -38,9 +42,11 @@ class EventCollector(object):
                                       AuthorServiceMap.service_author_id == service_author_id)). \
                           one()
 
-    return {'now': datetime.now(),
+    now = datetime.now()
+    return {'now': now,
             'asm': asm,
             'author_name': author_name,
+            'min_event_time': asm.last_update_time - self.LAST_UPDATE_OVERLAP if asm.last_update_time else now - self.LOOKBACK_WINDOW,
             'most_recent_event_id': asm.most_recent_event_id,
             'most_recent_event_timestamp': asm.most_recent_event_timestamp}
 
@@ -65,7 +71,7 @@ class EventCollector(object):
   '''
     fetch_log - utility for logging author event fetches in a consistent manner
   '''
-  def fetch_log(self, state):
+  def fetch_log_info(self, state):
     self.log.debug('Fetching %s events for author %s (service_author_id %s)' %
                       (self.service_name, state['author_name'], state['asm'].service_author_id))
 
@@ -75,3 +81,24 @@ class EventCollector(object):
   @abstractmethod
   def fetch(self, service_author_id, callback):
     pass
+
+  def screen_event(self, interpreter, state):
+
+    qualifies = False
+
+    event_time = interpreter.get_time()
+
+    # skip any events older than the lookback window
+    if event_time >= state['min_event_time']:
+
+      qualifies = True
+
+      # update the most-recent event timestamp state if appropriate
+      if not state['most_recent_event_timestamp'] or event_time > state['most_recent_event_timestamp']:
+        state['most_recent_event_id'] = interpreter.get_id()
+        state['most_recent_event_timestamp'] = event_time
+
+    else:
+      self.log.debug('Skipping event older than lookback window or last-update overlap')
+
+    return qualifies
