@@ -1,7 +1,8 @@
 import threading
 import puka
-import json
 import logging
+
+from tim_commons import serializer
 
 # Thread local client
 threadlocal = threading.local()
@@ -71,7 +72,7 @@ def send_messages(client, queue, messages):
   # Send all the messages
 #  promises = []
   for message in messages:
-    body = json.dumps(message)
+    body = serializer.dump_string(message)
     promise = client.basic_publish(exchange='',
                                    routing_key=queue,
                                    body=body)
@@ -99,7 +100,7 @@ def join(client, queue, handler):
     result = client.wait(promise)
 
     try:
-      message = json.loads(result['body'])
+      message = serializer.load_string(result['body'])
       if message['header']['type'] == queue:
         handler(message)
       else:

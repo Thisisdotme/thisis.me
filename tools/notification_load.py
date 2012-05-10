@@ -1,14 +1,13 @@
 import logging
 import sys
 import os
-import json
 
 from tim_commons.app_base import AppBase
 from tim_commons.message_queue import create_message_client, send_messages, create_queues
+from tim_commons import serializer
 
 
 class NotificationLoad(AppBase):
-
   def display_usage(self):
     return 'usage: %prog [options] queues...'
 
@@ -44,7 +43,7 @@ class NotificationLoad(AppBase):
 
     # read the message file
     try:
-      messages = json.load(open(file, 'r'))
+      messages = serializer.load(open(file, 'r'))
     except Exception:
       logging.error('Failed to read json file: %s', file)
       raise
