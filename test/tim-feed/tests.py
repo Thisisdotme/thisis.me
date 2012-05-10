@@ -1,13 +1,16 @@
 import unittest
-import tim_commons.mock
 
 from pyramid import testing
 from webob.multidict import MultiDict
-from feed.views import (get_facebook_feed, post_facebook_feed, verify_token,
-                        convert_facebook_notification)
+
+import tim_commons.mock
+from feed.views import get_facebook_feed, post_facebook_feed, convert_facebook_notification
+from tim_commons.config import ENVIRONMENT_KEY
 
 
 class FacebookFeedHTTPTestCase(unittest.TestCase):
+  verify_token = 'secret_token'
+
   def setUp(self):
     self.config = testing.setUp()
 
@@ -18,12 +21,14 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
     result = MultiDict()
     result.add('hub.mode', 'subscribe')
     result.add('hub.challenge', 'secret')
-    result.add('hub.verify_token', verify_token)
+    result.add('hub.verify_token', self.verify_token)
 
     return result
 
   def test_subscription_verification(self):
     request = testing.DummyRequest()
+    request.registry.settings[ENVIRONMENT_KEY] = {'feed': {'verify_token': self.verify_token}}
+
     request.GET = self._create_multidict()
 
     result = get_facebook_feed(request)
@@ -33,6 +38,8 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
 
   def test_incorrect_mode(self):
     request = testing.DummyRequest()
+    request.registry.settings[ENVIRONMENT_KEY] = {'feed': {'verify_token': self.verify_token}}
+
     request.GET = self._create_multidict()
     request.GET.pop('hub.mode')
     request.GET.add('hub.mode', 'incorrect')
@@ -43,6 +50,8 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
 
   def test_incorrect_token(self):
     request = testing.DummyRequest()
+    request.registry.settings[ENVIRONMENT_KEY] = {'feed': {'verify_token': self.verify_token}}
+
     request.GET = self._create_multidict()
     request.GET.pop('hub.verify_token')
     request.GET.add('hub.verify_token', 'incorrect')
@@ -53,6 +62,8 @@ class FacebookFeedHTTPTestCase(unittest.TestCase):
 
   def test_post_json(self):
     request = testing.DummyRequest()
+    request.registry.settings[ENVIRONMENT_KEY] = {'queues': {'facebook': {'notification': 'name'}}}
+
     request.message_client = tim_commons.mock.DummyMessageClient()
     request.headers['Content-Type'] = 'application/json'
     request.body = '''{"object": "user", "entry": [ { "uid": 1335845740,

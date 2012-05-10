@@ -27,7 +27,7 @@ def post_facebook_feed(request):
   facebook_notification = json.loads(request.body)
 
   events = convert_facebook_notification(facebook_notification)
-  queue = request.registry.settings[ENVIRONMENT_KEY]['queue']['facebook']['notification']
+  queue = request.registry.settings[ENVIRONMENT_KEY]['queues']['facebook']['notification']
   send_messages(request.message_client, queue, events)
 
   return Response()
