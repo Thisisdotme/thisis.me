@@ -17,18 +17,15 @@ from miapi.models import DBSession
 
 log = logging.getLogger(__name__)
 
-class FeatureController(object):
-  '''
-  classdocs
-  '''
 
-  def __init__(self,request):
+class FeatureController(object):
+
+  def __init__(self, request):
     '''
     Constructor
     '''
     self.request = request
     self.dbSession = DBSession()
-
 
   @view_config(route_name='features', request_method='GET', renderer='jsonp', http_cache=0)
   def listFeatures(self):
@@ -36,9 +33,8 @@ class FeatureController(object):
     featureList = []
     for feature in self.dbSession.query(Feature).order_by(Feature.name):
       featureList.append(feature.toJSONObject())
-  
-    return {'features':featureList}
 
+    return {'features': featureList}
 
   @view_config(route_name='feature.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def addFeature(self):
@@ -46,53 +42,50 @@ class FeatureController(object):
     featureName = self.request.matchdict['featurename']
 
     feature = Feature(featureName)
-  
+
     try:
       self.dbSession.add(feature)
       self.dbSession.flush()
       self.dbSession.commit()
-      log.info("create feature: %(featurename)s" % {'featurename':featureName})
-  
+      log.info("create feature: %(featurename)s" % {'featurename': featureName})
+
     except IntegrityError, e:
       self.dbSession.rollback()
       self.request.response.status_int = 409
-      return {'error':e.message}
-  
+      return {'error': e.message}
+
     return {'service': feature.toJSONObject()}
-    
 
   @view_config(route_name='feature.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
   def deleteFeature(self):
-  
+
     featureName = self.request.matchdict['featurename']
-    
+
     try:
       feature = self.dbSession.query(Feature).filter_by(name=featureName).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'feature "%s" does not exist' % featureName}
+      return {'error': 'feature "%s" does not exist' % featureName}
 
     try:
       self.dbSession.delete(feature)
       self.dbSession.commit()
-    
-    except Exception:
-      self.dbSession.rollback();
-      raise
-    
-    return {}
 
+    except Exception:
+      self.dbSession.rollback()
+      raise
+
+    return {}
 
   @view_config(route_name='feature.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
   def getFeature(self):
-  
+
     featureName = self.request.matchdict['featurename']
-    
+
     try:
       feature = self.dbSession.query(Feature).filter_by(name=featureName).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'feature "%s" does not exist' % featureName}
-      
+      return {'error': 'feature "%s" does not exist' % featureName}
+
     return feature.toJSONObject()
-        
