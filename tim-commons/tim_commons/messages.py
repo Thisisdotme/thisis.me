@@ -67,6 +67,13 @@ def create_foursquare_notification(foursquare_user_id):
 
   return _create_notification_message(TYPE, None, foursquare_user_id, None, None)
 
+
+def create_linkedin_notification(linkedin_user_id):
+
+  TYPE = 'linkedin.notification'
+
+  return _create_notification_message(TYPE, None, linkedin_user_id, None, None)
+
 '''
   Raw service event message.
 
@@ -128,6 +135,16 @@ def create_foursquare_event(foursquare_user_id, tim_author_id, json_event_dict):
   return _create_event_message(TYPE,
                                tim_author_id,
                                foursquare_user_id,
+                               json_event_dict)
+
+
+def create_linkedin_event(linkedin_user_id, tim_author_id, json_event_dict):
+
+  TYPE = 'linkedin.event'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               linkedin_user_id,
                                json_event_dict)
 
 
@@ -201,3 +218,15 @@ def create_foursquare_event_update(foursquare_user_id,
                                tim_author_id,
                                foursquare_user_id,
                                foursquare_event_id)
+
+
+def create_linkedin_event_update(linkedin_user_id,
+                                 tim_author_id,
+                                 linkedin_event_id):
+
+  TYPE = 'linkedin.update'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               linkedin_user_id,
+                               linkedin_event_id)
