@@ -1,0 +1,7 @@
+<div class="mi-content" style="height: 100%;">
+	{#events}
+  	<div class="event half-page" data-event_id="{event_id}">
+			{>_event/}
+	  </div>
+	{/events}
+</div>

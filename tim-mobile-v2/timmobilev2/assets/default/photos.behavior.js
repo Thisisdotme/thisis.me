@@ -197,8 +197,8 @@ the behavior for the photo feature
       
       events: {
     			"swiperight" : "showGridView",
-    			"swipeup .flipMode .flip-set" : "flipNext",
-    			"swipedown .flipMode .flip-set" : "flipPrevious",
+    			//"swipeup .flipMode .flip-set" : "flipNext",
+    			//"swipedown .flipMode .flip-set" : "flipPrevious",
     			//"click .detailLink" : "toggleMode",
     			//"click .gridLink" : "showGridView",
     			"click img" : "toggleMode"

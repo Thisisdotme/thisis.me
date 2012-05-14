@@ -1,0 +1,7 @@
+<div>{name}</div>
+<div>{headline}</div>
+<div>{industry}</div>
+<div>{location}</div>
+<div>{summary}</div>
+<div><img src="{picture_url}"</div>
+<div><a href="{public_profile_url}">LinkkedIn Profile</a></div>

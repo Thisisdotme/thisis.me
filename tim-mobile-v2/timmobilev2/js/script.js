@@ -13,6 +13,7 @@ TIM.currentPageElem = $('#splashScreen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#contentContainer');
 TIM.defaultTransition = "fade";
+TIM.isLoading = false;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -57,7 +58,16 @@ $(function() {
 	
 	TIM.disableScrolling();
 	
+	TIM.setLoading = function (loading) {
+	  TIM.isLoading = loading;
+	  if(loading) {
+	    $('#app').addClass('loading');
+	  } else {
+	    $('#app').removeClass('loading');
+	  }
+	}
 	
+	TIM.setLoading(true);
 	
 	//collection of features for this author
 	TIM.features = new TIM.collections.Features;
@@ -99,6 +109,7 @@ $(function() {
     	TIM.eventAggregator.bind('featureloaded', this.featureLoaded, this);
     	TIM.eventAggregator.bind('featurenavrendered', this.featureNavRendered, this);
     	TIM.eventAggregator.bind('detailLinkClicked', this.detailLinkClicked, this);
+    	TIM.eventAggregator.bind('error:featureload', this.featureLoadError, this);
     	
     	//move these to backbone views?
     	//make sure we have vclick event
@@ -128,6 +139,13 @@ $(function() {
         feature.behavior.activate(resourceId);
         TIM.eventAggregator.trigger('featureselected', feature); //to select the menu item?
       }
+    },
+    
+    //should probably pass an option here of whether to 'activate' the feature
+    featureLoadError: function(options) {
+      console.log("Feature loaded failed: ", options);
+      alert("feature load failed!");
+      TIM.setLoading(false);
     },
   
     featureNavRendered: function(){

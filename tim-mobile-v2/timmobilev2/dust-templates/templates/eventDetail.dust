@@ -1,0 +1,16 @@
+<div class="eventDetail">
+	DETAIL VIEW FOR TIMELINE EVENT!
+	{#content}
+	 <div class="content">
+			{?photo_url}
+			   	<div class="inner-image">
+					<img src='{photo_url}' />
+				</div>
+			{:else}
+			{/photo_url}
+			   <div class="inner-text">
+			     <p>{data}</p>
+			   </div>
+			 </div>
+		{/content}
+</div>

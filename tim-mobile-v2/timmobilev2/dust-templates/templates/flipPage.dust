@@ -1,0 +1,16 @@
+<div class="${theClass}" style="${theStyle}">
+	<div class="front">
+		<div class="outer">
+			<div class="content" style="${theContentStyleFront}">
+				<div class="inner">{>_event/}</div>
+			</div>
+		</div>
+	</div>
+	<div class="back">
+		<div class="outer">
+			<div class="content" style="${theContentStyleBack}">
+				<div class="inner">{>_event/}</div>
+			</div>
+		</div>
+	</div>
+</div>

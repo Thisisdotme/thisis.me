@@ -1,0 +1,10 @@
+<div class="photoGrid">
+	<h2>Photos of {author.first_name}</h2>
+		  {>_photoList:photos_of_author/}
+	<h2>Photo Stream</h2>
+	  <div id="photoStreamContainer" class="clearfix">
+	    <div class="clearfix">
+    		  {>_photoList:photo_stream/}
+  		</div>
+		</div>
+</div>

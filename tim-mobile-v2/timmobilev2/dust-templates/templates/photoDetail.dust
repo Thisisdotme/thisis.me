@@ -1,0 +1,6 @@
+<div class="photoDetail">
+	{#photo}
+		<div id="photoContainer"><img src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" /></div>
+		<div class="caption"><div>{title}</div><span class="listLink"/><span class="gridLink"/></div>
+	{/photo}
+</div>

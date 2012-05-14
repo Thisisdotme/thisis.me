@@ -305,7 +305,7 @@ td { vertical-align: top; }
   
   #splashScreen {
     background-color:#cd212b;
-    background:#cd212b url(/img/thisisme_logo.png) center center no-repeat;
+    background:#cd212b url(/img/thisisme_logo.png) center 30% no-repeat;
   }
       
   h1 { margin:0 }

@@ -153,6 +153,7 @@ TIM.mixins.flipset = {
   		//renderedIndex: 0,
 		//},
 		initializeFlipset: function() {
+		  var that = this;
       this.pageNum = 0;
   		this.pages = [];
   		this.flipSet = {};
@@ -160,6 +161,29 @@ TIM.mixins.flipset = {
   		this.chunkSize = 4;
   		this.renderedIndex = 0;
   		this.numResourcesRendered = 0;
+  		this.flipMode = true;
+  		this.$el.swipe({
+  		    threshold: 30,
+  		    swipeRight: function(event) {
+  		       //alert('swipe!');
+    	       //that.flipNext();
+    	    },
+    	    swipeUp: function(event) {
+    	      //alert('swipe!');
+    	      if(that.flipMode)
+    	        that.flipNext();
+    	    },
+    	    swipeDown: function(event) {
+    	        if(that.flipMode)
+    	          that.flipPrevious();
+    	    },
+    	    swipeLeft: function(event) {
+    	       //alert('swipe!');
+    	    },
+    	    click: function(event) {
+    	      //alert('click!!!!!');
+    	    }
+    	});
 		},
 		
 		renderPage: function(page){

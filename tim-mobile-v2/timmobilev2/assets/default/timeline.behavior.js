@@ -114,9 +114,9 @@
       },
 
   		events: {
-  			"swipeup .flip-set" : "flipNext",
-  			"swipedown .flip-set" : "flipPrevious",
-  			//"click .event" : "showDetail",
+  			//"swipeup .flip-set" : "flipNext",
+  			//  "swipedown .flip-set" : "flipPrevious",
+  			// "click .event" : "showDetail",
   			"swipeleft .event" : "showDetailView"
   		},
 
