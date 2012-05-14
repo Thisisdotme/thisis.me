@@ -219,6 +219,7 @@ td { vertical-align: top; }
     font-family:arial, sans-serif;
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* remove highlight color for tap events */
     -webkit-backface-visibility: hidden; /* helps with flickering? */
+    background-color:#666;
   }
   
   #loadingImg {
@@ -241,6 +242,7 @@ td { vertical-align: top; }
     width:100%;
     position:relative;
     min-height:100%;
+    overflow:hidden; 
   }
   
   @media screen and (min-width: 500px) {
@@ -325,7 +327,7 @@ td { vertical-align: top; }
      right:0px;
      z-index:10000;
      opacity:.9;
-     height:100%;
+     /* height:100%; */
     }
     
   #featureNav ul {
@@ -437,6 +439,57 @@ td { vertical-align: top; }
         from { opacity: 1; }
         to { opacity: 0; }
     }
+    
+    
+    .flip {
+    	-webkit-animation-duration: .65s;
+    	-webkit-backface-visibility:hidden;
+    	-webkit-transform:translateX(0); /* Needed to work around an iOS 3.1 bug that causes listview thumbs to disappear when -webkit-visibility:hidden is used. */
+    }
+
+    .flip.out {
+    	-webkit-transform: rotateY(-180deg) scale(.8);
+    	-webkit-animation-name: flipouttoleft;
+    }
+
+    .flip.in {
+    	-webkit-transform: rotateY(0) scale(1);
+    	-webkit-animation-name: flipinfromleft;
+    }
+
+    /* Shake it all about */
+
+    .flip.out.reverse {
+    	-webkit-transform: rotateY(180deg) scale(.8);
+    	-webkit-animation-name: flipouttoright;
+    }
+
+    .flip.in.reverse {
+    	-webkit-transform: rotateY(0) scale(1);
+    	-webkit-animation-name: flipinfromright;
+    }
+
+    @-webkit-keyframes flipinfromright {
+        from { -webkit-transform: rotateY(-180deg) scale(.8); }
+        to { -webkit-transform: rotateY(0) scale(1); }
+    }
+
+    @-webkit-keyframes flipinfromleft {
+        from { -webkit-transform: rotateY(180deg) scale(.8); }
+        to { -webkit-transform: rotateY(0) scale(1); }
+    }
+
+    @-webkit-keyframes flipouttoleft {
+        from { -webkit-transform: rotateY(0) scale(1); }
+        to { -webkit-transform: rotateY(-180deg) scale(.8); }
+    }
+
+    @-webkit-keyframes flipouttoright {
+        from { -webkit-transform: rotateY(0) scale(1); }
+        to { -webkit-transform: rotateY(180deg) scale(.8); }
+    }
+    
+    
    
    #detailContainer {
      background-color:#fff;

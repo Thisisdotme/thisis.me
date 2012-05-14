@@ -77,7 +77,9 @@
       className: "appPage",
       
       events: {
-        "click .highlight" : "showHighlight"
+        "click .highlight" : "showHighlight",
+        "click a" : "linkClicked"
+        
       },
 
       initialize: function() {
@@ -119,8 +121,21 @@
         //load highlight feature if necessary
         //navigate to that highlight
         //going to default to the timeline feature for now since we don't know if it's a highlight or photo or regular event, etc.
+        event.preventDefault();
         event.stopPropagation();
-        TIM.eventDispatcher.trigger('detailLinkClicked', $(event.currentTarget).data('event_id'), 'timeline');
+        //return;
+        
+        if($(event.currentTarget).tagName == "a" || $(event.relatedTarget).tagName == "a") {
+          return;
+        }
+        TIM.eventAggregator.trigger('detailLinkClicked', $(event.currentTarget).data('event_id'), 'timeline');
+      },
+      
+      linkClicked: function(event) {
+        //alert('hey! clicked!');
+        event.preventDefault();
+        event.stopPropagation(); //let the global handler for link clicks take care of it!
+        TIM.handleLinkClick(event);
       }
   });
   

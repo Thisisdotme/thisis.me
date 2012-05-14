@@ -2,12 +2,10 @@
   
   TIM.models.FeatureBehavior = Backbone.Model.extend({
     navigate: function() {
-      alert("hey!  I'm coming from the behavior superclass! my name is " + this.get('name'));
+      console.log("hey!  I'm coming from the behavior superclass! my name is " + this.get('name'));
     }
   });
   
-  //change this to featureloader? featurefactory?
-	
 	TIM.models.Feature = Backbone.Model.extend({
     
     //features loaded from API will extend this
@@ -24,14 +22,18 @@
       styleLoaded: false,
       resourcesLoaded: false,
       selected: false,
-      initialResourceId: 0
+      initialResourceId: 0,
+      navigateOnLoad: true
     },
 
     initialize: function() {
-      //add route to this feature to router
-      //add route to detail view to router?
+      //add route to this feature to router  /<featurename>
+      //also add route to detail view to router /<featurename>/<resourceid>
+      
       var featureName = this.get('feature_name');
-      TIM.app.route(featureName, featureName);
+      //a route for /<featurename>
+      
+      TIM.app.route(featureName, featureName); 
       TIM.app.route(featureName + "/:number", featureName, function(number){});
       
     },
@@ -44,46 +46,30 @@
       if(resourceId) {
         this.set('initialResourceId', resourceId);
       }
-      //are resources loaded? if not, load them!
-      //console.log("loading feature, resource id is: ", this.get('initialResourceId'));
       if(!this.get("resourcesLoaded")) {
         this.loadResources();
       } else {
-        //actually do the navigation
-        TIM.eventDispatcher.trigger('featureloaded', [this, this.get('initialResourceId')]);
-        //what does the 'navigate' method do?
-        this.behavior.navigate(this.get('initialResourceId'));
-        
-        //TIM.loadedFeatures[this.get('feature_name')].model.navigate(this.get('initialResourceId'));
+        //send an event notifying that the feature has loaded
+        TIM.eventAggregator.trigger('featureloaded', {"feature": this, "resourceId": this.get('initialResourceId'), "navigateOnLoad": this.get('navigateOnLoad')});
       }
     },
     
     loadResources: function() {
       var self = this;
-       //load behavior script, template, stylesheet
-      console.log('loading the resources for ' + this.get('feature_name'));
+      //load behavior script, template, stylesheet
       var featureName = this.get('feature_name');
-      
-      //feature behavior is an object holding models, views, collections for the feature?
-      
       
       //load the behavior
       $.getScript("/" + TIM.pageInfo.authorName + "/asset/" + featureName + ".behavior.js")
         .done(function(data, textStatus, jqxhr) {
-         //TIM.loadedModel = new TIM.models.TestNewModel();
-         //self.actions.push(TIM.featureHandlers[name]);
-         //console.log('history before: ', Backbone.history.handlers);
-         //self.route(name, name, function(){ TIM.featureHandlers.Highlights(); });
-         //console.log('history after: ', Backbone.history.handlers);
-         //
-         //console.log('script loaded, new model: ', TIM.loadedModels.);
-         //make a property on the object, not an attribute, so it doesn't save
          self.set('behaviorLoaded', true, {silent:true});
          //bind these instead of calling?
          self.resourceLoaded();
        })
        .fail(function(jqxhr, settings, exception) {
+         //start throwing app-wide error events
          console.log(exception);
+         TIM.eventAggregator.trigger('error:featureload', {"feature": this, "resource": "behavior", "exception": exception});
        });
       
       //load the template
@@ -94,14 +80,14 @@
          })
          .fail(function(jqxhr, settings, exception) {
             console.log("template load failed: ", exception);
+            TIM.eventAggregator.trigger('error:featureload', {"feature": this, "resource": "template", "exception": exception});
           });
+          
       //load the stylesheet
       //TODO: do this with a callback when the stylesheet is loaded - different browsers handle differently... find plugin?
       $('head').append('<link rel="stylesheet" type="text/css" href="/' + TIM.pageInfo.authorName + '/asset/' + featureName + '.css">');
       self.set('styleLoaded', true, {silent:true});
       self.resourceLoaded();
-      
-      //this.set('resourcesLoaded', true, {silent: true}) 
     },
     
     //call this when resources have been loaded for this feature:
@@ -109,108 +95,12 @@
     resourceLoaded: function() {
       //
       if(this.get("templateLoaded") && this.get("behaviorLoaded") && this.get("styleLoaded")) {
-        console.log('all resources have been loaded');
         this.set("resourcesLoaded", true, {silent:true});
         this.trigger('loaded', 'true');
-        //TIM.eventDispatcher.trigger('featureloaded', this);
         this.loadFeature();
       }
     }
-    
-
-  });
-  
-  TIM.models.Service = Backbone.Model.extend({
-
-    // Default attributes 
-    defaults: {
-    },
-
-    initialize: function() {
-    },
-
-    clear: function() {
-      this.destroy();
-    }
-
   });
 	
-	TIM.models.Profile = Backbone.Model.extend({
-		url: function() {
-				return TIM.apiUrl + 'authors/' + this.get('authorName') + '/features/linkedin/profile?callback=?';
-		},
-		
-    // Default attributes 
-    defaults: {
-			authorName : 'ken',
-			first_name: '',
-			last_name: '',
-			headline: 'Founder and CEO',
-			industry: '',
-			location: '',
-			name: '',
-			pictureUrl: 'https://fbcdn-profile-a.akamaihd.net/static-ak/rsrc.php/v1/yo/r/UlIqmHJn-SK.gif',
-			profileUrl: '',
-			profileIcon: '/img/social_icons/linkedin.png',
-			specialties: '',
-			summary: 'Placeholder summary '
-    },
-
-    initialize: function() {
-    
-		},
-
-    clear: function() {
-      this.destroy();
-    }
-
-  });
-
-	TIM.models.Author = Backbone.Model.extend({
-
-    // Default attributes 
-    defaults: {
-    },
-
-    initialize: function() {
-    },
-
-    clear: function() {
-      this.destroy();
-    }
-
-  });
-
-	TIM.models.Event = Backbone.Model.extend({
-
-    defaults: {
-			time_ago: ""
-    },
-
-    initialize: function() {
-			//not sure this would be the right place to do this...
-			//this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
-			this.set("time_ago", '1 day');
-    },
-	
-    clear: function() {
-      this.destroy();
-      this.view.remove();
-    }
-
-  });
-
-	//just trying this out to test out subclassing...
-	
-	TIM.models.LinkedInEvent = TIM.models.Event.extend({
-
-    // Default attributes 
-    defaults: {
-			featureName: "linkedIn"
-    }
-
-  });
-	
-
 	
 })( TIM );

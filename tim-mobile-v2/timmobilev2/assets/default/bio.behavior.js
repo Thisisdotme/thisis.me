@@ -51,6 +51,8 @@
       id: "bioPage",
       
       className: "appPage",
+      
+      iScrollElem: undefined,
 
       initialize: function() {
           _.bindAll(this, "render");
@@ -72,7 +74,13 @@
   		  if(TIM.appContainerElem.find(this.el).length == 0)  {
   			  TIM.appContainerElem.append(this.$el);
   			}
-  		  TIM.transitionPage (this.$el);
+  			var containerEl = this.$el.find('.bio')[0];
+  			this.iScrollElem = new iScroll(containerEl, { hScroll: false });
+  		  TIM.transitionPage (this.$el, {
+  		      callback: function() {
+              that.iScrollElem.refresh();
+            }
+        });
       }
   });
 
@@ -90,14 +98,12 @@
   		timeout : 5000,
   		success: function(resp) {
   		  //
-  		  console.log('fetched bio!!!!!');
+  		  console.log('fetched bio');
   		},
   		error: function(resp) {
   			TIM.appContainerElem.html("couldn't find profile for " + TIM.pageInfo.authorName);
   		}
   	});
-   
-    //bioView.render();
   };
   
   feature.navigate = function() {

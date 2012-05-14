@@ -3,7 +3,7 @@ TIM.views.FeatureNav = Backbone.View.extend( {
 		
    initialize: function() {
        this.collection.bind( "reset", this.render, this );
-       TIM.eventDispatcher.bind('featureselected', this.highlightSelectedNavItem, this);
+       TIM.eventAggregator.bind('featureselected', this.highlightSelectedNavItem, this);
    },
    
    addAll : function () {
@@ -11,7 +11,7 @@ TIM.views.FeatureNav = Backbone.View.extend( {
       //load the default feature here?
       //..or navigate?
       //send an app event?
-      TIM.eventDispatcher.trigger('featurenavrendered', this);
+      TIM.eventAggregator.trigger('featurenavrendered', this);
    },
 		
   addOne : function ( item ) {
@@ -66,7 +66,6 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 	  if(this.$el.hasClass('selected')) {
 	    return;
 	  }
-	  //this.model.loadFeature();
 	  TIM.app.navigate(this.model.get('feature_name'), {trigger: true});
 	},
 	
@@ -97,15 +96,55 @@ TIM.views.Page = Backbone.View.extend( {
     }
 } );
 
+//toolbar triggers events on its parent view?
+TIM.views.Toolbar = Backbone.View.extend( {
+        
+    className: "toolbar",
+    
+    template: "toolbar",
+    
+    events: {
+      "click span" : "itemClicked"
+    },
+    
+    items:[ 
+      {name: 'gridLink'},
+      {name: 'detailLink'}
+    ],
+    
+    initialize: function(spec) {
+        spec = spec || {};
+        _.bindAll(this);
+    },
+    
+    render: function() {
+      var that = this;
+      dust.render(this.template, {items:this.items}, function(err, out) {
+  		  if(err != null) {
+  				console.log(err);
+  			}
+  		  that.$el.html(out);
+  		});
+  		return this.$el;
+    },
+    
+    //parent views probably shouldn't rely on this event, but you never know
+    //maybe broadcast it app-wide?
+    
+    itemClicked: function(event) {
+      var item = event.currentTarget;//event.data('name')
+      //console.log(event, item);
+      this.trigger('itemClicked', $(item).data('toolbar-item'));
+    }
+    
+} );
+
+//should probably have some sort of function that does the template rendering 
+//to prevent lots of code-copying and 
+
 //an attempt to define the flipset functionality as a mixin
 
 TIM.mixins.flipset = {
-  	pageNum: 0,
-		pages: [],
-		flipSet: {},
-		flipSetInitialized: false,
-		chunkSize: 4,
-		renderedIndex: 0,
 		
 		//resetFlipSet: function() {
 		  //flipSet: {},
@@ -113,6 +152,15 @@ TIM.mixins.flipset = {
   		//chunkSize: 4,
   		//renderedIndex: 0,
 		//},
+		initializeFlipset: function() {
+      this.pageNum = 0;
+  		this.pages = [];
+  		this.flipSet = {};
+  		this.flipSetInitialized = false;
+  		this.chunkSize = 4;
+  		this.renderedIndex = 0;
+  		this.numResourcesRendered = 0;
+		},
 		
 		renderPage: function(page){
 
@@ -128,14 +176,17 @@ TIM.mixins.flipset = {
 					this.flipSet.push($(pageView.el));
 				}
     },
-
+    
+    //
+    
     renderFlipSet: function(){
 			//make pages here?  let's try it!!
-			this.pages = [];
+			var startIndex = this.numResourcesRendered;
+			this.pages = this.pages || [];
 			var self = this;
 			var page = [];
-			this.renderedIndex = 0;
-			this.flipSetInitialized = false;
+			this.renderedIndex = this.renderedIndex || 0;
+			this.flipSetInitialized = this.flipSetInitialized || false;
 
 			//make page objects with either 1 or 2 events
 			//if the event has a photo, it takes a full page
@@ -149,9 +200,11 @@ TIM.mixins.flipset = {
 			//only do this a little bit at a time?
 
 			//store whether an event has been added to a page?
-      //console.log('rendering highlight view', this);
-			this.collection.each(function(item) {
-				if(item.get('caption') !== undefined || item.get("content").photo_url !== undefined) {
+			
+			this.collection.each(function(item, index) {
+			  //console.log(index, startIndex);
+			  if(index < startIndex) return;
+				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
 					self.pages.push({"events" : [item.toJSON()]});
 				} else {
 					page.push(item);
@@ -160,6 +213,7 @@ TIM.mixins.flipset = {
 						page = [];
 					}
 				}
+				self.numResourcesRendered++;
 			});
 			//if there's one left over, make a page of it!
 			if(page.length == 1) {
@@ -167,13 +221,16 @@ TIM.mixins.flipset = {
 			}
       
 			//rather than rendering all pages at once, make it intelligent?
-			this.$el.html('');
-			this.renderPageChunk(0);
+			
+			if(startIndex == 0) {
+			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its element is empty
+			}
+			this.renderPageChunk(this.renderedIndex);
 			
 			if(TIM.appContainerElem.find(this.el).length == 0)  {
 			  TIM.appContainerElem.append(this.$el);
 			}
-			
+			console.log("flipset: ", this.flipSet);
 			return this;
     },
 
@@ -193,11 +250,14 @@ TIM.mixins.flipset = {
 		
 		flipNext: function(){
 		  //$.mobile.silentScroll(0);
-			window.scrollTo( 0, 1 );
+			//  window.scrollTo( 0, 1 );
 			//check if there are more pages to go
 			//if they've been rendered
-
+      
 			//prerender 2 pages in advance?
+			
+			var that = this;
+			
 			if(this.pageNum == (this.renderedIndex - 2)) {
 				this.renderPageChunk(this.renderedIndex);
 			}
@@ -205,16 +265,23 @@ TIM.mixins.flipset = {
 			if (this.flipSet.canGoNext()) {
 				this.flipSet.next(function(){});
 				this.pageNum++;
+			} else {
+			  //try to get the next page!
+			  //make this happen at least one 
+			  if($('#app').hasClass('loading') || this.collection.getNextPage === undefined) {
+			    return;
+			  }
+			  this.collection.getNextPage();
 			}
 		},
 
 		flipPrevious: function(){
 			//$.mobile.silentScroll(0);
-			window.scrollTo( 0, 1 );
+			//window.scrollTo( 0, 1 );
 
 			if (this.pageNum == 0) {
 				//check for newer events at this point?
-				//poll for newer events?
+				//do a 'get previous page' call, as in 
 			} 
 
 			if (this.flipSet.canGoPrevious()) {
@@ -225,7 +292,7 @@ TIM.mixins.flipset = {
 		
 		goToPage: function(num){
 			//$.mobile.silentScroll(0);
-			window.scrollTo( 0, 1 );
+			//window.scrollTo( 0, 1 );
 			this.pageNum = 0;
 			//console.log(this);
 			for(var i = 0; i < num; i++) {
@@ -264,6 +331,7 @@ function FlipSet($wrapper, width, height, nodes) {
 
 FlipSet.prototype.displayCurrentFlip_ = function() {
   this.containerNode_.empty();
+  console.log("current flip:", this.flips_[this.currentIndex_].originalNode_);
   this.containerNode_.append(this.flips_[this.currentIndex_].originalNode_);
 }
 

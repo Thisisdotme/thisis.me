@@ -13,7 +13,7 @@
   feature.views = {};
   feature.collections = {};
   feature.hasFetchedCollection = false;
-  feature.showDetailView = false;
+  feature.showDetails = false;
   feature.showDetailId = 0;
 
   feature.models.Highlights = TIM.models.FeatureBehavior.extend({
@@ -82,9 +82,20 @@
   TIM.views.HighlightList = Backbone.View.extend( {
       id: "highlights",
       className: "flippage flippage-container appPage",
+      
+      /* flipset vars - can't come from teh mixin? */
+      /* pageNum: 0,
+  		pages: [],
+  		flipSet: {},
+  		flipSetInitialized: false,
+  		chunkSize: 4,
+  		renderedIndex: 0,
+  		numResources: 0, */
+      
 
       initialize: function() {
           _.bindAll(this, "render", "renderPage");
+          this.initializeFlipset();
   				//collection fires 'reset' event when fetch is complete
   				//should collection have methods to get newer and older events so we don't have to get all at once?
   				//is this the right place to have all this info?
@@ -94,7 +105,7 @@
   		events: {
   			"swipeup .flip-set" : "flipNext",
   			"swipedown .flip-set" : "flipPrevious",
-  			"swipeleft .event" : "showDetail"
+  			"swipeleft .event" : "showDetailView"
   		},
       
       render: function() {
@@ -102,15 +113,15 @@
         this.renderFlipSet();
         
         //go straight to the detail view if we got here from an external link to a story
-        if(feature.showDetailView) {
-          feature.showDetailViewFn();
-          feature.showDetailView = false;
+        if(feature.showDetails) {
+          feature.showDetailView();
+          feature.showDetails = false;
         } else {
           TIM.transitionPage ($(this.el));
         }
       },
     
-  		showDetail: function(event) {
+  		showDetailView: function(event) {
   		  if (event) {
   		    console.log('detail click event: ', event);
   		    var detailId = $(event.currentTarget).data('event_id');
@@ -163,7 +174,7 @@
       },
       
       showListView: function(event) {
-        feature.showDetailView = false;
+        feature.showDetails = false;
         TIM.app.navigate("/highlights");
         TIM.transitionPage($('#highlights'), {animationName: "slide", reverse: true});
       }
@@ -213,16 +224,16 @@
     if(resourceId) {
       //go straight to detail view for this resource...
       //load collection first?
-      feature.showDetailView = true;
+      feature.showDetails = true;
       feature.showDetailId = resourceId;
     }
     //only fetch timeline, create view, etc. if need be...
-    feature.highlightCollection = feature.highlightCollection || new (TIM.collections.Highlights);
-    feature.timelineView = feature.timelineView || new TIM.views.HighlightList({collection: feature.highlightCollection});
+    feature.mainCollection = feature.mainCollection || new (TIM.collections.Highlights);
+    feature.timelineView = feature.timelineView || new TIM.views.HighlightList({collection: feature.mainCollection});
     //feature.gridView = feature.gridView || new TIM.views.HighlightGrid({collection: feature.myTimeline});
     feature.detailView = feature.detailView || new TIM.views.HighlightDetail();
     if(!feature.hasFetchedCollection) {
-      feature.highlightCollection.fetch({
+      feature.mainCollection.fetch({
   			dataType: "jsonp",
   			success: function(resp) {
 			    feature.hasFetchedCollection = true;
@@ -234,10 +245,10 @@
   	} else {
   	  //feature.gridView.render();
   	  //feature.timelineView.render();
-  	  if (feature.showDetailView) {
+  	  if (feature.showDetails) {
   	    //TIM.transitionPage ($("#detailContainer"));
   	    //feature.timelineView.showDetail();
-  	    feature.showDetailViewFn(resourceId);
+  	    feature.showDetailView(resourceId);
   	  } else {
   	    //feature.timelineView.showDetail();
   	    TIM.transitionPage (feature.timelineView.$el);
@@ -246,29 +257,29 @@
   };
   
   //maybe have methods to show detail view, show list view, show grid view?
-  feature.showDetailViewFn = function(resourceId) {
+  feature.showDetailView = function(resourceId) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
-    console.log(feature.highlightCollection);
+    console.log(feature.mainCollection);
     resourceId = resourceId || feature.showDetailId;
-    var model = feature.highlightCollection.find(function(model){return model.get('event_id') == resourceId});
+    var model = feature.mainCollection.find(function(model){return model.get('event_id') == resourceId});
 	  if(model) {
 	    console.log('have a model for the detail');
 	    feature.detailView.model = model;
 		  feature.detailView.render();
 		  TIM.transitionPage ($('#detailContainer'), {"animationName":"slide"});
 		  feature.showDetailsId = 0;
-		  feature.showDetailView = false;
+		  feature.showDetails = false;
 		} else {
 		  console.log("can't find a model for the detail");
-		  //go staight to the list view
-		  //TIM.transitionPage (this.$el, {"animationName":"fade"});
+		  TIM.transitionPage (feature.timelineView.$el);
+		  TIM.app.navigate("/highlights", {replace:true});
 		}
   }
   
   feature.navigate = function(resourceId) {
     console.log('navigate called on highlights feature!');
-    /// TIM.app.navigate("/highlights");
+    //TIM.transitionPage (feature.timelineView.$el);
   }
   
   //add to feature?

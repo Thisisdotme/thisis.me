@@ -47,7 +47,7 @@
   /*outline: solid 1px blue;*/
 }
 
-.flip-top-container .photoDetail .caption {
+.flip-top-container .photoDetail .caption, .flip-top-container .photoPage .caption {
   display:none;
 }
 

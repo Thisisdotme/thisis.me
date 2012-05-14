@@ -7,7 +7,7 @@
 		<!-- link href="http://fonts.googleapis.com/css?family=Holtwood+One+SC|PT+Sans+Narrow:400,700" rel="stylesheet" type="text/css" -->
 		<!-- link href='http://fonts.googleapis.com/css?family=Creepster' rel='stylesheet' type='text/css' -->
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
-		<script src="/${author_name}/asset/featureNavItem.js"></script>
+		<script src="/${author_name}/asset/coreTemplates.dust.js"></script>
 		
 		<div id="contentContainer">
 		  <div id="splashScreen" class="appPage active"></div>
