@@ -13,9 +13,11 @@ from pyramid.events import subscriber
 
 from miapi.models import DBSession
 
+
 @subscriber(NewRequest)
 def request_listener(event):
   event.request.add_finished_callback(session_remove_callback)
+
 
 def session_remove_callback(request):
   DBSession.remove()

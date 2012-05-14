@@ -3,7 +3,8 @@ Created on Feb 8, 2012
 
 @author: howard
 '''
-import json, urllib
+import json
+import urllib
 import oauth2 as oauth
 
 from mi_utils.oauth import make_request
@@ -16,13 +17,14 @@ from full_collector import FullCollector
 USER_INFO = 'account/verify_credentials.json'
 USER_TIMELINE = 'statuses/user_timeline.json'
 
+
 class TwitterFullCollector(FullCollector):
 
   def getServiceName(self):
     return 'twitter'
 
   # update_author
-  def build_one(self,afm,dbSession,oauthConfig,incremental):
+  def build_one(self,afm,dbSession, oauthConfig, incremental):
 
     super(TwitterFullCollector, self).build_one(afm,dbSession,oauthConfig,incremental)
 

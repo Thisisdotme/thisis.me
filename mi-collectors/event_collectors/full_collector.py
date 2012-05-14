@@ -14,7 +14,7 @@ from boto.s3.key import Key
 
 from mi_schema.models import Service, AuthorServiceMap, ServiceEvent
 
-INCREMENTAL_OVERLAP = timedelta (hours = 1)
+INCREMENTAL_OVERLAP = timedelta(hours=1)
 
 
 class FullCollectorState(object):
@@ -27,23 +27,23 @@ class FullCollectorState(object):
   filename = None
   mapper = None
   writer = None
-  
+
   # counters for various metrics
   totalRequested = 0
   totalAccepted = 0
   staleRejected = 0
   duplicateRejected = 0
-  
+
   # state from the last traversal
   lastUpdateTime = None
   mostRecentEventId = 0
   mostRecentEventTimestamp = None
   baselineLastUpdateTime = None
-  
+
   # profile image
   defaultProfileImageUrl = None
 
-  def __init__(self,dbSession,asm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl):
+  def __init__(self, dbSession, asm, now, filename, mapper, writer, lastUpdateTime, mostRecentEventId, mostRecentEventTimestamp, defaultProfileImageUrl):
     self.dbSession = dbSession
     self.asm = asm
     self.authorId = asm.author_id
@@ -57,28 +57,29 @@ class FullCollectorState(object):
     self.mostRecentEventId = mostRecentEventId
     self.mostRecentEventTimestamp = mostRecentEventTimestamp
     self.baselineLastUpdateTime = lastUpdateTime - INCREMENTAL_OVERLAP if mostRecentEventTimestamp else None
-    
+
     self.defaultProfileImageUrl = defaultProfileImageUrl
 
 
 '''
 This is the superclass for all collectors.  It provides a common infrastructure for all collectors
 '''
+
 class FullCollector(object):
   '''
   classdocs
   '''
-  lookbackWindow = datetime.now () - timedelta (days = 365)
+  lookbackWindow = datetime.now() - timedelta(days=365)
   incremental = True
 
   @classmethod
-  def eventsFromJSON(cls,collector,rawJSON):
+  def eventsFromJSON(cls, collector, rawJSON):
     pass
 
   '''
   Constructor
   '''
-  def __init__(self,s3Bucket, aws_access_key,aws_secret_key):
+  def __init__(self, s3Bucket, aws_access_key, aws_secret_key):
     #self.init_logger()
     self.log = logging.getLogger('driver')
     self.s3Bucket = s3Bucket
@@ -87,23 +88,22 @@ class FullCollector(object):
     self.incremental = True
     self.s3Connection = S3Connection(self.awsAccessKey, self.awsSecretKey)
 
-
   def init_logger(self):
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    #create console handler and set level to debug                                                                                                                                       
+    #create console handler and set level to debug
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
 
-    #create formatter                                                                                                                                                                    
+    #create formatter
     formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] - %(message)s")
 
-    #add formatter to ch                                                                                                                                                                 
+    #add formatter to ch
     ch.setFormatter(formatter)
 
-    #add ch to logger                                                                                                                                                                    
+    #add ch to logger
     logger.addHandler(ch)
 
     self.log = logger
@@ -113,7 +113,7 @@ class FullCollector(object):
     queries DB for all users that have services installed and call build_one for each
   '''
   def build_all(self,dbSession,oauthConfig,incremental):
-    
+
     self.log.info('%s build all models for %s beginning...' % ('incremental' if incremental else 'full', self.getServiceName()))
 
     # get the id for this service
@@ -121,15 +121,15 @@ class FullCollector(object):
 
     # query the db for all users that have the service installed
     for asm in dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId).all():
-      self.build_one(asm,dbSession,oauthConfig,incremental)
+      self.build_one(asm, dbSession, oauthConfig, incremental)
 
   '''
   update_one
   '''
   @abstractmethod
-  def build_one(self,asm,dbSession,oauthConfig,incremental):
+  def build_one(self, asm, dbSession, authConfig, incremental):
 
-    # if this is a full rebuild clean on MySQL and s3 
+    # if this is a full rebuild clean on MySQL and s3
     if not incremental:
 
       # clean MySQL
@@ -137,8 +137,8 @@ class FullCollector(object):
       asm.most_recent_event_id = None
       asm.most_recent_event_timestamp = None
 
-      dbSession.query(ServiceEvent).filter(ServiceEvent.author_service_map_id==asm.id).delete()
-      
+      dbSession.query(ServiceEvent).filter(ServiceEvent.author_service_map_id == asm.id).delete()
+
       dbSession.flush()
       dbSession.commit()
 
@@ -146,7 +146,7 @@ class FullCollector(object):
       bucket = self.s3Connection.get_bucket(self.s3Bucket)
       # refined
       for jsonType in ['normalized']:
-        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType,asm.author_id,self.getServiceName())):
+        for key in bucket.get_all_keys(prefix='%s/%s.%s.' % (jsonType, asm.author_id, self.getServiceName())):
           bucket.delete_key(key)
 
   @abstractmethod
@@ -159,14 +159,13 @@ class FullCollector(object):
   def getLookbackWindow(self):
     return self.lookbackWindow
 
-  def makeFilename(self,authorId,now,varient):
+  def makeFilename(self, authorId, now, varient):
     return '%s.%s.%d.%s.csv' % (authorId, self.getServiceName(), mktime(now.timetuple()), varient)
 
-
-  def beginTraversal(self,dbSession,asm,defaultProfileImageUrl):
+  def beginTraversal(self, dbSession, asm, defaultProfileImageUrl):
     now = datetime.now()
-    filename = self.makeFilename(asm.author_id,now,"refined")
-    mapper = open(filename,'wb')
+    filename = self.makeFilename(asm.author_id, now, "refined")
+    mapper = open(filename, 'wb')
     writer = csv.writer(mapper)
     mostRecentEventId = asm.most_recent_event_id if self.incremental else None
     mostRecentEventTimestamp = asm.most_recent_event_timestamp if self.incremental else None
@@ -174,10 +173,9 @@ class FullCollector(object):
 
     return FullCollectorState(dbSession,asm,now,filename,mapper,writer,lastUpdateTime,mostRecentEventId,mostRecentEventTimestamp,defaultProfileImageUrl)
 
+  def endTraversal(self, state, authorName):
 
-  def endTraversal(self,state,authorName):
-
-    # before uploading to s3 it's important to close the files to flush the buffers 
+    # before uploading to s3 it's important to close the files to flush the buffers
     state.mapper.close()
 
     # copy new mapper file to s3 if the file exists and has a non-zero size
@@ -188,11 +186,11 @@ class FullCollector(object):
       if os.path.getsize(state.filename) > 0:
         bucket = self.s3Connection.get_bucket(self.s3Bucket)
         k = Key(bucket)
-        
+
         # output refined JSON
-        k.key = 'normalized/%s.%s.%d.csv' % (state.authorId,self.getServiceName(),mktime(state.now.timetuple()))
+        k.key = 'normalized/%s.%s.%d.csv' % (state.authorId, self.getServiceName(), mktime(state.now.timetuple()))
         k.set_contents_from_filename(state.filename)
-        
+
       # remove the file from the local file-system
       os.remove(state.filename)
 
@@ -218,12 +216,12 @@ class FullCollector(object):
                               'total_requested':state.totalRequested},
                              sort_keys=True))
 
-  def writeEvent(self,event,state):
+  def writeEvent(self, event, state):
 
     def flushIfUnique():
       # check if this is a duplicate of something already in the DB
       #
-      count = state.dbSession.query(ServiceEvent.id).filter_by(author_service_map_id=state.asm.id,event_id=event.getEventId()).count()
+      count = state.dbSession.query(ServiceEvent.id).filter_by(author_service_map_id=state.asm.id, event_id=event.getEventId()).count()
       if count > 0:
         state.duplicateRejected = state.duplicateRejected + 1
       else:
@@ -242,11 +240,11 @@ class FullCollector(object):
         url = event.getEventURL()
         caption = event.getEventCaption()
         content = event.getEventContent()
-        photo = event.getEventPhoto();
+        photo = event.getEventPhoto()
         auxillaryContent = event.getAuxillaryContent()
         profileImageUrl = event.getProfileImageUrl() if event.getProfileImageUrl() else state.defaultProfileImageUrl
 
-        serviceEvent = ServiceEvent(state.asm.id,event.getEventId(),eventTime,url,caption,content,photo,auxillaryContent,profileImageUrl,json.dumps(event.getNativePropertiesObj()))
+        serviceEvent = ServiceEvent(state.asm.id, event.getEventId(), eventTime, url, caption, content, photo, auxillaryContent, profileImageUrl, json.dumps(event.getNativePropertiesObj()))
         state.dbSession.add(serviceEvent)
         state.dbSession.flush()
 
@@ -257,9 +255,9 @@ class FullCollector(object):
         normalizedDict = event.toNormalizedObj()
         normalizedDict['id'] = serviceEvent.id
         state.writer.writerow([state.authorId,json.dumps(normalizedDict,sort_keys=True)])
-        
+
         state.totalAccepted = state.totalAccepted + 1
-     
+
     # check if we're within the lookback window
     #
     state.totalRequested = state.totalRequested + 1
@@ -268,7 +266,7 @@ class FullCollector(object):
     if eventTime >= self.getLookbackWindow():
 
       # check if the event is more recent that our baseline
-      # 
+      #
       if state.baselineLastUpdateTime:
         if eventTime >= state.baselineLastUpdateTime:
           flushIfUnique()

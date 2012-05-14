@@ -3,7 +3,7 @@
 	<name>mi-model</name>
 	<comment></comment>
 	<projects>
-		<project>mi-utils</project>
+		<project>tim-commons</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

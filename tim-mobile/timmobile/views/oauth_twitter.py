@@ -119,7 +119,7 @@ def twitter_callback(request):
 
   userInfoJSON = json.loads(make_request(client,'https://api.twitter.com/1/account/verify_credentials.json').decode('utf-8'))
 
-  json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'auxillary_data':{'id':userInfoJSON['id']}})
+  json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'service_author_id': userInfoJSON['id']})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
                             (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE),

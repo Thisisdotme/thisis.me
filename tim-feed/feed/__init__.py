@@ -1,22 +1,36 @@
 from pyramid.config import Configurator
-from pyramid.events import NewRequest, subscriber
-from messages import get_current_message_client
+from pyramid.events import ApplicationCreated, NewRequest, subscriber
+from tim_commons.message_queue import get_current_message_client, create_queues
+from tim_commons.config import update_pyramid_configuration, ENVIRONMENT_KEY
 
-def bind_add_message_client(host):
-  def add_message_client(event):
-    event.request.message_client = get_current_message_client(host)
 
-  return add_message_client
+@subscriber(NewRequest)
+def add_message_client(event):
+  environment = event.request.registry.settings[ENVIRONMENT_KEY]
+  url = environment['broker']['url']
+  event.request.message_client = get_current_message_client(url)
+
+
+@subscriber(ApplicationCreated)
+def create_feed_queue(event):
+  environment = event.app.registry.settings[ENVIRONMENT_KEY]
+
+  client = get_current_message_client(environment['broker']['url'])
+  for service_queues in environment['queues'].itervalues():
+    queue = service_queues.get('notification', None)
+    if queue is not None:
+      create_queues(client, [queue])
+
 
 def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.
   """
+  # Load global environment configuration
+  update_pyramid_configuration(settings)
+
   config = Configurator(settings=settings)
 
   config.add_route('facebook_feed', 'feed/facebook')
-
-  config.add_subscriber(bind_add_message_client(settings['message.queue.url']),
-                        NewRequest)
 
   config.scan()
   return config.make_wsgi_app()

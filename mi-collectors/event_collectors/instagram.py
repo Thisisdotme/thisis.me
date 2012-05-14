@@ -3,7 +3,9 @@ Created on Feb 8, 2012
 
 @author: howard
 '''
-import json, urllib, urllib2
+import json
+import urllib
+import urllib2
 
 from mi_schema.models import Author
 from mi_model import Event
@@ -13,6 +15,7 @@ from full_collector import FullCollector
 
 USER_INFO = 'users/self'
 USER_MEDIA = 'users/self/media/recent'
+
 
 class InstagramFullCollector(FullCollector):
 

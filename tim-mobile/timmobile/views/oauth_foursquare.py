@@ -178,7 +178,7 @@ class FoursquareView(object):
       error = self.request.params.get('error')
       raise GenericError('Error authenticating user with Foursquare: %s' % error)
     
-    json_payload = json.dumps({'access_token':accessToken,'auxillary_data':{'id':userId}})
+    json_payload = json.dumps({'access_token': accessToken, 'service_author_id': userId})
     headers = {'Content-Type':'application/json; charset=utf-8'}
     req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
                                     (self.request.registry.settings['mi.api.endpoint'],authorName,self.featureName),
