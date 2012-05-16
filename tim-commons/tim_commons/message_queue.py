@@ -13,7 +13,6 @@ def get_current_message_client(url):
 
   Arguments:
   url -- the URL of the message queue server. E.g. amqp://localhost
-
   '''
   map = getattr(threadlocal, 'puka_client', None)
   if map is None:
@@ -29,7 +28,7 @@ def get_current_message_client(url):
 
 
 def create_message_client(url):
-  ''' Creates a message queue client for the given url.
+  '''Creates a message queue client for the given url.
 
   Arguments:
   url -- the URL of the message queue server. E.g. amqp://localhost
@@ -40,6 +39,11 @@ def create_message_client(url):
   client.wait(promise)
 
   return client
+
+
+def close_message_client(client):
+  promise = client.close()
+  client.wait(promise)
 
 
 def create_queues(client, queues, durable=True):
@@ -67,7 +71,6 @@ def send_messages(client, queue, messages):
             get_current_message_client
   queue -- the queue to push all the messages
   messages -- list of message to push to the queue
-
   '''
   # Send all the messages
 #  promises = []
@@ -93,7 +96,6 @@ def join(client, queue, handler):
             get_current_message_client
   queue -- the queue to push all the messages
   handler -- closer to call when a message is received from the message queue
-
   '''
   promise = client.basic_consume(queue=queue, prefetch_count=1)
   while True:
