@@ -1,6 +1,5 @@
 
 (function($) { 
-
   $.extend( $.support, {
   	orientation: "orientation" in window && "onorientationchange" in window,
   	touch: "ontouchend" in document,
@@ -40,6 +39,13 @@ $.event.special.swipe = {
 		var thisObject = this,
 			$this = $( thisObject );
 		$this.bind( touchStartEvent, function( event ) {
+		  //don't count events with more than one finger
+		  
+		  if(event.originalEvent.touches && event.originalEvent.touches.length && event.originalEvent.touches.length > 1) {
+		    //alert('2 fingers!');
+		    return false;
+		  }
+		  
 			var data = event.originalEvent.touches ?
 								event.originalEvent.touches[ 0 ] : event,
 				start = {
@@ -50,7 +56,12 @@ $.event.special.swipe = {
 				stop;
 
 			function moveHandler( event ) {
-
+        
+        if(event.originalEvent.touches && event.originalEvent.touches.length && event.originalEvent.touches.length > 1) {
+  		    //alert('2 fingers!');
+  		    return false;
+  		  }  
+        
 				if ( !start ) {
 					return;
 				}
@@ -72,6 +83,10 @@ $.event.special.swipe = {
 			$this.bind( touchMoveEvent, moveHandler )
 				.one( touchStopEvent, function( event ) {
 					$this.unbind( touchMoveEvent, moveHandler );
+					if(event.originalEvent.touches && event.originalEvent.touches.length && event.originalEvent.touches.length > 1) {
+    		    alert ('2 fingers!');
+    		    return;
+    		  }
 
 					if ( start && stop ) {
 						if ( stop.time - start.time < $.event.special.swipe.durationThreshold &&

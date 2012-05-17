@@ -1,0 +1,14 @@
+<div class="bio">
+  <div id="bioWrapper">
+	<h1>{name}</h1>
+	<div class="headline">{headline}</div>
+	<div class="profile_img">
+	  <img src="{picture_url}"/>
+	</div>
+	<div class="specialties"><strong>Specializing in: </strong>{specialties}</div>
+	<div class="summary"><strong>Summary: </strong>{summary}</div>
+	<div class="summary"><strong>Summary: </strong>{summary}</div>
+	<div class="summary"><strong>Summary: </strong>{summary}</div>
+	<div class="summary"><strong>Summary: </strong>{summary}</div>
+	</div>
+</div>

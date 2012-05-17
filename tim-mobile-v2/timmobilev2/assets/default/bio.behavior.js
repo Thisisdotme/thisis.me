@@ -1,6 +1,5 @@
 
 (function(TIM) {
-  console.log('tim: ', TIM);
   var feature = {};
   feature.models = {};
   feature.views = {};
@@ -24,7 +23,14 @@
   });
   
   TIM.models.Bio = Backbone.Model.extend({
-
+    
+    url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/services/linkedin/profile',
+    
+    parse: function(resp) {
+      console.log(resp);
+		  return (resp);
+		},
+    
     defaults: {
 			time_ago: ""
     },
@@ -36,22 +42,45 @@
       this.destroy();
       this.view.remove();
     }
+    
 
   });
   
   //basic placeholder for photo
   TIM.views.Bio = Backbone.View.extend( {
-      el: $( "#timeline" ),
+      id: "bioPage",
+      
+      className: "appPage",
+      
+      iScrollElem: undefined,
 
       initialize: function() {
-          //_.bindAll(this, "render", "renderPage");
+          _.bindAll(this, "render");
+          this.model.bind( "change", this.render );
       },
 
   		events: {
   		},
-
+  		
       render: function(){
-  		  $(this.el).html('bio feature');
+        var that = this;
+  		  dust.render("bio", this.model.toJSON(), function(err, out) {
+  			  if(err != null) {
+  					console.log(err);
+  				}
+  			  $(that.el).append(out);
+  			});
+
+  		  if(TIM.appContainerElem.find(this.el).length == 0)  {
+  			  TIM.appContainerElem.append(this.$el);
+  			}
+  			var containerEl = this.$el.find('.bio')[0];
+  			this.iScrollElem = new iScroll(containerEl, { hScroll: false });
+  		  TIM.transitionPage (this.$el, {
+  		      callback: function() {
+              that.iScrollElem.refresh();
+            }
+        });
       }
   });
 
@@ -61,9 +90,28 @@
   
   feature.activate = function() {
     var bioModel = new (TIM.models.Bio);
+    console.log("the bio model: " + bioModel);
     var bioView = new TIM.views.Bio({model: bioModel});
-    bioView.render();
+    bioView.model.fetch ({
+      dataType: "jsonp",
+	  	//add this timeout in case call fails...
+  		timeout : 5000,
+  		success: function(resp) {
+  		  //
+  		  console.log('fetched bio');
+  		},
+  		error: function(resp) {
+  			TIM.appContainerElem.html("couldn't find profile for " + TIM.pageInfo.authorName);
+  		}
+  	});
   };
+  
+  feature.navigate = function() {
+    TIM.app.navigate("/bio");
+  }
+  
+  //add to feature?
+  TIM.features.getByName("bio").behavior = feature;
   
   TIM.loadedFeatures["bio"] = feature;
   

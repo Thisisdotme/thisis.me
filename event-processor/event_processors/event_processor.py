@@ -67,6 +67,9 @@ class EventProcessor(object):
       # just skip it
       if existing_digest != new_digest:
 
+        print json.dumps(json.loads(existing_event.json), sort_keys=True, indent=2)
+        print json.dumps(service_event_json, sort_keys=True, indent=2)
+
         self.log.debug('Updating modified known event')
 
         # update event

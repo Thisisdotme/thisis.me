@@ -1,0 +1,3 @@
+{#photos}
+ <img class="thumb" src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}_s.jpg" data-photo_id="{id}"/>
+{/photos}

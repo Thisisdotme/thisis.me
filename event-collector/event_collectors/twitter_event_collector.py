@@ -6,6 +6,7 @@ Created on May 4, 2012
 import json
 import urllib
 import oauth2 as oauth
+from datetime import datetime
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event
@@ -35,25 +36,22 @@ class TwitterEventCollector(EventCollector):
 
     client = oauth.Client(consumer, token)
 
-    user_id = int(asm.service_author_id)
+    args = {'include_rts': 1,
+            'include_entities': 1,
+            'trim_user': 1,
+            'count': 100}
 
-    # API endpoing for querying user info
-    url = '%s%s' % (self.oauth_config['endpoint'], USER_INFO)
-    user_info_json = json.loads(make_request(client, url))
-
-    twitter_user_id = user_info_json['id']
-
-    if twitter_user_id != user_id:
-      raise Exception("Bad state - mis-matched twitter user ids")
+    if asm.most_recent_event_id:
+      args['since_id'] = asm.most_recent_event_id
 
     # API endpoint for getting user timeline
-    page = 1
     url = '%s%s?%s' % (self.oauth_config['endpoint'],
                        USER_TIMELINE,
-                       urllib.urlencode({'include_rts': '1', 'include_entities': '1', 'count': '200', 'page': page}))
+                       urllib.urlencode(args))
 
-    total_accepted = 0
-    while url and total_accepted < self.MAX_EVENTS:
+    min_age = datetime.now() - self.LOOKBACK_WINDOW
+    last_id = None
+    while True:
 
       content = make_request(client, url)
 
@@ -61,23 +59,32 @@ class TwitterEventCollector(EventCollector):
 
       # check if nothing returned and terminate loop if so
       if len(raw_json) == 0:
-        url = None
-        continue
+        break
 
       for post in raw_json:
 
         # process the item
         #print json.dumps(post, sort_keys=True, indent=2)
 
-        if self.screen_event(TwitterEventInterpreter(post), state):
-          total_accepted = total_accepted + 1
+        interpreter = TwitterEventInterpreter(post)
+        last_id = interpreter.get_id()
+
+        # terminate fetching any more events if we've gone beyond the lookback window
+        if interpreter.get_time() < min_age:
+          url = None
+          break
+
+        if self.screen_event(interpreter, state):
           callback(create_twitter_event(service_author_id, asm.author_id, post))
 
+      if not url:
+        break
+
       # setup for the next page (if any)
-      page = page + 1
+      args['max_id'] = long(last_id) - 1
       url = '%s%s?%s' % (self.oauth_config['endpoint'],
                          USER_TIMELINE,
-                         urllib.urlencode({'include_rts': '1', 'include_entities': '1', 'count': '200', 'page': page}))
+                         urllib.urlencode(args))
 
     # terminate the fetch
     self.fetch_end(state)

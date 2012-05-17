@@ -1,3 +1,7 @@
-body {
-  background-color:#def;
+#timeline {
+  height:100%;
+}
+
+#eventDetailContainer {
+  background:#fff;
 }

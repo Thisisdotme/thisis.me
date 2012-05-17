@@ -1,0 +1,78 @@
+@import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
+
+#coverContainer {
+  background:#000 url(/phil/asset/cover_bg.jpg) no-repeat left top;
+}
+
+.coverPage {
+  width:100%;
+  height:100%;
+  color:#fff;
+  font-family: 'PT Sans Narrow', sans-serif;
+  font-weight: bold;
+}
+
+.coverPage h1.title {
+  font-size:34px;
+  font-weight:normal;
+  color:#fff200;
+  text-align:left;
+  -webkit-text-stroke: 1px #333;
+  position:absolute;
+  top:22px;
+  left:12px;
+  font-family: 'Holtwood One SC',serif;
+  line-height:1.1;
+  text-transform:uppercase;
+}
+
+.coverPage a, .coverPage a:visited {
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  text-decoration:none;
+}
+
+
+.coverPage .primaryStory {
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  position:absolute;
+  top:150px;
+  width:250px;
+  left:28px;
+  font-family:helvetica,sans-serif;
+  line-height:1.1;
+  text-shadow:1px 1px #333;
+}
+
+.coverPage .secondaryStory {
+  position:absolute;
+  bottom:25px;
+  width:100px;
+  left:15%;
+  font-size:13px;
+  font-weight:bold;
+  color:#fff;
+  font-family:helvetica,sans-serif;
+  line-height:1.1;
+  text-shadow:1px 1px #333;
+  text-overflow:ellipsis;
+  
+}
+
+.coverPage .tertiaryStory {
+  position:absolute;
+   bottom:25px;
+   width:100px;
+   right:28px;
+   font-size:13px;
+   font-weight:bold;
+   color:#fff;
+   font-family:helvetica,sans-serif;
+   line-height:1.1;
+   text-shadow:1px 1px #333;
+   text-overflow:ellipsis;
+  
+}

@@ -1,0 +1,6 @@
+<div class="photoPage">
+	{#events}
+		<img src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" />
+		<div class="caption"><div>{title}</div></div>
+	{/events}
+</div>

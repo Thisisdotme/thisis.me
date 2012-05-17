@@ -1,0 +1,44 @@
+
+	{#content}
+	 <div class="content">
+			{?photo_url}
+			   	<div class="inner-image">
+					<img src='{photo_url}' />
+				</div>
+			{:else}
+			{/photo_url}
+			   <div class="inner-text">
+			     <p>{data}</p>
+			   </div>
+			 </div>
+			{/content}
+			<div class="footer">
+			  <div class="avatar" data-authorName="{author.name}">
+			    <div class="frame">
+			      <a href=""><img src='{author.profile_image_url}' /></a>
+			    </div>
+			  </div>
+
+			  <div class="info">
+			    <div class="author">
+			      <a href="/{author.name}/#timeline">{author.full_name}</a>
+			    </div>
+
+			    <div class="caption">
+			      {content.label}
+			    </div>
+			  </div>
+
+			  <div class="baseline">
+			    {#sources.items} 
+				{?feature_image_url}
+					<img src="{feature_image_url}" /> 
+				{/feature_image_url}
+			{/sources.items}
+
+	    <div class="fuzzy-time">
+	      {time_ago}
+	    </div>
+	  </div>
+	</div>
+  

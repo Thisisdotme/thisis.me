@@ -40,17 +40,11 @@ def _create_notification_message(message_type,
   return json_dict
 
 
-def create_facebook_notification(facebook_user_id,
-                                 tim_author_id=None,
-                                 oauth_access_token=None,
-                                 auth_access_secret=None):
+def create_facebook_notification(facebook_user_id):
 
   TYPE = 'facebook.notification'
 
-  return _create_notification_message(TYPE,
-                                      tim_author_id,
-                                      facebook_user_id,
-                                      oauth_access_token, auth_access_secret)
+  return _create_notification_message(TYPE, None, facebook_user_id, None, None)
 
 
 def create_twitter_notification(twitter_user_id):
@@ -58,6 +52,27 @@ def create_twitter_notification(twitter_user_id):
   TYPE = 'twitter.notification'
 
   return _create_notification_message(TYPE, None, twitter_user_id, None, None)
+
+
+def create_instagram_notification(instagram_user_id):
+
+  TYPE = 'instagram.notification'
+
+  return _create_notification_message(TYPE, None, instagram_user_id, None, None)
+
+
+def create_foursquare_notification(foursquare_user_id):
+
+  TYPE = 'foursquare.notification'
+
+  return _create_notification_message(TYPE, None, foursquare_user_id, None, None)
+
+
+def create_linkedin_notification(linkedin_user_id):
+
+  TYPE = 'linkedin.notification'
+
+  return _create_notification_message(TYPE, None, linkedin_user_id, None, None)
 
 '''
   Raw service event message.
@@ -105,11 +120,31 @@ def create_twitter_event(twitter_user_id, tim_author_id, json_event_dict):
 
 def create_instagram_event(instagram_user_id, tim_author_id, json_event_dict):
 
-  TYPE = 'twitter.event'
+  TYPE = 'instagram.event'
 
   return _create_event_message(TYPE,
                                tim_author_id,
                                instagram_user_id,
+                               json_event_dict)
+
+
+def create_foursquare_event(foursquare_user_id, tim_author_id, json_event_dict):
+
+  TYPE = 'foursquare.event'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               foursquare_user_id,
+                               json_event_dict)
+
+
+def create_linkedin_event(linkedin_user_id, tim_author_id, json_event_dict):
+
+  TYPE = 'linkedin.event'
+
+  return _create_event_message(TYPE,
+                               tim_author_id,
+                               linkedin_user_id,
                                json_event_dict)
 
 

@@ -1,0 +1,6 @@
+<div class="photoDetail">
+	{#events}
+		<img src='{src}' />
+		<div class="caption"><div>{title}</div></div>
+	{/events}
+</div>

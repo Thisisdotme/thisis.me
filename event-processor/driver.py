@@ -17,7 +17,7 @@ from event_processors.event_processor_factory import EventProcessorFactory
 DBSession = sessionmaker()
 
 
-class EventCollectorDriver(AppBase):
+class EventProcessorDriver(AppBase):
 
   def display_usage(self):
     return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
@@ -67,4 +67,4 @@ class EventCollectorDriver(AppBase):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventCollectorDriver(1).main())
+  sys.exit(EventProcessorDriver(1).main())

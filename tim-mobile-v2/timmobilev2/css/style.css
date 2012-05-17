@@ -212,24 +212,148 @@ td { vertical-align: top; }
    /* ==|== primary styles =====================================================
       Author:
       ========================================================================== */
+  
+  
+  
+  body {
+    font-family:arial, sans-serif;
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* remove highlight color for tap events */
+    -webkit-backface-visibility: hidden; /* helps with flickering? */
+    background-color:#666;
+  }
+  
+  #loadingImg {
+    display:none;
+    background:transparent url(/img/loading.gif) center center no-repeat;
+    position:absolute;
+    top:0px;
+    left:0px;
+    height:100%;
+    width:100%;
+    z-index:100;
+  }
+  
+  .loading #loadingImg {
+    display:block;
+  }
+  
+  #app {
+    /* gotta get rid of these explicit pixel sizes */
+    width:100%;
+    position:relative;
+    min-height:100%;
+    overflow:hidden; 
+  }
+  
+  @media screen and (min-width: 500px) {
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      width:320px;
+      min-height:370px;
+    }
+  }
+  
+  @media screen and (width: 320px) {
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      width:320px;
+      min-height:370px;
+    }
+  }
+  
+  @media screen and (height: 320px) {
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      min-height:320px;
+      width:480px;
+    }
+  }
+  
+  @media screen and (width: 360px) {
+     #app {
+       /* gotta get rid of these explicit pixel sizes */
+       width:360px;
+       min-height:515px;
+     }
+   }
+  
+  #app.transitioning {
+    -webkit-perspective:1000;
+  }
+  
+  .appPage {
+    position:absolute;
+    width:100%;
+    min-height:100%;
+    display:none;
+    border:0;
+    background-color:#333;
+   -webkit-transform:translate3d(0,0,0);
+   -webkit-backface-visibility: hidden;
+  }
+  
+  .appPage.active {
+    display:block;
+  }
+  
+  #contentContainer {
+   /*  position:relative; */
+    min-height:100%;
+    width:100%;
+    /* background-color:#666; */
+  }
+  
+  #splashScreen {
+    background-color:#cd212b;
+    background:#cd212b url(/img/thisisme_logo.png) center 30% no-repeat;
+  }
       
   h1 { margin:0 }
 
-   #followers a {
-   	color: #000;
+   #navToggle {
+      display:block;
+      height:36px;
+      width:36px;
+      background:url(/img/nav-toggle.png);
+      float:right;
    }
+   
+   .initializing #featureNav {
+      display:none;
+     }
+   
+   #featureNav {
+     position:absolute;
+     right:0px;
+     z-index:10000;
+     opacity:.9;
+     /* height:100%; */
+    }
+    
+  #featureNav ul {
+    background-color:#cd212b;
+    display:none;
+    color:#fff;
+    height:100%;
+    padding-top:35px;
+  }
+  
+  #featureNav.active ul {
+    display:block;
+  }
    
    #featureNav li {
-     float:left;
      list-style:none;
-     margin-right:12px;
+     padding:12px 4px;
+     font-size:14px;
    }
    
+   #featureNav .selected {
+      font-weight:bold;
+    }
+   
    .mi-header { }
-   /*.ui-content { margin-top: 43px; }*/
-
-   #newsfeed .ui-content > div, #timeline .ui-content > div, #feature .ui-content > div { clear: both; }
-
+   
    #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
 
    .featureIcon { float:left; margin-right:1em; } 
@@ -239,81 +363,138 @@ td { vertical-align: top; }
    .event p { margin-top:.33em; }*/
 
    #authorFeatures .ui-content a { margin: 1em; display: inline-block;}
+   
+    
+    /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
+    Built by David Kaneda and maintained by Jonathan Stark.
+    */
+    .in, .out {
+    	-webkit-animation-timing-function: ease-in-out;
+    	-webkit-animation-duration: 500ms;
+    }
 
-   /* getting the button in the feature footer to be centered */
-   .center-button { text-align:center; }
+    .slide.out {
+    	-webkit-transform: translateX(-100%);
+    	-webkit-animation-name: slideouttoleft;
+    	z-index:0;
+    }
 
-   #feature label { font-weight: bold; }
+    .slide.in {
+    	-webkit-transform: translateX(0);
+    	-webkit-animation-name: slideinfromright;
+    	z-index:10;
+    }
+    
+    .slide.out.reverse {
+    	-webkit-transform: translateX(100%);
+    	-webkit-animation-name: slideouttoright;
+    	z-index:10;
+    }
 
-   .data-spinner {
-   	max-height: 100%;
-   	max-width: 100%;
+    .slide.in.reverse {
+    	-webkit-transform: translateX(0);
+    	-webkit-animation-name: slideinfromleft;
+    	z-indez:0;
+    }
+    
+    .fade.out {
+    	z-index: 0;
+    	-webkit-animation-name: fadeout;
+    }
+
+    .fade.in {
+    	opacity: 1;
+    	z-index: 10;
+    	-webkit-animation-name: fadein;
+    }
+    
+    @-webkit-keyframes slideinfromright {
+        from { -webkit-transform: translateX(100%); }
+        to { -webkit-transform: translateX(0); }
+    }
+
+    @-webkit-keyframes slideinfromleft {
+        from { -webkit-transform: translateZ(-20px); }
+        70% { -webkit-transform: translateZ(0); }
+        to { -webkit-transform: translateX(0); -webkit-transform: translateZ(0); }
+    }
+
+    @-webkit-keyframes slideouttoleft {
+        from { -webkit-transform: translateX(0); }
+        30% { -webkit-transform: translateZ(-20px); }
+        to { -webkit-transform: translateX(0); -webkit-transform: translateZ(-20px); }
+    }
+
+    @-webkit-keyframes slideouttoright {
+        from { -webkit-transform: translateX(0); }
+        to { -webkit-transform: translateX(100%); }
+    }
+    
+    @-webkit-keyframes fadein {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @-webkit-keyframes fadeout {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+    
+    
+    .flip {
+    	-webkit-animation-duration: .65s;
+    	-webkit-backface-visibility:hidden;
+    	-webkit-transform:translateX(0); /* Needed to work around an iOS 3.1 bug that causes listview thumbs to disappear when -webkit-visibility:hidden is used. */
+    }
+
+    .flip.out {
+    	-webkit-transform: rotateY(-180deg) scale(.8);
+    	-webkit-animation-name: flipouttoleft;
+    }
+
+    .flip.in {
+    	-webkit-transform: rotateY(0) scale(1);
+    	-webkit-animation-name: flipinfromleft;
+    }
+
+    /* Shake it all about */
+
+    .flip.out.reverse {
+    	-webkit-transform: rotateY(180deg) scale(.8);
+    	-webkit-animation-name: flipouttoright;
+    }
+
+    .flip.in.reverse {
+    	-webkit-transform: rotateY(0) scale(1);
+    	-webkit-animation-name: flipinfromright;
+    }
+
+    @-webkit-keyframes flipinfromright {
+        from { -webkit-transform: rotateY(-180deg) scale(.8); }
+        to { -webkit-transform: rotateY(0) scale(1); }
+    }
+
+    @-webkit-keyframes flipinfromleft {
+        from { -webkit-transform: rotateY(180deg) scale(.8); }
+        to { -webkit-transform: rotateY(0) scale(1); }
+    }
+
+    @-webkit-keyframes flipouttoleft {
+        from { -webkit-transform: rotateY(0) scale(1); }
+        to { -webkit-transform: rotateY(-180deg) scale(.8); }
+    }
+
+    @-webkit-keyframes flipouttoright {
+        from { -webkit-transform: rotateY(0) scale(1); }
+        to { -webkit-transform: rotateY(180deg) scale(.8); }
+    }
+    
+    
+   
+   #detailContainer {
+     background-color:#fff;
    }
-
-   .header-logo {
-   	height: 40px;
-   	text-align: center;
-   }
-
-   .header-logo img {
-   	max-height:100%;
-   }
-
-   #accounts h3 {
-   	margin-top: 0;
-   	margin-bottom: 30px;
-   }
-
-   #newlogin .ui-content h3 {
-   	margin: 0;
-   	padding: 0;
-   }
-
-   #login .ui-content {
-   	margin-top: 43px; 
-   }
-
-   #login .logo {
-   	text-align: center;
-   	margin-bottom: 30px;
-   }
-
-   #login .logo img{
-   	text-align: center;
-   	max-height: 100%;
-   	max-width: 100%;
-   }
-
-   #login input[type="text"], #newlogin input[type="text"] {
-   	margin-bottom: 5px;
-   }
-
-   #login form .ui-btn, #newlogin form .ui-btn {
-   	margin-top: 15px;
-   }
-
-   /****
-    *
-    * Followers page
-    *
-    ****/
-
-   #followersList label {
-   	padding-left:.5em;
-   	vertical-align:.4em; 
-   }
-
-   /*********************************
-    * 
-    * 	OAuth Starting Page
-    * 
-    *********************************/
-   .addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
-   .addfeature div { float: left; }
-   .addfeature img { margin-top: 10px; max-height: 100%;	max-width: 100%; }
-   .addfeature .logo { width: 80px; }
-   .addfeature .arrow { margin-top: 25px; width: 60px; font-weight: bold; font-size: 30px; }
-
+   
    /* Newsfeed */
 
    /*.flippage-container .event .content { position: absolute; top: 50%; }*/
@@ -445,11 +626,6 @@ td { vertical-align: top; }
    	color: #000;
    }
 
-   #newsfeed .ui-content, #timeline .ui-content {
-   	margin: 0;
-   	padding: 0;
-   }
-
    .flippage-container .mi-content {
    	margin: 0;
    	padding: 0;
@@ -477,34 +653,19 @@ td { vertical-align: top; }
    	border-bottom:1px inset #777;
    }
 
-
-   /*	Feature specific configurations  */
-   /*.flippage-container .event.half-page { height: 184px; }
-   .flippage-container .event.half-page  > div:first-child { height: 86px; }*/
-
-
-   /*.flippage-container .event.full-page { height: 369px;}*/
    .flippage-container .event.half-page .content {
    	padding-top: 10px; 
    	height: 90px;  
    	display: table-cell;
    	vertical-align: middle;
    }
-   #timeline .flippage-container .event.half-page .content {
-   	padding-top: 10px; 
-   	height: 122px; 
-   }
-
+   
    .flippage-container .event.full-page .content {
    	padding-top: 10px; 
    	height: 290px; 
    	float: left; 
    }
-   #timeline .flippage-container .event.full-page .content {
-   	padding-top: 10px; 
-   	height: 310px; 
-   }
-
+  
    .flippage-container .event .content .inner-text {
    	float: left;
    	padding: 10px 10px 10px 10px;
@@ -526,10 +687,7 @@ td { vertical-align: top; }
        -webkit-line-clamp:3;
    /*	max-height: 56px;*/
    }
-   #timeline .flippage-container .event .content .inner-text p {
-   	-webkit-line-clamp:4;
-   }
-
+  
    .flippage-container .event .content .inner-image {
    /*	padding: 5px 0;*/
    	height: 238px;
@@ -587,10 +745,6 @@ td { vertical-align: top; }
    	overflow: hidden;
    }
 
-   #timeline .flippage-container .event .footer .info .caption {
-   	width: 300px;
-   }
-
    .flippage-container .event .footer > div{
    	float: left;
    }
@@ -639,75 +793,7 @@ td { vertical-align: top; }
    	font-size: 12px;
    }
 
-   /* experimental for pull-down and pull-up */
-
-   #wrapper {
-   	position:absolute; z-index:1;
-   	top:0px; bottom:0px; left:-9999px;
-   	width:100%;
-   	overflow:auto;
-   }
-
-   #scroller {
-   	position:absolute; z-index:1;
-   /*	-webkit-touch-callout:none;*/
-   	-webkit-tap-highlight-color:rgba(0,0,0,0);
-   	width:100%;
-   	padding:0;
-   }
-
-   #pullDown, #pullUp {
-   	background:#fff;
-   	height:40px;
-   	line-height:40px;
-   	padding:5px 10px;
-   	border-bottom:1px solid #ccc;
-   	color:#888;
-   	text-size:.75em;
-   	text-align:center;
-   	}
-
-   #pullDown .pullDownIcon, #pullUp .pullUpIcon  {
-   	display:block; float:left;
-   	width:40px; height:40px;
-   	background:url(/img/pull-icon@2x.png) 0 0 no-repeat;
-   	-webkit-background-size:40px 80px; background-size:40px 80px;
-   	-webkit-transition-property:-webkit-transform;
-   	-webkit-transition-duration:250ms;	
-   }
-
-   #pullDown .pullDownIcon {
-   	-webkit-transform:rotate(0deg) translateZ(0);
-   }
-
-   #pullUp .pullUpIcon  {
-   	-webkit-transform:rotate(-180deg) translateZ(0);
-   }
-
-   #pullDown.flip .pullDownIcon {
-   	-webkit-transform:rotate(-180deg) translateZ(0);
-   }
-
-   #pullUp.flip .pullUpIcon {
-   	-webkit-transform:rotate(0deg) translateZ(0);
-   }
-
-   #pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon {
-   	background-position:0 100%;
-   	-webkit-transform:rotate(0deg) translateZ(0);
-   	-webkit-transition-duration:0ms;
-
-   	-webkit-animation-name:loading;
-   	-webkit-animation-duration:2s;
-   	-webkit-animation-iteration-count:infinite;
-   	-webkit-animation-timing-function:linear;
-   }
-
-   @-webkit-keyframes loading {
-   	from { -webkit-transform:rotate(0deg) translateZ(0); }
-   	to { -webkit-transform:rotate(360deg) translateZ(0); }
-   }
-
+   
 
    /*
     * Media queries for responsive design https://github.com/shichuan/mobile-html5-boilerplate/wiki/The-Style
