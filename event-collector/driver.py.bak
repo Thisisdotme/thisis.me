@@ -6,8 +6,6 @@ Created on May 2, 2012
 @author: howard
 '''
 import sys
-import signal
-import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -33,18 +31,6 @@ class EventCollectorDriver(AppBase):
       self._handle_event(callback_msg)
 
     self.collector.fetch(msg['message']['service_author_id'], handle_event_callback)
-
-  def setup_term_handler(self):
-
-    def term_handler(signum, frame):
-      print 'received SIGTERM signal'
-      sys.exit()
-
-    pid = os.getpid()
-    print pid
-
-    signal.signal(signal.SIGTERM, term_handler)
-    # signal.siginterrupt(signal.SIGTERM, False)
 
   def main(self):
 
@@ -76,8 +62,6 @@ class EventCollectorDriver(AppBase):
     self.log.info('Queue broker URL: %s' % broker_url)
     self.log.info('Receive queue: %s' % receive_queue)
     self.log.info('Send queue: %s' % self.send_queue)
-
-#    self.setup_term_handler()
 
     self.collector = EventCollectorFactory.from_service_name(service_name, db_session, oauth_config, self.log)
 
