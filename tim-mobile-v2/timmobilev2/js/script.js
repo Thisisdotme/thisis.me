@@ -34,7 +34,7 @@ $(function() {
       var height =  $(window).height(),
           width =  $(window).width();
       //don't bother for desktop sizes!
-      if (height > 500) return;
+      if (height > 600) return;
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
@@ -117,12 +117,13 @@ $(function() {
     	$('#navToggle').click(function(event){
     	  event.preventDefault();
     	  event.stopPropagation();
-    	  $('#featureNav').toggleClass('active');
+    	  $('#app').toggleClass('navOpen');
+    	  //$('#featureNav').toggleClass('active');
     	});
     	
     	$('#app').click(function(event){
     	  event.preventDefault();
-    	  $('#featureNav').removeClass('active');
+    	  //$('#featureNav').removeClass('active');
     	})
     	
     	$('#app').on('click', 'a', function(event) {
@@ -231,7 +232,7 @@ $(function() {
   //for now this simply handles the DOM page transition
   
 	TIM.transitionPage = function (toPage, options) {
-	  $('#app').removeClass('loading initializing');
+	  $('#app').removeClass('loading initializing navOpen');
 	  options = options || {};
 	  var fromPage = options.fromPage || TIM.currentPageElem;
 	  
@@ -243,7 +244,7 @@ $(function() {
 	    return;
 	  }
 	  
-	  $('#featureNav').removeClass('active'); //hide the main feature nav - make this a TIM method?
+	  //$('#app').removeClass('navOpen'); //hide the main feature nav - make this a TIM method?
 	 
 	  var animationName = options.animationName || TIM.defaultTransition; //changed from slide
 	  

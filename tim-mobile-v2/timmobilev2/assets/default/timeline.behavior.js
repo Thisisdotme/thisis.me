@@ -99,6 +99,7 @@
   TIM.views.EventList = Backbone.View.extend( {
       id: "timeline",
       className: "flippage flippage-container appPage",   
+      pageTemplate: "event",
       
       initialize: function() {
           //add flipset functionality to this view
@@ -117,7 +118,7 @@
   			//"swipeup .flip-set" : "flipNext",
   			//  "swipedown .flip-set" : "flipPrevious",
   			// "click .event" : "showDetail",
-  			"swipeleft .event" : "showDetailView"
+  			"click .event" : "showDetailView"
   		},
 
       render: function() {

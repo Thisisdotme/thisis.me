@@ -1,8 +1,7 @@
 <metal:index use-macro="load: master_template.html">
+  
 	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
-		<nav id="featureNav" class="clearfix"><a href="#" id="navToggle"></a>
-			<ul id="featureNavItems"></ul>
-		</nav>
+  	<a href="#" id="navToggle"></a>
 		<!-- this font link should maybe be in a per-user asset?  -->
 		<!-- link href="http://fonts.googleapis.com/css?family=Holtwood+One+SC|PT+Sans+Narrow:400,700" rel="stylesheet" type="text/css" -->
 		<!-- link href='http://fonts.googleapis.com/css?family=Creepster' rel='stylesheet' type='text/css' -->
@@ -13,7 +12,9 @@
 		  <div id="splashScreen" class="appPage active"></div>
 		  <div id="loadingImg"></div>
 		</div>
-		
+		<nav id="featureNav" class="clearfix">
+  		<ul id="featureNavItems"></ul>
+  	</nav>
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script">

@@ -75,27 +75,6 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 	
 });
 
-//this view is used by the flipset mixin
-
-TIM.views.Page = Backbone.View.extend( {
-
-    initialize: function(spec) {
-        _.bindAll(this, "render");
-				this.page = spec.page;
-    },
-
-    render: function( tmpl ) {
-			var that = this;
-			tmpl = tmpl || (this.page.events.length === 1 ? "event" : "page");
-			dust.render(tmpl, this.page, function(err, out) {
-			  if(err != null) {
-					console.log(err);
-				}
-			  $(that.el).append(out);
-			});	
-    }
-} );
-
 //toolbar triggers events on its parent view?
 TIM.views.Toolbar = Backbone.View.extend( {
         
@@ -139,6 +118,33 @@ TIM.views.Toolbar = Backbone.View.extend( {
     
 } );
 
+//this view is used by the flipset mixin
+//do we need to have a view at all?
+
+TIM.views.Page = Backbone.View.extend( {
+    
+    className: "page",
+    
+    initialize: function(spec) {
+        _.bindAll(this, "render");
+				this.pages = spec.pages;
+    },
+
+    render: function( tmpl, callback ) {
+			var that = this;
+			//console.log("pages: ", this.pages);
+			tmpl = tmpl || "event";//(this.page.events.length === 1 ? "event" : "page");
+			dust.render(tmpl, this.pages[0], function(err, out) {
+			  if(err != null) {
+			    callback(err);
+					console.log(err);
+				} else{
+				  callback(out);
+				}
+			});	
+    }
+} );
+
 //should probably have some sort of function that does the template rendering 
 //to prevent lots of code-copying and 
 
@@ -158,10 +164,11 @@ TIM.mixins.flipset = {
   		this.pages = [];
   		this.flipSet = {};
   		this.flipSetInitialized = false;
-  		this.chunkSize = 4;
+  		this.chunkSize = 6;
   		this.renderedIndex = 0;
   		this.numResourcesRendered = 0;
   		this.flipMode = true;
+  		/*
   		this.$el.swipe({
   		    threshold: 30,
   		    swipeRight: function(event) {
@@ -183,22 +190,36 @@ TIM.mixins.flipset = {
     	    click: function(event) {
     	      //alert('click!!!!!');
     	    }
-    	});
+    	}); */
 		},
 		
-		renderPage: function(page){
-
+		//send pages to the flips script one at a time as strings?
+		renderPage: function(pages){
+        console.log('in render page!, pages: ', pages);
   			//send pages, which can be 1-3 events to the event View
-		    var pageView = new TIM.views.Page({page: page});
+		    var pageView = new TIM.views.Page({pages: pages});
 		    var tmpl = this.pageTemplate;
-        pageView.render(tmpl);
+		    var that = this;
+		    
+		    //have to use a callback, as dust rendering is asychronous
+        pageView.render(tmpl, function(pageHtml){
+          if (!that.flipSetInitialized) {
+  					//this.flipSet = new Flipset($(this.el), 320, 370, [$(pageView.el)]);
+  					
+  					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml]});
+  					//console.log("hey, here's teh pageview elem", $(pageView.el, pageView.el));
+  					//var flip = this.$el.flips({pages:$(pageView.el, pageView.el)});
+  					//this.$el.flips("addPage", pageView.$el);
+  					that.flipSetInitialized = true;
+  				} else {
+  				  console.log("adding page!");
+  					that.flipSet.addPage(pageHtml, {skipLayout: true});
+  					//alert("god dammit, can't do this yet!");
+  					
+  				}
+        });
+        
 
-				if (!this.flipSetInitialized) {
-					this.flipSet = new FlipSet($(this.el), 320, 370, [$(pageView.el)]);
-					this.flipSetInitialized = true;
-				} else {
-					this.flipSet.push($(pageView.el));
-				}
     },
     
     //
@@ -229,11 +250,11 @@ TIM.mixins.flipset = {
 			  //console.log(index, startIndex);
 			  if(index < startIndex) return;
 				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
-					self.pages.push({"events" : [item.toJSON()]});
+					self.pages.push({"event_class" : "full-page", "events" : [item.toJSON()]});
 				} else {
 					page.push(item);
 					if(page.length == 2) {
-						self.pages.push({"events" : [page[0].toJSON(), page[1].toJSON()]});
+						self.pages.push({"event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
 						page = [];
 					}
 				}
@@ -241,7 +262,7 @@ TIM.mixins.flipset = {
 			});
 			//if there's one left over, make a page of it!
 			if(page.length == 1) {
-			  self.pages.push({"events" : [page[0].toJSON()]});
+			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
       
 			//rather than rendering all pages at once, make it intelligent?
@@ -257,19 +278,40 @@ TIM.mixins.flipset = {
 			console.log("flipset: ", this.flipSet);
 			return this;
     },
-
+    
+    //have to render 2 pages at a time with the new flipboard functionality - er, not really...
 		renderPageChunk: function(start) {
-
 			//would this fn check for earlier/later events if they haven't been loaded?
-
+      var that = this;
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
 				end = this.pages.length;
 			}
 			for (var i = start; i < end; i++) {
-				this.renderPage(this.pages[i]);
-				this.renderedIndex++;
+			  //if(end - i > 2) {
+			  //  this.renderPage([this.pages[i], this.pages[++i]]);
+			   // i += 2;
+  			//	this.renderedIndex += 2;
+			 // } else {
+			    this.renderPage([this.pages[i]]);
+  				this.renderedIndex++;
+			  //}
 			}
+			var layout = function() {
+			  that.flipSet._layout();
+			}
+			window.setTimeout(layout, 20);
+			
+			/*
+			if (!this.flipSetInitialized) {
+				//this.flipSet = new FlipSet($(this.el), 320, 370, [$(pageView.el)]);
+				console.log("hey, here's teh pageview elem", $(pageView.el));
+				this.$el.flips({pages:$(pageView.el, pageView.el)});
+				this.flipSetInitialized = true;
+			} else {
+				//this.flipSet.push($(pageView.el));
+				alert("god dammit, can't do this yet!");
+			} */
 		},
 		
 		flipNext: function(){
@@ -327,7 +369,11 @@ TIM.mixins.flipset = {
   			this.pageNum++;
   		}
   		this.flipSet.currentIndex_ = this.pageNum;
-  		this.flipSet.displayCurrentFlip_();
+  		
+  		this.flipSet.currentPage = this.pageNum;
+  		this.flipSet._goto();
+  		//this.flipSet.displayCurrentFlip_();
+  		
 		}
 }
 

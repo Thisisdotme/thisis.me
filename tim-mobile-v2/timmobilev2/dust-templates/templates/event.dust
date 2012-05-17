@@ -1,6 +1,6 @@
 <div class="mi-content"  style="height: 100%;">
 	{#events}
-	  <div class="event full-page" data-event_id="{event_id}">
+	  <div class="event {event_class}" data-event_id="{event_id}">
 			{>_event/}
 	  </div>
 	{/events}
