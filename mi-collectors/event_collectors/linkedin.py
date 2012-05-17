@@ -3,7 +3,8 @@ Created on Feb 8, 2012
 
 @author: howard
 '''
-import json, urllib
+import json
+import urllib
 import oauth2 as oauth
 from datetime import timedelta
 from time import mktime
@@ -14,14 +15,11 @@ from mi_schema.models import Author
 from full_collector import FullCollector
 from mi_model.Event import LinkedInEvent
 
-DATETIME_STRING_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
-USER_INFO = 'account/verify_credentials.json'
-USER_TIMELINE = 'statuses/user_timeline.json'
-
-FULL_LOOKBACK_WINDOW = timedelta (days = 365)
+FULL_LOOKBACK_WINDOW = timedelta(days=365)
 
 PAGE_SIZE = 200
+
 
 class LinkedInFullCollector(FullCollector):
 
@@ -29,11 +27,11 @@ class LinkedInFullCollector(FullCollector):
     return 'linkedin'
 
   # update_author
-  def build_one(self,afm,dbSession,oauthConfig,incremental):
+  def build_one(self, afm, dbSession, oauthConfig, incremental):
 
-    super(LinkedInFullCollector, self).build_one(afm,dbSession,oauthConfig,incremental)
+    super(LinkedInFullCollector, self).build_one(afm, dbSession, oauthConfig, incremental)
 
-    # get the name of the author  
+    # get the name of the author
     authorName = dbSession.query(Author.author_name).filter_by(id=afm.author_id).one()
 
     auxData = json.loads(afm.auxillary_data)
@@ -41,23 +39,23 @@ class LinkedInFullCollector(FullCollector):
 
     # setup what we need for oauth
     consumer = oauth.Consumer(oauthConfig['key'], oauthConfig['secret'])
-    token = oauth.Token(key=afm.access_token,secret=afm.access_token_secret)
+    token = oauth.Token(key=afm.access_token, secret=afm.access_token_secret)
     client = oauth.Client(consumer, token)
 
     try:
 
       # request the user's profile
-      response = make_request(client,'http://api.linkedin.com/v1/people/~:(picture-url)',{'x-li-format':'json'})
+      response = make_request(client, 'http://api.linkedin.com/v1/people/~:(picture-url)', {'x-li-format': 'json'})
       respJSON = json.loads(response)
-  
-      profileImageURL = respJSON['pictureUrl'] if respJSON.has_key('pictureUrl') else None
-        
-      traversal = self.beginTraversal(dbSession,afm,profileImageURL)
+
+      profileImageURL = respJSON['pictureUrl'] if 'pictureUrl' in respJSON else None
+
+      traversal = self.beginTraversal(dbSession, afm, profileImageURL)
 
       # optimization to request only those since we've last updated
-      args = {'scope':'self',
-              'type':['APPS','CMPY','CONN','JOBS','JGRP','PICT','PRFX','RECU','PRFU','QSTN','SHAR','VIRL'],
-              'count':PAGE_SIZE}
+      args = {'scope': 'self',
+              'type': ['APPS', 'CMPY', 'CONN', 'JOBS', 'JGRP', 'PICT', 'PRFX', 'RECU', 'PRFU', 'QSTN', 'SHAR', 'VIRL'],
+              'count': PAGE_SIZE}
 
       # incremental
       if traversal.baselineLastUpdateTime:
@@ -68,15 +66,15 @@ class LinkedInFullCollector(FullCollector):
         # limit to only one year of data
         args['after'] = '%s000' % int(mktime((traversal.now - FULL_LOOKBACK_WINDOW).timetuple()))
 
-      offset = 0;
+      offset = 0
 #      args['start'] = offset
 
-      url = '%s?%s' % ('http://api.linkedin.com/v1/people/~/network/updates',urllib.urlencode(args, True))
+      url = '%s?%s' % ('http://api.linkedin.com/v1/people/~/network/updates', urllib.urlencode(args, True))
 
       while url and traversal.totalAccepted < 200:
 
-        # request the user's updates 
-        content = make_request(client,url,{'x-li-format':'json'})
+        # request the user's updates
+        content = make_request(client, url, {'x-li-format': 'json'})
 
         try:
           rawJSON = json.loads(content)
@@ -87,11 +85,11 @@ class LinkedInFullCollector(FullCollector):
 
 #        print json.dumps(rawJSON, sort_keys=True, indent=2)
 
-        if rawJSON.get('_total',0) == 0:
+        if rawJSON.get('_total', 0) == 0:
           url = None
           continue
 
-        LinkedInEvent.eventsFromJSON(self,rawJSON,traversal,afm.author_id,userId,client)
+        LinkedInEvent.eventsFromJSON(self, rawJSON, traversal, afm.author_id, userId, client)
 
         # setup for the next page (if any)
         if rawJSON['_total'] < PAGE_SIZE:
@@ -99,12 +97,12 @@ class LinkedInFullCollector(FullCollector):
         else:
           offset = offset + PAGE_SIZE
 #          args['start'] = offset
-          url = '%s?%s' % ('http://api.linkedin.com/v1/people/~/network/updates',urllib.urlencode(args, True))
-          
-      self.endTraversal(traversal,authorName)
-      
+          url = '%s?%s' % ('http://api.linkedin.com/v1/people/~/network/updates', urllib.urlencode(args, True))
+
+      self.endTraversal(traversal, authorName)
+
     except Exception, e:
       self.log.error('****ERROR****')
       self.log.error(e)
       dbSession.rollback()
-      raise #continue
+      raise  # continue

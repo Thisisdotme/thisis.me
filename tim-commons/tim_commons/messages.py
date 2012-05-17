@@ -148,85 +148,16 @@ def create_linkedin_event(linkedin_user_id, tim_author_id, json_event_dict):
                                json_event_dict)
 
 
-'''
-  Update event message.
+def create_event_update_message(message_type, service_author_id, service_event_id):
+  '''Update event message.
 
   Stores messages containing event identifiers that need to be checked for
   updates.
-'''
-
-
-def _create_event_update_message(message_type,
-                                 tim_author_id,
-                                 service_author_id,
-                                 service_event_id):
-
+  '''
   VERSION = 1
 
-  json_dict = _create_tim_message(VERSION, message_type)
-
-  json_dict['message'] = {'tim_author_id': tim_author_id,
-                          'service_author_id': service_author_id,
+  json_dict = _create_tim_message(VERSION, message_type + '.update')
+  json_dict['message'] = {'service_author_id': service_author_id,
                           'service_event_id': service_event_id}
 
   return json_dict
-
-
-def create_facebook_event_update(facebook_user_id,
-                                 tim_author_id,
-                                 facebook_event_id):
-
-  TYPE = 'facebook.update'
-
-  return _create_event_message(TYPE,
-                               tim_author_id,
-                               facebook_user_id,
-                               facebook_event_id)
-
-
-def create_twitter_event_update(twitter_user_id,
-                                tim_author_id,
-                                twitter_event_id):
-
-  TYPE = 'twitter.update'
-
-  return _create_event_message(TYPE,
-                               tim_author_id,
-                               twitter_user_id,
-                               twitter_event_id)
-
-
-def create_instagram_event_update(instagram_user_id,
-                                  tim_author_id,
-                                  instagram_event_id):
-
-  TYPE = 'instagram.update'
-
-  return _create_event_message(TYPE,
-                               tim_author_id,
-                               instagram_user_id,
-                               instagram_event_id)
-
-
-def create_foursquare_event_update(foursquare_user_id,
-                                   tim_author_id,
-                                   foursquare_event_id):
-
-  TYPE = 'foursquare.update'
-
-  return _create_event_message(TYPE,
-                               tim_author_id,
-                               foursquare_user_id,
-                               foursquare_event_id)
-
-
-def create_linkedin_event_update(linkedin_user_id,
-                                 tim_author_id,
-                                 linkedin_event_id):
-
-  TYPE = 'linkedin.update'
-
-  return _create_event_message(TYPE,
-                               tim_author_id,
-                               linkedin_user_id,
-                               linkedin_event_id)
