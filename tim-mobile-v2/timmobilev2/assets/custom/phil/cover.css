@@ -2,6 +2,7 @@
 
 #coverContainer {
   background:#000 url(/phil/asset/cover_bg.jpg) no-repeat left top;
+  background-size:cover;
 }
 
 .coverPage {

@@ -196,7 +196,7 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			"swiperight" : "showGridView",
+    			//"swiperight" : "showGridView",
     			//"swipeup .flipMode .flip-set" : "flipNext",
     			//"swipedown .flipMode .flip-set" : "flipPrevious",
     			//"click .detailLink" : "toggleMode",

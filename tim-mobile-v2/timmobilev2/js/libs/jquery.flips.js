@@ -19,11 +19,6 @@
  * - Apple Safari 5.1 Mobile
  * 
  */
- 
- //get rid of History?
- //add ability to dynamically add pages
- //change to be vertical!
- 
 
 (function( window, undefined ) {
 	
@@ -51,7 +46,7 @@
 			this._validateOpts();
 			this._getWinSize();
 			this._getState();
-			this._layout(); //this is where it 'enhances' the markup - injects it into the flip template
+			this._layout();
 			this._initTouchSwipe();
 			this._loadEvents();
 			this._goto();
@@ -91,7 +86,7 @@
 		},
 		_getState			: function() {
 		
-			this.state = undefined; //this.History.getState().url.queryStringToJSON().page;
+			this.state = this.History.getState().url.queryStringToJSON().page;
 			
 		},
 		_isNumber			: function( n ) {
@@ -138,10 +133,8 @@
 			} );
 		
 		},
-		//skip this for now...
 		_saveState			: function() {
-		  return; //just returning
-		  
+		
 			// adds a new state to the history object and triggers the statechange event on the window
 			var page = this.currentPage;
 			
@@ -152,9 +145,6 @@
 			}
 			
 		},
-		
-		//move this stuff up into the dest templates?
-		//...except for the size css, which we could do with $.css
 		_layout				: function() {
 			
 			this._setLayoutSize();
@@ -202,8 +192,8 @@
 		_setLayoutSize		: function() {
 		
 			this.$el.css( {
-				width	: this.windowProp.width,
-				height	: this.windowProp.height
+				//width	: this.windowProp.width,
+				//height	: this.windowProp.height
 			} );
 		
 		},
@@ -251,7 +241,7 @@
 					
 					// on the first & last page neighbors we don't flip
 					if( _self.currentPage === 0 && _self.flipSide === 'l2r' || _self.currentPage === _self.flipPagesCount && _self.flipSide === 'r2l' ) {
-						
+						alert('false!');
 						return false;
 					
 					}

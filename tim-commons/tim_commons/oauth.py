@@ -43,11 +43,12 @@ def make_request(client, url, request_headers={}, error_string="Failed Request",
 
   else:
     status_codes = {
-            403: 'Usually this means a throttle limit has been reached.',
-            401: 'Usually this means the OAuth signature was bad.',
-            405: 'Usually this means a wrong HTTP method was used (GET when you should POST, etc).',
-            400: 'Usually this means the request was formatted incorrectly or included an unexpected parameter.',
-            404: 'The resource was not found.'}
+            400: 'The request could not be understood by the server due to malformed syntax.  Usually this means the request was formatted incorrectly or included an unexpected parameter.',
+            401: 'The request requires user authentication.  Usually this means the OAuth signature was bad.',
+            403: 'The server understood the request, but is refusing to fulfill it.  This might mean a throttle limit has been reached.',
+            404: 'The server has not found anything matching the Request-URI.  The resource was not found.',
+            405: 'The method specified in the Request-Line is not allowed for the resource identified by the Request-URI.  Usually this means a wrong HTTP method was used (GET when you should POST, etc).'
+            }
     if resp.status in status_codes:
       raise OAuthError(resp.status, status_codes[resp.status])
     else:
