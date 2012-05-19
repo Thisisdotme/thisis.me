@@ -32,7 +32,10 @@ class EventUpdaterDriver(AppBase):
       self._handle_event(callback_msg)
 
     body = msg['message']
-    self.updater.fetch(body['tim_author_id'], body['service_author_id'], body['service_event_id'], handle_event_callback)
+    self.updater.fetch(body['service_id'],
+                       body['service_author_id'],
+                       body['service_event_id'],
+                       handle_event_callback)
 
   def main(self):
 
@@ -48,7 +51,7 @@ class EventUpdaterDriver(AppBase):
 
     # initialize the db engine & session
     engine = create_engine(db_url, encoding='utf-8', echo=False)
-    DBSession.configure(bind=engine)
+    DBSession.configure(bind=engine, autocommit=True)
 
     db_session = DBSession()
 
@@ -70,7 +73,7 @@ class EventUpdaterDriver(AppBase):
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
 
-    create_queues(self.client, [receive_queue])
+    create_queues(self.client, [receive_queue], durable=False)
 
     def handle_receieve_callback(callback_msg):
       self._handle_message_receive(callback_msg)

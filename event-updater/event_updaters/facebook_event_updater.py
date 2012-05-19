@@ -13,11 +13,14 @@ from event_updater import EventUpdater
 
 class FacebookEventUpdater(EventUpdater):
 
-  def fetch(self, tim_author_id, service_author_id, service_event_id, callback):
+  def fetch(self, service_id, service_author_id, service_event_id, callback):
 
-    super(FacebookEventUpdater, self).fetch(tim_author_id, service_author_id, service_event_id, callback)
+    super(FacebookEventUpdater, self).fetch(service_id,
+                                            service_author_id,
+                                            service_event_id,
+                                            callback)
 
-    asm = self.get_author_service_map(tim_author_id)
+    asm = self.get_author_service_map(service_author_id)
 
     args = {'access_token': asm.access_token}
 
@@ -26,4 +29,4 @@ class FacebookEventUpdater(EventUpdater):
 
     event_json = json.load(urllib2.urlopen(path))
 
-    callback(create_facebook_event(service_author_id, tim_author_id, event_json))
+    callback(create_facebook_event(service_author_id, asm.author_id, event_json))

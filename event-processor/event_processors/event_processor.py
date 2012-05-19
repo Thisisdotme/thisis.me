@@ -20,8 +20,8 @@ class EventProcessor(object):
 
     # get the service-id for this collector's service
     query = self.db_session.query(Service.id)
-    query.filter(Service.service_name == self.service_name)
-    self.service_id = query.one()
+    query = query.filter(Service.service_name == self.service_name)
+    self.service_id, = query.one()
 
   @abstractmethod
   def get_event_interpreter(self, service_event_json):
@@ -31,7 +31,7 @@ class EventProcessor(object):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
     query = self.db_session.query(AuthorServiceMap.id)
-    query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
+    query = query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
                       AuthorServiceMap.service_id == self.service_id))
     asm_id, = query.one()
 
@@ -41,7 +41,7 @@ class EventProcessor(object):
     existing_event = None
     try:
       query = self.db_session.query(ServiceEvent)
-      query.filter_by(author_service_map_id=asm_id, event_id=interpreter.get_id())
+      query = query.filter_by(author_service_map_id=asm_id, event_id=interpreter.get_id())
       existing_event = query.one()
     except NoResultFound:
       pass
@@ -66,9 +66,6 @@ class EventProcessor(object):
       # if the digests are different then the event has been modified; otherwise
       # just skip it
       if existing_digest != new_digest:
-
-        print json.dumps(json.loads(existing_event.json), sort_keys=True, indent=2)
-        print json.dumps(service_event_json, sort_keys=True, indent=2)
 
         self.log.debug('Updating modified known event')
 
@@ -115,13 +112,11 @@ class EventProcessor(object):
                                    json_serializer.dump_string(service_event_json))
       self.db_session.add(service_event)
 
-    update_scanner(self.db_serssion,
+    update_scanner(self.db_session,
                    event_updated,
                    interpreter.get_id(),
                    service_author_id,
                    self.service_name)
-
-    self.db_session.commit()
 
 
 def update_scanner(db_session, event_updated, service_event_id, service_user_id, service_id):

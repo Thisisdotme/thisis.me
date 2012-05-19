@@ -40,7 +40,7 @@ class EventProcessorDriver(AppBase):
 
     # initialize the db engine & session
     engine = create_engine(db_url, encoding='utf-8', echo=False)
-    DBSession.configure(bind=engine)
+    DBSession.configure(bind=engine, autocommit=True)
 
     db_session = DBSession()
 

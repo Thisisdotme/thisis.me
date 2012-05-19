@@ -26,11 +26,11 @@ class EventUpdater(object):
     self.service_id = service_id
 
   @abstractmethod
-  def fetch(self, tim_author_id, service_author_id, service_event_id, callback):
+  def fetch(self, service_id, service_author_id, service_event_id, callback):
     pass
 
-  def get_author_service_map(self, tim_author_id):
+  def get_author_service_map(self, service_author_id):
     return self.db_session.query(AuthorServiceMap). \
                            filter(and_(AuthorServiceMap.service_id == self.service_id,
-                                       AuthorServiceMap.author_id == tim_author_id)). \
+                                       AuthorServiceMap.service_author_id == service_author_id)). \
                            one()
