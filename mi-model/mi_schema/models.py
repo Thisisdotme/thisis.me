@@ -513,7 +513,7 @@ class EventScannerPriority(Base):
     self.service_user_id = service_user_id
     self.service_id = service_id
 
-    self.hash_id = self.generate_id(service_event_id, service_user_id, service_event_id)
+    self.hash_id = self.generate_id(service_event_id, service_user_id, service_id)
 
   def __repr__(self):
     return "<EventScannerPriority('{0}', '{1}', '{2}', '{3}')>".format(self.service_event_id,
