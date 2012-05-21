@@ -25,7 +25,7 @@ class EventCollectorDriver(AppBase):
 
   def main(self):
 
-    self.log.info("Beginning: " + self.name)
+    logging.info("Beginning: " + self.name)
 
     service_name = self.args[0]
     if not service_name:
