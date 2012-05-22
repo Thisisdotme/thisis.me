@@ -2,7 +2,7 @@ environment=jose
 
 # Define the root location for all mobile identity scripts, sourcec code, config
 # files, etc.
-export TIM_HOME=/opt/tim/thisis.me
+export TIM_HOME=/home/jose/dev/work/thisis.me
 
 # Define root location for data file
 export TIM_DATA=$TIM_HOME/data/$environment
