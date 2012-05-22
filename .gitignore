@@ -1,3 +1,9 @@
 *.pyc
 *.swp
+
+# packages
+*.egg
+*.egg-info
+
+# environment
 env
