@@ -126,7 +126,6 @@
         this.renderFlipSet();
         //go straight to the detail view if we got here from an external link to a story
         if(feature.showDetails) {
-          console.log("detaill?");
           feature.showDetailView();
           feature.showDetails = false;
         } else {

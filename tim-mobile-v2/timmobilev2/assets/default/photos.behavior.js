@@ -103,7 +103,11 @@ the behavior for the photo feature
         var photos = this.collection.toJSON();
         var photos_of_author = photos.slice(0,5);
         var photo_stream = photos.slice(5);
-        var template_context = {"author":{first_name:TIM.pageInfo.authorFirstName}, "photos_of_author": {photos: photos_of_author}, "photo_stream": {photos: photo_stream}};
+        var template_context = {
+                                "author": {first_name:TIM.pageInfo.authorFirstName}, 
+                                "photos_of_author": {photos: photos_of_author}, 
+                                "photo_stream": {photos: photo_stream}
+        };
         
   		  dust.render("photos", template_context, function(err, out) {
   			  if(err != null) {
@@ -200,7 +204,7 @@ the behavior for the photo feature
     			//"swipeup .flipMode .flip-set" : "flipNext",
     			//"swipedown .flipMode .flip-set" : "flipPrevious",
     			//"click .detailLink" : "toggleMode",
-    			//"click .gridLink" : "showGridView",
+    			"click .gridLink" : "showGridView",
     			"click img" : "toggleMode"
   		},
 
@@ -210,14 +214,16 @@ the behavior for the photo feature
         if(!this.hasRendered) {
           this.renderFlipSet();
           this.hasRendered = true;
-          this.toolbarView = new TIM.views.Toolbar();
-          var toolbarEl = this.toolbarView.render();
-          this.$el.append(toolbarEl);
-          this.toolbarView.bind('itemClicked', this.toolbarClicked, this);
+          //this.toolbarView = new TIM.views.Toolbar();
+          //var toolbarEl = this.toolbarView.render();
+          //this.$el.append(toolbarEl);
+          //this.toolbarView.bind('itemClicked', this.toolbarClicked, this);
         }
       },
 
       showGridView: function(event) {
+        console.log('toolbar clicked');
+        event.preventDefault();
         if(!this.flipMode) {
           return;
         }
@@ -236,11 +242,11 @@ the behavior for the photo feature
           });
         //}
       },
-      
+      //we're attempting to load ahead of teh flip
       renderNextPageset: function() {
         this.renderFlipSet();
         //maybe do this a coupld of flips ahead?
-        this.flipNext();
+        //this.flipNext();
         $('#app').removeClass('loading');
       },
       
@@ -248,7 +254,7 @@ the behavior for the photo feature
   		  this.$el.toggleClass('flipMode');
   		  if(this.flipMode) {
   		    //make an iscroll container
-  		    var containerEl = this.$el.find('.photoPage')[0];
+  		    var containerEl = this.$el; //.find('.photoPage')[0];
   		    if(containerEl) {
   		      this.iScrollElem = new iScroll(containerEl, { zoom: true });
   		    }
@@ -265,6 +271,7 @@ the behavior for the photo feature
       },
       
       toolbarClicked: function(info) {
+        console.log("toolbar clicked: ", info);
         if(info === 'detailLink') {
           this.toggleMode();
         }

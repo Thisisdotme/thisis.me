@@ -120,6 +120,7 @@ TIM.views.Toolbar = Backbone.View.extend( {
 
 //this view is used by the flipset mixin
 //do we need to have a view at all?
+//maybe to include a toolbar?
 
 TIM.views.Page = Backbone.View.extend( {
     
@@ -195,7 +196,7 @@ TIM.mixins.flipset = {
 		
 		//send pages to the flips script one at a time as strings?
 		renderPage: function(pages){
-        console.log('in render page!, pages: ', pages);
+        //console.log('in render page!, pages: ', pages);
   			//send pages, which can be 1-3 events to the event View
 		    var pageView = new TIM.views.Page({pages: pages});
 		    var tmpl = this.pageTemplate;
@@ -206,13 +207,13 @@ TIM.mixins.flipset = {
           if (!that.flipSetInitialized) {
   					//this.flipSet = new Flipset($(this.el), 320, 370, [$(pageView.el)]);
   					
-  					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml]});
+  					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml], parentView: that});
+  					window.flipSet = that.flipSet; //for debugging
   					//console.log("hey, here's teh pageview elem", $(pageView.el, pageView.el));
   					//var flip = this.$el.flips({pages:$(pageView.el, pageView.el)});
   					//this.$el.flips("addPage", pageView.$el);
   					that.flipSetInitialized = true;
   				} else {
-  				  console.log("adding page!");
   					that.flipSet.addPage(pageHtml, {skipLayout: true});
   					//alert("god dammit, can't do this yet!");
   					
@@ -282,6 +283,9 @@ TIM.mixins.flipset = {
     //have to render 2 pages at a time with the new flipboard functionality - er, not really...
 		renderPageChunk: function(start) {
 			//would this fn check for earlier/later events if they haven't been loaded?
+			
+			
+			
       var that = this;
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
@@ -327,9 +331,11 @@ TIM.mixins.flipset = {
 			if(this.pageNum == (this.renderedIndex - 2)) {
 				this.renderPageChunk(this.renderedIndex);
 			}
+			
 			//console.log(this);
-			if (this.flipSet.canGoNext()) {
-				this.flipSet.next(function(){});
+			if (this.pageNum < this.collection.length - 2) {
+				//this.flipSet.next(function(){});
+				//
 				this.pageNum++;
 			} else {
 			  //try to get the next page!
@@ -338,6 +344,7 @@ TIM.mixins.flipset = {
 			    return;
 			  }
 			  this.collection.getNextPage();
+			  this.pageNum++;
 			}
 		},
 
@@ -350,8 +357,8 @@ TIM.mixins.flipset = {
 				//do a 'get previous page' call, as in 
 			} 
 
-			if (this.flipSet.canGoPrevious()) {
-				this.flipSet.previous(function(){});
+			if (true || this.flipSet.canGoPrevious()) {
+				//this.flipSet.previous(function(){});
 				this.pageNum--;
 			}
 		},
@@ -369,11 +376,15 @@ TIM.mixins.flipset = {
   			this.pageNum++;
   		}
   		this.flipSet.currentIndex_ = this.pageNum;
-  		
+  	
   		this.flipSet.currentPage = this.pageNum;
   		this.flipSet._goto();
   		//this.flipSet.displayCurrentFlip_();
   		
+		},
+		
+		pageChanged: function (num) {
+		  
 		}
 }
 

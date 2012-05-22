@@ -24,7 +24,7 @@
  //add ability to dynamically add pages
  //change to be vertical!
  
- //make this not a jquery plugin?
+ //have vars for $prevPage, $nextPage, $currentPage
  
 
 	var Flipset 			= function( options ) {
@@ -36,7 +36,7 @@
 	};
 	
   Flipset.defaults 	= {
-		flipspeed			: 900,
+		flipspeed			: 500,
 		fliptimingfunction	: 'linear',
 		current				: 1
 	};
@@ -46,31 +46,34 @@
 	  //make init less 'comprehensive'
 		_init 				: function( options ) {
 		  //pass in original pages as raw strings, turn into special flip pages - can use dust instead of jquery - just use the string
+		  //no need to pass in pages? just get from parent view's collection?
+		  //maybe keep track of pages back up in the view?
+		  
+		  
+		  
 		  this.sourceItems = [];
 			this.pages = [];
 			this.options 		= $.extend( true, {}, Flipset.defaults, options );
-			//do these need to be objects or just jquery elems?
+			this.parentView = options.parentView;
+			this.flipPagesCount = 0;
+			
+			//DOM elements for previous, current, and next page
+			this.$previousPage = undefined;
+			this.$currentPage = undefined;
+			this.$nextPage = undefined;
+			
 			for (var i = 0, page; i < options.pages.length; i++) {
-       	//this.pages.push(new FlipPage({node: page, flipset: this} ));
        	page = options.pages[i]
        	this.addPage(page, {skipLayout:true});
       }
-			//this.pages			= options.pages;//this.$el.children( 'div.f-page' );  --passing in the pages upon init - should be able to add pages.. this should be an array, not a jquery object
-			//let's say the pages have already been 'enhanced'... and are coming in as front/back pagesets
-			//let's have this take on a 
-			//do we need both 'pages' and 'flipPages'?
-			console.log("flips pages:", this.pages);
+			
 			this.pagesCount		= this.pages ? this.pages.length : 0;
 		
 			this.currentPage	= this.options.current || 1;
 			//don't let the person flip to the first page?
 			
-			//do these off the bat or wait?
-			
 			this._getWinSize();
-	
-			//this._layout(); //this is where it 'enhances' the markup - injects it into the flip template
-			
+		
 			this._initTouchSwipe(); //this is ok - it's just on the container el
 			this._loadEvents(); //this means binding the events -it's fine to do right away
 			//this._goto();
@@ -85,7 +88,7 @@
 		  }
 		  this.pagesCount++;
 		  if (!opts.skipLayout) {
-		    this._layout();
+		    this._layout(); //layout puts the pages into the front/back divs and sets z-index
 		    this._loadEvents();
 		  }
 		},
@@ -111,27 +114,18 @@
 			
 			var page = ( this.state === undefined ) ? this.currentPage : this.state;
 			
-			if( !this._isNumber( page ) || page < 0 || page > this.flipPagesCount ) {
+			if( page < 1 || page > this.flipPagesCount ) {
 			
-				page = 0;
+				page = 1;
 			
 			}
 			
 			this.currentPage = page;
 			
 		},
-		_getState			: function() {
-		
-			this.state = undefined; //this.History.getState().url.queryStringToJSON().page;
-			
-		},
-		_isNumber			: function( n ) {
-		
-			return parseFloat( n ) == parseInt( n ) && !isNaN( n ) && isFinite( n );
-		
-		},
-		_adjustLayout		: function( page ) { //page is the index of... i think the current page
-		
+		_adjustLayout		: function( page ) { //page is the index of... the current page
+		  console.log("in adjust layout, page is: ", page);
+		  
 			var _self = this;
 			
 			var $flipPages = this._getPageElems();
@@ -144,8 +138,8 @@
 				if( i === page - 1 ) {
 				
 					$page.css({
-						'-webkit-transform'	: 'rotateY( -180deg )',
-						'-moz-transform'	: 'rotateY( -180deg )',
+						'-webkit-transform'	: 'rotateX( 180deg )',
+						'-moz-transform'	: 'rotateX( 180deg )',
 						'z-index'			: _self.flipPagesCount - 1 + i
 					});
 				
@@ -153,8 +147,8 @@
 				else if( i < page ) {
 				
 					$page.css({
-						'-webkit-transform'	: 'rotateY( -181deg )', // todo: fix this (should be -180deg)
-						'-moz-transform'	: 'rotateY( -181deg )', // todo: fix this (should be -180deg)
+						'-webkit-transform'	: 'rotateX( 181deg )', // todo: fix this (should be 180deg)
+						'-moz-transform'	: 'rotateX( 181deg )', // todo: fix this (should be 180deg)
 						'z-index'			: _self.flipPagesCount - 1 + i
 					});
 				
@@ -162,8 +156,8 @@
 				else {
 				
 					$page.css({
-						'-webkit-transform'	: 'rotateY( 0deg )',
-						'-moz-transform'	: 'rotateY( 0deg )',
+						'-webkit-transform'	: 'rotateX( 0deg )',
+						'-moz-transform'	: 'rotateX( 0deg )',
 						'z-index'			: _self.flipPagesCount - 1 - i
 					});
 				
@@ -184,9 +178,12 @@
 			var that = this;
 			//start and end with a fake page?
 			//that.$el.append("<div class='page'></div>");
-			for( var i = -1; i <= this.pagesCount; ++i ) {
-  			var	page 		= that.sourceItems[i] || "",
-  			  nextPage = that.sourceItems[ i + 1 ] || '',
+			
+			//don't loop through this necessarily - only do when necessary?
+			
+			for( var i = this.flipPagesCount - 1; i <= this.pagesCount; ++i ) {
+  			var	page 		= that.sourceItems[i] || "", //"<span class='big-num'>" + i  + "</span>";//
+  			  nextPage = that.sourceItems[ i + 1 ] || '', //"<span class='big-num'>" + (i+1)  + "</span>";//t
   				pageData	= {
   					frontContent			: page,
   					backContent			: nextPage,
@@ -223,12 +220,6 @@
   			});
   		}
 			
-			
-			
-			//may need to go back to this template strategy after all
-			
-			//$( '#pageTmpl' ).tmpl( pageData ).appendTo( this.$el );
-			
 			//this.pages.remove();
 			this.$flipPages		= this._getPageElems();
 			this.flipPagesCount	= this.$flipPages.length;
@@ -236,6 +227,10 @@
 			//adjust layout
 			this._adjustLayout( ( this.state === undefined ) ? this.currentPage : this.state );
 			
+		},
+		_renderPage : function (sourceItem) {
+		  
+		  
 		},
 		//set this to the size of the app container, not the window
 		//
@@ -252,16 +247,19 @@
 			var _self = this;
 			
 			this.$el.swipe( {
-				threshold			: 0,
+				threshold			: 5,
 				swipeStatus			: function( event, phase, start, end, direction, distance ) {
-					
+				  //if view is not in flip mode, return
+				  if(_self.parentView && !_self.parentView.flipMode) {
+				    return;
+				  }
 					//get window size if it hasn't been set...
-					if (_self.windowProp.width == 0) {
+					if (_self.windowProp.height == 0) {
 					  _self._getWinSize();
 					}
 					
-					var startX		= start.x,
-						endX		= end.x,
+					var startY		= start.y,
+						endY		= end.y,
 						sym, angle,
 						oob			= false,
 						noflip		= false;
@@ -272,12 +270,12 @@
 					// check only if not animating
 					if( !_self._isAnimating() ) {
 					
-						( startX < _self.windowProp.width / 2 ) ? _self.flipSide = 'l2r' : _self.flipSide = 'r2l';
-						//console.log(startX, _self.flipSide, _self.windowProp.width / 2, _self.windowProp, _self.$el);
+						( startY < _self.windowProp.height / 2 ) ? _self.flipSide = 'l2r' : _self.flipSide = 'r2l';
+						//console.log(startY, _self.flipSide, _self.windowProp.width / 2, _self.windowProp, _self.$el);
 					
 					}
 					
-					if( direction === 'up' || direction === 'down' ) {
+					if( direction === 'left' || direction === 'right' ) {
 						
 						if( _self.angle === undefined || _self.angle === 0 ) {
 						
@@ -287,7 +285,7 @@
 						}
 						else {
 							
-							( _self.angle < 90 ) ? direction = 'right' : direction = 'left';
+							( _self.angle < 90 ) ? direction = 'up' : direction = 'down';
 							
 						}
 						
@@ -310,10 +308,10 @@
 					// if we would start dragging right next to [window's width / 2] then
 					// the symmetric point would be very close to the starting point. A very short swipe
 					// would be enough to flip the page..
-					sym	= _self.windowProp.width - startX;
+					sym	= _self.windowProp.height - startY;
 					
-					var symMargin = 0.9 * ( _self.windowProp.width / 2 );
-					if( Math.abs( startX - sym ) < symMargin ) {
+					var symMargin = 0.9 * ( _self.windowProp.height / 2 );
+					if( Math.abs( startY - sym ) < symMargin ) {
 					
 						( _self.flipSide === 'r2l' ) ? sym -= symMargin / 2 : sym += symMargin / 2;
 					
@@ -330,7 +328,7 @@
 					// |          |      e   |
 					// |          |          |
 					// -----------------------
-					if( endX > startX && _self.flipSide === 'r2l' ) {
+					if( endY > startY && _self.flipSide === 'r2l' ) {
 					
 						angle		= 0;
 						oob 		= true;
@@ -347,7 +345,7 @@
 					// |  e       |          |
 					// |          |          |
 					// -----------------------
-					else if( endX < sym && _self.flipSide === 'r2l' ) {
+					else if( endY < sym && _self.flipSide === 'r2l' ) {
 					
 						angle		= 180;
 						oob 		= true;
@@ -363,7 +361,7 @@
 					// |          |      e   |
 					// |          |          |
 					// -----------------------
-					else if( endX > sym && _self.flipSide === 'l2r' ) {
+					else if( endY > sym && _self.flipSide === 'l2r' ) {
 					
 						angle		= 0;
 						oob 		= true;
@@ -379,7 +377,7 @@
 					// |   e      |          |
 					// |          |          |
 					// -----------------------
-					else if( endX < startX && _self.flipSide === 'l2r' ) {
+					else if( endY < startY && _self.flipSide === 'l2r' ) {
 					
 						angle		= 180;
 						oob 		= true;
@@ -400,12 +398,12 @@
 						var s, e, val;
 						
 						( _self.flipSide === 'r2l' ) ?
-							( s = startX, e = sym, val = startX - distance ) : 
-							( s = sym, e = startX , val = startX + distance );
+							( s = startY, e = sym, val = startY - distance ) : 
+							( s = sym, e = startY , val = startY + distance );
 						
 						angle = _self._calcAngle( val, s, e );
 						
-						if( ( direction === 'left' && _self.flipSide === 'l2r' ) || ( direction === 'right' && _self.flipSide === 'r2l' ) ) {
+						if( ( direction === 'up' && _self.flipSide === 'l2r' ) || ( direction === 'down' && _self.flipSide === 'r2l' ) ) {
 							
 							noflip	= true;
 						
@@ -418,7 +416,7 @@
 						case 'start' :
 							
 							if( _self._isAnimating() ) {
-								
+								//return false;
 								// the user can still grab a page while one is flipping (in this case not being able to move)
 								// and once the page is flipped the move/touchmove events are triggered..
 								_self.start = true;
@@ -488,12 +486,12 @@
 										_self._updatePage();
 									
 									}
-									
+                  console.log('oob!');
 									_self._onEndFlip( _self.$flippingPage );
 								
 								}
 								else {
-									
+									//return;
 									// save last angle
 									_self.angle = angle;
 									// calculate the speed to flip the page:
@@ -502,7 +500,7 @@
 							
 									switch( direction ) {
 										
-										case 'left' :
+										case 'up' :
 											
 											_self._turnPage( 180 );
 											
@@ -514,7 +512,7 @@
 											
 											break;
 										
-										case 'right' :
+										case 'down' :
 											
 											_self._turnPage( 0 );
 											
@@ -544,15 +542,17 @@
 		_setFlippingPage	: function() {
 			
 			var _self = this;
-			console.log("pages: ", this.pages);
+			//console.log("set flipping page: - pages: ", this.pages);
 			( this.flipSide === 'l2r' ) ?
 				this.$flippingPage 	= this.pages[this.currentPage - 1] :
 				this.$flippingPage	= this.pages[this.currentPage] ;
 			
+			console.log("setting flipping page: ", this.$flippingPage);
+			
 			this.$flippingPage.on( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function( event ) {
 				
 				if( $( event.target ).hasClass( 'page' ) ) {
-				
+				  console.log('calling transition end handler');
 					_self._onEndFlip( $(this) );
 				
 				}
@@ -561,36 +561,27 @@
 		
 		},
 		_updatePage			: function() {
-			
 			if( this.flipSide === 'r2l' ) {
-			
 				++this.currentPage;
-				
+				this.parentView.flipNext();
 			}
 			else if( this.flipSide === 'l2r' ) {
-			
 				--this.currentPage;
-				
+				this.parentView.flipPrevious();
 			}
 			
 		},
 		_isAnimating		: function() {
-		
 			if( this.isAnimating ) {
-			
 				return true;
-			
 			}
-			
 			return false;
-		
 		},
 		_loadEvents			: function() {
-			
 			var _self = this;
 			
 			$( window ).on( 'resize', function( event ) {
-			
+			  return;
 				_self._getWinSize();
 				_self._setLayoutSize();
 				var $flipPages = _self._getPageElems();
@@ -605,34 +596,24 @@
 					//width	: _self.windowProp.width,
 					//left	: -_self.windowProp.width / 2
 				} );
-				$contentFront.eq( 0 ).css( 'width', _self.windowProp.width );
+				$contentFront.eq( 0 ).css( 'height', _self.windowProp.height );
 				
-				$contentBack.css( 'width', _self.windowProp.width );
+				$contentBack.css( 'height', _self.windowProp.height );
 			
 			} );
-			
-			//this is when the URL changes... probably not applicagle
-		/*	$( window ).on( 'statechange.flips', function( event ) {
-				
-				_self._getState();
-				_self._goto();
-				if( !_self.isAnimating ) {
-				
-					_self._adjustLayout( _self.currentPage );
-					
-				}
-				
-			} ); */
 				
 		},
 		_onEndFlip			: function( $page ) {
 			
+			console.log('\n in End Flip function for page ', $page, this.flipSide);
+			//this._adjustLayout(this.currentPage);
+			
 			// if the page flips from left to right we will need to change the z-index of the flipped page
 			if( ( this.flipSide === 'l2r' && $page.data( 'flip' ) ) || 
 				( this.flipSide === 'r2l' && !$page.data( 'flip' ) )  ) {
-        console.log('changing z-index of page to', ( this.pagesCount - 2 - $page.index()), $page);
+        console.log('changing z-index of page ' + $page.index() + ' to', ( this.flipPagesCount - 2 - $page.index()), $page);
 				//$page.css( 'z-index', this.pagesCount - 2 - $page.index() );
-			
+			  $page.css( 'z-index', 500 );
 			}
 			
 			this.$flippingPage.css( {
@@ -647,8 +628,7 @@
 			
 			// hack (todo: issues with safari / z-indexes)
 			if( this.flipSide === 'r2l' || ( this.flipSide === 'l2r' && !$page.data( 'flip' ) ) ) {
-			
-				this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(-180deg)' );
+				this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateX(180deg)' );
 			
 			}
 			
@@ -663,17 +643,17 @@
 		// given the current angle and the default speed, calculate the respective speed to accomplish the flip
 		_calculateSpeed		: function() {
 			
-			( this.flipDirection === 'right' ) ? 
+			( this.flipDirection === 'up' ) ? 
 				this.flipSpeed = ( this.options.flipspeed / 180 ) * this.angle :
 				this.flipSpeed = - ( this.options.flipspeed / 180 ) * this.angle + this.options.flipspeed;
 		
 		},
 		_turnPage			: function( angle, update ) {
 			
-			// hack / todo: before page that was set to -181deg should have -180deg
+			// hack / todo: before page that was set to 181deg should have 180deg
 			this.$beforePage.css({
-				'-webkit-transform'	: 'rotateY( -180deg )',
-				'-moz-transform'	: 'rotateY( -180deg )'
+				'-webkit-transform'	: 'rotateX( 180deg )',
+				'-moz-transform'	: 'rotateX( 180deg )'
 			});
 			
 			// if not moving manually set a transition to flip the page
@@ -692,18 +672,22 @@
 			// this is done on the _onEndFlip function.
 			var idx	= ( this.flipSide === 'r2l' ) ? this.currentPage : this.currentPage - 1;
 			if( this.flipSide === 'r2l' ) {
-				console.log('changing z-index in turnpage: ', this.flipPagesCount - 1 + idx )
+				//console.log('changing z-index in turnpage: ', this.flipPagesCount - 1 + idx )
 				this.$flippingPage.css( 'z-index', this.flipPagesCount - 1 + idx );
 			
 			}
 			
 			// hack (todo: issues with safari / z-indexes)
-			this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(180deg)' );
-			
+			//console.log(this.$flippingPage.css('z-index'));
+			this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateX(180deg)' );
+			//this.$flippingPage.find('.back').css( 'border', '1px solid red' );
+			//this.$flippingPage.find('.front').css( 'border', '1px solid green' );
+			//this.$flippingPage.children().css( '-webkit-transform', 'translate3d(0px, 0px, 0px)' );
+			//this.$flippingPage.css( 'z-index', '9000' );
 			// update the angle
 			this.$flippingPage.css( {
-				'-webkit-transform'		: 'rotateY(-' + angle + 'deg)',
-				'-moz-transform'		: 'rotateY(-' + angle + 'deg)'
+				'-webkit-transform'		: 'rotateX(' + angle + 'deg)',
+				'-moz-transform'		: 'rotateX(' + angle + 'deg)'
 			} );
 			
 			// show overlays
@@ -711,7 +695,7 @@
 			
 		},
 		_addOverlays		: function() {
-			
+			//return;
 			var _self = this;
 			
 			// remove current overlays
@@ -798,7 +782,7 @@
 				
 					var afterdelay = 0;
 					
-					if( this.flipDirection === 'right' ) {
+					if( this.flipDirection === 'down' ) {
 						
 						if( this.angle > 90 ) {
 							
@@ -824,11 +808,11 @@
 					this.$afterOverlay.css( {
 						'-webkit-transition' 	: 'opacity ' + afterspeed + 'ms ' + this.options.fliptimingfunction + ' ' + afterdelay + 'ms',
 						'-moz-transition' 		: 'opacity ' + afterspeed + 'ms ' + this.options.fliptimingfunction + ' ' + afterdelay + 'ms',
-						'opacity'				: ( this.flipDirection === 'left' ) ? 0 : 1
+						'opacity'				: ( this.flipDirection === 'up' ) ? 0 : 1
 					} ).on( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function( event ) {
 						if( _self.$beforeOverlay ) _self.$beforeOverlay.off( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips');
 						setTimeout( function() {
-							_self._adjustLayout(_self.currentPage);
+							 _self._adjustLayout(_self.currentPage);
 						}, _self.options.flipspeed / 2 - margin );
 					} );
 					
@@ -838,7 +822,7 @@
 				
 					var beforedelay = 0;
 					
-					if( this.flipDirection === 'left' )  {
+					if( this.flipDirection === 'up' )  {
 						
 						if( this.angle < 90 ) {
 						
@@ -864,7 +848,7 @@
 					this.$beforeOverlay.css( {
 						'-webkit-transition'	: 'opacity ' + beforespeed + 'ms ' + this.options.fliptimingfunction + ' ' + beforedelay + 'ms',
 						'-moz-transition'		: 'opacity ' + beforespeed + 'ms ' + this.options.fliptimingfunction + ' ' + beforedelay + 'ms',
-						'opacity'				: ( this.flipDirection === 'left' ) ? 1 : 0
+						'opacity'				: ( this.flipDirection === 'up' ) ? 1 : 0
 					} ).on( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function( event ) {
 						if( _self.$afterOverlay ) _self.$afterOverlay.off( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips');
 						_self._adjustLayout(_self.currentPage);
@@ -876,10 +860,5 @@
 				
 		}
 	};
-	
-	var FlipPage = function (options ){
-	  this.$el = options.pageEl;
-	  
-	}
 	
 	

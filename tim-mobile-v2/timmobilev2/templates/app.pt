@@ -6,7 +6,7 @@
 		<!-- link href="http://fonts.googleapis.com/css?family=Holtwood+One+SC|PT+Sans+Narrow:400,700" rel="stylesheet" type="text/css" -->
 		<!-- link href='http://fonts.googleapis.com/css?family=Creepster' rel='stylesheet' type='text/css' -->
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
-		<script src="/${author_name}/asset/coreTemplates.dust.js"></script>
+		
 		
 		<div id="contentContainer">
 		  <div id="splashScreen" class="appPage active"></div>
@@ -15,6 +15,11 @@
 		<nav id="featureNav" class="clearfix">
   		<ul id="featureNavItems"></ul>
   	</nav>
+  	<script src="/${author_name}/asset/coreTemplates.dust.js"></script>
+  	
+  	<!-- remote dubugger script! uncomment for remote debugging! -->
+  	
+  	<!-- script src="http://10.0.1.5:8081/target/target-script-min.js#anonymous"></script -->
 	</div><!-- /page -->
 
 	<script type="text/javascript" metal:fill-slot="page_script">
@@ -22,5 +27,4 @@
 			authorName: '${author_name}'
 		}
 	</script>
-
 </metal:index>
