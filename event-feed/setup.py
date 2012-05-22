@@ -12,9 +12,9 @@ requires = [
     'waitress',
     ]
 
-setup(name='feed',
+setup(name='event_feed',
       version='0.0',
-      description='feed',
+      description='event feed',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
         "Programming Language :: Python",
@@ -31,9 +31,9 @@ setup(name='feed',
       zip_safe=False,
       install_requires=requires,
       tests_require=requires,
-      test_suite="feed",
+      test_suite="event_feed",
       entry_points="""\
       [paste.app_factory]
-      main = feed:main
+      main = event_feed:main
       """,
       )

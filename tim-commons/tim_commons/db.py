@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 Session = scoped_session(sessionmaker())
 
 
-def configure_session(url, autocommit=True, echo=False):
-  engine = create_engine(url, encoding='utf-8', echo=echo)
+def configure_session(url, autocommit=True, echo=False, pool_recycle=3600):
+  engine = create_engine(url, encoding='utf-8', echo=echo, pool_recycle=pool_recycle)
   Session.configure(bind=engine, autocommit=autocommit)
 
 

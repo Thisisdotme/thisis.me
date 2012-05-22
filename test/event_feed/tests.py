@@ -4,7 +4,7 @@ from pyramid import testing
 from webob.multidict import MultiDict
 
 import tim_commons.mock
-from feed.views import get_facebook_feed, post_facebook_feed, convert_facebook_notification
+from event_feed.views import get_facebook_feed, post_facebook_feed, convert_facebook_notification
 from tim_commons.config import ENVIRONMENT_KEY
 
 
