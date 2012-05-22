@@ -56,17 +56,21 @@ class EventCollector(object):
   '''
   def fetch_end(self, state):
 
-    # set the author/service map's last update time
-    state['asm'].last_update_time = state['now']
+    try:
+      # set the author/service map's last update time
+      state['asm'].last_update_time = state['now']
 
-    # update the most_recent_event_id and most_recent_event_timestamp if changed
-    if state['most_recent_event_id'] != state['asm'].most_recent_event_id or \
-       state['most_recent_event_timestamp'] != state['asm'].most_recent_event_timestamp:
-      state['asm'].most_recent_event_id = state['most_recent_event_id']
-      state['asm'].most_recent_event_timestamp = state['most_recent_event_timestamp']
+      # update the most_recent_event_id and most_recent_event_timestamp if changed
+      if state['most_recent_event_id'] != state['asm'].most_recent_event_id or \
+         state['most_recent_event_timestamp'] != state['asm'].most_recent_event_timestamp:
+        state['asm'].most_recent_event_id = state['most_recent_event_id']
+        state['asm'].most_recent_event_timestamp = state['most_recent_event_timestamp']
 
-    self.db_session.flush()
-    self.db_session.commit()
+      self.db_session.flush()
+      self.db_session.commit()
+    except:
+      self.db_session.rollback()
+      raise
 
   '''
     fetch_log - utility for logging author event fetches in a consistent manner
