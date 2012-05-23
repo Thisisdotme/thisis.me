@@ -1,22 +1,10 @@
-#!/usr/bin/env python
-
-'''
-Created on May 2, 2012
-
-@author: howard
-'''
 import sys
-import signal
-import os
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import logging
 
 from tim_commons.app_base import AppBase
-from event_collectors.event_collector_factory import EventCollectorFactory
+from event_collectors import event_collector
 from tim_commons.message_queue import (create_message_client, join, send_messages, create_queues)
-
-DBSession = sessionmaker()
+from tim_commons import db
 
 
 class EventCollectorDriver(AppBase):
@@ -32,37 +20,23 @@ class EventCollectorDriver(AppBase):
     def handle_event_callback(callback_msg):
       self._handle_event(callback_msg)
 
-    self.collector.fetch(msg['message']['service_author_id'], handle_event_callback)
-
-  def setup_term_handler(self):
-
-    def term_handler(signum, frame):
-      print 'received SIGTERM signal'
-      sys.exit()
-
-    pid = os.getpid()
-    print pid
-
-    signal.signal(signal.SIGTERM, term_handler)
-    # signal.siginterrupt(signal.SIGTERM, False)
+    with db.Context():
+      self.collector.fetch(msg['message']['service_author_id'], handle_event_callback)
 
   def main(self):
 
-    self.log.info("Beginning: " + self.name)
+    logging.info("Beginning: " + self.name)
 
     service_name = self.args[0]
     if not service_name:
-      self.log.fatal("Missing required argument: service-name")
+      logging.fatal("Missing required argument: service-name")
       return
 
     # read the db url from the config
-    dbUrl = self.config['db']['sqlalchemy.url']
+    db_url = self.config['db']['sqlalchemy.url']
 
     # initialize the db engine & session
-    engine = create_engine(dbUrl, encoding='utf-8', echo=False)
-    DBSession.configure(bind=engine)
-
-    db_session = DBSession()
+    db.configure_session(db_url)
 
     # get the oauth application config for this collector
     oauth_config = self.config['oauth'][service_name]
@@ -73,13 +47,11 @@ class EventCollectorDriver(AppBase):
     self.send_queue = queue_config[service_name]['event']
     receive_queue = queue_config[service_name]['notification']
 
-    self.log.info('Queue broker URL: %s' % broker_url)
-    self.log.info('Receive queue: %s' % receive_queue)
-    self.log.info('Send queue: %s' % self.send_queue)
+    logging.info('Queue broker URL: %s' % broker_url)
+    logging.info('Receive queue: %s' % receive_queue)
+    logging.info('Send queue: %s' % self.send_queue)
 
-#    self.setup_term_handler()
-
-    self.collector = EventCollectorFactory.from_service_name(service_name, db_session, oauth_config, self.log)
+    self.collector = event_collector.from_service_name(service_name, oauth_config)
 
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
@@ -91,7 +63,7 @@ class EventCollectorDriver(AppBase):
 
     join(self.client, receive_queue, handle_receieve_callback)
 
-    self.log.info("Finished: " + self.name)
+    logging.info("Finished: " + self.name)
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes

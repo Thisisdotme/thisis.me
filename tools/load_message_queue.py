@@ -59,6 +59,8 @@ class NotificationLoad(AppBase):
       queue = message['header']['type'].encode('ascii')
       if queue in self.queues:
         send_messages(client, queue, [message])
+        sys.stdout.write('.')
+    sys.stdout.write('\n')
 
 
 if __name__ == '__main__':

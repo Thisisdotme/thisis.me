@@ -148,7 +148,7 @@ def create_linkedin_event(linkedin_user_id, tim_author_id, json_event_dict):
                                json_event_dict)
 
 
-def create_event_update_message(message_type, service_author_id, service_event_id):
+def create_event_update_message(service_id, service_author_id, service_event_id):
   '''Update event message.
 
   Stores messages containing event identifiers that need to be checked for
@@ -156,8 +156,9 @@ def create_event_update_message(message_type, service_author_id, service_event_i
   '''
   VERSION = 1
 
-  json_dict = _create_tim_message(VERSION, message_type + '.update')
+  json_dict = _create_tim_message(VERSION, service_id + '.update')
   json_dict['message'] = {'service_author_id': service_author_id,
-                          'service_event_id': service_event_id}
+                          'service_event_id': service_event_id,
+                          'service_id': service_id}
 
   return json_dict
