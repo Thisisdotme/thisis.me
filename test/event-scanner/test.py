@@ -1,6 +1,6 @@
 import unittest
 
-from tim_scanner import driver
+from event_scanner import driver
 from tim_commons import mock
 from mi_schema.models import EventScannerPriority
 
