@@ -20,6 +20,7 @@ def get_facebook_feed(request):
   if (hub_mode == 'subscribe' and
       hub_verify_token == verify_token and
       hub_challenge is not None):
+    logging.info('Got a facebook subscription with challenge: %s', hub_challenge)
     return Response(body=request.GET.getone('hub.challenge'))
   else:
     logging.info('Invalid request: mode = %s, verify_token = %s, challenge = %s',
