@@ -55,6 +55,8 @@ class LinkedinEventCollector(EventCollector):
       # limit to only one year of data
       args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
 
+    args['after'] = 0
+
     offset = 0
     args['start'] = offset
 

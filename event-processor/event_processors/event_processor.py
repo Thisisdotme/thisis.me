@@ -34,7 +34,7 @@ class EventProcessor:
     self.service_name = service_name
 
     # get the service-id for this collector's service
-    query = db.Session.query(Service.id)
+    query = db.Session().query(Service.id)
     query = query.filter(Service.service_name == self.service_name)
     self.service_id, = query.one()
 
@@ -45,7 +45,7 @@ class EventProcessor:
   def process(self, tim_author_id, service_author_id, service_event_json):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
-    query = db.Session.query(AuthorServiceMap.id)
+    query = db.Session().query(AuthorServiceMap.id)
     query = query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
                       AuthorServiceMap.service_id == self.service_id))
     asm_id, = query.one()
@@ -55,7 +55,7 @@ class EventProcessor:
     # check for existing update
     existing_event = None
     try:
-      query = db.Session.query(ServiceEvent)
+      query = db.Session().query(ServiceEvent)
       query = query.filter_by(author_service_map_id=asm_id, event_id=interpreter.get_id())
       existing_event = query.one()
     except NoResultFound:
@@ -125,7 +125,7 @@ class EventProcessor:
                                    auxiliary_content,
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
-      db.Session.add(service_event)
+      db.Session().add(service_event)
 
     update_scanner(event_updated,
                    interpreter.get_id(),
@@ -136,7 +136,7 @@ class EventProcessor:
 def update_scanner(event_updated, service_event_id, service_user_id, service_id):
   # Get the scanner state from the database
   event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_id)
-  scanner_event = db.Session.query(EventScannerPriority).get(event_id)
+  scanner_event = db.Session().query(EventScannerPriority).get(event_id)
 
   if scanner_event is not None:
     if event_updated:
@@ -146,4 +146,4 @@ def update_scanner(event_updated, service_event_id, service_user_id, service_id)
   else:
     priority = 0 if event_updated else 1
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
-    db.Session.add(scanner_event)
+    db.Session().add(scanner_event)

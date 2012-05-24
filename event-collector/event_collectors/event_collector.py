@@ -41,7 +41,7 @@ class EventCollector(object):
     self.oauth_config = oauth_config
 
     # get the service-id for this collector's service
-    service_id, = db.Session.query(Service.id).filter(Service.service_name == self.service_name).one()
+    service_id, = db.Session().query(Service.id).filter(Service.service_name == self.service_name).one()
     self.service_id = service_id
 
   '''
@@ -50,7 +50,7 @@ class EventCollector(object):
   '''
   def fetch_begin(self, service_author_id):
 
-    asm, author_name = db.Session.query(AuthorServiceMap, Author.author_name). \
+    asm, author_name = db.Session().query(AuthorServiceMap, Author.author_name). \
                           join(Author, AuthorServiceMap.author_id == Author.id). \
                           filter(and_(AuthorServiceMap.service_id == self.service_id,
                                       AuthorServiceMap.service_author_id == service_author_id)). \
