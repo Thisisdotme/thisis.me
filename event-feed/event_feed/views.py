@@ -21,8 +21,12 @@ def get_facebook_feed(request):
       hub_verify_token == verify_token and
       hub_challenge is not None):
     return Response(body=request.GET.getone('hub.challenge'))
-
-  return HTTPNotFound()
+  else:
+    logging.info('Invalid request: mode = %s, verify_token = %s, challenge = %s',
+                 hub_mode,
+                 hub_verify_token,
+                 hub_challenge)
+    return HTTPNotFound()
 
 
 @view_config(request_method='POST',
