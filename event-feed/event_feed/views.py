@@ -11,10 +11,15 @@ from tim_commons.config import ENVIRONMENT_KEY
 
 @view_config(request_method='GET', route_name='facebook_feed')
 def get_facebook_feed(request):
+  hub_mode = request.GET.get('hub.mode', None)
+  hub_verify_token = request.GET.get('hub.verify_token', None)
+  hub_challenge = request.GET.get('hub.challenge', None)
+
   verify_token = request.registry.settings[ENVIRONMENT_KEY]['feed']['verify_token']
 
-  if (request.GET.getone('hub.mode') == 'subscribe' and
-      request.GET.getone('hub.verify_token') == verify_token):
+  if (hub_mode == 'subscribe' and
+      hub_verify_token == verify_token and
+      hub_challenge is not None):
     return Response(body=request.GET.getone('hub.challenge'))
 
   return HTTPNotFound()
