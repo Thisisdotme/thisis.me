@@ -58,9 +58,7 @@ class ScannerApplication(AppBase):
     queues = self.config['queues']
     _create_event_queues(message_client, queues)
 
-    iteration_counter_module = maximum_priority
-    if self.option.iterations != 0:
-      iteration_counter_module = _lcm(maximum_priority, self.option.iterations)
+    iteration_counter_module = _compute_maximum_iteration(maximum_priority, self.option.iterations)
 
     current_iteration = 1
     start = None
@@ -73,7 +71,8 @@ class ScannerApplication(AppBase):
 
       start = datetime.datetime.now()
 
-      iteration_maximum_priority = int(math.log(_gcd(maximum_priority, current_iteration), 2))
+      iteration_maximum_priority = _compute_iteration_maximum_priority(maximum_priority,
+                                                                       current_iteration)
 
       current_id = ""
 
@@ -92,6 +91,17 @@ class ScannerApplication(AppBase):
       current_iteration = (current_iteration % iteration_counter_module) + 1
 
     close_message_client(message_client)
+
+
+def _compute_maximum_iteration(max_priority, max_iterations):
+  if max_iterations == 0:
+    return 2 ** max_priority
+  else:
+    return _lcm(2 ** max_priority, max_iterations)
+
+
+def _compute_iteration_maximum_priority(maximum_priority, current_iteration):
+  return int(math.log(_gcd(2 ** maximum_priority, current_iteration), 2))
 
 
 def  _lcm(a, b):
