@@ -1,5 +1,4 @@
 import logging
-import json
 
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -7,6 +6,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from tim_commons.message_queue import send_messages
 from tim_commons.messages import create_facebook_notification
 from tim_commons.config import ENVIRONMENT_KEY
+from tim_commons import json_serializer
 
 
 @view_config(request_method='GET', route_name='facebook_feed')
@@ -34,7 +34,7 @@ def get_facebook_feed(request):
              route_name='facebook_feed',
              header="Content-Type:application/json")
 def post_facebook_feed(request):
-  facebook_notification = json.loads(request.body)
+  facebook_notification = json_serializer.load_string(request.body)
 
   events = convert_facebook_notification(facebook_notification)
   queue = request.registry.settings[ENVIRONMENT_KEY]['queues']['facebook']['notification']
