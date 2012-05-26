@@ -29,3 +29,29 @@ class ScannerTestCase(unittest.TestCase):
     set_size = 1000
 
     driver._query_events(db_session, current_id, maximum_priority, set_size)
+
+  def test_iteration_modulo(self):
+    modulo = driver._compute_maximum_iteration(3, 0)
+    self.assertEqual(modulo, 8)
+
+    modulo = driver._compute_maximum_iteration(8, 0)
+    self.assertEqual(modulo, 256)
+
+    modulo = driver._compute_maximum_iteration(8, 3)
+    self.assertEqual(modulo, 768)
+
+    modulo = driver._compute_maximum_iteration(3, 10)
+    self.assertEqual(modulo, 40)
+
+  def test_iteration_priority(self):
+    max_priority = 6
+    priority = driver._compute_iteration_maximum_priority(
+        max_priority,
+        driver._compute_maximum_iteration(max_priority, 0))
+    self.assertEqual(priority, max_priority)
+
+    for i in xrange(0, max_priority):
+      priority = driver._compute_iteration_maximum_priority(max_priority, 2 ** i)
+      self.assertEqual(priority, i)
+      priority = driver._compute_iteration_maximum_priority(max_priority, 3 * (2 ** i))
+      self.assertEqual(priority, i)

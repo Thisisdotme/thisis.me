@@ -12,7 +12,8 @@ from tim_commons import json_serializer
 from tim_commons import db
 
 
-def from_service_name(service_name, oauth_config):
+def from_service_name(service_name, max_priority, oauth_config):
+
   # load the desired module from the event_collectors package
   name = 'event_processors.' + service_name + '_event_processor'
   __import__(name)
@@ -20,7 +21,7 @@ def from_service_name(service_name, oauth_config):
 
   # retrieve the desired class and instantiate a new instance
   cls = getattr(mod, service_name.capitalize() + "EventProcessor")
-  collector = cls(service_name, oauth_config)
+  collector = cls(service_name, max_priority, oauth_config)
 
   return collector
 
@@ -29,10 +30,11 @@ class EventProcessor:
 
   __metaclass__ = ABCMeta
 
-  def __init__(self, service_name, oauth_config):
+  def __init__(self, service_name, max_priority, oauth_config):
 
     self.service_name = service_name
     self.oauth_config = oauth_config
+    self.max_priority = max_priority
 
     # get the service-id for this collector's service
     query = db.Session().query(Service.id)
@@ -131,10 +133,11 @@ class EventProcessor:
     update_scanner(event_updated,
                    interpreter.get_id(),
                    service_author_id,
-                   self.service_name)
+                   self.service_name,
+                   self.max_priority)
 
 
-def update_scanner(event_updated, service_event_id, service_user_id, service_id):
+def update_scanner(event_updated, service_event_id, service_user_id, service_id, max_priority):
   # Get the scanner state from the database
   event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_id)
   scanner_event = db.Session().query(EventScannerPriority).get(event_id)
@@ -144,6 +147,8 @@ def update_scanner(event_updated, service_event_id, service_user_id, service_id)
       scanner_event.priority = 0
     else:
       scanner_event.priority += 1
+      if scanner_event.priority > max_priority:
+        scanner_event.priority = max_priority
   else:
     priority = 0 if event_updated else 1
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)

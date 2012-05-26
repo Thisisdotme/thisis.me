@@ -38,11 +38,12 @@ class EventProcessorDriver(AppBase):
     # get the broker and queue config
     broker_url = self.config['broker']['url']
     receive_queue = self.config['queues'][service_name]['event']
+    max_priority = self.config['scanner']['maximum_priority']
 
     logging.info('Queue broker URL: %s' % broker_url)
     logging.info('Receive queue: %s' % receive_queue)
 
-    self.processor = event_processor.from_service_name(service_name, self.config['oauth'][service_name])
+    self.processor = event_processor.from_service_name(service_name, max_priority, self.config['oauth'][service_name])
 
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
