@@ -1,16 +1,23 @@
-# define the root location for all mobile identity scripts, source, config files, etc.
-export MI_HOME=~/dev
-export TIM_HOME=~/dev
-export TIM_DATA=~/dev/data/howard
+environment=howard
 
-# define location of configuration files
-export MI_CONFIG=$MI_HOME/config/howard
-export TIM_CONFIG=$TIM_HOME/config/howard
+# Define the root location for all mobile identity scripts, sourcec code, config
+# files, etc.
+export TIM_HOME=/Users/howard/dev
 
-export MI_OAUTH_KEYS=$TIM_CONFIG/oauth_keys.test.json
+# Define root location for data file
+export TIM_DATA=$TIM_HOME/data/$environment
 
-# define the pythonpath
-export PYTHONPATH=$TIM_HOME/tim-commons:$TIM_HOME/mi-model:$TIM_HOME/mi-db:$TIM_HOME/mi-collectors
+# Define location of configuration files
+export TIM_CONFIG=$TIM_HOME/config/$environment
+
+# Define oath keys
+export TIM_OAUTH_KEYS=$TIM_CONFIG/oauth_keys.json
+
+# Define the pythonpath
+export PYTHONPATH=$TIM_HOME/mi-utils:$TIM_HOME/mi-model:$TIM_HOME/mi-db
+export PYTHONPATH=$TIM_HOME/mi-collectors:$TIM_HOME/mi-traversal:$PYTHONPATH
+export PYTHONPATH=$TIM_HOME/tools:$TIM_HOME/tim-commons:$TIM_HOME/event-scanner:$PYTHONPATH
+export PYTHONPATH=$TIM_HOME/event-interpreter:$PYTHONPATH
 
 # define s3 scripts bucket
 export SCRIPT_BUCKET=scripts.dev.thisis.me

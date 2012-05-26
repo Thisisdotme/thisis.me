@@ -66,7 +66,7 @@ class TwitterEventCollector(EventCollector):
         # process the item
         #print json.dumps(post, sort_keys=True, indent=2)
 
-        interpreter = TwitterEventInterpreter(post)
+        interpreter = TwitterEventInterpreter(post, asm, self.oauth_config)
         last_id = interpreter.get_id()
 
         # terminate fetching any more events if we've gone beyond the lookback window

@@ -13,9 +13,9 @@ from event_updater import EventUpdater
 
 class FacebookEventUpdater(EventUpdater):
 
-  def fetch(self, service_id, service_author_id, service_event_id, callback):
+  def fetch(self, tim_author_id, service_author_id, service_event_id, callback):
 
-    super(FacebookEventUpdater, self).fetch(service_id,
+    super(FacebookEventUpdater, self).fetch(tim_author_id,
                                             service_author_id,
                                             service_event_id,
                                             callback)

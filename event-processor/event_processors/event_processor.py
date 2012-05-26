@@ -12,7 +12,7 @@ from tim_commons import json_serializer
 from tim_commons import db
 
 
-def from_service_name(service_name):
+def from_service_name(service_name, oauth_config):
   # load the desired module from the event_collectors package
   name = 'event_processors.' + service_name + '_event_processor'
   __import__(name)
@@ -20,7 +20,7 @@ def from_service_name(service_name):
 
   # retrieve the desired class and instantiate a new instance
   cls = getattr(mod, service_name.capitalize() + "EventProcessor")
-  collector = cls(service_name)
+  collector = cls(service_name, oauth_config)
 
   return collector
 
@@ -29,9 +29,10 @@ class EventProcessor:
 
   __metaclass__ = ABCMeta
 
-  def __init__(self, service_name):
+  def __init__(self, service_name, oauth_config):
 
     self.service_name = service_name
+    self.oauth_config = oauth_config
 
     # get the service-id for this collector's service
     query = db.Session().query(Service.id)
@@ -39,24 +40,24 @@ class EventProcessor:
     self.service_id, = query.one()
 
   @abstractmethod
-  def get_event_interpreter(self, service_event_json):
+  def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
     pass
 
   def process(self, tim_author_id, service_author_id, service_event_json):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
-    query = db.Session().query(AuthorServiceMap.id)
+    query = db.Session().query(AuthorServiceMap)
     query = query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
-                      AuthorServiceMap.service_id == self.service_id))
-    asm_id, = query.one()
+                              AuthorServiceMap.service_id == self.service_id))
+    asm = query.one()
 
-    interpreter = self.get_event_interpreter(service_event_json)
+    interpreter = self.get_event_interpreter(service_event_json, asm, self.oauth_config)
 
     # check for existing update
     existing_event = None
     try:
       query = db.Session().query(ServiceEvent)
-      query = query.filter_by(author_service_map_id=asm_id, event_id=interpreter.get_id())
+      query = query.filter_by(author_service_map_id=asm.id, event_id=interpreter.get_id())
       existing_event = query.one()
     except NoResultFound:
       pass
@@ -115,7 +116,7 @@ class EventProcessor:
       # TODO: Deal with profile image
       profile_image = None
 
-      service_event = ServiceEvent(asm_id,
+      service_event = ServiceEvent(asm.id,
                                    interpreter.get_id(),
                                    interpreter.get_time(),
                                    url,

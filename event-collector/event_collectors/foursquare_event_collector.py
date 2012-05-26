@@ -60,7 +60,7 @@ class FoursquareEventCollector(EventCollector):
       # for each element in the feed
       for post in raw_json['response']['checkins']['items']:
 
-        interpreter = FoursquareEventInterpreter(post)
+        interpreter = FoursquareEventInterpreter(post, asm, self.oauth_config)
 
         if interpreter.get_time() < min_age:
           url = None

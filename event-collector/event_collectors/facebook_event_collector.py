@@ -50,7 +50,7 @@ class FacebookEventCollector(EventCollector):
           if post.get('type') == 'status' and post.get('actions') is None:
             continue
 
-          if self.screen_event(FacebookStatusEventInterpreter(post), state):
+          if self.screen_event(FacebookStatusEventInterpreter(post, asm, self.oauth_config), state):
             total_accepted = total_accepted + 1
             callback(create_facebook_event(service_author_id, asm.author_id, post))
 
