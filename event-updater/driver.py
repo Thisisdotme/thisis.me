@@ -23,7 +23,7 @@ class EventUpdaterDriver(AppBase):
 
     body = msg['message']
     with db.Context():
-      self.updater.fetch(body['tim_author_id'],
+      self.updater.fetch(body['service_id'],
                          body['service_author_id'],
                          body['service_event_id'],
                          handle_event_callback)

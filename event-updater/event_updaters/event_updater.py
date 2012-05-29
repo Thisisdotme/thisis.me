@@ -33,11 +33,11 @@ class EventUpdater(object):
     self.service_id, = query.one()
 
   @abstractmethod
-  def fetch(self, tim_author_id, service_author_id, service_event_id, callback):
-    pass
+  def fetch(self, service_id, service_author_id, service_event_id, callback):
+    raise NotImplementedError
 
-  def get_author_service_map(self, tim_author_id):
+  def get_author_service_map(self, service_author_id):
     query = db.Session().query(AuthorServiceMap)
     query = query.filter(and_(AuthorServiceMap.service_id == self.service_id,
-                              AuthorServiceMap.author_id == tim_author_id))
+                              AuthorServiceMap.service_author_id == service_author_id))
     return query.one()
