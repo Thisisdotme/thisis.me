@@ -143,12 +143,15 @@ class AuthorServiceMap(Base):
 
   __tablename__ = 'author_service_map'
   __table_args__ = (UniqueConstraint('author_id', 'service_id', name='uidx_author_service_map_1'),
+                    UniqueConstraint('service_id', 'service_author_id', name='uidx_author_service_map_2'),
                     {})
 
   id = Column(Integer, primary_key=True)
 
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
   service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), nullable=False)
+
+  service_author_id = Column(String(255))
 
   access_token = Column(String(255))
   access_token_secret = Column(String(255))
@@ -157,9 +160,6 @@ class AuthorServiceMap(Base):
 
   most_recent_event_id = Column(String(255))
   most_recent_event_timestamp = Column(DateTime)
-
-  # TODO add unique constraint on service_id and service_author_id
-  service_author_id = Column(String(255))
 
   def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, service_author_id=None):
     self.author_id = authorId
