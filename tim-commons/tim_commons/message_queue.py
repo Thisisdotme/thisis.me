@@ -63,48 +63,53 @@ def create_queues(client, queues, durable=True):
     client.wait(promise)
 
 
-def send_messages(client, queue, messages):
-  ''' Sends a list of messages to the specified queue.
+def send_messages(client, messages):
+  ''' Sends a list of messages to the appropriate queue.
 
   Arguments:
   client -- the object returned by create_message_client or
             get_current_message_client
-  queue -- the queue to push all the messages
-  messages -- list of message to push to the queue
+  messages -- list of message to push
   '''
-  # Send all the messages
-#  promises = []
+# Send all the messages
   for message in messages:
+    queue = message['header']['type'].encode('ascii')
     body = json_serializer.dump_string(message)
     promise = client.basic_publish(exchange='',
                                    routing_key=queue,
                                    body=body)
     client.wait(promise)
 
-  # Wait until all the message were sent
-#  for promise in promises:
 
-
-def join(client, queue, handler):
+def join(client, queues):
   '''
-  Receives messages from the message queue and forwards them to the
-  handler. The handler needs to implement a handler method that accepts one
-  parameter. The parameter is the map representing the JSON object.
+  Receives messages from the message queues and forwards them to the
+  handler for the corresponding queue. The handler needs to accepts
+  one parameter. The parameter is the map representing the JSON object.
 
   Arguments:
   client -- the object returned by create_message_client or
             get_current_message_client
-  queue -- the queue to push all the messages
-  handler -- closer to call when a message is received from the message queue
+  queues -- a list of {'queue': <queue name>, 'handler': <handler>}i
   '''
-  promise = client.basic_consume(queue=queue, prefetch_count=1)
+# Populate the handlers
+  handlers = {}
+  for queue in queues:
+    queue_name = queue['queue']
+    if queue_name in handlers:
+      raise Exception('Queue {0} appears twice in the set of queues'.format(queue_name))
+
+    handlers[queue_name] = queue['handler']
+
+# Start recieving message from all the queues
+  promise = client.basic_consume_multi(queues=queues, prefetch_count=1)
   while True:
     result = client.wait(promise)
 
     try:
       message = json_serializer.load_string(result['body'])
-      if message['header']['type'] == queue:
-        handler(message)
+      if message['header']['type'] == result['routing_key']:
+        handlers[result['routing_key']](message)
       else:
         logging.error('Message does not contain a header.type: %s' % result)
     except Exception:

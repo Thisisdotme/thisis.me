@@ -14,7 +14,7 @@ class EventUpdaterDriver(AppBase):
     return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
 
   def _handle_event(self, msg):
-    send_messages(self.client, self.send_queue, [msg])
+    send_messages(self.client, [msg])
 
   def _handle_message_receive(self, msg):
 

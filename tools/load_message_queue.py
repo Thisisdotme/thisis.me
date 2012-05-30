@@ -5,7 +5,6 @@ import os
 from tim_commons.app_base import AppBase
 from tim_commons.message_queue import create_message_client, send_messages, create_queues
 from tim_commons import json_serializer
-from tim_commons.bool import to_boolean
 
 
 class NotificationLoad(AppBase):
@@ -21,8 +20,9 @@ class NotificationLoad(AppBase):
                             dest='message_file',
                             default='{tim_data}/messages.json',
                             help='File containing all the message events')
-    self.option_parser.add_option('--durable',
+    self.option_parser.add_option('--non-durable',
                             dest='durable',
+                            action='store_false',
                             default=True,
                             help='Flag specifying message queue durability')
 
@@ -57,13 +57,13 @@ class NotificationLoad(AppBase):
     client = create_message_client(self.option.url)
 
     # create all of the required queues
-    create_queues(client, self.queues, durable=to_boolean(self.option.durable))
+    create_queues(client, self.queues, durable=self.option.durable)
 
     # itereate and send all the interesting messages
     for message in messages:
-      queue = message['header']['type'].encode('ascii')
+      queue = message['header']['type']
       if queue in self.queues:
-        send_messages(client, queue, [message])
+        send_messages(client, [message])
         sys.stdout.write('.')
     sys.stdout.write('\n')
 

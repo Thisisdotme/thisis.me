@@ -15,12 +15,10 @@ class ScannerTestCase(unittest.TestCase):
 
   def test_send_update_messages(self):
     client = mock.DummyMessageClient()
-    queues = {'facebook': {'update': 'queue_name'},
-              'instagram': {'update': 'another_queue_name'}}
     events = [EventScannerPriority('event_id', 'user_id', 'facebook', 2),
               EventScannerPriority('event_id', 'user_id', 'instagram', 2)]
 
-    driver._send_update_message_from_event(client, queues, events)
+    driver._send_update_message_from_event(client, events)
 
   def test_query_event(self):
     db_session = mock.DummyDBSession()

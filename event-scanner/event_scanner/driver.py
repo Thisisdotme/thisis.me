@@ -55,8 +55,7 @@ class ScannerApplication(AppBase):
     iteration_minimum_duration = float(self.config['scanner']['iteration_minimum_duration'])
     iteration_minimum_duration = datetime.timedelta(seconds=iteration_minimum_duration)
 
-    queues = self.config['queues']
-    _create_event_queues(message_client, queues)
+    _create_event_queues(message_client, self.config['queues'])
 
     iteration_counter_module = _compute_maximum_iteration(maximum_priority, self.option.iterations)
 
@@ -86,7 +85,7 @@ class ScannerApplication(AppBase):
         else:
           logging.debug('Sending %s events to the queue', len(view_result))
 
-        current_id = _send_update_message_from_event(message_client, queues, view_result)
+        current_id = _send_update_message_from_event(message_client, view_result)
 
       current_iteration = (current_iteration % iteration_counter_module) + 1
 
@@ -130,15 +129,14 @@ def _create_event_queues(message_client, queues_config):
       create_queues(message_client, [queue], durable=False)
 
 
-def _send_update_message_from_event(message_client, queues, events):
+def _send_update_message_from_event(message_client, events):
   current_id = ""
 
   for event in events:
-    queue = queues[event.service_id]['update']
     message = create_event_update_message(event.service_id,
                                           event.service_user_id,
                                           event.service_event_id)
-    send_messages(message_client, queue, [message])
+    send_messages(message_client, [message])
     current_id = event.hash_id
 
   return current_id
