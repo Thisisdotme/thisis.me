@@ -5,5 +5,10 @@
 *.egg
 *.egg-info
 
+# IDE files
+.idea
+.project
+.pydevproject
+
 # environment
 env
