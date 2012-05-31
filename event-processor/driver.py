@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 import logging
 
@@ -9,53 +8,86 @@ from event_processors import event_processor
 
 
 class EventProcessorDriver(AppBase):
-
   def display_usage(self):
-    return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
+    return 'usage: %prog [options]'
 
-  def _handle_message_receive(self, msg):
-    body = msg['message']
-    with db.Context():
-      self.processor.process(body['tim_author_id'],
-                             body['service_author_id'],
-                             body['service_event_json'])
+  def init_args(self):
+    self.option_parser.add_option('--service',
+                                  dest='services',
+                                  action='append',
+                                  default=[],
+                                  help='Service to process')
+
+  def parse_args(self, ignore):
+    (self.option, ignore) = self.option_parser.parse_args()
+
+    if ignore:
+      self.option_parser.print_help()
+      sys.exit()
 
   def main(self):
-
     logging.info("Beginning: " + self.name)
-
-    service_name = self.args[0]
-    if not service_name:
-      logging.fatal("Missing required argument: service-name")
-      return
 
     # read the db url from the config
     db_url = self.config['db']['sqlalchemy.url']
+    # get the broker and queue config
+    broker_url = self.config['broker']['url']
+    # get the maximum priority
+    max_priority = int(self.config['scanner']['maximum_priority'])
 
     # initialize the db engine & session
     db.configure_session(db_url)
 
-    # get the broker and queue config
-    broker_url = self.config['broker']['url']
-    receive_queue = self.config['queues'][service_name]['event']
-    max_priority = self.config['scanner']['maximum_priority']
+    services = services_configuration(self.option.services, self.config)
 
-    logging.info('Queue broker URL: %s' % broker_url)
-    logging.info('Receive queue: %s' % receive_queue)
+    # Get a list of all the queues and all the handler
+    queues = []
+    handlers = []
+    for service in services:
+      # List queues
+      queues.append(service['queue'])
 
-    self.processor = event_processor.from_service_name(service_name, max_priority, self.config['oauth'][service_name])
+      # Create handlers
+      processor = event_processor.from_service_name(service['name'],
+                                                    max_priority,
+                                                    service['oauth'])
+      handler = {'queue': service['queue'],
+                 'handler': create_processor_handler(processor)}
+      handlers.append(handler)
+
+    logging.info('Queue broker URL: %s', broker_url)
+    logging.info('Active queues: %s', queues)
+    logging.debug('Active handlers: %s', handlers)
 
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
+    create_queues(self.client, queues)
 
-    create_queues(self.client, [receive_queue])
-
-    def handle_receieve_callback(callback_msg):
-      self._handle_message_receive(callback_msg)
-
-    join(self.client, receive_queue, handle_receieve_callback)
+    join(self.client, handlers)
 
     logging.info("Finished: " + self.name)
+
+
+def services_configuration(services, config):
+  # If services is empty then get all the services in the configuration
+  if not services:
+    for service in config['queues'].iterkeys():
+      services.append(service)
+
+  return [{'name': service,
+           'oauth': config['oauth'][service],
+           'queue': config['queues'][service]['event']} for service in services]
+
+
+def create_processor_handler(processor):
+  def handler(message):
+    body = message['message']
+    with db.Context():
+      processor.process(body['tim_author_id'],
+                        body['service_author_id'],
+                        body['service_event_json'])
+  return handler
+
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes

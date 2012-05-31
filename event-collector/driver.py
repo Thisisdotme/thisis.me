@@ -52,15 +52,15 @@ class EventCollectorDriver(AppBase):
 
     services = services_configuration(self.option.services, self.config)
 
-#   Get a list of all the queues and all the handlers
+    # Get a list of all the queues and all the handlers
     queues = []
     handlers = []
     for service in services:
-#     List queues
+      # List queues
       queues.append(service['send_queue'])
       queues.append(service['receive_queue'])
 
-#     Create handlers
+      # Create handlers
       collector = event_collector.from_service_name(service['name'], service['oauth'])
       handler = {'queue': service['receive_queue'],
                  'handler': self.create_collector_handler(collector)}
