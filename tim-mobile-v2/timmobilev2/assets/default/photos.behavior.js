@@ -3,9 +3,10 @@
 the behavior for the photo feature
 
 -a good place to try out the Gridview > Listview > Detailview structure
--the gridview is the initial view
--the listview is the flippable view
--the detailview allows pinching & scrolling & zooming, etc.
+
+-the album list view (default)
+-the gridview for one album
+-the listview - the flippable view for an album - it has 'flip mode' and 'detail mode', which allows pinching/zooming, also 'comment mode'
 
 -have whether to show the grid of list/flip view determined internally, not via the URL
 
@@ -38,6 +39,40 @@ the behavior for the photo feature
 
   });
   
+  TIM.models.PhotoAlbum = Backbone.Model.extend({
+
+    initialize: function() {
+      this.photos = new TIM.collections.Photos();
+    },
+	
+    clear: function() {
+      this.destroy();
+      this.view.remove();
+    }
+
+  });
+  
+  TIM.collections.PhotoAlbums = Backbone.Collection.extend({
+  	 	model: TIM.models.PhotoAlbum,
+  		//url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
+  		
+  		//let's fake this with flickr
+			  		
+  		initialize: function(options) {
+  		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
+  		  this.initializePaging();
+  			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoAlbums?callback=?';
+  		  //alert(this.url);
+  		},
+  		
+  		
+  		parse: function(resp) {
+  		  return (resp.photos.photo);
+  		}
+
+  });
+  
+  
   TIM.models.Photo = Backbone.Model.extend({
 
     defaults: {
@@ -62,8 +97,7 @@ the behavior for the photo feature
 			  		
   		initialize: function() {
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
-  		  this.initializePaging();
-  		  //var authorName = 'kitten';
+  		  this.initializePaging({pageSize:100});
   		  var authorName = TIM.pageInfo.authorFirstName;
   			this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + authorName 
@@ -74,42 +108,45 @@ the behavior for the photo feature
   		
   		parse: function(resp) {
   		  return (resp.photos.photo);
+  		},
+  		
+  		setURL: function(searchTerm) {
+  		  searchTerm = searchTerm || TIM.pageInfo.authorFirstName;
+  		  this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
+  			            + searchTerm 
+  			            + "&per_page=" + this.pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
   		}
 
   });
   
-  //basic placeholder for photo
-  //this would be the grid view
-  
-  TIM.views.PhotoGrid = Backbone.View.extend( {
-      id: "photos",
-      className: "appPage",
+  //the 'home view' for the photos feature - a list of the author's photo albums
+  TIM.views.PhotoAlbumList = Backbone.View.extend( {
+      id: "photoAlbums",
+      className: "appPage photoFeature",
       numRendered: 0,
 
       initialize: function() {
+          _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
           _.bindAll(this, "render");
           this.collection.bind( "reset", this.render );
           this.collection.bind('pageLoaded', this.renderNextPageset, this);
       },
 
   		events: {
-  		  "click .thumb": "showFlipView"
+  		  //"vclick": "showFlipView",
+  		  "vclick .album": "showGridView"
   		},
 
 
       render: function(){
         var that = this;
-        //split the collection into 2
-        var photos = this.collection.toJSON();
-        var photos_of_author = photos.slice(0,5);
-        var photo_stream = photos.slice(5);
+
+        var albums = this.collection.toJSON();
         var template_context = {
-                                "author": {first_name:TIM.pageInfo.authorFirstName}, 
-                                "photos_of_author": {photos: photos_of_author}, 
-                                "photo_stream": {photos: photo_stream}
+                                "albums": albums
         };
         
-  		  dust.render("photos", template_context, function(err, out) {
+  		  dust.render("photoAlbums", template_context, function(err, out) {
   			  if(err != null) {
   					console.log(err);
   				}
@@ -121,8 +158,8 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			
-  			this.iScrollElem = new iScroll('photoStreamContainer', { hScroll: false });
-  			setTimeout(function () { that.iScrollElem.refresh() }, 500)
+  			this.iScrollElem = new iScroll('photoAlbumList', { hScroll: false });
+  			setTimeout(function () { that.iScrollElem.refresh() }, 50);
   			
   		  if(!feature.showDetails) {
   		    TIM.transitionPage (this.$el);
@@ -133,29 +170,218 @@ the behavior for the photo feature
       showFlipView: function(event) {
   		  var resourceId = 0;
   		  if (event) {
-  		    resourceId = $(event.currentTarget).data('photo_id');
+  		    resourceId = $(event.currentTarget).data('id');
+  		    albumId = $(event.currentTarget).data('album_id');
   		  }
-  		  feature.showListView(resourceId, {animationName: "slide"});
+  		  feature.showListView(resourceId, {albumId: albumId, animationName: "slide"});
+      },
+      
+      showGridView: function(event) {
+  		  var resourceId = 0;
+  		  if (event) {
+  		    resourceId = $(event.currentTarget).data('album_id');
+  		  }
+  		  feature.showGridView(resourceId, {animationName: "slide"});
       },
       
       //figure out the next elements, add those to the grid
       renderNextPageset: function() {
-        
-        //only render the ones we haven't already rendered
-        var photos = this.collection.toJSON();
-        photos = photos.slice(this.numRendered);
-        var that = this;
+        console.log('render next pageset');
+      },
       
-        var template_context = {"photos": photos};
-  		  dust.render("_photoList", template_context, function(err, out) {
+      resetScrollElem: function() {
+        var that = this;
+        setTimeout(function () { that.iScrollElem.refresh() }, 50);
+      }
+      
+  });
+  
+  
+  //basic placeholder for photo
+  //this would be the grid view
+  //need to have view for the album list
+  //and a grid view for a single album
+  //
+  //make this grid view have an album
+  //
+  //make paging happen!
+  
+  TIM.views.PhotoGrid = Backbone.View.extend( {
+      id: "photoGrid",
+      className: "appPage photoFeature",
+      numRendered: 0,
+      chunkSize: 15,
+      initialRenderSize: 15,
+      chunkRendering: false,
+
+      initialize: function() {
+          _.bindAll(this);
+          //this.collection.bind( "reset", this.render );
+          this.collection.bind('pageLoaded', this.renderNextPageset, this);
+          this.numRendered = 0;
+      },
+
+  		events: {
+  		  "vclick .thumb": "showFlipView",
+  		  "vclick .gridLink": "showAlbumView",
+  			"swiperight" : "showAlbumView"
+  		},
+  		
+  		setCollection: function(album) {
+  		  this.album = album;
+        this.collection = album.photos;
+        this.collection.bind('pageLoaded', this.renderNextPageset, this);
+  			this.collection.bind( "reset", this.render );
+      },
+
+
+      render: function(){
+        var that = this;
+        
+        //clean out the container element
+        this.numRendered = 0;
+        this.$el.html('');
+        
+        //append the element to the document if it's not in there already
+        
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+  			  TIM.appContainerElem.append(this.$el);
+  			}
+  			//render container with no photos initially
+  			var template_context = {photos:[], name: this.album.get('name')};
+  			
+  			dust.render("photoGrid", template_context, function(err, out) {
   			  if(err != null) {
   					console.log(err);
   				}
-  				that.iScrollElem.destroy();
-  			  $('#photoStreamContainer > div').append(out);
-  			  that.iScrollElem = new iScroll('photoStreamContainer', { hScroll: false });
-  			  that.numRendered += photos.length;
+  			  (that.$el).append(out);
+  			  //that.numRendered = that.collection.length;
   			});
+  			//alert(that.$el.html());
+  			
+  			//if there's an existing iscroll element, destroy it!
+  			if (this.iScrollElem) {
+          this.iScrollElem.destroy();
+          this.iScrollElem = null;
+        }
+  			
+  			//now render the initial batch of photos
+        this.renderChunk(this.initialRenderSize);
+  		  
+  		  //transition to this view
+  			//this needs to not be so silly - shouldn't do this by default
+  			//
+  		  if(!feature.showDetails) {
+  		    TIM.transitionPage (this.$el, {animationName: "slide"});
+		    }
+  		    		  
+      },
+      
+      resetScrollElem: function(options) {
+        options = options || {};
+        var that = this;
+        if (this.iScrollElem) {
+          if (options.destroy) {
+            this.iScrollElem.destroy();
+            this.iScrollElem = null;
+          } else if(options.addScrollDistance) {
+            this.iScrollElem.maxScrollY += options.addScrollDistance;
+          } else {
+            setTimeout(function () { that.iScrollElem.refresh();  }, 0);
+            return;
+          }
+          
+        }
+        this.iScrollElem = new iScroll('photoGridScroll', { 
+            //maybe instead of checking vs. the iscroll value, check to see which item is currently in view, then render next chunk if it's not visible & we're getting close to needing it
+          		onScrollMove: function () {
+          		},
+              onScrollEnd: function () {
+          			if (this.y < (this.maxScrollY + 30 )) {
+          			  that.renderChunk();
+          			}
+          		},
+              hScroll: false,
+              vScrollbar: false
+         });
+  			setTimeout(function () { that.iScrollElem.refresh();  }, 10);
+      },
+
+      showFlipView: function(event) {
+  		  var resourceId = 0;
+  		  if (event) {
+  		    resourceId = $(event.currentTarget).data('photo_id');
+  		  }
+  		  feature.showListView(resourceId, {albumId: this.album.id, collection: this.collection, animationName: "slide"});
+      },
+      
+      showAlbumView: function(event) {
+  		  TIM.transitionPage (feature.albumListView.$el, {
+  		    animationName: "slide", reverse: true,
+  		    callback: function() {
+            feature.albumListView.resetScrollElem();
+          }
+  		  });
+      },
+      
+      //figure out the next elements, add those to the grid
+      //decouple page requests and rendering
+      //for both grid view and flip view (already doing it for flip view)
+      //
+      //render in groups of 3?
+      //
+      //maybe have this fn ask for the next page if necessary?
+      //
+      
+      renderChunk: function(chunkSize) {
+          var that = this;
+          if (this.chunkRendering) {
+            console.log('chunk rendering - gonna return now');
+            return;
+          }
+          this.chunkRendering = true;
+         //only render the ones we haven't already rendered
+          chunkSize = chunkSize || this.chunkSize;
+         
+          var photos = this.collection.toJSON();
+          
+          //fetch next page if we're getting close to the end of the collection
+          //this need to be more intelligent so it doesn't keep asking for thing that aren't there
+          //
+          //make this automatically triggered by an event?
+          //
+          
+          if(this.collection.length <= this.numRendered + (2 * chunkSize)) {
+            this.collection.getNextPage();
+          }
+          
+          photos = photos.slice(this.numRendered, this.numRendered + chunkSize);
+          if (photos.length === 0) {
+            this.chunkRendering = false;
+            return;
+          }
+          
+          console.log('in render chunk', chunkSize, this.numRendered, photos.length);
+
+          var template_context = {"photos": photos};
+    		  dust.render("_photoList", template_context, function(err, out) {
+    			  if(err != null) {
+    					console.log(err);
+    				}
+    				//that.iScrollElem.destroy();
+    			  $('#photoGridScroll .gridContainer').append(out);
+    			  //that.iScrollElem = new iScroll('photoStreamContainer', { hScroll: false });
+    			  //that.resetScrollElem({addScrollDistance:  500});
+    			  that.resetScrollElem();
+    			  that.numRendered += photos.length;
+    			  TIM.setLoading(false);
+    			  that.chunkRendering = false; 
+    			});
+      },
+      
+      //is this used?
+      
+      renderNextPageset: function() {
       }
       
   });
@@ -165,7 +391,7 @@ the behavior for the photo feature
           
       id: "photoListContainer",
       
-      className: "appPage flipMode",
+      className: "appPage flipMode photoFeature",
       
       pageTemplate: "photoPage",
       
@@ -195,24 +421,31 @@ the behavior for the photo feature
     			this.collection.bind( "reset", this.render );
       },
       
+      setCollection: function(album) {
+        this.album = album
+        this.collection = album.photos;
+        this.collection.bind('pageLoaded', this.renderNextPageset, this);
+  			this.collection.bind( "reset", this.render );
+      },
+      
       //add the flip events to the flip mixin
       //this view should have the ability to not be flippable & return back to other modules
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			//"swiperight" : "showGridView",
-    			//"swipeup .flipMode .flip-set" : "flipNext",
-    			//"swipedown .flipMode .flip-set" : "flipPrevious",
-    			//"click .detailLink" : "toggleMode",
-    			"click .gridLink" : "showGridView",
-    			"click img" : "toggleMode"
+    			"vclick .detailLink" : "toggleMode",
+    			"vclick .gridLink" : "showGridView",
+    			"vclick .fullPhoto" : "toggleMode",
+    			"swiperight" : "showGridView"
   		},
 
       render: function( ) {
         //mixing in FlipSet functionality to this view, so the main purpose of 'render' is to render the flipset
         console.log('rendering photo list view');
         if(!this.hasRendered) {
-          this.renderFlipSet();
+          this.renderFlipSet({
+            pageMetaData: {count:this.album.get('count')}
+          });
           this.hasRendered = true;
           //this.toolbarView = new TIM.views.Toolbar();
           //var toolbarEl = this.toolbarView.render();
@@ -234,10 +467,11 @@ the behavior for the photo feature
         //} else {
           TIM.app.navigate("/photos");
           TIM.transitionPage(feature.gridView.$el, {
+          //TIM.transitionPage(feature.albumListView.$el, {
               animationName: "slide", 
               reverse: true,
               callback: function() {
-                feature.gridView.iScrollElem.refresh();
+                feature.gridView.resetScrollElem();
               }
           });
         //}
@@ -251,15 +485,42 @@ the behavior for the photo feature
       },
       
       toggleMode: function(event) {
-  		  this.$el.toggleClass('flipMode');
-  		  if(this.flipMode) {
-  		    //make an iscroll container
-  		    var containerEl = this.$el; //.find('.photoPage')[0];
-  		    if(containerEl) {
-  		      this.iScrollElem = new iScroll(containerEl, { zoom: true });
-  		    }
+        var that = this;
+  		  
+  		  if (this.flipMode) {
+  		    this.$el.toggleClass('flipMode');
   		    this.flipMode = false;
+  		    
+  		    //make an iscroll container
+  		    //get the actual photo image & lay the over the actual flip area?
+  		    var overlay = $("<div class='scrollOverlay photoFeature'></div>");
+  		    //this.$el.prepend(overlay);
+  		    $('#contentContainer').prepend(overlay);
+  		    var clonedPage = $('.back .photoPage').eq(1).clone();
+  		    //alert(img.css('background-image'));
+  		    overlay.append(clonedPage);
+  		    this.$el.css('display', "none");
+  		    
+  		    //console.log('imgae: ', img);
+  		    window.setTimeout(function() {
+  		      overlay.addClass('noToolbars');
+  		    }, 10);
+  		    
+  		    overlay.on('vclick', function(event){
+  		      that.toggleMode();
+  		    })
+  		    var containerEl = overlay.get(0);
+  		    //var containerEl = $("#contentContainer").css('height','200px');//this.$el.get(0);
+  		    if(containerEl) {
+  		      this.iScrollElem = new iScroll(containerEl, { zoom: true, hScrollbar: false, vScrollbar: false });
+  		    }
+  		    
   		  } else {
+  		    this.$el.css('display', "block");
+  		     window.setTimeout(function() {
+    		      that.$el.toggleClass('flipMode');
+    		    }, 10);
+  		    $('.scrollOverlay').remove();
   		    this.flipMode = true;
   		    this.iScrollElem.destroy();
           this.iScrollElem = null;
@@ -293,28 +554,26 @@ the behavior for the photo feature
       feature.showDetails = true;
       feature.showDetailId = resourceId;
     }
-  
+    
+    feature.albumCollection = feature.albumCollection || new TIM.collections.PhotoAlbums();
     feature.mainCollection = feature.mainCollection || new TIM.collections.Photos();
     
-    feature.gridView =  feature.gridView || new TIM.views.PhotoGrid({collection: feature.mainCollection});
+    //keep grid/list views hanging around or just use one for each and swap out collections?
+    
+    //feature.gridView =  feature.gridView || new TIM.views.PhotoGrid();
     feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
+    feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
     
     //feature.detailView = feature.detailView || new TIM.views.PhotoDetail();
     
     if(!feature.hasFetchedCollection) {
       console.log('fetching collection!'); 
-      feature.mainCollection.fetch({
-  			dataType: "jsonp",
-  			success: function(resp) {
-  		    feature.hasFetchedCollection = true;
-  		    if (feature.showDetails) {
-  		      feature.showDetailView();
-  		    }
-  			},
-  			error: function(resp) {
-          console.log("error: ", resp);
-  			}
-  		});
+      
+      //this will eventually get the photo albums for the author
+      //it should be paged via (perhaps) infinite scroll
+      
+      feature.albumCollection.reset(feature.fakeAlbumData);
+  		feature.hasFetchedCollection = true;
   	} else {
   	  if (feature.showDetails) {
   	    if (feature.hasFetchedCollection) {
@@ -322,43 +581,104 @@ the behavior for the photo feature
   	    }
   	  } else {
   	    TIM.enableScrolling();
-  	    TIM.transitionPage (feature.gridView.$el);
+  	    //TIM.transitionPage (feature.gridView.$el);
+  	    TIM.transitionPage (feature.albumListView.$el);
   	  }
   	}
   };
   
+  //
   //maybe have methods to show detail view, show list view, show grid view?
   //in this case, resourceId is the ID of the first resource to show
+  //have to fetch the collection if it doesn't aready exist
+  //should jump straight to the page that has that resource ID if possible
+  //
+  
   feature.showListView = function(resourceId, options) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
+    TIM.setLoading(true);
     options = options || {};
     TIM.disableScrolling();
     resourceId = resourceId || feature.showDetailId;
-    var model = feature.mainCollection.find(function(model){return model.get('id') == resourceId});
-	  if(model) {
-	    console.log('have a model for the resource: ', model);
-	    feature.listView.model = model;
-	    
-		  feature.listView.render();
-		  
-		  var pageNum = model ? feature.mainCollection.indexOf(model) : 0;
-		  feature.listView.goToPage(pageNum);
-		  
-		  TIM.transitionPage (feature.listView.$el, {"animationName":options.animationName || "fade", "reverse": options.reverse});
-		  feature.showDetailId = 0;
-		  feature.showDetails = false;
-		} else {
-		  console.log("can't find a model for the resource, heading back to the main view", resourceId, feature.photoCollection);
-		  feature.showDetailId = 0;
-		  feature.showDetails = false;
-		  TIM.app.navigate("/photos", {trigger: true}); //if we can't find the resource, just go the default feature view
-		}
+    var album = feature.albumCollection.get(options.albumId);
+    album.photos.setURL(album.get("searchTerm"));
+    
+    var collection = album.photos; // || feature.mainCollection;
+    
+    var showView = function(album) {
+       //this isn't ideal - should be able to re-use the flip view if it's the last one the user saw
+       if (feature.listView) {
+         feature.listView.close();
+       }
+       
+       var listView = new TIM.views.PhotoList({collection: album.photos});
+       listView.setCollection (album);
+       listView.initializeFlipset();
+       listView.render();
+       feature.listView = listView;
+
+  	   var model = collection.find(function(model){return model.get('id') == resourceId});
+       listView.model = model;
+       var pageNum = model ? collection.indexOf(model) + 1 : 1;
+       listView.goToPage(pageNum);
+
+        TIM.transitionPage (listView.$el, {"animationName":options.animationName || "fade", "reverse": options.reverse});
+        feature.showDetailId = 0;
+        feature.showDetails = false;
+        TIM.setLoading(false);
+     }
+    
+    if (!album.hasFetchedPhotos) {
+      album.photos.fetch({
+  			dataType: "jsonp",
+  			success: function(resp) {
+  		    //alert('got photos for album!');
+  		    album.hasFetchedPhotos = true;
+  		    showView(album);
+  			},
+  			error: function(resp) {
+          console.log("error: ", resp);
+  			}
+  		});
+    } else {
+      //just show the album?
+      showView(album);
+    }
   }
   
-  //show the grid view
-  feature.showGridView = function() {
+  //show the grid view of one album
+  //fetch the collection of photos for the album if necessary
+  
+  feature.showGridView = function(albumId) {
+    TIM.setLoading(true);
+    var album = feature.albumCollection.get(albumId);
+    album.photos.setURL(album.get("searchTerm"));
+    //don't make a new one each time?
+    feature.gridView = feature.gridView || new TIM.views.PhotoGrid({collection: album.photos});
+    feature.gridView.album = album;
     
+    if (!album.hasFetchedPhotos) {
+      album.photos.fetch({
+  			dataType: "jsonp",
+  			success: function(resp) {
+  		    //alert('got photos for album!');
+          album.hasFetchedPhotos = true;
+          feature.gridView.setCollection (album);
+          feature.gridView.render();
+          TIM.setLoading(false);
+  			},
+  			error: function(resp) {
+          console.log("error: ", resp);
+  			}
+  		});
+    } else {
+      //just show the album?
+      feature.gridView.setCollection (album);
+      feature.gridView.render();
+      TIM.setLoading(false );
+    }
+
   }
   
   
@@ -381,6 +701,69 @@ the behavior for the photo feature
   TIM.features.getByName("photos").behavior = feature;
   
   TIM.loadedFeatures["photos"] = feature;
+  
+  feature.fakeAlbumData = [
+    {
+      name: "All Photos",
+      count: "318",
+      id: 1000,
+      searchTerm: TIM.pageInfo.authorFirstName,
+      thumbs: [
+        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+      ]
+    },
+    {
+      name: "Photos of " + TIM.pageInfo.authorFirstName,
+      count: "31",
+      id: 1001,
+      searchTerm: "frog",
+       thumbs: [
+          {image_url: "http://farm8.static.flickr.com/7212/7296052850_4b75dae217_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+        ]
+    },
+    {
+      name: "Photos " + TIM.pageInfo.authorFirstName + " has taken",
+      count: "156",
+      id: 1002,
+      searchTerm: "elephant",
+      thumbs: [
+        {image_url: "http://farm8.static.flickr.com/7098/7296136912_d29bb66142_s.jpg", id: 123},
+        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+      ]
+    },
+    {
+      name: "Photos " + TIM.pageInfo.authorFirstName + " has liked",
+      count: "23",
+      id: 1003,
+      searchTerm: "dam",
+       thumbs: [
+          {image_url: "http://farm8.static.flickr.com/7220/7296052840_6372ef6dff_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+        ]
+    },
+    {
+      name: "Detroit, May 1977",
+      count: "15",
+      id: 1004,
+      searchTerm: "groovy",
+       thumbs: [
+          {image_url: "http://farm8.static.flickr.com/7082/7295851342_99f8612529_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+        ]
+    }
+  ]
   
   
 })(TIM);

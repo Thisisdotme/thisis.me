@@ -1,3 +1,13 @@
+//extending backbone view object to allow for DOM removal & event unbinding in one call
+//see http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/
+Backbone.View.prototype.close = function(){
+  this.remove();
+  this.unbind();
+  if (this.onClose){
+    this.onClose();
+  }
+}
+
 TIM.views.FeatureNav = Backbone.View.extend( {
    el: $( "#featureNavItems" ),
 		
@@ -8,9 +18,7 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    
    addAll : function () {
       this.collection.each (this.addOne);
-      //load the default feature here?
-      //..or navigate?
-      //send an app event?
+      //notify the app that the feature nav has been rendered
       TIM.eventAggregator.trigger('featurenavrendered', this);
    },
 		
@@ -46,7 +54,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 	},
 	
 	events: {
-		"click" : "loadFeature"
+		"vclick" : "loadFeature"
 	},
 
 	render : function () {
@@ -147,9 +155,11 @@ TIM.views.Page = Backbone.View.extend( {
 } );
 
 //should probably have some sort of function that does the template rendering 
-//to prevent lots of code-copying and 
+//to prevent lots of code copying and pasting
 
 //an attempt to define the flipset functionality as a mixin
+
+//key is the 'pages' array... it's different than underlying event/photo/etc collection in that there can be multiple items on a page
 
 TIM.mixins.flipset = {
 		
@@ -165,33 +175,10 @@ TIM.mixins.flipset = {
   		this.pages = [];
   		this.flipSet = {};
   		this.flipSetInitialized = false;
-  		this.chunkSize = 6;
+  		this.chunkSize = 50;
   		this.renderedIndex = 0;
   		this.numResourcesRendered = 0;
   		this.flipMode = true;
-  		/*
-  		this.$el.swipe({
-  		    threshold: 30,
-  		    swipeRight: function(event) {
-  		       //alert('swipe!');
-    	       //that.flipNext();
-    	    },
-    	    swipeUp: function(event) {
-    	      //alert('swipe!');
-    	      if(that.flipMode)
-    	        that.flipNext();
-    	    },
-    	    swipeDown: function(event) {
-    	        if(that.flipMode)
-    	          that.flipPrevious();
-    	    },
-    	    swipeLeft: function(event) {
-    	       //alert('swipe!');
-    	    },
-    	    click: function(event) {
-    	      //alert('click!!!!!');
-    	    }
-    	}); */
 		},
 		
 		//send pages to the flips script one at a time as strings?
@@ -202,7 +189,6 @@ TIM.mixins.flipset = {
 		    var tmpl = this.pageTemplate;
 		    var that = this;
 		    
-		    //have to use a callback, as dust rendering is asychronous
         pageView.render(tmpl, function(pageHtml){
           if (!that.flipSetInitialized) {
   					//this.flipSet = new Flipset($(this.el), 320, 370, [$(pageView.el)]);
@@ -214,9 +200,7 @@ TIM.mixins.flipset = {
   					//this.$el.flips("addPage", pageView.$el);
   					that.flipSetInitialized = true;
   				} else {
-  					that.flipSet.addPage(pageHtml, {skipLayout: true});
-  					//alert("god dammit, can't do this yet!");
-  					
+  					that.flipSet.addSourceItem(pageHtml);
   				}
         });
         
@@ -225,12 +209,15 @@ TIM.mixins.flipset = {
     
     //
     
-    renderFlipSet: function(){
+    renderFlipSet: function(options){
 			//make pages here?  let's try it!!
+			options = options || {};
+			console.log("rendering flipset, options: ", options);
 			var startIndex = this.numResourcesRendered;
 			this.pages = this.pages || [];
 			var self = this;
 			var page = [];
+			var itemJSON;
 			this.renderedIndex = this.renderedIndex || 0;
 			this.flipSetInitialized = this.flipSetInitialized || false;
 
@@ -250,8 +237,14 @@ TIM.mixins.flipset = {
 			this.collection.each(function(item, index) {
 			  //console.log(index, startIndex);
 			  if(index < startIndex) return;
+			  itemJSON = item.toJSON();
+			  if(options.pageMetaData) {
+			    
+			  }
+			  //this is very dependent on the old structure of the data
+			  
 				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
-					self.pages.push({"event_class" : "full-page", "events" : [item.toJSON()]});
+					self.pages.push({num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
 					page.push(item);
 					if(page.length == 2) {
@@ -261,6 +254,7 @@ TIM.mixins.flipset = {
 				}
 				self.numResourcesRendered++;
 			});
+			
 			//if there's one left over, make a page of it!
 			if(page.length == 1) {
 			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
@@ -276,15 +270,12 @@ TIM.mixins.flipset = {
 			if(TIM.appContainerElem.find(this.el).length == 0)  {
 			  TIM.appContainerElem.append(this.$el);
 			}
-			console.log("flipset: ", this.flipSet);
+			//console.log("flipset: ", this.flipSet);
 			return this;
     },
     
-    //have to render 2 pages at a time with the new flipboard functionality - er, not really...
 		renderPageChunk: function(start) {
 			//would this fn check for earlier/later events if they haven't been loaded?
-			
-			
 			
       var that = this;
 			var end = start + this.chunkSize;
@@ -297,49 +288,31 @@ TIM.mixins.flipset = {
 			   // i += 2;
   			//	this.renderedIndex += 2;
 			 // } else {
+			   //console.log('calling render page');
 			    this.renderPage([this.pages[i]]);
   				this.renderedIndex++;
+  				//that.flipSet._addPage();
 			  //}
 			}
-			var layout = function() {
-			  that.flipSet._layout();
-			}
-			window.setTimeout(layout, 20);
-			
-			/*
-			if (!this.flipSetInitialized) {
-				//this.flipSet = new FlipSet($(this.el), 320, 370, [$(pageView.el)]);
-				console.log("hey, here's teh pageview elem", $(pageView.el));
-				this.$el.flips({pages:$(pageView.el, pageView.el)});
-				this.flipSetInitialized = true;
-			} else {
-				//this.flipSet.push($(pageView.el));
-				alert("god dammit, can't do this yet!");
-			} */
+			console.log('in render page chunk starting with ', start);
+			//have to know how to remove the last (2?) page(s) from teh flipset & insert starting there..
+			that.flipSet._createPageElements();
 		},
 		
 		flipNext: function(){
-		  //$.mobile.silentScroll(0);
-			//  window.scrollTo( 0, 1 );
-			//check if there are more pages to go
-			//if they've been rendered
-      
-			//prerender 2 pages in advance?
 			
 			var that = this;
+			//prerendering 3 pages & sending to flipset
+			//we always want to have this many pages available to teh flipset because it needs to have as many as 4 pages in the DOM at one time
 			
-			if(this.pageNum == (this.renderedIndex - 2)) {
+			if(this.pageNum == (this.renderedIndex - 3)) {
 				this.renderPageChunk(this.renderedIndex);
 			}
 			
-			//console.log(this);
 			if (this.pageNum < this.collection.length - 2) {
-				//this.flipSet.next(function(){});
-				//
 				this.pageNum++;
 			} else {
-			  //try to get the next page!
-			  //make this happen at least one 
+			  
 			  if($('#app').hasClass('loading') || this.collection.getNextPage === undefined) {
 			    return;
 			  }
@@ -364,10 +337,11 @@ TIM.mixins.flipset = {
 		},
 		
 		goToPage: function(num){
-			//$.mobile.silentScroll(0);
-			//window.scrollTo( 0, 1 );
+			
 			this.pageNum = 0;
-			//console.log(this);
+			
+			//make sure pages are rendered before trying to go to that page
+			
 			for(var i = 0; i < num; i++) {
 		    //prerender 2 pages in advance?
   			if(this.pageNum == (this.renderedIndex - 2)) {
@@ -375,11 +349,8 @@ TIM.mixins.flipset = {
   			}
   			this.pageNum++;
   		}
-  		this.flipSet.currentIndex_ = this.pageNum;
   	
-  		this.flipSet.currentPage = this.pageNum;
-  		this.flipSet._goto();
-  		//this.flipSet.displayCurrentFlip_();
+  		this.flipSet._gotoPage(num);
   		
 		},
 		
@@ -387,245 +358,4 @@ TIM.mixins.flipset = {
 		  
 		}
 }
-
-
-/* flipboard functionality from blog post via Grio */
-
-function FlipSet($wrapper, width, height, nodes) {
-  this.flips_ = [];
-  this.currentIndex_ = 0;
-  this.width = width;
-  this.height = height;
-
-  for (var i = 0, node; node = nodes[i]; i++) {
-  	this.flips_.push(new Flip(node, width, height, this));
-  }
-    
-  this.containerNode_ = $("<div class='flip-set'/>");
-  //trying out not-explicitly-sized flips
-  this.containerNode_.css("width", '100%');
-  this.containerNode_.css("height", '100%');
-    
-  this.displayCurrentFlip_();
-  $wrapper.append(this.containerNode_);
-} 
-
-FlipSet.prototype.displayCurrentFlip_ = function() {
-  this.containerNode_.empty();
-  console.log("current flip:", this.flips_[this.currentIndex_].originalNode_);
-  this.containerNode_.append(this.flips_[this.currentIndex_].originalNode_);
-}
-
-FlipSet.prototype.getCurrentIndex = function(node) {
-	return this.currentIndex_;
-}
-
-FlipSet.prototype.push = function(node) {
-	this.flips_.push(new Flip(node, this.width, this.height, this));
-}
-
-FlipSet.prototype.unshift = function(node) {
-	this.flips_.unshift(new Flip(node, this.width, this.height, this));
-    this.currentIndex_++;
-}
-
-FlipSet.prototype.getLength = function() {
-	return this.flips_.length;
-}
-
-FlipSet.prototype.next = function(callback) {
-  if (this.isTransitioning_) return;
-  
-  this.isTransitioning_ = true;
-  var currentFlip = this.flips_[this.currentIndex_]
-  var nextFlip = this.flips_[this.currentIndex_ + 1];
-  
-  currentFlip.beginFlipFrom();
-  nextFlip.beginFlipTo();
-  var self = this;
-  nextFlip.immediate(nextFlip.foldBottom, function() {
-    currentFlip.foldTop();
-    nextFlip.unfold();
-    currentFlip.moveToBack();
-    nextFlip.onTransitionEnd(function() {
-      nextFlip.endFlipTo();
-      currentFlip.endFlipFrom();
-      self.isTransitioning_ = false;
-      callback();
-    });
-  });
-
-  this.currentIndex_++;
-};
-
-FlipSet.prototype.previous = function(callback) {
-  if (this.isTransitioning_) return;
-  
-  this.isTransitioning_ = true;
-  var currentFlip = this.flips_[this.currentIndex_]
-  var previousFlip = this.flips_[this.currentIndex_ - 1];
-  
-  currentFlip.beginFlipFrom();
-  previousFlip.beginFlipTo();
-  
-  // Hack to make the lower part of the page appear
-  var height = this.height; 
-  //previousFlip.bottomInnerContainerNode_.css("top", "50%");//Math.floor(height/2) + 'px');
-  //var t=setTimeout(function() {
-  		//previousFlip.bottomInnerContainerNode_.css("top", "-50%");//-Math.floor(height/2) + 'px');
-  	//}, 200);
-  
-  
-  // currentFlip.bottomInnerContainerNode_.hide();
-  var self = this;
-  previousFlip.immediate(previousFlip.foldTop, function() {
-  	currentFlip.foldBottom();
-    previousFlip.unfold();
-    currentFlip.moveToBack();
-    previousFlip.onTransitionEnd(function() {
-  	  currentFlip.bottomInnerContainerNode_.show();
-      previousFlip.endFlipTo();
-      currentFlip.endFlipFrom();
-      self.isTransitioning_ = false;
-      callback();
-    });
-  });	  
-  
-  this.currentIndex_--;
-};
-
-FlipSet.prototype.canGoNext = function() {
-  return this.currentIndex_ < this.flips_.length - 1;
-};
-
-FlipSet.prototype.canGoPrevious = function() {
-  return this.currentIndex_ > 0;
-};
-
-function Flip(node, width, height, parentSet) {
-  this.originalNode_ = node;
-  this.parentSet_ = parentSet;
-  this.init_(width, height);
-}
-
-Flip.prototype.init_ = function(width, height) {
-  this.originalNode_.css("height", "100%");
-  var node = this.originalNode_;
-  
-  var containerNode = $("<div class='flip-container'/>");
-  containerNode.css("width", "100%");
-  containerNode.css("height", "100%");
-  
-  var topContainerNode = $("<div class='flip-top-container flip-transitionable'/>");
-  topContainerNode.append(node.clone());
-  topContainerNode.css("width", "100%");
-  topContainerNode.css("height", "50%");
-  //topContainerNode.find(".footer").css("bottom", -Math.floor(height/2) + 'px');
-  
-  var bottomContainerNode = $("<div class='flip-bottom-container flip-transitionable'/>");
-  var bottomInnerContainerNode = $("<div class='flip-bottom-inner-container'/>");
-  
-  bottomInnerContainerNode.append(node.clone());
-  bottomInnerContainerNode.css("height", "200%");
-
-  bottomContainerNode.append(bottomInnerContainerNode);
-  bottomContainerNode.css("height", "50%");
-  bottomContainerNode.css("width", "100%");
-  bottomInnerContainerNode.css("width", "100%");
-
-  bottomInnerContainerNode.css("top", "-100%");
-  
-  containerNode.append(topContainerNode);
-  containerNode.append(bottomContainerNode);
-  
-  this.containerNode_ = containerNode;
-  this.topContainerNode_ = topContainerNode;
-  this.bottomContainerNode_ = bottomContainerNode;
-  this.bottomInnerContainerNode_ = bottomInnerContainerNode;
-  
-  
-  var self = this;
-  var onTransitionEnd = function() {
-    if (self.onTransitionEnd_) {
-      self.onTransitionEnd_();
-      self.onTransitionEnd_ = null;
-    }
-  };
-  
-  try {
-  	this.containerNode_.bind("webkitTransitionEnd", onTransitionEnd);
-  } catch (err) {}
-  
-  try {
-    // Should be mozTransitionEnd, but is transition end per 
-    // https://developer.mozilla.org/en/CSS/CSS_transitions#Detecting_the_completion_of_a_transition
-  	this.containerNode_.bind("transitionend", onTransitionEnd);
-  } catch (err) {}
-};
-
-Flip.prototype.moveToFront = function() {
-  this.containerNode_.css("z-index", 1);
-};
-
-Flip.prototype.moveToBack = function() {
-   this.containerNode_.css("z-index", -1);
-};
-
-Flip.prototype.beginFlipFrom = function() {
-  this.moveToFront();
-  this.originalNode_.replaceWith(this.containerNode_);  
-};
-
-Flip.prototype.beginFlipTo = function() {
-  this.parentSet_.containerNode_.append(this.containerNode_);
-};
-
-Flip.prototype.endFlipFrom = function() {
-  //this.containerNode_.css("display", 'none').detach().css("display", 'block');
-  this.containerNode_.detach();
-  //this.containerNode_.css("display", 'block');
-  this.containerNode_.css("z-index", 'auto');
-};
-
-Flip.prototype.endFlipTo = function() {
-  this.containerNode_.parent().append(this.originalNode_);
-  this.containerNode_.css("z-index", 'auto');
-  //this.containerNode_.css("display", 'none').detach().css("display", 'block');
-  this.containerNode_.detach();
-  //this.containerNode_.css("display", 'block');
-  this.containerNode_.css("z-index", 'auto');
-};
-
-Flip.prototype.immediate = function(method, callback) {
-	this.topContainerNode_.removeClass('flip-transitionable');
-	this.bottomContainerNode_.removeClass('flip-transitionable');
-  
-  method.call(this);
-  
-  var self = this;
-  window.setTimeout(function() {
-	self.topContainerNode_.addClass('flip-transitionable');
-	self.bottomContainerNode_.addClass('flip-transitionable');
-    
-    callback();
-  });
-};
-
-Flip.prototype.foldTop = function() {
-  this.containerNode_.addClass('folded-top');
-};
-
-Flip.prototype.foldBottom = function(opt_immediate) {
-  this.containerNode_.addClass('folded-bottom');
-}
-
-Flip.prototype.unfold = function(opt_immediate) {
-  this.containerNode_.removeClass('folded-top');
-  this.containerNode_.removeClass('folded-bottom');
-}
-
-Flip.prototype.onTransitionEnd = function(callback) {
-  this.onTransitionEnd_ =callback;
-};
-
 

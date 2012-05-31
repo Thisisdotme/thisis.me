@@ -75,7 +75,7 @@
 			click			: null,		// Function	- A handler triggered when a user just clicks on the item, rather than swipes it. If they do not move, click is triggered, if they do move, it is not.
 			
 			triggerOnTouchEnd : true,	// Boolean, if true, the swipe events are triggered when the touch end event is received (user releases finger).  If false, it will be triggered on reaching the threshold, and then cancel the touch event automatically.
-			allowPageScroll : "auto" 	/* How the browser handles page scrolls when the user is swiping on a touchSwipe object. 
+			allowPageScroll : "none" 	/* How the browser handles page scrolls when the user is swiping on a touchSwipe object. 
 											"auto" : all undefined swipes will cause the page to scroll in that direction.
  											"none" : the page will not scroll when user swipes.
  											"horizontal" : will force page to scroll on horizontal swipes.
@@ -130,7 +130,8 @@
 			var end={x:0, y:0};
 			var delta={x:0, y:0};
 			// added by Codrops
-			var lastPositionX = 0; 
+			var lastPositionX = 0;
+			var lastPositionY = 0;  
 			
 			/**
 			* Event handler for a touch start event. 
@@ -159,6 +160,7 @@
 					start.y = end.y = evt.pageY;
 					// changed by Codrops
 					lastPositionX = end.x;
+					lastPositionY = end.y;
 					
 					if (defaults.swipeStatus)
 						triggerHandler(event, phase, start, end);
@@ -190,7 +192,8 @@
 			
 				// changed by Codrops
 				direction = caluculateDirection();
-				lastPositionX = end.x;	
+				lastPositionX = end.x;
+				lastPositionY = end.y;	
 				
 				if (hasTouch) {
                     fingerCount = event.touches.length;
@@ -239,7 +242,7 @@
 				distance = caluculateDistance();
 				
 				//changed by codrops
-				direction = caluculateDirection();
+				//direction = caluculateDirection();
 				
 				if (defaults.triggerOnTouchEnd)
 				{
@@ -426,20 +429,31 @@
 			{
 				var angle = caluculateAngle();
 				
-				if ( (angle <= 45) && (angle >= 0) ) 
-					return LEFT;
+				if ( (angle <= 45) && (angle >= 0) ) {
+				  return LEFT;
+				}
+					
 				
-				else if ( (angle <= 360) && (angle >= 315) )
-					return LEFT;
+			  if ( (angle <= 360) && (angle >= 315) ) {
+			    return LEFT;
+			  }
+					
 				
-				else if ( (angle >= 135) && (angle <= 225) )
-					return RIGHT;
+				if ( (angle >= 135) && (angle <= 225) ) {
+				  return RIGHT;
+				}
+					
 				
-				else if ( (angle > 45) && (angle < 135) )
-					return DOWN;
+				if ( (angle > 45) && (angle < 135) ) {
+				  return end.y > lastPositionY ? DOWN : UP;
+				}
+					
 				
-				else
-					return UP;
+				else {
+				  console.log('end, last', end.y, lastPositionY);
+				  return end.y > lastPositionY ? DOWN : UP;
+				}
+					
 			}
 			
 			// added by codrops

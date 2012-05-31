@@ -77,8 +77,8 @@
       className: "appPage",
       
       events: {
-        "click .highlight" : "showHighlight",
-        "click a" : "linkClicked"
+        "vclick .highlight" : "showHighlight",
+        "vclick a" : "linkClicked"
         
       },
 

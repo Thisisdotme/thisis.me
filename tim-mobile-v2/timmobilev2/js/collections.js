@@ -30,8 +30,9 @@ TIM.collections.Features = Backbone.Collection.extend({
 TIM.mixins.paging = {
   
   initializePaging: function(options) {
+    options = options || {};
     this.page = 1;
-  	this.pageSize = 15 || options.pageSize; 
+  	this.pageSize = options.pageSize || 15; 
   },
   
   //get earlier events and append them to the beginning of the collection
@@ -43,7 +44,7 @@ TIM.mixins.paging = {
   getNextPage: function() {
     var that = this;
     this.page++;
-    //alert(this.collection.page);
+
     $('#app').addClass('loading');
     this.fetch({
       add:true,
