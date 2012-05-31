@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 import logging
 
@@ -9,66 +8,94 @@ from event_updaters import event_updater
 
 
 class EventUpdaterDriver(AppBase):
-
   def display_usage(self):
-    return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
+    return 'usage: %prog [options]'
 
-  def _handle_event(self, msg):
-    send_messages(self.client, [msg])
+  def init_args(self):
+    self.option_parser.add_option('--service',
+                                  dest='services',
+                                  action='append',
+                                  default=[],
+                                  help='Service to process')
 
-  def _handle_message_receive(self, msg):
+  def parse_args(self, ignore):
+    (self.option, ignore) = self.option_parser.parse_args()
 
-    def handle_event_callback(callback_msg):
-      self._handle_event(callback_msg)
-
-    body = msg['message']
-    with db.Context():
-      self.updater.fetch(body['service_id'],
-                         body['service_author_id'],
-                         body['service_event_id'],
-                         handle_event_callback)
+    if ignore:
+      self.option_parser.print_help()
+      sys.exit()
 
   def main(self):
-
     logging.info("Beginning: " + self.name)
-
-    service_name = self.args[0]
-    if not service_name:
-      logging.fatal("Missing required argument: service-name")
-      return
 
     # read the db url from the config
     db_url = self.config['db']['sqlalchemy.url']
+    # get the broker and queue config
+    broker_url = self.config['broker']['url']
 
     # initialize the db engine & session
     db.configure_session(db_url)
 
-    # get the oauth application config for this collector
-    oauth_config = self.config['oauth'][service_name]
-
-    # get the broker and queue config
-    broker_url = self.config['broker']['url']
-    queue_config = self.config['queues']
-    self.send_queue = queue_config[service_name]['event']
-    receive_queue = queue_config[service_name]['update']
-
-    logging.info('Queue broker URL: %s' % broker_url)
-    logging.info('Receive queue: %s' % receive_queue)
-    logging.info('Send queue: %s' % self.send_queue)
-
-    self.updater = event_updater.from_service_name(service_name, oauth_config)
-
     # get message broker client and store in instance -- used for both receiving and sending
-    self.client = create_message_client(broker_url)
+    client = create_message_client(broker_url)
 
-    create_queues(self.client, [receive_queue], durable=False)
+    services = services_configuration(self.option.services, self.config)
 
-    def handle_receieve_callback(callback_msg):
-      self._handle_message_receive(callback_msg)
+    durable_queues = []
+    non_durable_queues = []
+    handlers = []
+    for service in services:
+      # List queues
+      durable_queues.append(service['send_queue'])
+      non_durable_queues.append(service['receive_queue'])
 
-    join(self.client, receive_queue, handle_receieve_callback)
+      # Create handlers
+      updater = event_updater.from_service_name(service['name'], service['oauth'])
+      handler = {'queue': service['receive_queue'],
+                 'handler': create_updater_handler(updater, client)}
+      handlers.append(handler)
+
+    logging.info('Queue broker URL: %s', broker_url)
+    logging.info('Active queue: %s %s', durable_queues, non_durable_queues)
+    logging.debug('Active handlers: %s', handlers)
+
+    create_queues(client, non_durable_queues, durable=False)
+    create_queues(client, durable_queues)
+
+    join(client, handlers)
 
     logging.info("Finished: " + self.name)
+
+
+def services_configuration(services, config):
+  # If services is empty then get all the services in the configuration
+  if not services:
+    for service in config['queues'].iterkeys():
+      services.append(service)
+
+  return [{'name': service,
+           'oauth': config['oauth'][service],
+           'send_queue': config['queues'][service]['event'],
+           'receive_queue': config['queues'][service]['update']} for service in services]
+
+
+def create_event_callback(client):
+  def handler(message):
+    send_messages(client, [message])
+
+  return handler
+
+
+def create_updater_handler(updater, client):
+  def handler(message):
+    body = message['message']
+    with db.Context():
+      updater.fetch(body['service_id'],
+                    body['service_author_id'],
+                    body['service_event_id'],
+                    create_event_callback(client))
+
+  return handler
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
