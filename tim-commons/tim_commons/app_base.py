@@ -1,9 +1,3 @@
-'''
-Created on Feb 19, 2012
-
-@author: howard
-'''
-
 import os
 import sys
 import logging
@@ -84,28 +78,14 @@ class AppBase:
         sys.exit(self.STATUS_ERROR)
 
   def init_logger(self):
-    # Set the root logger to DEBUG
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)s [%(name)s] - %(message)s',
+                        stream=sys.stdout)
 
-    #create logger
-    logger = logging.getLogger(self.name)
-    logger.setLevel(logging.DEBUG)
+    # Configure the sqlalchemy logger
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-    #create console handler and set level to debug
-    ch = logging.StreamHandler(sys.stdout)
-    ch.setLevel(logging.DEBUG)
-
-    #create formatter
-    formatter = logging.Formatter("%(asctime)s %(levelname)s [%(name)s] - %(message)s")
-
-    #add formatter to ch
-    ch.setFormatter(formatter)
-
-    #add ch to logger
-    logger.addHandler(ch)
-
-    self.log = logger
+    self.log = logging.getLogger()
 
   def load_config(self, config_file):
     self.config = load_configuration(config_file)

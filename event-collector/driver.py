@@ -1,97 +1,95 @@
-#!/usr/bin/env python
-
-'''
-Created on May 2, 2012
-
-@author: howard
-'''
 import sys
-import signal
-import os
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+import logging
 
 from tim_commons.app_base import AppBase
-from event_collectors.event_collector_factory import EventCollectorFactory
+from event_collectors import event_collector
 from tim_commons.message_queue import (create_message_client, join, send_messages, create_queues)
-
-DBSession = sessionmaker()
+from tim_commons import db
 
 
 class EventCollectorDriver(AppBase):
 
   def display_usage(self):
-    return 'Usage: ' + self.name + '.py <<service_name>> \nExample: ' + self.name + '.py facebook'
+    return 'usage: %prog [options]'
 
-  def _handle_event(self, msg):
-    send_messages(self.client, self.send_queue, [msg])
+  def init_args(self):
+    self.option_parser.add_option('--service',
+                                  dest='services',
+                                  action='append',
+                                  default=[],
+                                  help='Services to process')
 
-  def _handle_message_receive(self, msg):
+  def parse_args(self, ignore):
+    (self.option, ignore) = self.option_parser.parse_args()
 
-    def handle_event_callback(callback_msg):
-      self._handle_event(callback_msg)
-
-    self.collector.fetch(msg['message']['service_author_id'], handle_event_callback)
-
-  def setup_term_handler(self):
-
-    def term_handler(signum, frame):
-      print 'received SIGTERM signal'
+    if ignore:
+      self.option_parser.print_help()
       sys.exit()
 
-    pid = os.getpid()
-    print pid
+  def create_event_callback(self):
+    def handler(message):
+      send_messages(self.client, [message])
 
-    signal.signal(signal.SIGTERM, term_handler)
-    # signal.siginterrupt(signal.SIGTERM, False)
+    return handler
+
+  def create_collector_handler(self, collector):
+    def handler(message):
+      with db.Context():
+        collector.fetch(message['message']['service_author_id'], self.create_event_callback())
+
+    return handler
 
   def main(self):
-
-    self.log.info("Beginning: " + self.name)
-
-    service_name = self.args[0]
-    if not service_name:
-      self.log.fatal("Missing required argument: service-name")
-      return
+    logging.info("Beginning: " + self.name)
 
     # read the db url from the config
-    dbUrl = self.config['db']['sqlalchemy.url']
-
-    # initialize the db engine & session
-    engine = create_engine(dbUrl, encoding='utf-8', echo=False)
-    DBSession.configure(bind=engine)
-
-    db_session = DBSession()
-
-    # get the oauth application config for this collector
-    oauth_config = self.config['oauth'][service_name]
-
+    db_url = self.config['db']['sqlalchemy.url']
     # get the broker and queue config
     broker_url = self.config['broker']['url']
-    queue_config = self.config['queues']
-    self.send_queue = queue_config[service_name]['event']
-    receive_queue = queue_config[service_name]['notification']
 
-    self.log.info('Queue broker URL: %s' % broker_url)
-    self.log.info('Receive queue: %s' % receive_queue)
-    self.log.info('Send queue: %s' % self.send_queue)
+    # initialize the db engine & session
+    db.configure_session(db_url)
 
-#    self.setup_term_handler()
+    services = services_configuration(self.option.services, self.config)
 
-    self.collector = EventCollectorFactory.from_service_name(service_name, db_session, oauth_config, self.log)
+    # Get a list of all the queues and all the handlers
+    queues = []
+    handlers = []
+    for service in services:
+      # List queues
+      queues.append(service['send_queue'])
+      queues.append(service['receive_queue'])
+
+      # Create handlers
+      collector = event_collector.from_service_name(service['name'], service['oauth'])
+      handler = {'queue': service['receive_queue'],
+                 'handler': self.create_collector_handler(collector)}
+      handlers.append(handler)
+
+    logging.info('Queue broker URL: %s', broker_url)
+    logging.info('Active queues: %s', queues)
+    logging.debug('Active handlers: %s', handlers)
 
     # get message broker client and store in instance -- used for both receiving and sending
     self.client = create_message_client(broker_url)
+    create_queues(self.client, queues)
 
-    create_queues(self.client, [self.send_queue, receive_queue])
+    join(self.client, handlers)
 
-    def handle_receieve_callback(callback_msg):
-      self._handle_message_receive(callback_msg)
+    logging.info("Finished: " + self.name)
 
-    join(self.client, receive_queue, handle_receieve_callback)
 
-    self.log.info("Finished: " + self.name)
+def services_configuration(services, config):
+  # If services is empty then get all the services in the configuration
+  if not services:
+    for service in config['queues'].iterkeys():
+      services.append(service)
+
+  return [{'name': service,
+           'oauth': config['oauth'][service],
+           'send_queue': config['queues'][service]['event'],
+           'receive_queue': config['queues'][service]['notification']} for service in services]
+
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes

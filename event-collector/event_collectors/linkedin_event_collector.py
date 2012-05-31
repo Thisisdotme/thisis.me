@@ -52,7 +52,7 @@ class LinkedinEventCollector(EventCollector):
     if asm.most_recent_event_timestamp:
       args['after'] = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
     else:
-      # limit to only one year of data
+      # limit to one year of data
       args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
 
     offset = 0
@@ -90,7 +90,7 @@ class LinkedinEventCollector(EventCollector):
 
               postClone['updateContent']['person']['connections'] = {"_total": 1, "values": [copy.deepcopy(connection)]}
 
-              interpreter = LinkedinEventInterpreter(postClone)
+              interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
               if interpreter.get_time() < min_age:
                 url = None
@@ -101,7 +101,7 @@ class LinkedinEventCollector(EventCollector):
 
           elif (update_type == 'PREC' or update_type == 'SVPR') and post['updateContent']['person']['id'] == service_author_id:
 
-            interpreter = LinkedinEventInterpreter(post)
+            interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
             if interpreter.get_time() < min_age:
               url = None
@@ -112,7 +112,7 @@ class LinkedinEventCollector(EventCollector):
 
           elif update_type == 'SHAR':
 
-            interpreter = LinkedinEventInterpreter(post)
+            interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
             if interpreter.get_time() < min_age:
               url = None
@@ -123,7 +123,7 @@ class LinkedinEventCollector(EventCollector):
 
           elif update_type == 'MSFC' and post['updateContent']['companyPersonUpdate']['person']['id'] == service_author_id:
 
-            interpreter = LinkedinEventInterpreter(post)
+            interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
             if interpreter.get_time() < min_age:
               url = None
@@ -134,7 +134,7 @@ class LinkedinEventCollector(EventCollector):
 
           elif update_type == 'JOBP' and post['updateContent']['job']['jobPoster']['id'] == service_author_id:
 
-            interpreter = LinkedinEventInterpreter(post)
+            interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
             if interpreter.get_time() < min_age:
               url = None
@@ -153,7 +153,7 @@ class LinkedinEventCollector(EventCollector):
 
               postClone['updateContent']['person']['memberGroups'] = {"_total": 1, "values": [copy.deepcopy(group)]}
 
-              interpreter = LinkedinEventInterpreter(postClone)
+              interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
               if interpreter.get_time() < min_age:
                 url = None
@@ -164,7 +164,7 @@ class LinkedinEventCollector(EventCollector):
 
           elif update_type == 'STAT' and post['updateContent']['person']['id'] == service_author_id:
 
-            interpreter = LinkedinEventInterpreter(post)
+            interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
             if interpreter.get_time() < min_age:
               url = None

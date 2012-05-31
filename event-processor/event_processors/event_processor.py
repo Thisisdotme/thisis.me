@@ -1,47 +1,65 @@
 import hashlib
+import sys
+import logging
 from abc import (abstractmethod, ABCMeta)
 from datetime import datetime
+
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
 from mi_schema.models import (ServiceEvent, AuthorServiceMap, Service, EventScannerPriority)
 from tim_commons import json_serializer
+from tim_commons import db
 
 
-class EventProcessor(object):
+def from_service_name(service_name, max_priority, oauth_config):
+
+  # load the desired module from the event_collectors package
+  name = 'event_processors.' + service_name + '_event_processor'
+  __import__(name)
+  mod = sys.modules[name]
+
+  # retrieve the desired class and instantiate a new instance
+  cls = getattr(mod, service_name.capitalize() + "EventProcessor")
+  collector = cls(service_name, max_priority, oauth_config)
+
+  return collector
+
+
+class EventProcessor:
 
   __metaclass__ = ABCMeta
 
-  def __init__(self, service_name, db_session, log):
+  def __init__(self, service_name, max_priority, oauth_config):
 
     self.service_name = service_name
-    self.db_session = db_session
-    self.log = log
+    self.oauth_config = oauth_config
+    self.max_priority = max_priority
 
     # get the service-id for this collector's service
-    query = self.db_session.query(Service.id)
-    query.filter(Service.service_name == self.service_name)
-    self.service_id = query.one()
+    query = db.Session().query(Service.id)
+    query = query.filter(Service.service_name == self.service_name)
+    self.service_id, = query.one()
 
   @abstractmethod
-  def get_event_interpreter(self, service_event_json):
+  def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
     pass
 
   def process(self, tim_author_id, service_author_id, service_event_json):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
-    query = self.db_session.query(AuthorServiceMap.id)
-    query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
-                      AuthorServiceMap.service_id == self.service_id))
-    asm_id, = query.one()
+    query = db.Session().query(AuthorServiceMap)
+    query = query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
+                              AuthorServiceMap.service_id == self.service_id))
+    asm = query.one()
 
-    interpreter = self.get_event_interpreter(service_event_json)
+    interpreter = self.get_event_interpreter(service_event_json, asm, self.oauth_config)
 
     # check for existing update
     existing_event = None
     try:
-      query = self.db_session.query(ServiceEvent)
-      query.filter_by(author_service_map_id=asm_id, event_id=interpreter.get_id())
+      query = db.Session().query(ServiceEvent)
+      query = query.filter_by(author_service_map_id=asm.id, event_id=interpreter.get_id())
       existing_event = query.one()
     except NoResultFound:
       pass
@@ -67,10 +85,7 @@ class EventProcessor(object):
       # just skip it
       if existing_digest != new_digest:
 
-        print json.dumps(json.loads(existing_event.json), sort_keys=True, indent=2)
-        print json.dumps(service_event_json, sort_keys=True, indent=2)
-
-        self.log.debug('Updating modified known event')
+        logging.debug('Updating modified known event')
 
         # update event
         existing_event.json = new_json
@@ -82,12 +97,12 @@ class EventProcessor(object):
 
       else:
         # skip event
-        self.log.debug('Skipping unchanged known event')
+        logging.debug('Skipping unchanged known event')
         event_updated = False
 
     else:
 
-      self.log.debug('Adding new unknown event')
+      logging.debug('Adding new unknown event')
 
       # handle new
 
@@ -103,7 +118,7 @@ class EventProcessor(object):
       # TODO: Deal with profile image
       profile_image = None
 
-      service_event = ServiceEvent(asm_id,
+      service_event = ServiceEvent(asm.id,
                                    interpreter.get_id(),
                                    interpreter.get_time(),
                                    url,
@@ -113,28 +128,28 @@ class EventProcessor(object):
                                    auxiliary_content,
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
-      self.db_session.add(service_event)
+      db.Session().add(service_event)
 
-    update_scanner(self.db_serssion,
-                   event_updated,
+    update_scanner(event_updated,
                    interpreter.get_id(),
                    service_author_id,
-                   self.service_name)
+                   self.service_name,
+                   self.max_priority)
 
-    self.db_session.commit()
 
-
-def update_scanner(db_session, event_updated, service_event_id, service_user_id, service_id):
+def update_scanner(event_updated, service_event_id, service_user_id, service_id, max_priority):
   # Get the scanner state from the database
   event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_id)
-  scanner_event = db_session.query(EventScannerPriority).get(event_id)
+  scanner_event = db.Session().query(EventScannerPriority).get(event_id)
 
   if scanner_event is not None:
     if event_updated:
       scanner_event.priority = 0
     else:
       scanner_event.priority += 1
+      if scanner_event.priority > max_priority:
+        scanner_event.priority = max_priority
   else:
     priority = 0 if event_updated else 1
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
-    db_session.add(scanner_event)
+    db.Session().add(scanner_event)

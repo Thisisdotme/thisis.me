@@ -1,15 +1,31 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-
+import logging
+import sys
 from abc import abstractmethod
 from datetime import (datetime, timedelta)
 
 from sqlalchemy import (and_)
 
 from mi_schema.models import (Service, AuthorServiceMap, Author)
+from tim_commons import db
+
+
+def from_service_name(service_name, oauth_config):
+  '''Loads the module and instantiates the class for the specified collector.
+
+  Works on convention. The module name must be <<service_name>>_event_collector and the class
+  name must be <<Servicename>>EventCollector
+  '''
+
+  # load the desired module from the event_collectors package
+  name = 'event_collectors.' + service_name + '_event_collector'
+  __import__(name)
+  mod = sys.modules[name]
+
+  # retrieve the desired class and instantiate a new instance
+  cls = getattr(mod, service_name.capitalize() + "EventCollector")
+  collector = cls(service_name, oauth_config)
+
+  return collector
 
 
 class EventCollector(object):
@@ -19,15 +35,13 @@ class EventCollector(object):
 
   MAX_EVENTS = 1000
 
-  def __init__(self, service_name, db_session, oauth_config, log):
+  def __init__(self, service_name, oauth_config):
 
     self.service_name = service_name
-    self.db_session = db_session
     self.oauth_config = oauth_config
-    self.log = log
 
     # get the service-id for this collector's service
-    service_id, = self.db_session.query(Service.id).filter(Service.service_name == self.service_name).one()
+    service_id, = db.Session().query(Service.id).filter(Service.service_name == self.service_name).one()
     self.service_id = service_id
 
   '''
@@ -36,17 +50,21 @@ class EventCollector(object):
   '''
   def fetch_begin(self, service_author_id):
 
-    asm, author_name = self.db_session.query(AuthorServiceMap, Author.author_name). \
+    asm, author_name = db.Session().query(AuthorServiceMap, Author.author_name). \
                           join(Author, AuthorServiceMap.author_id == Author.id). \
                           filter(and_(AuthorServiceMap.service_id == self.service_id,
                                       AuthorServiceMap.service_author_id == service_author_id)). \
                           one()
 
     now = datetime.now()
+    min_event_time = now - self.LOOKBACK_WINDOW
+    if asm.last_update_time:
+      min_event_time = asm.last_update_time - self.LAST_UPDATE_OVERLAP
+
     return {'now': now,
             'asm': asm,
             'author_name': author_name,
-            'min_event_time': asm.last_update_time - self.LAST_UPDATE_OVERLAP if asm.last_update_time else now - self.LOOKBACK_WINDOW,
+            'min_event_time': min_event_time,
             'most_recent_event_id': asm.most_recent_event_id,
             'most_recent_event_timestamp': asm.most_recent_event_timestamp}
 
@@ -65,15 +83,14 @@ class EventCollector(object):
       state['asm'].most_recent_event_id = state['most_recent_event_id']
       state['asm'].most_recent_event_timestamp = state['most_recent_event_timestamp']
 
-    self.db_session.flush()
-    self.db_session.commit()
-
   '''
     fetch_log - utility for logging author event fetches in a consistent manner
   '''
   def fetch_log_info(self, state):
-    self.log.debug('Fetching %s events for author %s (service_author_id %s)' %
-                      (self.service_name, state['author_name'], state['asm'].service_author_id))
+    logging.debug('Fetching %s events for author %s (service_author_id %s)',
+                  self.service_name,
+                  state['author_name'],
+                  state['asm'].service_author_id)
 
   '''
     fetch
@@ -99,6 +116,6 @@ class EventCollector(object):
         state['most_recent_event_timestamp'] = event_time
 
     else:
-      self.log.debug('Skipping event older than lookback window or last-update overlap')
+      logging.debug('Skipping event older than lookback window or last-update overlap')
 
     return qualifies

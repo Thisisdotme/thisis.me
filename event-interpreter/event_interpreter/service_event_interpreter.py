@@ -11,8 +11,10 @@ class ServiceEventInterpreter(object):
 
   __metaclass__ = ABCMeta
 
-  def __init__(self, json):
+  def __init__(self, json, author_service_map, oauth_config):
     self.json = json
+    self.author_service_map = author_service_map
+    self.oauth_config = oauth_config
 
   '''
     get the service's unique identifier for the event

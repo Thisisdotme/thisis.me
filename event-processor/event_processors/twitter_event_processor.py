@@ -10,5 +10,5 @@ from event_processor import EventProcessor
 
 class TwitterEventProcessor(EventProcessor):
 
-  def get_event_interpreter(self, service_event_json):
-    return TwitterEventInterpreter(service_event_json)
+  def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
+    return TwitterEventInterpreter(service_event_json, author_service_map, oauth_config)

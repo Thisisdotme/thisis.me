@@ -1,32 +1,26 @@
-'''
-Created on May 10, 2012
-
-@author: howard
-'''
-import json
 import urllib2
 import urllib
 
 from tim_commons.messages import create_foursquare_event
+from tim_commons import json_serializer
 from event_updater import EventUpdater
 
 CHECKIN_RESOURCE = 'checkins/'
 
 
 class FoursquareEventUpdater(EventUpdater):
-
-  def fetch(self, tim_author_id, service_author_id, service_event_id, callback):
-
-    super(FoursquareEventUpdater, self).fetch(tim_author_id, service_author_id, service_event_id, callback)
-
-    asm = self.get_author_service_map(tim_author_id)
+  def fetch(self, service_id, service_author_id, service_event_id, callback):
+    asm = self.get_author_service_map(service_author_id)
 
     args = {'oauth_token': asm.access_token,
             'v': 20120130}
 
-    url = '%s%s%s?%s' % (self.oauth_config['endpoint'], CHECKIN_RESOURCE, service_event_id, urllib.urlencode(args))
+    url = '%s%s%s?%s' % (self.oauth_config['endpoint'],
+                         CHECKIN_RESOURCE,
+                         service_event_id,
+                         urllib.urlencode(args))
 
-    event_json = json.load(urllib2.urlopen(url))
+    event_json = json_serializer.load(urllib2.urlopen(url))
 
     # check for error
     if event_json['meta']['code'] != 200:
@@ -55,4 +49,4 @@ class FoursquareEventUpdater(EventUpdater):
     if 'user' in checkin_json:
       del checkin_json['user']
 
-    callback(create_foursquare_event(service_author_id, tim_author_id, checkin_json))
+    callback(create_foursquare_event(service_author_id, asm.tim_author_id, checkin_json))
