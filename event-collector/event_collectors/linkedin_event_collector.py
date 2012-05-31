@@ -52,10 +52,8 @@ class LinkedinEventCollector(EventCollector):
     if asm.most_recent_event_timestamp:
       args['after'] = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
     else:
-      # limit to only one year of data
+      # limit to one year of data
       args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
-
-    args['after'] = 0
 
     offset = 0
     args['start'] = offset
