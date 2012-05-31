@@ -28,7 +28,12 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     return self._client
 
   def get_id(self):
-    return self.json['updateKey']
+    eventId = self.json['updateKey']
+    if self.json['updateType'] == 'CONN':
+      eventId = eventId + ':' + self.json['updateContent']['person']['connections']['values'][0]['id']
+    elif self.json['updateType'] == 'JGRP':
+      eventId = eventId + ':' + self.json['updateContent']['person']['memberGroups']['values'][0]['id']
+    return eventId
 
   def get_time(self):
     return datetime.utcfromtimestamp(int(self.json['timestamp'] / 1000))
