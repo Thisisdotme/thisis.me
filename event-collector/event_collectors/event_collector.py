@@ -33,7 +33,7 @@ class EventCollector(object):
   LAST_UPDATE_OVERLAP = timedelta(hours=1)
   LOOKBACK_WINDOW = timedelta(days=365)
 
-  MAX_EVENTS = 1000
+  MAX_EVENTS = 10000
 
   def __init__(self, service_name, oauth_config):
 
@@ -51,10 +51,10 @@ class EventCollector(object):
   def fetch_begin(self, service_author_id):
 
     asm, author_name = db.Session().query(AuthorServiceMap, Author.author_name). \
-                          join(Author, AuthorServiceMap.author_id == Author.id). \
-                          filter(and_(AuthorServiceMap.service_id == self.service_id,
-                                      AuthorServiceMap.service_author_id == service_author_id)). \
-                          one()
+                                    join(Author, AuthorServiceMap.author_id == Author.id). \
+                                    filter(and_(AuthorServiceMap.service_id == self.service_id,
+                                                AuthorServiceMap.service_author_id == service_author_id)). \
+                                    one()
 
     now = datetime.now()
     min_event_time = now - self.LOOKBACK_WINDOW
@@ -116,6 +116,6 @@ class EventCollector(object):
         state['most_recent_event_timestamp'] = event_time
 
     else:
-      logging.debug('Skipping event older than lookback window or last-update overlap')
+      logging.debug('Skipping event older than lookback window or last-update overlap; event_time == %s' % event_time)
 
     return qualifies

@@ -8,7 +8,7 @@ from datetime import datetime
 from service_event_interpreter import ServiceEventInterpreter
 
 
-class GooglePlusStatusEventInterpreter(ServiceEventInterpreter):
+class GoogleplusStatusEventInterpreter(ServiceEventInterpreter):
 
   def get_id(self):
     return self.json['id']
