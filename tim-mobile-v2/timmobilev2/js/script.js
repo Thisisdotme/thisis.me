@@ -13,9 +13,17 @@ TIM.currentPageElem = $('#splashScreen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#contentContainer');
 TIM.defaultTransition = "fade";
-TIM.isLoading = false;
+TIM.loading_ = false;
+TIM.transitioning_ = false;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
+
+//hide address bar
+window.addEventListener("load",function() {
+    setTimeout(function(){
+        window.scrollTo(0, 0);
+    }, 0);
+});
 
 $(function() {
   
@@ -26,6 +34,16 @@ $(function() {
   if(!TIM.pageInfo || !TIM.pageInfo.authorName || TIM.pageInfo.authorName === '') {
     return;
   }
+  
+  //have a global event/handler for window resize (reorientation?)
+  //
+  //views can subscribe to this and ... update their sizes accordingly if they have explicit sizes
+  //especially for scrollable areas, which need an explicit size, at least for iscroll
+  //
+  //should have a scrollable area object in the views.js?
+  //
+  //
+  
   
   //move things like this to a utils object?
   function reorient(e) {
@@ -59,12 +77,29 @@ $(function() {
 	TIM.disableScrolling();
 	
 	TIM.setLoading = function (loading) {
-	  TIM.isLoading = loading;
+	  TIM._loading = loading;
 	  if(loading) {
 	    $('#app').addClass('loading');
 	  } else {
 	    $('#app').removeClass('loading');
 	  }
+	}
+	
+	TIM.isLoading = function() {
+	  return TIM.loading_;
+	}
+	
+	TIM.setTransitioning = function (transitioning) {
+	  TIM._transitioning = transitioning;
+	  if(transitioning) {
+	    $('#app').addClass('transitioning');
+	  } else {
+	    $('#app').removeClass('transitioning');
+	  }
+	}
+	
+	TIM.isTransitioning = function() {
+	  return TIM.transitioning_;
 	}
 	
 	TIM.setLoading(true);
@@ -81,6 +116,8 @@ $(function() {
 	
 	//fetch the features for this author on load
 	//use a JSONP plugin that properly reports errors?
+	//
+	//
 	TIM.features.fetch({
 		dataType: "jsonp",
 		//add this timeout in case call fails...
@@ -114,19 +151,17 @@ $(function() {
     	//move these to backbone views?
     	//make sure we have vclick event
     	
-    	$('#navToggle').click(function(event){
+    	$('#navToggle').on('vclick', (function(event){
     	  event.preventDefault();
     	  event.stopPropagation();
     	  $('#app').toggleClass('navOpen');
-    	  //$('#featureNav').toggleClass('active');
-    	});
+    	}));
     	
-    	$('#app').click(function(event){
+    	$('#app').on('vclick', (function(event){
     	  event.preventDefault();
-    	  //$('#featureNav').removeClass('active');
-    	})
+    	}))
     	
-    	$('#app').on('click', 'a', function(event) {
+    	$('#app').on('vclick', 'a', function(event) {
     	  event.preventDefault();
     	  TIM.handleLinkClick(event);
     	})
@@ -142,7 +177,7 @@ $(function() {
       }
     },
     
-    //should probably pass an option here of whether to 'activate' the feature
+    //should do something more intelligent than throwing up an alert :)
     featureLoadError: function(options) {
       console.log("Feature loaded failed: ", options);
       alert("feature load failed!");
@@ -150,8 +185,6 @@ $(function() {
     },
   
     featureNavRendered: function(){
-      //features will have 
-      //TIM.features.last().loadFeature();
       var hash = window.location.hash;
       hash = hash || "cover";
       this.navigate(''); //doing this so the following call actually triggers the event
@@ -198,7 +231,7 @@ $(function() {
   	    var feature = TIM.features.getByName(featureName);
   	    
   	    if (TIM.features.getSelectedFeature()) {
-  	      $('#app').addClass('loading'); //make this a method on TIM
+  	      TIM.setLoading(true); //make this a method on TIM
   	    }
   	    
   	    if(!feature) {
@@ -230,6 +263,8 @@ $(function() {
   //do transition between pages?
   //this is going to have to evolve to be something much more like what jquery mobile does with 'changePage'
   //for now this simply handles the DOM page transition
+  //
+  //should keep a history stack & use that to determine whether to do a forward or revers transition
   
 	TIM.transitionPage = function (toPage, options) {
 	  $('#app').removeClass('loading initializing navOpen');
@@ -238,17 +273,14 @@ $(function() {
 	  
 	  //only do transition if necessary - if the from and to page are the same, just return
 	  
-	  console.log('transitioning: ', toPage, fromPage, toPage.is(fromPage));
+	  console.log('transitioning (fromPage, toPage, fromPage==toPage:) ', toPage, fromPage, toPage.is(fromPage));
 	  
 	  if(toPage.is(fromPage) && !options.transitionSamePage) {
 	    return;
 	  }
-	  
-	  //$('#app').removeClass('navOpen'); //hide the main feature nav - make this a TIM method?
 	 
 	  var animationName = options.animationName || TIM.defaultTransition; //changed from slide
-	  
-	  //fromPage.removeClass("slide fade");
+	
 	  var inClasses = "active in " + animationName;
 	  var outClasses = "active out " + animationName;
 	  if(options.reverse) {
@@ -281,10 +313,10 @@ $(function() {
 	TIM.handleLinkClick = function (event) {
 	  event.preventDefault();
 	  var el = event.currentTarget;
-	  //window._el = el;
-	  //return;
+	 
 	  //everything after the first slash?
 	  //this probably needs to be something more intelligent with scary regular expressions!
+	  //
 	  
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
 	  console.log(url);

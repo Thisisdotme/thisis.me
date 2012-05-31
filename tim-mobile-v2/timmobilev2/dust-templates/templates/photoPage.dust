@@ -1,6 +1,8 @@
 <div class="photoPage">
+  <div class="toolbar"><span class="gridLink" data-toolbar-item="gridLink"/><span class="detailLink" data-toolbar-item="detailLink"/><h1>{num} of {options.pageMetaData.count}</h1></div>
 	{#events}
-		<img src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" />
+	  <div class="fullPhoto" style="background-image:url(http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg)" data-photo_id="{id}"/>
+		<!-- <img src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" /> -->
 		<div class="caption"><div>{title}</div></div>
 	{/events}
 </div>

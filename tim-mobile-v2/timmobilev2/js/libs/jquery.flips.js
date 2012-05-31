@@ -23,7 +23,6 @@
 (function( window, undefined ) {
 	
 	$.Flips 			= function( options, element ) {
-	
 		this.$el	= $( element );
 		this._init( options );
 		
@@ -50,6 +49,7 @@
 			this._initTouchSwipe();
 			this._loadEvents();
 			this._goto();
+			alert('dam!');
 			
 		},
 		_validateOpts		: function() {
@@ -590,7 +590,7 @@
 			// hack (todo: issues with safari / z-indexes)
 			if( this.flipSide === 'r2l' || ( this.flipSide === 'l2r' && !$page.data( 'flip' ) ) ) {
 			
-				this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(-180deg)' );
+				//this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(-180deg)' );
 			
 			}
 			
@@ -640,7 +640,7 @@
 			}
 			
 			// hack (todo: issues with safari / z-indexes)
-			this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(180deg)' );
+			//this.$flippingPage.find('.back').css( '-webkit-transform', 'rotateY(180deg)' );
 			
 			// update the angle
 			this.$flippingPage.css( {
@@ -734,7 +734,7 @@
 				// when the flipping page is on the same side).
 				var afterspeed	= this.flipSpeed,
 					beforespeed	= this.flipSpeed,
-					margin		= 60; // hack (todo: issues with safari / z-indexes)
+					margin		= 0;//60; // hack (todo: issues with safari / z-indexes)
 				
 				if( this.$afterOverlay ) {
 				
@@ -770,7 +770,7 @@
 					} ).on( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function( event ) {
 						if( _self.$beforeOverlay ) _self.$beforeOverlay.off( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips');
 						setTimeout( function() {
-							_self._adjustLayout(_self.currentPage);
+							//_self._adjustLayout(_self.currentPage);
 						}, _self.options.flipspeed / 2 - margin );
 					} );
 					
@@ -809,6 +809,7 @@
 						'opacity'				: ( this.flipDirection === 'left' ) ? 1 : 0
 					} ).on( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function( event ) {
 						if( _self.$afterOverlay ) _self.$afterOverlay.off( 'webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips');
+						alert('christ!');
 						_self._adjustLayout(_self.currentPage);
 					} );
 					
