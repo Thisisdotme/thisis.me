@@ -14,6 +14,11 @@ class GoogleplusEventUpdater(EventUpdater):
 
     asm = self.get_author_service_map(service_author_id)
 
+    # TODO - there needs to be a global caching mechanism for this (i.e. memcached, etc.).
+    #        Because of the distributed nature of this two successive updates for the
+    #        same author don't share any state and can't leverage the refresh token
+    #        The refresh token should have a configured TTL
+
     # we need to exchange the refresh token for an access token
     query_args = urllib.urlencode([('client_id', self.oauth_config['key']),
                                    ('client_secret', self.oauth_config['secret']),
