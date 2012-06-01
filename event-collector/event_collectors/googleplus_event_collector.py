@@ -7,15 +7,15 @@ from event_interpreter.googleplus_event_interpreter import GoogleplusStatusEvent
 from event_collector import EventCollector
 
 
-class InstagramEventCollector(EventCollector):
+class GoogleplusEventCollector(EventCollector):
 
   USER_ACTIVITY = 'people/me/activities/public'
 
-  PAGE_SIZE = 200
+  PAGE_SIZE = 100
 
   def fetch(self, service_author_id, callback):
 
-    super(InstagramEventCollector, self).fetch(service_author_id, callback)
+    super(GoogleplusEventCollector, self).fetch(service_author_id, callback)
 
     state = self.fetch_begin(service_author_id)
 
@@ -24,15 +24,15 @@ class InstagramEventCollector(EventCollector):
     asm = state['asm']
 
     # we need to exchange the refresh token for an access token
-    queryArgs = urllib.urlencode([('client_id', self.oauth_config['key']),
-                                  ('client_secret', self.oauth_config['secret']),
-                                  ('refresh_token', asm.access_token),
-                                  ('grant_type', 'refresh_token')])
-    raw_obj = json.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'], queryArgs))
+    query_args = urllib.urlencode([('client_id', self.oauth_config['key']),
+                                   ('client_secret', self.oauth_config['secret']),
+                                   ('refresh_token', asm.access_token),
+                                   ('grant_type', 'refresh_token')])
+    raw_obj = json.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'], query_args))
 
-    accessToken = raw_obj['access_token']
+    access_token = raw_obj['access_token']
 
-    args = {'access_token': accessToken,
+    args = {'access_token': access_token,
             'maxResults': self.PAGE_SIZE}
 
     # setup the url for fetching a page of posts
