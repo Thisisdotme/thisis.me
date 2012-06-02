@@ -49,4 +49,4 @@ class FoursquareEventUpdater(EventUpdater):
     if 'user' in checkin_json:
       del checkin_json['user']
 
-    callback(create_foursquare_event(service_author_id, asm.tim_author_id, checkin_json))
+    callback(create_foursquare_event(service_author_id, asm.author_id, checkin_json))

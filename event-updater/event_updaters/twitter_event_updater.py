@@ -24,6 +24,6 @@ class TwitterEventUpdater(EventUpdater):
                                            'include_entities': '1',
                                            'trim_user': '1'}))
 
-    event_json = json_serializer.load__string(make_request(client, url))
+    event_json = json_serializer.load_string(make_request(client, url))
 
     callback(create_twitter_event(service_author_id, asm.tim_author_id, event_json))
