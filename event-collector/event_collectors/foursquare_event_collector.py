@@ -40,7 +40,7 @@ class FoursquareEventCollector(EventCollector):
     args['offset'] = 0
 
     if asm.most_recent_event_timestamp:
-      args['afterTimestamp'] = asm.most_recent_event_timestamp - 3600
+      args['afterTimestamp'] = asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP
 
     min_age = datetime.utcnow() - self.LOOKBACK_WINDOW
 
