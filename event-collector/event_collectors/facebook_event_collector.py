@@ -33,8 +33,6 @@ class FacebookEventCollector(EventCollector):
     total_accepted = 0
     while path and total_accepted < self.MAX_EVENTS:
 
-      import logging
-      logging.debug("GET page")
       raw_json = json.load(urllib2.urlopen(path))
 
       # process the item
