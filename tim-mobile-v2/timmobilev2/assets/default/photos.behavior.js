@@ -94,15 +94,17 @@ the behavior for the photo feature
   		//url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
   		
   		//let's fake this with flickr
+  		max: 0,
 			  		
-  		initialize: function() {
-  		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
+  		initialize: function(options) {
+  		  options = options || {};
+  		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+
   		  this.initializePaging({pageSize:100});
+  		  this.max = options.max || 0;
   		  var authorName = TIM.pageInfo.authorFirstName;
   			this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + authorName 
   			            + "&per_page=" + this.pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
-  		  //alert(this.url);
   		},
   		
   		
@@ -110,11 +112,24 @@ the behavior for the photo feature
   		  return (resp.photos.photo);
   		},
   		
-  		setURL: function(searchTerm) {
+  		//trying to make this so it doesn't get photos past teh album's 'count'
+  		//
+  		//
+  		
+  		setURL: function(searchTerm, pageSize) {
+  		  searchTerm = searchTerm || this.searchTerm;
+  		  this.searchTerm = searchTerm;
+  		  
+  		  pageSize = pageSize || this.pageSize;
+  		  
+  		  if(this.max && (this.pageSize > this.max)) {
+  		    this.pageSize = this.max;
+  		  }
+  		  
   		  searchTerm = searchTerm || TIM.pageInfo.authorFirstName;
   		  this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + searchTerm 
-  			            + "&per_page=" + this.pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
+  			            + "&per_page=" + pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
   		}
 
   });
@@ -133,7 +148,6 @@ the behavior for the photo feature
       },
 
   		events: {
-  		  //"vclick": "showFlipView",
   		  "vclick .album": "showGridView"
   		},
 
@@ -158,8 +172,10 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			
+  			$('#photoAlbumList').css('height', TIM.getViewportSize().height - 40 + 'px');
+  			
   			this.iScrollElem = new iScroll('photoAlbumList', { hScroll: false });
-  			setTimeout(function () { that.iScrollElem.refresh() }, 50);
+  			setTimeout(function () { that.iScrollElem.refresh() }, 0);
   			
   		  if(!feature.showDetails) {
   		    TIM.transitionPage (this.$el);
@@ -181,7 +197,7 @@ the behavior for the photo feature
   		  if (event) {
   		    resourceId = $(event.currentTarget).data('album_id');
   		  }
-  		  feature.showGridView(resourceId, {animationName: "slide"});
+  		  feature.showGridView({albumId: resourceId, animationName: "slide"});
       },
       
       //figure out the next elements, add those to the grid
@@ -191,7 +207,7 @@ the behavior for the photo feature
       
       resetScrollElem: function() {
         var that = this;
-        setTimeout(function () { that.iScrollElem.refresh() }, 50);
+        setTimeout(function () { that.iScrollElem.refresh() }, 0);
       }
       
   });
@@ -211,7 +227,7 @@ the behavior for the photo feature
       className: "appPage photoFeature",
       numRendered: 0,
       chunkSize: 15,
-      initialRenderSize: 15,
+      initialRenderSize: 30,
       chunkRendering: false,
 
       initialize: function() {
@@ -266,20 +282,14 @@ the behavior for the photo feature
         }
   			
   			//now render the initial batch of photos
-        this.renderChunk(this.initialRenderSize);
-  		  
-  		  //transition to this view
-  			//this needs to not be so silly - shouldn't do this by default
-  			//
-  		  if(!feature.showDetails) {
-  		    TIM.transitionPage (this.$el, {animationName: "slide"});
-		    }
-  		    		  
+        this.renderChunk(this.initialRenderSize);  		  
       },
       
       resetScrollElem: function(options) {
         options = options || {};
         var that = this;
+        //make sure the elem container is the right height
+        $('#photoGridScroll').css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
         if (this.iScrollElem) {
           if (options.destroy) {
             this.iScrollElem.destroy();
@@ -304,15 +314,15 @@ the behavior for the photo feature
               hScroll: false,
               vScrollbar: false
          });
-  			setTimeout(function () { that.iScrollElem.refresh();  }, 10);
+  			setTimeout(function () { that.iScrollElem.refresh();  }, 0);
       },
 
       showFlipView: function(event) {
-  		  var resourceId = 0;
+  		  var photoId = 0;
   		  if (event) {
-  		    resourceId = $(event.currentTarget).data('photo_id');
+  		    photoId = $(event.currentTarget).data('photo_id');
   		  }
-  		  feature.showListView(resourceId, {albumId: this.album.id, collection: this.collection, animationName: "slide"});
+  		  feature.showListView({albumId: this.album.id, photoId: photoId, collection: this.collection, animationName: "slide"});
       },
       
       showAlbumView: function(event) {
@@ -320,6 +330,7 @@ the behavior for the photo feature
   		    animationName: "slide", reverse: true,
   		    callback: function() {
             feature.albumListView.resetScrollElem();
+            TIM.app.navigate('/photos');
           }
   		  });
       },
@@ -342,6 +353,20 @@ the behavior for the photo feature
           this.chunkRendering = true;
          //only render the ones we haven't already rendered
           chunkSize = chunkSize || this.chunkSize;
+          
+          //only render up to the album's count size!
+          var numLeft = this.album.get('count') - this.numRendered;
+          if(numLeft <= 0) {
+            console.log('no more to render');
+            this.$el.find('.loading').html('---');
+            this.chunkRendering = false;
+            return;
+          }
+          
+          if (numLeft < chunkSize) {
+            chunkSize = numLeft;
+            this.$el.find('.loading').html('---');
+          }
          
           var photos = this.collection.toJSON();
           
@@ -352,6 +377,7 @@ the behavior for the photo feature
           //
           
           if(this.collection.length <= this.numRendered + (2 * chunkSize)) {
+            //make this only get until the number specified by the album's 'count'!
             this.collection.getNextPage();
           }
           
@@ -370,8 +396,6 @@ the behavior for the photo feature
     				}
     				//that.iScrollElem.destroy();
     			  $('#photoGridScroll .gridContainer').append(out);
-    			  //that.iScrollElem = new iScroll('photoStreamContainer', { hScroll: false });
-    			  //that.resetScrollElem({addScrollDistance:  500});
     			  that.resetScrollElem();
     			  that.numRendered += photos.length;
     			  TIM.setLoading(false);
@@ -386,6 +410,13 @@ the behavior for the photo feature
       
   });
   
+  
+  //make it so this view doesn't flip beyond its collection's official 'count'
+  //
+  //
+  //other things to do: fake comments list and map icon/overlays
+  //
+  //
   
   TIM.views.PhotoList = Backbone.View.extend( {
           
@@ -424,6 +455,7 @@ the behavior for the photo feature
       setCollection: function(album) {
         this.album = album
         this.collection = album.photos;
+        this.collection.max = album.get("count");
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
       },
@@ -435,6 +467,7 @@ the behavior for the photo feature
       events: {
     			"vclick .detailLink" : "toggleMode",
     			"vclick .gridLink" : "showGridView",
+    			//"vclick .image" : "toggleMode",
     			"vclick .fullPhoto" : "toggleMode",
     			"swiperight" : "showGridView"
   		},
@@ -462,27 +495,32 @@ the behavior for the photo feature
         }
         var that = this;
         feature.showDetails = false;
-        //if(feature.listView.$el.is(TIM.previousPageElem)) {
-          //history.back();
-        //} else {
-          TIM.app.navigate("/photos");
+        feature.showGridView({albumId: this.album.id, reverse:true});
+        /*
           TIM.transitionPage(feature.gridView.$el, {
           //TIM.transitionPage(feature.albumListView.$el, {
               animationName: "slide", 
               reverse: true,
               callback: function() {
                 feature.gridView.resetScrollElem();
+                TIM.app.navigate('/photos/' + that.album.id);
               }
           });
-        //}
+        */
       },
       //we're attempting to load ahead of teh flip
       renderNextPageset: function() {
         this.renderFlipSet();
         //maybe do this a coupld of flips ahead?
         //this.flipNext();
-        $('#app').removeClass('loading');
+        TIM.setLoading(false);
       },
+      
+      //this is going to need some work to be able to (fairly) seamlessly transition between
+      // 'flip mode' and a mode where the image is scrollable and zoomable
+      //
+      // also should have a 'comments mode' and perhaps a 'map mode'
+      //
       
       toggleMode: function(event) {
         var that = this;
@@ -498,10 +536,13 @@ the behavior for the photo feature
   		    $('#contentContainer').prepend(overlay);
   		    var clonedPage = $('.back .photoPage').eq(1).clone();
   		    //alert(img.css('background-image'));
-  		    overlay.append(clonedPage);
-  		    this.$el.css('display', "none");
   		    
+  		    overlay.append(clonedPage);
+  		    this.$el.addClass('hidden');
+  		    var img = clonedPage.find('.image');
+  		    $('.scrollOverlay > div').css('width', img.width() + 'px');
   		    //console.log('imgae: ', img);
+  		    
   		    window.setTimeout(function() {
   		      overlay.addClass('noToolbars');
   		    }, 10);
@@ -512,11 +553,14 @@ the behavior for the photo feature
   		    var containerEl = overlay.get(0);
   		    //var containerEl = $("#contentContainer").css('height','200px');//this.$el.get(0);
   		    if(containerEl) {
-  		      this.iScrollElem = new iScroll(containerEl, { zoom: true, hScrollbar: false, vScrollbar: false });
+  		      this.iScrollElem = new iScroll(containerEl, { zoom: true, vScroll: true, hScroll: true, hScrollbar: false, vScrollbar: false });
+  		       window.setTimeout(function() {
+      		      that.iScrollElem.refresh();
+      		    }, 10); 
   		    }
   		    
   		  } else {
-  		    this.$el.css('display', "block");
+  		     this.$el.removeClass('hidden');
   		     window.setTimeout(function() {
     		      that.$el.toggleClass('flipMode');
     		    }, 10);
@@ -539,6 +583,13 @@ the behavior for the photo feature
         if(info === 'gridLink') {
           this.showGridView();
         }
+      },
+      
+      //keep track of our album id & current photo id?
+      updateRouter: function() {
+        var curPhoto = this.collection.at(this.pageNum);
+        var photoId = curPhoto ? curPhoto.id : 0;
+        TIM.app.navigate("/photos/" + this.album.id + "/" + photoId, {replace:true});
       }
 
   } );
@@ -546,46 +597,64 @@ the behavior for the photo feature
   feature.model = new feature.models.Photos();
   
   //maybe have the ability to prefetch collection before actually showing the feature?
+  //
+  //we're assuming that the url for theis feature will be /photos/<album_id>/<photo_id>
   
-  feature.activate = function(resourceId) {
-    if(resourceId) {
-      //go straight to detail view for this resource...
-      //load collection first?
-      feature.showDetails = true;
-      feature.showDetailId = resourceId;
-    }
+  //if there's no photo id, go to the album grid view
+  //if there's no album id, just go to the main 'album list' view
+  
+  //
+  
+  feature.activate = function(path) {
+    var args = path ? path.split('/') : [];
     
+    var albumId = args[0];
+    var photoId = args[1];
+   
     feature.albumCollection = feature.albumCollection || new TIM.collections.PhotoAlbums();
     feature.mainCollection = feature.mainCollection || new TIM.collections.Photos();
     
     //keep grid/list views hanging around or just use one for each and swap out collections?
     
     //feature.gridView =  feature.gridView || new TIM.views.PhotoGrid();
+    
     feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
+
     
-    //feature.detailView = feature.detailView || new TIM.views.PhotoDetail();
+    //always make sure we have a list of albums?
+    var showView = function(options) {
+      if(options.albumId) {
+  		  if(photoId) {
+  		    feature.showListView(options);
+  		  } else {
+  		    feature.showGridView(options);
+  		  }
+  		} else {
+  		  feature.showAlbumListView();
+  		}
+    }
     
     if(!feature.hasFetchedCollection) {
       console.log('fetching collection!'); 
       
       //this will eventually get the photo albums for the author
       //it should be paged via (perhaps) infinite scroll
+      feature.fakeAlbumData = feature.fakeAlbumData.concat(getFakeAlbums(35));
+      console.log("feature.fakeAlbumData", feature.fakeAlbumData);
       
       feature.albumCollection.reset(feature.fakeAlbumData);
   		feature.hasFetchedCollection = true;
+  		showView({albumId: albumId, photoId: photoId});
   	} else {
-  	  if (feature.showDetails) {
-  	    if (feature.hasFetchedCollection) {
-  	      feature.showDetailView(resourceId);
-  	    }
-  	  } else {
-  	    TIM.enableScrolling();
-  	    //TIM.transitionPage (feature.gridView.$el);
-  	    TIM.transitionPage (feature.albumListView.$el);
-  	  }
+  	  showView({albumId: albumId, photoId: photoId});
   	}
   };
+  
+  feature.showAlbumListView = function(options) {
+    options = options || {};
+    TIM.transitionPage (feature.albumListView.$el);
+  }
   
   //
   //maybe have methods to show detail view, show list view, show grid view?
@@ -594,35 +663,38 @@ the behavior for the photo feature
   //should jump straight to the page that has that resource ID if possible
   //
   
-  feature.showListView = function(resourceId, options) {
+  feature.showListView = function(options) {
+    
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
+    console.log('show list view: ', options);
+    
     TIM.setLoading(true);
     options = options || {};
     TIM.disableScrolling();
-    resourceId = resourceId || feature.showDetailId;
+    resourceId = options.photoId;
     var album = feature.albumCollection.get(options.albumId);
     album.photos.setURL(album.get("searchTerm"));
     
     var collection = album.photos; // || feature.mainCollection;
     
     var showView = function(album) {
-       //this isn't ideal - should be able to re-use the flip view if it's the last one the user saw
-       if (feature.listView) {
+        //this isn't ideal - should be able to re-use the flip view if it's the last one the user saw
+        if (feature.listView) {
          feature.listView.close();
-       }
-       
-       var listView = new TIM.views.PhotoList({collection: album.photos});
-       listView.setCollection (album);
-       listView.initializeFlipset();
-       listView.render();
-       feature.listView = listView;
+        }
 
-  	   var model = collection.find(function(model){return model.get('id') == resourceId});
-       listView.model = model;
-       var pageNum = model ? collection.indexOf(model) + 1 : 1;
-       listView.goToPage(pageNum);
+        var listView = new TIM.views.PhotoList({collection: album.photos});
+        listView.setCollection (album);
+        listView.initializeFlipset();
+        listView.render();
+        feature.listView = listView;
 
+        var model = collection.find(function(model){return model.get('id') == resourceId});
+        listView.model = model;
+        var pageNum = model ? collection.indexOf(model) + 1 : 1;
+        listView.goToPage(pageNum);
+        TIM.app.navigate('/photos/' + album.id + "/" + resourceId);
         TIM.transitionPage (listView.$el, {"animationName":options.animationName || "fade", "reverse": options.reverse});
         feature.showDetailId = 0;
         feature.showDetails = false;
@@ -650,13 +722,23 @@ the behavior for the photo feature
   //show the grid view of one album
   //fetch the collection of photos for the album if necessary
   
-  feature.showGridView = function(albumId) {
+  feature.showGridView = function(options) {
     TIM.setLoading(true);
-    var album = feature.albumCollection.get(albumId);
+    options = options || {};
+    var album = feature.albumCollection.get(options.albumId);
     album.photos.setURL(album.get("searchTerm"));
     //don't make a new one each time?
     feature.gridView = feature.gridView || new TIM.views.PhotoGrid({collection: album.photos});
     feature.gridView.album = album;
+    
+    var showView = function () {
+      //transition to this view
+			//this needs to not be so silly - shouldn't do this by default
+			//
+		  TIM.setLoading(false);
+	    TIM.app.navigate('/photos/' + album.id);
+	    TIM.transitionPage (feature.gridView.$el, {animationName: "slide", reverse: options.reverse});
+    }
     
     if (!album.hasFetchedPhotos) {
       album.photos.fetch({
@@ -666,7 +748,7 @@ the behavior for the photo feature
           album.hasFetchedPhotos = true;
           feature.gridView.setCollection (album);
           feature.gridView.render();
-          TIM.setLoading(false);
+          showView();
   			},
   			error: function(resp) {
           console.log("error: ", resp);
@@ -676,31 +758,27 @@ the behavior for the photo feature
       //just show the album?
       feature.gridView.setCollection (album);
       feature.gridView.render();
-      TIM.setLoading(false );
+      showView();
     }
-
-  }
-  
-  
-  feature.showDetailView = function(resourceId, options) {
-    resourceId = resourceId || feature.showDetailId;
-    options = options || {};
-    var model = feature.mainCollection.find(function(model){return model.get('id') == resourceId});
-	  if(model) {
-	    feature.detailView.model = model;
-	    feature.detailView.render();
-	    TIM.transitionPage (feature.detailView.$el, {"animationName":options.animationName || "fade", "reverse": options.reverse});
-	  } else {
-	    feature.showDetailId = 0;
-		  feature.showDetails = false;
-		  TIM.app.navigate("/photos", {trigger: true}); //if we can't find the resource, just go the default feature view
-	  }
   }
   
   //add to feature?
   TIM.features.getByName("photos").behavior = feature;
   
-  TIM.loadedFeatures["photos"] = feature;
+  TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging?
+  
+  //the rest of the code here is for generating fake photo album data to drive the feature
+  
+  var searchTerms = ["frog","cat","horse","groovy","magnetic","spacy","elephant","water","mountains","jackson","music","angry","bloody","beautiful","jazz","bass",
+  "elvin","coltrane","butterfly","marathon","bert","lsd","philadelphia","macrame","jungle","philosophy","philandering","boorish","race","fly","cimena","basketball","boxing","instagram","scale","architecture",
+  "elusive","spiral","spiritual","lake","droplet"];
+  
+  var thumbUrls = ["http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg","http://farm8.static.flickr.com/7101/7317518440_575f7473e9_s.jpg","http://farm8.static.flickr.com/7102/7317495298_6f865be565_s.jpg",
+  "http://farm9.static.flickr.com/8019/7317489980_9d0948e075_s.jpg","http://farm8.static.flickr.com/7074/7317442018_1401bf1bdf_s.jpg","http://farm8.static.flickr.com/7071/7315388362_5f94d64f9e_s.jpg",
+  "http://farm3.static.flickr.com/2650/3979691504_b570db2465_s.jpg","http://farm9.static.flickr.com/8008/7317204782_a9be30ffe4_s.jpg","http://farm9.static.flickr.com/8148/7310548548_dd8c16edd9_s.jpg",
+  "http://farm8.static.flickr.com/7077/7309112088_30b4e0295f_s.jpg","http://farm8.static.flickr.com/7076/7317232294_5799de05bf_s.jpg","http://farm8.static.flickr.com/7244/7317325330_918e450255_s.jpg",
+  "http://farm8.static.flickr.com/7097/7316591786_14cce6b6af_s.jpg","http://farm8.static.flickr.com/7243/7315224968_7ea76566bb_s.jpg","http://farm9.static.flickr.com/8156/7317521928_b274e5e203_s.jpg",
+  "http://farm8.static.flickr.com/7226/7317491966_37b3b759b6_s.jpg"];
   
   feature.fakeAlbumData = [
     {
@@ -710,60 +788,100 @@ the behavior for the photo feature
       searchTerm: TIM.pageInfo.authorFirstName,
       thumbs: [
         {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+       /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
         {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
       ]
     },
     {
       name: "Photos of " + TIM.pageInfo.authorFirstName,
       count: "31",
       id: 1001,
-      searchTerm: "frog",
+      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
        thumbs: [
           {image_url: "http://farm8.static.flickr.com/7212/7296052850_4b75dae217_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
         ]
     },
     {
       name: "Photos " + TIM.pageInfo.authorFirstName + " has taken",
       count: "156",
       id: 1002,
-      searchTerm: "elephant",
+      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
       thumbs: [
         {image_url: "http://farm8.static.flickr.com/7098/7296136912_d29bb66142_s.jpg", id: 123},
-        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+        /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
       ]
     },
     {
       name: "Photos " + TIM.pageInfo.authorFirstName + " has liked",
       count: "23",
       id: 1003,
-      searchTerm: "dam",
+      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
        thumbs: [
           {image_url: "http://farm8.static.flickr.com/7220/7296052840_6372ef6dff_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
         ]
     },
     {
       name: "Detroit, May 1977",
       count: "15",
       id: 1004,
-      searchTerm: "groovy",
+      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
        thumbs: [
           {image_url: "http://farm8.static.flickr.com/7082/7295851342_99f8612529_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123}
+          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
+        ]
+    },
+    {
+      name: "Tahoe 2009",
+      count: "37",
+      id: 1005,
+      searchTerm: "tahoe",
+       thumbs: [
+          {image_url: "http://farm8.static.flickr.com/7228/7314556638_e004c47b52_s.jpg", id: 123},
+          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
         ]
     }
   ]
+  var album_id_num = 1006;
+  
+  
+  var getFakeAlbums = function (num) {
+    num = num || 10;
+    var fakeAlbums = [];
+    for (var i = 0; i < num; i++) {
+      fakeAlbums.push(generateAlbumJSON());
+    }
+    return fakeAlbums;
+  }
+  
+  var generateAlbumJSON = function () {
+    var searchTerm = searchTerms[Math.floor((Math.random()*searchTerms.length))];
+    var thumb = thumbUrls[Math.floor((Math.random()*thumbUrls.length))];
+    return {
+     name: searchTerm,
+     count: Math.floor((Math.random()*78)+1),
+     id: album_id_num++,
+     searchTerm: searchTerm,
+      thumbs: [
+         {image_url: thumb, id: 123},
+         /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+           {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
+           //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
+       ]
+    }
+  }
   
   
 })(TIM);

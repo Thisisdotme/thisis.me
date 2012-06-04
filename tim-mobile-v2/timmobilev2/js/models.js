@@ -29,12 +29,18 @@
     initialize: function() {
       //add route to this feature to router  /<featurename>
       //also add route to detail view to router /<featurename>/<resourceid>
+      //could also be /featurename/<listid>/<resourceid>
+      
+      //if 3 levels, add 3rd route?
       
       var featureName = this.get('feature_name');
       //a route for /<featurename>
       
       TIM.app.route(featureName, featureName); 
-      TIM.app.route(featureName + "/:number", featureName, function(number){});
+      //TIM.app.route(featureName + "/:resource", featureName, function(number){});
+      
+      //TIM.app.route(featureName + "/:collection/:resource", featureName, function(resource, collection){return 9000}); //we probably have to get way more 'general-purpose' here, but this might (tenuously) do for now?
+      TIM.app.route(featureName + "/*path", featureName, function(path){});
       
     },
 
@@ -42,15 +48,15 @@
       this.destroy();
     },
     
-    loadFeature: function(resourceId) {
-      if(resourceId) {
-        this.set('initialResourceId', resourceId);
+    loadFeature: function(path) {
+      if(path) {
+        this.set('initialPath', path);
       }
       if(!this.get("resourcesLoaded")) {
         this.loadResources();
       } else {
         //send an event notifying that the feature has loaded
-        TIM.eventAggregator.trigger('featureloaded', {"feature": this, "resourceId": this.get('initialResourceId'), "navigateOnLoad": this.get('navigateOnLoad')});
+        TIM.eventAggregator.trigger('featureloaded', {"feature": this, "path": this.get('initialPath'), "navigateOnLoad": this.get('navigateOnLoad')});
       }
     },
     

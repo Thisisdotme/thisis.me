@@ -8,6 +8,26 @@ Backbone.View.prototype.close = function(){
   }
 }
 
+TIM.views.ErrorMessage = Backbone.View.extend( {
+   id: "errorMessage",
+   
+   initialize: function() {
+       _.bindAll(this);
+       this.$messageEl = $('#errorMessage > div');
+   },
+   
+   render: function (options) {
+     options = options || {};
+     var message = options.message || "We encountered an error.  Please try again.";
+     this.$el.html('<div>' + message + '</div>');
+     console.log(this.$el);
+     if(TIM.appContainerElem.find(this.el).length == 0)  {
+			  TIM.appContainerElem.append(this.$el);
+		  }     
+   }
+});
+   
+
 TIM.views.FeatureNav = Backbone.View.extend( {
    el: $( "#featureNavItems" ),
 		
@@ -87,7 +107,6 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 TIM.views.Toolbar = Backbone.View.extend( {
         
     className: "toolbar",
-    
     template: "toolbar",
     
     events: {
@@ -154,7 +173,7 @@ TIM.views.Page = Backbone.View.extend( {
     }
 } );
 
-//should probably have some sort of function that does the template rendering 
+//should probably have some sort of general function that does the template rendering 
 //to prevent lots of code copying and pasting
 
 //an attempt to define the flipset functionality as a mixin
@@ -163,12 +182,6 @@ TIM.views.Page = Backbone.View.extend( {
 
 TIM.mixins.flipset = {
 		
-		//resetFlipSet: function() {
-		  //flipSet: {},
-  		//flipSetInitialized: false,
-  		//chunkSize: 4,
-  		//renderedIndex: 0,
-		//},
 		initializeFlipset: function() {
 		  var that = this;
       this.pageNum = 0;
@@ -191,13 +204,9 @@ TIM.mixins.flipset = {
 		    
         pageView.render(tmpl, function(pageHtml){
           if (!that.flipSetInitialized) {
-  					//this.flipSet = new Flipset($(this.el), 320, 370, [$(pageView.el)]);
   					
   					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml], parentView: that});
   					window.flipSet = that.flipSet; //for debugging
-  					//console.log("hey, here's teh pageview elem", $(pageView.el, pageView.el));
-  					//var flip = this.$el.flips({pages:$(pageView.el, pageView.el)});
-  					//this.$el.flips("addPage", pageView.$el);
   					that.flipSetInitialized = true;
   				} else {
   					that.flipSet.addSourceItem(pageHtml);
@@ -213,6 +222,7 @@ TIM.mixins.flipset = {
 			//make pages here?  let's try it!!
 			options = options || {};
 			console.log("rendering flipset, options: ", options);
+			
 			var startIndex = this.numResourcesRendered;
 			this.pages = this.pages || [];
 			var self = this;
@@ -221,27 +231,48 @@ TIM.mixins.flipset = {
 			this.renderedIndex = this.renderedIndex || 0;
 			this.flipSetInitialized = this.flipSetInitialized || false;
 
-			//make page objects with either 1 or 2 events
-			//if the event has a photo, it takes a full page
-			//otherwise, stuff 2 events in a page
-
-			//should a 'page' be a backbone model?
-			//have a collection of pages?
-
-			//modify this so it doesn't skip too many non-photo events if there's a long series of photo events
-
-			//only do this a little bit at a time?
-
-			//store whether an event has been added to a page?
+			options.start = startIndex;
 			
-			this.collection.each(function(item, index) {
-			  //console.log(index, startIndex);
-			  if(index < startIndex) return;
+			this.makePages(options);
+				
+			if(startIndex == 0) {
+			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its element is empty
+			}
+			this.renderPageChunk(this.renderedIndex);
+			
+			if(TIM.appContainerElem.find(this.el).length == 0)  {
+			  TIM.appContainerElem.append(this.$el);
+			}
+	
+			return this;
+    },
+    
+    //this function turns raw events into 'pages' that are ready to be rendered as one 'flip page'
+    //this allows more than one event to appear on a page
+    
+    makePages: function(options) {
+      
+      var self = this;
+			var page = [];
+			var itemJSON;
+			
+      var start = options.start || 0;
+      var end = options.end || this.collection.length;
+      
+      this.collection.each(function(item, index) {
+			  
+			  if(index < start || index >= end) return; //return if out of range
+			  
 			  itemJSON = item.toJSON();
 			  if(options.pageMetaData) {
 			    
 			  }
+			  
 			  //this is very dependent on the old structure of the data
+			  //will probably change going forward...
+			  //possibly different templates for different event types?
+			  
+			  //shouldn't skip too many non-one-page events...
 			  
 				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
 					self.pages.push({num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
@@ -259,19 +290,7 @@ TIM.mixins.flipset = {
 			if(page.length == 1) {
 			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
-      
-			//rather than rendering all pages at once, make it intelligent?
 			
-			if(startIndex == 0) {
-			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its element is empty
-			}
-			this.renderPageChunk(this.renderedIndex);
-			
-			if(TIM.appContainerElem.find(this.el).length == 0)  {
-			  TIM.appContainerElem.append(this.$el);
-			}
-			//console.log("flipset: ", this.flipSet);
-			return this;
     },
     
 		renderPageChunk: function(start) {
@@ -283,16 +302,8 @@ TIM.mixins.flipset = {
 				end = this.pages.length;
 			}
 			for (var i = start; i < end; i++) {
-			  //if(end - i > 2) {
-			  //  this.renderPage([this.pages[i], this.pages[++i]]);
-			   // i += 2;
-  			//	this.renderedIndex += 2;
-			 // } else {
-			   //console.log('calling render page');
-			    this.renderPage([this.pages[i]]);
-  				this.renderedIndex++;
-  				//that.flipSet._addPage();
-			  //}
+			  this.renderPage([this.pages[i]]);
+  			this.renderedIndex++;
 			}
 			console.log('in render page chunk starting with ', start);
 			//have to know how to remove the last (2?) page(s) from teh flipset & insert starting there..
@@ -302,6 +313,7 @@ TIM.mixins.flipset = {
 		flipNext: function(){
 			
 			var that = this;
+			
 			//prerendering 3 pages & sending to flipset
 			//we always want to have this many pages available to teh flipset because it needs to have as many as 4 pages in the DOM at one time
 			
@@ -313,11 +325,14 @@ TIM.mixins.flipset = {
 				this.pageNum++;
 			} else {
 			  
-			  if($('#app').hasClass('loading') || this.collection.getNextPage === undefined) {
+			  if(TIM.isLoading() || this.collection.getNextPage === undefined) {
 			    return;
 			  }
 			  this.collection.getNextPage();
 			  this.pageNum++;
+			}
+			if (this.updateRouter) {
+			  this.updateRouter();
 			}
 		},
 
@@ -333,6 +348,9 @@ TIM.mixins.flipset = {
 			if (true || this.flipSet.canGoPrevious()) {
 				//this.flipSet.previous(function(){});
 				this.pageNum--;
+			}
+			if (this.updateRouter) {
+			  this.updateRouter();
 			}
 		},
 		
@@ -351,11 +369,29 @@ TIM.mixins.flipset = {
   		}
   	
   		this.flipSet._gotoPage(num);
+  		if (this.updateRouter) {
+			  this.updateRouter();
+			}
   		
 		},
 		
 		pageChanged: function (num) {
 		  
 		}
+}
+
+//abstraction of iscroll element for a view...
+//
+//maybe eventually do away with iscroll
+//
+//have methods to create, refresh, destroy
+//
+//set height, change height of container (full window, specific height, full height - toolbar, etc.)
+//
+
+
+TIM.views.scrollElem = {
+  
+  
 }
 

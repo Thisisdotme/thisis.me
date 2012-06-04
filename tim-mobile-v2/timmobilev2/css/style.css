@@ -238,6 +238,18 @@ td { vertical-align: top; }
     display:block;
   }
   
+  #errorMessage {
+    position:absolute;
+    bottom:0;
+    width:100%;
+    background-color:yellow;
+  }
+  
+  #errorMessage > div {
+    text-align:center;
+    padding:12px;
+  }
+  
   #app {
     /* gotta get rid of these explicit pixel sizes */
     width:100%;
@@ -513,6 +525,10 @@ td { vertical-align: top; }
    
    #detailContainer {
      background-color:#fff;
+   }
+   
+   .hidden {
+     display:none;
    }
    
    /* Newsfeed */
