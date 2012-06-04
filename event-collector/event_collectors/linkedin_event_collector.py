@@ -68,7 +68,7 @@ class LinkedinEventCollector(EventCollector):
 
       raw_json = json.loads(content)
 
-      if raw_json.get('_total', 0) == 0:
+      if raw_json == None or raw_json.get('_total', 0) == 0:
         url = None
         break
 
