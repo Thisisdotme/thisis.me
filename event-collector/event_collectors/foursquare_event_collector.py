@@ -7,6 +7,7 @@ import json
 import urllib
 import urllib2
 from datetime import datetime
+from time import mktime
 
 from tim_commons.messages import create_foursquare_event
 from event_interpreter.foursquare_event_interpreter import FoursquareEventInterpreter
@@ -33,19 +34,22 @@ class FoursquareEventCollector(EventCollector):
     args = {'oauth_token': asm.access_token,
             'v': 20120130}
 
-    # start by getting the first 250 checkin.  For now we won't bother seeding the system
-    # with anymore than 250
-
     args['limit'] = LIMIT
     args['offset'] = 0
 
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
     if asm.most_recent_event_timestamp:
-      args['afterTimestamp'] = asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP
+      after_time = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+    else:
+      after_time = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
 
-    min_age = datetime.utcnow() - self.LOOKBACK_WINDOW
+    args['afterTimestamp'] = after_time
 
     url = '%s%s?%s' % (self.oauth_config['endpoint'], USER_CHECKINS, urllib.urlencode(args))
-    while url:
+
+    total_accepted = 0
+    while url and total_accepted < self.MAX_EVENTS:
 
       raw_json = json.load(urllib2.urlopen(url))
 
@@ -54,7 +58,7 @@ class FoursquareEventCollector(EventCollector):
         raise Exception('Foursquare error response: %s' % raw_json['meta']['code'])
 
       # terminate if the response has no more events/checkins
-      if int(raw_json['response']['checkins']['count']) == 0:
+      if len(raw_json['response']['checkins']['items']) == 0:
         break
 
       # for each element in the feed
@@ -62,11 +66,8 @@ class FoursquareEventCollector(EventCollector):
 
         interpreter = FoursquareEventInterpreter(post, asm, self.oauth_config)
 
-        if interpreter.get_time() < min_age:
-          url = None
-          break
-
         if self.screen_event(interpreter, state):
+          total_accepted = total_accepted + 1
           callback(create_foursquare_event(service_author_id, asm.author_id, post))
 
       # for
