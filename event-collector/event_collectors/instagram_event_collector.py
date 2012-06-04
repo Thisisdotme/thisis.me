@@ -1,6 +1,7 @@
 import json
 import urllib
 import urllib2
+from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_instagram_event
@@ -27,9 +28,13 @@ class InstagramEventCollector(EventCollector):
     args = {'access_token': asm.access_token,
             'count': self.PAGE_SIZE}
 
-    # optimization to request only those since we've last updated
-    if asm.last_update_time:
-      args['min_timestamp'] = int(mktime(asm.last_update_time.timetuple()))
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
+    if asm.most_recent_event_timestamp:
+      min_timestamp = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+    else:
+      min_timestamp = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
+    args['min_timestamp'] = min_timestamp
 
     # setup the url for fetching a page of posts
     url = '%s%s?%s' % (self.oauth_config['endpoint'], self.USER_MEDIA, urllib.urlencode(args))

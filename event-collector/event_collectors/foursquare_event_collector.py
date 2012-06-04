@@ -43,7 +43,6 @@ class FoursquareEventCollector(EventCollector):
       after_time = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
     else:
       after_time = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
-
     args['afterTimestamp'] = after_time
 
     url = '%s%s?%s' % (self.oauth_config['endpoint'], USER_CHECKINS, urllib.urlencode(args))

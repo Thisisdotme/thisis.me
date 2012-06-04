@@ -1,6 +1,7 @@
 import json
 import urllib
 import urllib2
+from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_facebook_event
@@ -22,10 +23,13 @@ class FacebookEventCollector(EventCollector):
 
     args = {'access_token': asm.access_token}
 
-    # optimization to request only those since we've last updated
-    if asm.last_update_time:
-      since = int(mktime(asm.last_update_time.timetuple()))
-      args['since'] = since
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
+    if asm.most_recent_event_timestamp:
+      since = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+    else:
+      since = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
+    args['since'] = since
 
     # fetch all the pages /me/feed
     path = self.oauth_config['endpoint'] % 'me/feed?%s' % urllib.urlencode(args)
