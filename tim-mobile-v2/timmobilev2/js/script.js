@@ -15,6 +15,7 @@ TIM.appContainerElem = $('#contentContainer');
 TIM.defaultTransition = "fade";
 TIM.loading_ = false;
 TIM.transitioning_ = false;
+TIM.errorMessageView = undefined;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -58,7 +59,18 @@ $(function() {
   }
   window.onorientationchange = reorient;
   window.setTimeout(reorient, 0);
+  window.onresize = TIM.setViewportSize;
   
+  TIM.getViewportSize = function() {
+    return {height: TIM.viewportHeight_, width: TIM.viewportWidth_ }
+  }
+  
+  TIM.setViewportSize = function() {
+    TIM.viewportWidth_ = $(window).width();
+    TIM.viewportHeight_ = $(window).height();
+  }
+  
+  TIM.setViewportSize();
   
   TIM.disableScrolling = function() {
     //$(document).on("touchstart", preventScrolling);
@@ -121,12 +133,14 @@ $(function() {
 	TIM.features.fetch({
 		dataType: "jsonp",
 		//add this timeout in case call fails...
-		timeout : 10000,
+		timeout : 5000,
 		success: function(resp) {
 		  console.log('fetched features');
 		},
 		error: function(resp) {
-			TIM.appContainerElem.html("loading features failed for " + TIM.pageInfo.authorName + ". perhaps this author doesn't exist?");
+			TIM.showErrorMessage({
+			    exception: "loading features failed for " + TIM.pageInfo.authorName + ". perhaps this author doesn't exist?"
+			});
 		}
 	});
 	
@@ -170,17 +184,19 @@ $(function() {
     //should probably pass an option here of whether to 'activate' the feature
     featureLoaded: function(options) {
       console.log("Feature loaded callback: ", options);
-      var feature = options.feature, resourceId = options.resourceId, navigate = options.navigateOnLoad;
+      var feature = options.feature, path = options.path, navigate = options.navigateOnLoad;
       if(navigate) {
-        feature.behavior.activate(resourceId);
+        feature.behavior.activate(path);
         TIM.eventAggregator.trigger('featureselected', feature); //to select the menu item?
       }
     },
     
     //should do something more intelligent than throwing up an alert :)
+    //maybe a linkedin-style error message popping from teh bottom?
+    
     featureLoadError: function(options) {
       console.log("Feature loaded failed: ", options);
-      alert("feature load failed!");
+      TIM.showErrorMessage(options);
       TIM.setLoading(false);
     },
   
@@ -204,7 +220,6 @@ $(function() {
 	
   Backbone.history.start({root: '/' + TIM.globals.authorName});
 	
-	//move this to some sort of plugin?
 	$.fn.animationComplete = function( callback ) {
 		if( $.support.cssTransitions ) {
 			return $( this ).one( 'webkitAnimationEnd', callback );
@@ -219,7 +234,7 @@ $(function() {
 	//binding to 'all' on the router - this will get fired for any hash change event
 	//make sure menu item is selected
 	
-	TIM.app.bind('all', function(route, resourceId) {
+	TIM.app.bind('all', function(route, path) {
 	    
 	    // the 'route' argument will be in the form "route:featurename"
 	    
@@ -250,15 +265,23 @@ $(function() {
   	    }
   	    
   	    if (feature.behavior) {
-  	        console.log('********* activating feature *********', resourceId);
-            feature.behavior.activate(resourceId);
+  	        console.log('********* activating feature *********', path);
+            feature.behavior.activate(path);
             TIM.features.setSelectedFeature(feature); //this should be a callback from the feature when it's been activated?
         } else {
-          feature.loadFeature(resourceId);
+          feature.loadFeature(path);
           TIM.features.setSelectedFeature(feature);
         }
       }
   });
+  
+  TIM.showErrorMessage = function (options) {
+    TIM.setLoading(false);
+    if (!TIM.errorMessageView) {
+      TIM.errorMessageView = new TIM.views.ErrorMessage();
+    }
+    TIM.errorMessageView.render({message: options.exception});
+  };
   
   //do transition between pages?
   //this is going to have to evolve to be something much more like what jquery mobile does with 'changePage'

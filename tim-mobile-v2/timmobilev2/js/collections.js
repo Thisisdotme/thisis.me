@@ -26,13 +26,17 @@ TIM.collections.Features = Backbone.Collection.extend({
 });
 
 //paging for collection as a mixin
+//
+//have some sort of variable that says whether there's a maximum/total count - after reaching this count, don't try to get the next page?
+//
 
 TIM.mixins.paging = {
   
   initializePaging: function(options) {
     options = options || {};
     this.page = 1;
-  	this.pageSize = options.pageSize || 15; 
+  	this.pageSize = options.pageSize || 15;
+  	this.max = options.max || 0; 
   },
   
   //get earlier events and append them to the beginning of the collection
@@ -43,9 +47,24 @@ TIM.mixins.paging = {
   
   getNextPage: function() {
     var that = this;
+    
+    if(this.max) {
+       if (this.max && this.length >= max) {
+          console.log("tried to page too far!")
+          return;
+        }
+
+        //hacky way to make the search cut off at a specific number
+        if (this.length + this.pageSize > this.max) {
+          this.setURL(undefined, this.max - this.length);
+        }
+      
+    }
+  
     this.page++;
 
-    $('#app').addClass('loading');
+    TIM.setLoading(true);
+    
     this.fetch({
       add:true,
       data: {page: this.page},

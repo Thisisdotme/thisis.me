@@ -195,6 +195,7 @@ iScroll.prototype = {
 	},
 	
 	_scrollbar: function (dir) {
+	  return; //KL
 		var that = this,
 			doc = document,
 			bar;
@@ -278,6 +279,7 @@ iScroll.prototype = {
 	},
 
 	_scrollbarPos: function (dir, hidden) {
+	  return;
 		var that = this,
 			pos = dir == 'h' ? that.x : that.y,
 			size;
@@ -594,6 +596,7 @@ iScroll.prototype = {
 	},
 	
 	_resetPos: function (time) {
+	  return;
 		var that = this,
 			resetX = that.x >= 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x,
 			resetY = that.y >= that.minScrollY || that.maxScrollY > 0 ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
@@ -953,7 +956,7 @@ iScroll.prototype = {
 
 		if (!that.zoomed) {
 			that.scroller.style[vendor + 'TransitionDuration'] = '0';
-			that._resetPos(200);
+			//that._resetPos(200); //kl - why is this called?
 		}
 	},
 
