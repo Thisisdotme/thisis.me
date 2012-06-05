@@ -57,9 +57,11 @@ class EventCollector(object):
                                     one()
 
     now = datetime.now()
-    min_event_time = now - self.LOOKBACK_WINDOW
-    if asm.last_update_time:
-      min_event_time = asm.last_update_time - self.LAST_UPDATE_OVERLAP
+    min_event_time = None
+    if asm.most_recent_event_timestamp:
+      min_event_time = asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP
+    else:
+      min_event_time = now - self.LOOKBACK_WINDOW
 
     return {'now': now,
             'asm': asm,
