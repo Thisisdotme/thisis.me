@@ -1,14 +1,9 @@
-'''
-Created on May 9, 2012
-
-@author: howard
-'''
 import oauth2 as oauth
-import json
 from datetime import datetime
 from service_event_interpreter import ServiceEventInterpreter
 
 from tim_commons.oauth import make_request
+from tim_commons import json_serializer
 
 
 class LinkedinEventInterpreter(ServiceEventInterpreter):
@@ -153,7 +148,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
 
       # request the user's updates
       json_str = make_request(self.get_oauth_client(), url, {'x-li-format': 'json'})
-      json_obj = json.loads(json_str)
+      json_obj = json_serializer.load_string(json_str)
 
       self.headline = json_obj.get('headline')
       self.summary = json_obj.get('summary')

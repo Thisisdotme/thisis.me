@@ -1,15 +1,10 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-import json
 import urllib
 import oauth2 as oauth
 from datetime import datetime
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event
+from tim_commons import json_serializer
 
 from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
 from event_collector import EventCollector
@@ -55,7 +50,7 @@ class TwitterEventCollector(EventCollector):
 
       content = make_request(client, url)
 
-      raw_json = json.loads(content)
+      raw_json = json_serializer.load_string(content)
 
       # check if nothing returned and terminate loop if so
       if len(raw_json) == 0:
