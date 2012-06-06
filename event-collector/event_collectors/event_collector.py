@@ -105,7 +105,7 @@ class EventCollector(object):
 
     qualifies = False
 
-    event_time = interpreter.get_time()
+    event_time = interpreter.get_create_time()
 
     # skip any events older than the lookback window
     if event_time >= state['min_event_time']:

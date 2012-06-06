@@ -90,7 +90,7 @@ class LinkedinEventCollector(EventCollector):
 
               interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
-              if interpreter.get_time() < min_age:
+              if interpreter.get_create_time() < min_age:
                 url = None
                 break
 
@@ -101,7 +101,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -112,7 +112,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -123,7 +123,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -134,7 +134,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -153,7 +153,7 @@ class LinkedinEventCollector(EventCollector):
 
               interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
-              if interpreter.get_time() < min_age:
+              if interpreter.get_create_time() < min_age:
                 url = None
                 break
 
@@ -164,7 +164,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 

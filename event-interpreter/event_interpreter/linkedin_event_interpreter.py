@@ -30,7 +30,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
       eventId = eventId + ':' + self.json['updateContent']['person']['memberGroups']['values'][0]['id']
     return eventId
 
-  def get_time(self):
+  def get_create_time(self):
     return datetime.utcfromtimestamp(int(self.json['timestamp'] / 1000))
 
   def get_headline(self):

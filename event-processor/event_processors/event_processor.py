@@ -120,7 +120,7 @@ class EventProcessor:
 
       service_event = ServiceEvent(asm.id,
                                    interpreter.get_id(),
-                                   interpreter.get_time(),
+                                   interpreter.get_create_time(),
                                    url,
                                    caption,
                                    content,

@@ -8,13 +8,21 @@ from datetime import datetime
 from service_event_interpreter import ServiceEventInterpreter
 
 
-class FacebookStatusEventInterpreter(ServiceEventInterpreter):
+class FacebookEventInterpreter(ServiceEventInterpreter):
+
+  DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+0000'
 
   def get_id(self):
     return self.json['id']
 
-  def get_time(self):
-    return datetime.strptime(self.json['created_time'], '%Y-%m-%dT%H:%M:%S+0000')
+  def get_create_time(self):
+    return datetime.strptime(self.json['created_time'], self.DATETIME_FORMAT)
+
+  def get_update_time(self):
+    return datetime.strptime(self.json['updated_time'], self.DATETIME_FORMAT)
+
+
+class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 
   def get_headline(self):
     # this handles events from Nike which is a repetition event

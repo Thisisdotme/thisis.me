@@ -24,11 +24,17 @@ class ServiceEventInterpreter(object):
     pass
 
   '''
-    get the time the event occurred as a Python Time object
+    get the time the event the created as a Python Time object
   '''
   @abstractmethod
-  def get_time(self):
+  def get_create_time(self):
     pass
+
+  '''
+    get the time the event was last updated as a Python Time object
+  '''
+  def get_update_time(self):
+    None
 
   '''
     get the events headline - a brief caption
@@ -37,10 +43,10 @@ class ServiceEventInterpreter(object):
     return None
 
   '''
-    get the event's deck - a sentence or few sentences below a headline
-    which summarizes the article
+    get the event's tagline or deck - a sentence or few sentences which summarizes
+    # the post
   '''
-  def get_deck(self):
+  def get_tagline(self):
     return None
 
   '''

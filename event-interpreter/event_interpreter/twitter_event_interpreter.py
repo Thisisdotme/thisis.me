@@ -15,5 +15,5 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
   def get_id(self):
     return self.json['id_str']
 
-  def get_time(self):
+  def get_create_time(self):
     return datetime.strptime(self.json['created_at'], self.DATETIME_STRING_FORMAT)

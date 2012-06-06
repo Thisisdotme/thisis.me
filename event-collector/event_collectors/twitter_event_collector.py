@@ -65,7 +65,7 @@ class TwitterEventCollector(EventCollector):
         last_id = interpreter.get_id()
 
         # terminate fetching any more events if we've gone beyond the lookback window
-        if interpreter.get_time() < min_age:
+        if interpreter.get_create_time() < min_age:
           url = None
           break
 
