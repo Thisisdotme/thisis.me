@@ -1,7 +1,7 @@
 import urllib
 import urllib2
 from datetime import datetime
-from time import mktime
+import calendar
 
 from tim_commons.messages import create_facebook_event
 from tim_commons import json_serializer
@@ -29,9 +29,11 @@ class FacebookEventCollector(EventCollector):
     # get only events since last update or past year depending on if this
     # is the first collection of not
     if asm.most_recent_event_timestamp:
-      since = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+      since = calendar.timegm((asm.most_recent_event_timestamp -
+                               self.LAST_UPDATE_OVERLAP).utctimetuple())
     else:
-      since = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
+      since = calendar.timegm((datetime.utcnow() -
+                               self.LOOKBACK_WINDOW).utctimetuple())
     args['since'] = since
 
     # fetch all new posts

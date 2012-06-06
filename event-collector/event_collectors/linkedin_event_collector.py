@@ -1,7 +1,7 @@
 import urllib
 import oauth2 as oauth
 from datetime import datetime
-from time import mktime
+import calendar
 import copy
 
 from tim_commons.oauth import make_request
@@ -43,13 +43,15 @@ class LinkedinEventCollector(EventCollector):
     args = {'scope': 'self',
             'count': self.PAGE_SIZE}
 
-    # optimization to request only those since we've last updated
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
     if asm.most_recent_event_timestamp:
-      args['after'] = int(mktime((asm.most_recent_event_timestamp -
-                                  self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
+      after = calendar.timegm((asm.most_recent_event_timestamp -
+                               self.LAST_UPDATE_OVERLAP).utctimetuple()) * 1000
     else:
-      # limit to one year of data
-      args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
+      after = calendar.timegm((datetime.utcnow() -
+                               self.LOOKBACK_WINDOW).utctimetuple()) * 1000
+    args['after'] = after
 
     offset = 0
     args['start'] = offset

@@ -1,7 +1,7 @@
 import urllib
 import urllib2
 from datetime import datetime
-from time import mktime
+import calendar
 
 from tim_commons.messages import create_foursquare_event
 from tim_commons import json_serializer
@@ -35,10 +35,11 @@ class FoursquareEventCollector(EventCollector):
     # get only events since last update or past year depending on if this
     # is the first collection of not
     if asm.most_recent_event_timestamp:
-      after_time = int(mktime((asm.most_recent_event_timestamp -
-                               self.LAST_UPDATE_OVERLAP).timetuple()))
+      after_time = calendar.timegm((asm.most_recent_event_timestamp -
+                                    self.LAST_UPDATE_OVERLAP).utctimetuple())
     else:
-      after_time = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
+      after_time = calendar.timegm((datetime.utcnow() -
+                                    self.LOOKBACK_WINDOW).utctimetuple())
     args['afterTimestamp'] = after_time
 
     url = '%s%s?%s' % (self.oauth_config['endpoint'], USER_CHECKINS, urllib.urlencode(args))

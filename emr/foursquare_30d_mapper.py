@@ -6,13 +6,13 @@ Created on Feb 27, 2012
 @author: howard
 '''
 import sys, csv, json, datetime
-from time import mktime
+import calendar
 
 def main(argv):
 
   # get seconds for 30 days past
   start_date = datetime.date.today() + datetime.timedelta(-30)  
-  start_secs = int(mktime(start_date.timetuple()))
+  start_secs = calendar.timegm(start_date.timetuple())
 
 #  reader = csv.reader(open("part-00000", "rb"),delimiter='\t')
   reader = csv.reader(sys.stdin,delimiter='\t')

@@ -44,7 +44,7 @@ class TwitterEventCollector(EventCollector):
                        USER_TIMELINE,
                        urllib.urlencode(args))
 
-    min_age = datetime.now() - self.LOOKBACK_WINDOW
+    min_age = datetime.utcnow() - self.LOOKBACK_WINDOW
     last_id = None
     while True:
 

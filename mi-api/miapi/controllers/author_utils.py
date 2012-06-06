@@ -1,4 +1,4 @@
-from time import mktime
+import calendar
 
 from miapi.models import SimpleDBSession
 from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent
@@ -36,7 +36,7 @@ def createServiceEvent(dbSession, request, fe, serviceName, author):
 
   event = {'event_id': fe.id,
            'service': serviceName,
-           'create_time': int(mktime(fe.create_time.timetuple())),
+           'create_time': calendar.timegm(fe.create_time.timetuple()),
            'link': request.route_url('author.query.events.eventId', authorname=request.matchdict['authorname'], eventID=fe.id),
            'content': content,
            'author': author,
@@ -78,7 +78,7 @@ def createHighlightEvent(dbSession, request, highlight, fe, serviceName, author)
 
   event = {'event_id': fe.id,
            'service': serviceName,
-           'create_time': int(mktime(fe.create_time.timetuple())),
+           'create_time': calendar.timegm(fe.create_time.timetuple()),
            'link': request.route_url('author.query.events.eventId', authorname=request.matchdict['authorname'], eventID=fe.id),
            'content': content,
            'author': author,
