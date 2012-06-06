@@ -11,6 +11,9 @@ from event_collector import EventCollector
 
 class FacebookEventCollector(EventCollector):
 
+  FEED_COLLECTION = 'me/posts'
+  ALBUMS_COLLECTION = 'me/albums'
+
   def fetch(self, service_author_id, callback):
 
     super(FacebookEventCollector, self).fetch(service_author_id, callback)
@@ -31,8 +34,8 @@ class FacebookEventCollector(EventCollector):
       since = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
     args['since'] = since
 
-    # fetch all the pages /me/feed
-    path = self.oauth_config['endpoint'] % 'me/feed?%s' % urllib.urlencode(args)
+    # fetch all new posts
+    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.FEED_COLLECTION, urllib.urlencode(args))
 
     total_accepted = 0
     while path and total_accepted < self.MAX_EVENTS:
@@ -64,6 +67,13 @@ class FacebookEventCollector(EventCollector):
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
       nextPath = raw_json['paging']['next'] if 'paging' in raw_json and 'next' in raw_json['paging'] else None
       path = nextPath if nextPath and nextPath != path else None
+
+    # fetch all new photo albums
+    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.ALBUMS_COLLECTION, urllib.urlencode(args))
+    total_accepted = 0
+    while path and total_accepted < self.MAX_EVENTS:
+
+      raw_json = json.load(urllib2.urlopen(path))
 
     # terminate the fetch
     self.fetch_end(state)

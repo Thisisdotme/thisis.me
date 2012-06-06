@@ -56,7 +56,7 @@ class EventCollector(object):
                                                 AuthorServiceMap.service_author_id == service_author_id)). \
                                     one()
 
-    now = datetime.now()
+    now = datetime.utcnow()
     min_event_time = None
     if asm.most_recent_event_timestamp:
       min_event_time = asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP
