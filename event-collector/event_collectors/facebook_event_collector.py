@@ -69,11 +69,11 @@ class FacebookEventCollector(EventCollector):
       path = nextPath if nextPath and nextPath != path else None
 
     # fetch all new photo albums
-    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.ALBUMS_COLLECTION, urllib.urlencode(args))
-    total_accepted = 0
-    while path and total_accepted < self.MAX_EVENTS:
-
-      raw_json = json.load(urllib2.urlopen(path))
+#    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.ALBUMS_COLLECTION, urllib.urlencode(args))
+#    total_accepted = 0
+#    while path and total_accepted < self.MAX_EVENTS:
+#
+#      raw_json = json.load(urllib2.urlopen(path))
 
     # terminate the fetch
     self.fetch_end(state)
