@@ -145,10 +145,6 @@ def update_scanner(event_updated, service_event_id, service_user_id, service_id,
   if scanner_event is not None:
     if event_updated:
       scanner_event.priority = 0
-    else:
-      scanner_event.priority += 1
-      if scanner_event.priority > max_priority:
-        scanner_event.priority = max_priority
   else:
     priority = 0 if event_updated else 1
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
