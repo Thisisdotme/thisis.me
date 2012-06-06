@@ -1,8 +1,8 @@
-import json
 import urllib
 import urllib2
 
 from tim_commons.messages import create_googleplus_event
+from tim_commons import json_serializer
 from event_interpreter.googleplus_event_interpreter import GoogleplusStatusEventInterpreter
 from event_collector import EventCollector
 
@@ -33,7 +33,8 @@ class GoogleplusEventCollector(EventCollector):
                                    ('client_secret', self.oauth_config['secret']),
                                    ('refresh_token', asm.access_token),
                                    ('grant_type', 'refresh_token')])
-    raw_obj = json.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'], query_args))
+    raw_obj = json_serializer.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'],
+                                                   query_args))
 
     access_token = raw_obj['access_token']
 
@@ -46,14 +47,15 @@ class GoogleplusEventCollector(EventCollector):
     total_accepted = 0
     while url and total_accepted < self.MAX_EVENTS:
 
-      raw_obj = json.load(urllib2.urlopen(url))
+      raw_obj = json_serializer.load(urllib2.urlopen(url))
 
       # for element in the feed
       for post in raw_obj.get('items', []):
 
         if post['kind'] == 'plus#activity':
 
-          if self.screen_event(GoogleplusStatusEventInterpreter(post, asm, self.oauth_config), state):
+          if self.screen_event(GoogleplusStatusEventInterpreter(post, asm, self.oauth_config),
+                               state):
             total_accepted = total_accepted + 1
             callback(create_googleplus_event(service_author_id, asm.author_id, post))
 
@@ -64,7 +66,9 @@ class GoogleplusEventCollector(EventCollector):
       next_page = raw_obj.get('next_pageToken')
       if next_page:
         args['pageToken'] = next_page
-        url = '%s%s?%s' % (self.oauth_config['endpoint'], self.USER_ACTIVITY, urllib.urlencode(args))
+        url = '%s%s?%s' % (self.oauth_config['endpoint'],
+                           self.USER_ACTIVITY,
+                           urllib.urlencode(args))
       else:
         url = None
 

@@ -1,9 +1,3 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-import json
 import urllib
 import oauth2 as oauth
 from datetime import datetime
@@ -12,6 +6,7 @@ import copy
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_linkedin_event
+from tim_commons import json_serializer
 
 from event_interpreter.linkedin_event_interpreter import LinkedinEventInterpreter
 from event_collector import EventCollector
@@ -50,7 +45,8 @@ class LinkedinEventCollector(EventCollector):
 
     # optimization to request only those since we've last updated
     if asm.most_recent_event_timestamp:
-      args['after'] = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
+      args['after'] = int(mktime((asm.most_recent_event_timestamp -
+                                  self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
     else:
       # limit to one year of data
       args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
@@ -58,7 +54,9 @@ class LinkedinEventCollector(EventCollector):
     offset = 0
     args['start'] = offset
 
-    url = '%s%s?%s' % (self.oauth_config['endpoint'], UPDATE_RESOURCE, urllib.urlencode(args, True))
+    url = '%s%s?%s' % (self.oauth_config['endpoint'],
+                       UPDATE_RESOURCE,
+                       urllib.urlencode(args, True))
 
     total_count = 0
     while url:
@@ -66,15 +64,13 @@ class LinkedinEventCollector(EventCollector):
       # request the user's updates
       content = make_request(client, url, {'x-li-format': 'json'})
 
-      raw_json = json.loads(content)
+      raw_json = json_serializer.load_string(content)
 
       if raw_json == None or raw_json.get('_total', 0) == 0:
         url = None
         break
 
       for post in raw_json.get('values', []):
-
-#        print json.dumps(post, sort_keys=True, indent=2)
 
         update_type = post['updateType']
 

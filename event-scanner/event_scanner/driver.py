@@ -1,12 +1,8 @@
 import sys
 import logging
-import contextlib
 import math
 import datetime
 import time
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 from tim_commons import total_seconds
 from tim_commons.app_base import AppBase
@@ -14,6 +10,7 @@ from tim_commons.message_queue import (create_message_client,
                                        send_messages,
                                        close_message_client,
                                        create_queues)
+from tim_commons import db
 from tim_commons.messages import create_event_update_message
 from mi_schema.models import EventScannerPriority
 
@@ -38,16 +35,14 @@ class ScannerApplication(AppBase):
 
   def _create_database(self):
     db_url = self.config['db']['sqlalchemy.url']
-    engine = create_engine(db_url, encoding='utf-8', echo=False)
-    return sessionmaker(bind=engine, autocommit=True)
+    db.configure_session(db_url)
 
   def _create_message_client(self):
     message_url = self.config['broker']['url']
     return create_message_client(message_url)
 
   def main(self):
-    DBSession = self._create_database()
-
+    self._create_database()
     message_client = self._create_message_client()
 
     maximum_priority = int(self.config['scanner']['maximum_priority'])
@@ -77,15 +72,16 @@ class ScannerApplication(AppBase):
 
       processed_all_events = False
       while not processed_all_events:
-        with contextlib.closing(DBSession()) as session:
-          view_result = _query_events(session, current_id, iteration_maximum_priority, batch_size)
+        with db.Context():
+          view_result = _query_events(current_id, iteration_maximum_priority, batch_size)
 
-        if not view_result:
-          processed_all_events = True
-        else:
-          logging.debug('Sending %s events to the queue', len(view_result))
+          if not view_result:
+            processed_all_events = True
+          else:
+            logging.debug('Sending %s events to the queue', len(view_result))
 
-        current_id = _send_update_message_from_event(message_client, view_result)
+          current_id = _send_update_message_from_event(message_client, view_result)
+          _decrease_priority(view_result, maximum_priority)
 
       current_iteration = (current_iteration % iteration_counter_module) + 1
 
@@ -142,12 +138,19 @@ def _send_update_message_from_event(message_client, events):
   return current_id
 
 
-def _query_events(db_session, current_id, maximum_priority, set_size):
-  query = db_session.query(EventScannerPriority)
+def _query_events(current_id, maximum_priority, set_size):
+  query = db.Session().query(EventScannerPriority)
   query = query.filter(EventScannerPriority.hash_id > current_id)
   query = query.filter(EventScannerPriority.priority <= maximum_priority)
 
   return query[0:set_size]
+
+
+def _decrease_priority(events, max_priority):
+  for event in events:
+    event.priority += 1
+    if event.priority > max_priority:
+      event.priority = max_priority
 
 
 if __name__ == '__main__':

@@ -1,10 +1,10 @@
-import json
 import urllib
 import urllib2
 from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_facebook_event
+from tim_commons import json_serializer
 from event_interpreter.facebook_event_interpreter import FacebookStatusEventInterpreter
 from event_collector import EventCollector
 
@@ -40,10 +40,9 @@ class FacebookEventCollector(EventCollector):
     total_accepted = 0
     while path and total_accepted < self.MAX_EVENTS:
 
-      raw_json = json.load(urllib2.urlopen(path))
+      raw_json = json_serializer.load(urllib2.urlopen(path))
 
       # process the item
-      #print json.dumps(raw_json, sort_keys=True, indent=2)
 
       # TODO loop termination on various constraints is not exact
 
@@ -57,7 +56,8 @@ class FacebookEventCollector(EventCollector):
           if post.get('type') == 'status' and post.get('actions') is None:
             continue
 
-          if self.screen_event(FacebookStatusEventInterpreter(post, asm, self.oauth_config), state):
+          if self.screen_event(FacebookStatusEventInterpreter(post, asm, self.oauth_config),
+                               state):
             total_accepted = total_accepted + 1
             callback(create_facebook_event(service_author_id, asm.author_id, post))
 

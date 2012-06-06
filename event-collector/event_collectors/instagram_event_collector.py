@@ -1,10 +1,10 @@
-import json
 import urllib
 import urllib2
 from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_instagram_event
+from tim_commons import json_serializer
 from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
 from event_collector import EventCollector
 
@@ -31,7 +31,8 @@ class InstagramEventCollector(EventCollector):
     # get only events since last update or past year depending on if this
     # is the first collection of not
     if asm.most_recent_event_timestamp:
-      min_timestamp = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+      min_timestamp = int(mktime((asm.most_recent_event_timestamp -
+                                  self.LAST_UPDATE_OVERLAP).timetuple()))
     else:
       min_timestamp = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
     args['min_timestamp'] = min_timestamp
@@ -42,7 +43,7 @@ class InstagramEventCollector(EventCollector):
     total_accepted = 0
     while url and total_accepted < self.MAX_EVENTS:
 
-      raw_obj = json.load(urllib2.urlopen(url))
+      raw_obj = json_serializer.load(urllib2.urlopen(url))
 
       # for element in the feed
       for post in raw_obj.get('data', []):

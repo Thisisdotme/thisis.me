@@ -1,15 +1,10 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-import json
 import urllib
 import urllib2
 from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_foursquare_event
+from tim_commons import json_serializer
 from event_interpreter.foursquare_event_interpreter import FoursquareEventInterpreter
 from event_collector import EventCollector
 
@@ -40,7 +35,8 @@ class FoursquareEventCollector(EventCollector):
     # get only events since last update or past year depending on if this
     # is the first collection of not
     if asm.most_recent_event_timestamp:
-      after_time = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple()))
+      after_time = int(mktime((asm.most_recent_event_timestamp -
+                               self.LAST_UPDATE_OVERLAP).timetuple()))
     else:
       after_time = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple()))
     args['afterTimestamp'] = after_time
@@ -50,7 +46,7 @@ class FoursquareEventCollector(EventCollector):
     total_accepted = 0
     while url and total_accepted < self.MAX_EVENTS:
 
-      raw_json = json.load(urllib2.urlopen(url))
+      raw_json = json_serializer.load(urllib2.urlopen(url))
 
       # check for error
       if raw_json['meta']['code'] != 200:
