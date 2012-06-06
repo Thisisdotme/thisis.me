@@ -4,7 +4,7 @@ from datetime import datetime
 from time import mktime
 
 from tim_commons.messages import create_facebook_event
-from tim_commonts import json_serializer
+from tim_commons import json_serializer
 from event_interpreter.facebook_event_interpreter import FacebookStatusEventInterpreter
 from event_collector import EventCollector
 
