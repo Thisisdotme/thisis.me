@@ -1,7 +1,8 @@
 import urllib
 import urllib2
-from datetime import datetime
+import datetime
 import calendar
+import logging
 
 from tim_commons.messages import create_facebook_event
 from tim_commons import json_serializer
@@ -32,16 +33,18 @@ class FacebookEventCollector(EventCollector):
       since = calendar.timegm((asm.most_recent_event_timestamp -
                                self.LAST_UPDATE_OVERLAP).utctimetuple())
     else:
-      since = calendar.timegm((datetime.utcnow() -
+      since = calendar.timegm((datetime.datetime.utcnow() -
                                self.LOOKBACK_WINDOW).utctimetuple())
     args['since'] = since
 
     # fetch all new posts
-    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.FEED_COLLECTION, urllib.urlencode(args))
+    path = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
+                               self.FEED_COLLECTION,
+                               urllib.urlencode(args))
 
     total_accepted = 0
     while path and total_accepted < self.MAX_EVENTS:
-
+      logging.debug('Requesting %s', path)
       raw_obj = json_serializer.load(urllib2.urlopen(path))
 
       # process the item
@@ -63,29 +66,32 @@ class FacebookEventCollector(EventCollector):
             total_accepted = total_accepted + 1
             callback(create_facebook_event(service_author_id, asm.author_id, post))
 
-        # if
-      # for
-
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
       nextPath = raw_obj['paging']['next'] if 'paging' in raw_obj and 'next' in raw_obj['paging'] else None
       path = nextPath if nextPath and nextPath != path else None
 
     # fetch all photo albums (new and existing); send messages for any that are new or updated
     # purposely remove "since" query arg
+    '''
     del args['since']
 
-    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.ALBUMS_COLLECTION, urllib.urlencode(args))
+    path = '%s%s?%s' % (self.oauth_config['endpoint'],
+                        self.ALBUMS_COLLECTION,
+                        urllib.urlencode(args))
     total_accepted = 0
     while path and total_accepted < self.MAX_EVENTS:
 
       raw_obj = json_serializer.load(urllib2.urlopen(path))
+      logging.debug('Received json: %s', raw_obj)
 
       # skip photos posted to friend's walls
       if raw_obj['type'] == 'friends_walls':
         continue
 
-      created_time = calendar.timegm(datetime.strptime(raw_obj['created_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
-      updated_time = calendar.timegm(datetime.strptime(raw_obj['updated_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
+      created_time = calendar.timegm(datetime.datetime.strptime(raw_obj['created_time'],
+                                                                "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
+      updated_time = calendar.timegm(datetime.datetime.strptime(raw_obj['updated_time'],
+                                                                "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
 
       if created_time >= since or updated_time >= since:
 
@@ -94,6 +100,6 @@ class FacebookEventCollector(EventCollector):
         raw_obj['type'] = 'album'
 
         # post
-
+    '''
     # terminate the fetch
     self.fetch_end(state)

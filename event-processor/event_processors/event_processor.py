@@ -1,8 +1,9 @@
 import hashlib
 import sys
+import math
 import logging
 from abc import (abstractmethod, ABCMeta)
-from datetime import datetime
+import datetime
 
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
@@ -10,9 +11,10 @@ from sqlalchemy.orm.exc import NoResultFound
 from mi_schema.models import (ServiceEvent, AuthorServiceMap, Service, EventScannerPriority)
 from tim_commons import json_serializer
 from tim_commons import db
+from tim_commons import total_seconds
 
 
-def from_service_name(service_name, max_priority, oauth_config):
+def from_service_name(service_name, max_priority, min_duration, oauth_config):
 
   # load the desired module from the event_collectors package
   name = 'event_processors.' + service_name + '_event_processor'
@@ -21,7 +23,7 @@ def from_service_name(service_name, max_priority, oauth_config):
 
   # retrieve the desired class and instantiate a new instance
   cls = getattr(mod, service_name.capitalize() + "EventProcessor")
-  collector = cls(service_name, max_priority, oauth_config)
+  collector = cls(service_name, max_priority, min_duration, oauth_config)
 
   return collector
 
@@ -30,11 +32,12 @@ class EventProcessor:
 
   __metaclass__ = ABCMeta
 
-  def __init__(self, service_name, max_priority, oauth_config):
+  def __init__(self, service_name, max_priority, min_duration, oauth_config):
 
     self.service_name = service_name
     self.oauth_config = oauth_config
     self.max_priority = max_priority
+    self.min_duration = min_duration
 
     # get the service-id for this collector's service
     query = db.Session().query(Service.id)
@@ -93,7 +96,7 @@ class EventProcessor:
         existing_event.content = interpreter.get_content()
         existing_event.photo_url = interpreter.get_photo()
         existing_event.auxillary_content = interpreter.get_auxiliary_content()
-        existing_event.modify_time = datetime.now()
+        existing_event.modify_time = datetime.datetime.utcnow()
 
       else:
         # skip event
@@ -130,14 +133,25 @@ class EventProcessor:
                                    json_serializer.dump_string(service_event_json))
       db.Session().add(service_event)
 
+    update_time = interpreter.get_update_time()
+    if update_time is None:
+      update_time = interpreter.get_create_time()
     update_scanner(event_updated,
                    interpreter.get_id(),
                    service_author_id,
                    self.service_name,
-                   self.max_priority)
+                   update_time,
+                   self.max_priority,
+                   self.min_duration)
 
 
-def update_scanner(event_updated, service_event_id, service_user_id, service_id, max_priority):
+def update_scanner(event_updated,
+                   service_event_id,
+                   service_user_id,
+                   service_id,
+                   update_time,
+                   max_priority,
+                   min_duration):
   # Get the scanner state from the database
   event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_id)
   scanner_event = db.Session().query(EventScannerPriority).get(event_id)
@@ -146,6 +160,25 @@ def update_scanner(event_updated, service_event_id, service_user_id, service_id,
     if event_updated:
       scanner_event.priority = 0
   else:
-    priority = 0 if event_updated else 1
+    logging.debug('The event update time is %s.', update_time)
+
+    min_duration_in_sec = total_seconds(min_duration)
+    event_age = datetime.datetime.utcnow() - update_time
+    event_age_in_sec = total_seconds(event_age)
+    if event_age_in_sec < 0.0:
+      event_age_in_sec = math.abs(event_age_in_sec)
+      if event_age_in_sec > min_duration_in_sec:
+        logging.warning('Time clock are out of sync by at least: %s', event_age_in_sec)
+
+    logging.debug('Event is %s seconds old and the mininum duration is %s: %s',
+                  event_age_in_sec,
+                  min_duration_in_sec,
+                  event_age_in_sec / min_duration_in_sec)
+    priority = int(math.ceil(math.log(event_age_in_sec / min_duration_in_sec, 2)))
+    if priority < 0:
+      priority = 0
+    elif priority > max_priority:
+      priority = max_priority
+
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
     db.Session().add(scanner_event)
