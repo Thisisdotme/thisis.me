@@ -3,13 +3,18 @@ import urllib
 
 from tim_commons.messages import create_foursquare_event
 from tim_commons import json_serializer
+from tim_commons import prune_dictionary
 from event_updater import EventUpdater
 
 CHECKIN_RESOURCE = 'checkins/'
 
 
 class FoursquareEventUpdater(EventUpdater):
+
+  PRUNE_ITEMS = {'venue': {'stats': None, 'events': None}, 'user': None}
+
   def fetch(self, service_id, service_author_id, service_event_id, callback):
+
     asm = self.get_author_service_map(service_author_id)
 
     args = {'oauth_token': asm.access_token,
@@ -37,16 +42,15 @@ class FoursquareEventUpdater(EventUpdater):
 
       The following two properties don't appear in the "users/self/checkins" resource so each new
       foursquare event will immediately update.  If the user executes another checkin within
-      60 minutes its possible the collector will get the event again because of the 60 minute
-      overlap cause this event to "flap".  It's minor but noteworthy.
+      60 minutes its possible the collector will get the event again because of the MOST_RECENT_OVERLAP
+      window causing this event to "flap".  It's minor but noteworthy.
 
-      del checkin_json['score']
-      del checkin_json['venue']['specials']
+      del checkin_obj['score']
+      del checkin_obj['venue']['specials']
     '''
 
-    checkin_json = event_json['response']['checkin']
+    checkin_obj = event_json['response']['checkin']
 
-    if 'user' in checkin_json:
-      del checkin_json['user']
+    prune_dictionary(checkin_obj, self.PRUNE_ITEMS)
 
-    callback(create_foursquare_event(service_author_id, asm.author_id, checkin_json))
+    callback(create_foursquare_event(service_author_id, asm.author_id, checkin_obj))

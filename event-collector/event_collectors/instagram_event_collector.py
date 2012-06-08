@@ -32,10 +32,10 @@ class InstagramEventCollector(EventCollector):
     # is the first collection of not
     if asm.most_recent_event_timestamp:
       min_timestamp = calendar.timegm((asm.most_recent_event_timestamp -
-                                       self.LAST_UPDATE_OVERLAP).utctimetuple())
+                                       self.MOST_RECENT_OVERLAP).utctimetuple())
     else:
       min_timestamp = calendar.timegm((datetime.utcnow() -
-                                       self.LOOKBACK_WINDOW).utctimetuple())
+                                       self.NEW_LOOKBACK_WINDOW).utctimetuple())
     args['min_timestamp'] = min_timestamp
 
     # setup the url for fetching a page of posts

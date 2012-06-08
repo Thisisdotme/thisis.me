@@ -13,7 +13,7 @@ class FacebookEventUpdater(EventUpdater):
     args = {'access_token': asm.access_token}
 
     # fetch latest version of event
-    path = self.oauth_config['endpoint'] % '%s?%s' % (service_event_id, urllib.urlencode(args))
+    path = '%s%s?%s' % (self.oauth_config['endpoint'], service_event_id, urllib.urlencode(args))
 
     event_json = json_serializer.load(urllib2.urlopen(path))
 
