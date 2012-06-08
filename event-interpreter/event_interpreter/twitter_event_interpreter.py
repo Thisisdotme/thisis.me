@@ -12,6 +12,9 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
 
   DATETIME_STRING_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
+  def get_type(self):
+    return None
+
   def get_id(self):
     return self.json['id_str']
 

@@ -38,12 +38,14 @@ class FacebookEventCollector(EventCollector):
     args['since'] = since
 
     # fetch all new posts
-    path = '%s%s?%s' % (self.oauth_config['endpoint'], self.FEED_COLLECTION, urllib.urlencode(args))
+    posts_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
+                                    self.FEED_COLLECTION,
+                                    urllib.urlencode(args))
 
     total_accepted = 0
-    while path and total_accepted < self.MAX_EVENTS:
+    while posts_url and total_accepted < self.MAX_EVENTS:
 
-      posts_obj = json_serializer.load(urllib2.urlopen(path))
+      posts_obj = json_serializer.load(urllib2.urlopen(posts_url))
 
       # process the item
 
@@ -68,66 +70,69 @@ class FacebookEventCollector(EventCollector):
       # for
 
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
-      nextPath = posts_obj['paging']['next'] if 'paging' in posts_obj and 'next' in posts_obj['paging'] else None
-      path = nextPath if nextPath and nextPath != path else None
+      next_url = posts_obj['paging']['next'] if 'paging' in posts_obj and 'next' in posts_obj['paging'] else None
+      posts_url = next_url if next_url and next_url != posts_url else None
 
     # while posts
 
-#    # collect photos for all time.  If this is the first update then
-#    photo_since = since if asm.most_recent_event_timestamp else None
-#
-#    path = '%s%s?%s' % (self.oauth_config['endpoint'],
-#                        self.ALBUMS_COLLECTION,
-#                        urllib.urlencode({'access_token': asm.access_token}))
-#
-#    while path:
-#
-#      albums_obj = json_serializer.load(urllib2.urlopen(path))
-#
-#      for album in albums_obj.get('data', []):
-#
-#        # skip photos posted to friend's walls
-#        if album['type'] == 'friends_walls':
-#          continue
-#
-#        created_time = calendar.timegm(datetime.strptime(album['created_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
-#        updated_time = calendar.timegm(datetime.strptime(album['updated_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
-#
-#        if photo_since == None or created_time >= photo_since or updated_time >= photo_since:
-#
-#          # set the type to 'album so it will match what you get when it's directly
-#          # queried; also makes it easier for the event process to identify it
-#          album['type'] = 'album'
-#
-#          # send event message
-#          callback(create_facebook_event(service_author_id, asm.author_id, album))
-#
-#        # if
-#
-#        # check for any new photos in the album
-#        photos_path = '%s%s?%s' % (self.oauth_config['endpoint'], album['id'], self.PHOTOS_COLLECTION, urllib.urlencode(args))
-#        while photos_path:
-#
-#          photos_obj = json_serializer.load(urllib2.urlopen(path))
-#
-#          for photo in photos_obj.get('data', []):
-#
-#            photo['type'] = 'photo'
-#
-#            # event message
-#            callback(create_facebook_event(service_author_id, asm.author_id, photo))
-#
-#          # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
-#          nextPath = photos_obj['paging']['next'] if 'paging' in photos_obj and 'next' in photos_obj['paging'] else None
-#          path = nextPath if nextPath and nextPath != photos_path else None
-#
-#        # while photos
-#
-#      # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
-#      nextPath = albums_obj['paging']['next'] if 'paging' in albums_obj and 'next' in albums_obj['paging'] else None
-#      path = nextPath if nextPath and nextPath != path else None
-#
-#    # while albums
+    # collect photos for all time.  If this is the first update then
+    photo_since = since if asm.most_recent_event_timestamp else None
+
+    albums_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
+                                     self.ALBUMS_COLLECTION,
+                                     urllib.urlencode({'access_token': asm.access_token}))
+
+    while albums_url:
+
+      albums_obj = json_serializer.load(urllib2.urlopen(albums_url))
+
+      for album in albums_obj.get('data', []):
+
+        # skip photos posted to friend's walls
+        if album['type'] == 'friends_walls':
+          continue
+
+        created_time = calendar.timegm(datetime.strptime(album['created_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
+        updated_time = calendar.timegm(datetime.strptime(album['updated_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
+
+        if photo_since == None or created_time >= photo_since or updated_time >= photo_since:
+
+          # set the type to 'album so it will match what you get when it's directly
+          # queried; also makes it easier for the event process to identify it
+          album['type'] = 'album'
+
+          # send event message
+          callback(create_facebook_event(service_author_id, asm.author_id, album))
+
+        # if
+
+        # check for any new photos in the album
+        photos_url = '{0}{1}{2}?{3}'.format(self.oauth_config['endpoint'],
+                                            album['id'],
+                                            self.PHOTOS_COLLECTION,
+                                            urllib.urlencode(args))
+        while photos_url:
+
+          photos_obj = json_serializer.load(urllib2.urlopen(photos_url))
+
+          for photo in photos_obj.get('data', []):
+
+            photo['type'] = 'photo'
+
+            # event message
+            callback(create_facebook_event(service_author_id, asm.author_id, photo))
+
+          # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
+          next_url = photos_obj['paging']['next'] if 'paging' in photos_obj and 'next' in photos_obj['paging'] else None
+          photos_url = next_url if next_url and next_url != photos_url else None
+
+        # while photos
+
+      # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
+      next_url = albums_obj['paging']['next'] if 'paging' in albums_obj and 'next' in albums_obj['paging'] else None
+      albums_url = next_url if next_url and next_url != albums_url else None
+
+    # while albums
 
     # terminate the fetch
     self.fetch_end(state)

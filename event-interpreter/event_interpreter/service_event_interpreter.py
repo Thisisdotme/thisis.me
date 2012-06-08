@@ -17,6 +17,13 @@ class ServiceEventInterpreter(object):
     self.oauth_config = oauth_config
 
   '''
+    get the type of the event (status, photo, album, checkin, etc.)
+  '''
+  @abstractmethod
+  def get_type(self):
+    pass
+
+  '''
     get the service's unique identifier for the event
   '''
   @abstractmethod

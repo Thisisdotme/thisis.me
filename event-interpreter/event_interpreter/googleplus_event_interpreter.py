@@ -12,6 +12,9 @@ class GoogleplusStatusEventInterpreter(ServiceEventInterpreter):
 
   DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
+  def get_type(self):
+    return None
+
   def get_id(self):
     return self.json['id']
 
