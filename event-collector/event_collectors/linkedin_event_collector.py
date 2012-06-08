@@ -33,7 +33,7 @@ class LinkedinEventCollector(EventCollector):
 
     service_author_id = asm.service_author_id
 
-    min_age = datetime.utcnow() - self.LOOKBACK_WINDOW
+    min_age = datetime.utcnow() - self.NEW_LOOKBACK_WINDOW
 
     # setup what we need for oauth
     consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
@@ -47,10 +47,10 @@ class LinkedinEventCollector(EventCollector):
     # is the first collection of not
     if asm.most_recent_event_timestamp:
       after = calendar.timegm((asm.most_recent_event_timestamp -
-                               self.LAST_UPDATE_OVERLAP).utctimetuple()) * 1000
+                               self.MOST_RECENT_OVERLAP).utctimetuple()) * 1000
     else:
       after = calendar.timegm((datetime.utcnow() -
-                               self.LOOKBACK_WINDOW).utctimetuple()) * 1000
+                               self.NEW_LOOKBACK_WINDOW).utctimetuple()) * 1000
     args['after'] = after
 
     offset = 0
