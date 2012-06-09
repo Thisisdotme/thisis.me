@@ -7,7 +7,7 @@ Created on Jan 16, 2012
 import oauth2 as oauth
 import json
 
-from mi_utils.oauth import make_request
+from tim_commons.oauth import make_request
 
 from profile_retriever import ProfileRetriever
 

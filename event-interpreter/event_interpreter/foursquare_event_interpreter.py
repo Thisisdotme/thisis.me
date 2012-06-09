@@ -11,7 +11,7 @@ from service_event_interpreter import ServiceEventInterpreter
 class FoursquareEventInterpreter(ServiceEventInterpreter):
 
   def get_type(self):
-    return None
+    return self.CHECKIN_TYPE
 
   def get_id(self):
     return self.json['id']

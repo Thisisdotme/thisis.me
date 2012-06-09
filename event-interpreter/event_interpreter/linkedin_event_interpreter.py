@@ -23,7 +23,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     return self._client
 
   def get_type(self):
-    return None
+    return self.FOLLOW_TYPE if self.json['updateType'] == 'CONN' else self.STATUS_TYPE
 
   def get_id(self):
     eventId = self.json['updateKey']

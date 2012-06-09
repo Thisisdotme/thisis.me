@@ -66,9 +66,6 @@ class FacebookEventCollector(EventCollector):
             total_accepted = total_accepted + 1
             callback(create_facebook_event(service_author_id, asm.author_id, post))
 
-        # if
-      # for
-
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
       next_url = posts_obj['paging']['next'] if 'paging' in posts_obj and 'next' in posts_obj['paging'] else None
       posts_url = next_url if next_url and next_url != posts_url else None

@@ -1,4 +1,5 @@
 import sys
+import datetime
 import logging
 
 from tim_commons.app_base import AppBase
@@ -34,6 +35,8 @@ class EventProcessorDriver(AppBase):
     broker_url = self.config['broker']['url']
     # get the maximum priority
     max_priority = int(self.config['scanner']['maximum_priority'])
+    min_duration = float(self.config['scanner']['iteration_minimum_duration'])
+    min_duration = datetime.timedelta(seconds=min_duration)
 
     # initialize the db engine & session
     db.configure_session(db_url)
@@ -50,6 +53,7 @@ class EventProcessorDriver(AppBase):
       # Create handlers
       processor = event_processor.from_service_name(service['name'],
                                                     max_priority,
+                                                    min_duration,
                                                     service['oauth'])
       handler = {'queue': service['queue'],
                  'handler': create_processor_handler(processor)}

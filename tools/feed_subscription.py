@@ -43,6 +43,7 @@ class Subscriber(AppBase):
                     'verify_token': verify_token}
     data = urlencode(subscription)
 
+    logging.info('POSTing to URL: %s', url)
     logging.info('POSTing: %s', data)
     urlopen(url, data)
 

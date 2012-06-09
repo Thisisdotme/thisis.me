@@ -28,7 +28,7 @@ class FacebookEventInterpreter(ServiceEventInterpreter):
 class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return None
+    return self.STATUS_TYPE
 
   def get_headline(self):
     # this handles events from Nike which is a repetition event
@@ -55,10 +55,10 @@ class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 class FacebookPhotoAlbumEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return None
+    return self.PHOTOALBUM_TYPE
 
 
 class FacebookPhotoEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return None
+    return self.PHOTO_TYPE

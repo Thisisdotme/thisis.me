@@ -9,6 +9,15 @@ from abc import (abstractmethod, ABCMeta)
 
 class ServiceEventInterpreter(object):
 
+  HIGHLIGHT_TYPE = 1
+  PHOTOALBUM_TYPE = 2
+  PHOTO_TYPE = 3
+  CHECKIN_TYPE = 4
+  STATUS_TYPE = 5
+  FOLLOW_TYPE = 6
+  VIDEO_TYPE = 7
+  VIDEOALBUM_TYPE = 8
+
   __metaclass__ = ABCMeta
 
   def __init__(self, json, author_service_map, oauth_config):
