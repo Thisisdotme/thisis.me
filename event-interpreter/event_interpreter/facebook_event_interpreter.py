@@ -4,11 +4,15 @@ Created on May 9, 2012
 @author: howard
 '''
 
+from abc import ABCMeta
+
 from datetime import datetime
 from service_event_interpreter import ServiceEventInterpreter
 
 
 class FacebookEventInterpreter(ServiceEventInterpreter):
+
+  __metaclass__ = ABCMeta
 
   DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+0000'
 
@@ -57,8 +61,21 @@ class FacebookPhotoAlbumEventInterpreter(FacebookEventInterpreter):
   def get_type(self):
     return self.PHOTOALBUM_TYPE
 
+  def get_headline(self):
+    return self.json.get('name', None)
+
 
 class FacebookPhotoEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
     return self.PHOTO_TYPE
+
+  def get_headline(self):
+    return self.json.get('name', None)
+
+  def get_photo(self):
+    photo = None
+    images = self.json.get('images', None)
+    if images and len(images) > 0:
+      photo = images[0].get('source', None)
+    return photo

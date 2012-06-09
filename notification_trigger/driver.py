@@ -70,4 +70,4 @@ class NotificationDriver(AppBase):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(NotificationDriver().main())
+  sys.exit(NotificationDriver('notification_trigger').main())

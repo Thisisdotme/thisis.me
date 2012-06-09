@@ -8,7 +8,7 @@ from tim_commons import json_serializer
 
 class LinkedinEventInterpreter(ServiceEventInterpreter):
 
-  # TODO - not sure I want this
+  # TODO - not sure we want this
   def __init__(self, json, author_service_map, oauth_config):
     super(LinkedinEventInterpreter, self).__init__(json, author_service_map, oauth_config)
     self._client = None
@@ -46,7 +46,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
 
     return headline
 
-  def get_deck(self):
+  def get_tagline(self):
 
     deck = None
 
@@ -54,30 +54,30 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
 
     # connection updates
     if updateType == 'CONN':
-      deck = self.get_connection_deck()
+      deck = self.get_connection_tagline()
     # share updates
     elif updateType == 'SHAR':
-      deck = self.get_share_deck()
+      deck = self.get_share_tagline()
     # company follow updates
     elif updateType == 'MSFC':
-      deck = self.get_company_follow_deck()
+      deck = self.get_company_follow_tagline()
     # recommendation updates
     elif updateType == 'PREC' or updateType == 'SVPR':
-      deck = self.get_recommendation_deck()
+      deck = self.get_recommendation_tagline()
     elif updateType == 'JOBP':
-      deck = self.get_job_posting_deck()
+      deck = self.get_job_posting_tagline()
     # joined group update
     elif updateType == 'JGRP':
-      deck = self.get_join_group_deck()
+      deck = self.get_join_group_tagline()
     # status updates
     elif updateType == 'STAT':
-      deck = self.get_status_deck()
+      deck = self.get_status_tagline()
 
     return deck
 
   # TODO: need to remedy the headline, deck, content debate
   def get_content(self):
-    return self.get_deck()
+    return self.get_tagline()
 
   def get_photo(self):
 
@@ -89,7 +89,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
 
     return photo
 
-  def get_connection_deck(self):
+  def get_connection_tagline(self):
 
     self.init_connection()
     connection = self.json['updateContent']['person']['connections']['values'][0]
@@ -98,7 +98,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
       content = '%s  %s' % (content, self.headline)
     return content
 
-  def get_share_deck(self):
+  def get_share_tagline(self):
 
     currShare = self.json['updateContent']['person']['currentShare']
 
@@ -117,28 +117,28 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
 
     return phrase
 
-  def get_company_follow_deck(self):
+  def get_company_follow_tagline(self):
 
     person = self.json['updateContent']['companyPersonUpdate']['person']
     action = self.json['updateContent']['companyPersonUpdate']['action']
     return '%s %s %s' % (person['firstName'], action['code'], self.json['updateContent']['company']['name'])
 
-  def get_recommendation_deck(self):
+  def get_recommendation_tagline(self):
 
     person = self.json['updateContent']['person']
     recommendation = person['recommendationsGiven']['recommendation']
     return '%s recommends %s %s %s' % (person['firstName'], recommendation['recommendationType']['code'], recommendation['recommendee']['firstName'], recommendation['recommendee']['lastName'])
 
-  def get_job_posting_deck(self):
+  def get_job_posting_tagline(self):
 
     job = self.json['updateContent']['job']
     person = self.json['updateContent']['job']['jobPoster']
     return '%s posted the job: %s at %s' % (person['firstName'], job['position'], job['company'])
 
-  def get_join_group_deck(self):
+  def get_join_group_tagline(self):
     return self.json['updateContent']['person']['memberGroups']['values'][0]['name']
 
-  def get_status_deck(self):
+  def get_status_tagline(self):
     return self.json['updateContent']['person']['currentStatus']
 
   def init_connection(self):
