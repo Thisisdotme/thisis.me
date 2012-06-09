@@ -95,4 +95,4 @@ def create_processor_handler(processor):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventProcessorDriver(1).main())
+  sys.exit(EventProcessorDriver('event_processor').main())

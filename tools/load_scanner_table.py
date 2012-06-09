@@ -70,4 +70,4 @@ def _lookup_services_with_event_queue(config):
 
 
 if __name__ == '__main__':
-  sys.exit(LoadScannerTableApplication().main())
+  sys.exit(LoadScannerTableApplication('load_scanner_table').main())

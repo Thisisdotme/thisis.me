@@ -93,4 +93,4 @@ def services_configuration(services, config):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventCollectorDriver(1).main())
+  sys.exit(EventCollectorDriver('event_collector').main())
