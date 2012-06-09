@@ -69,4 +69,4 @@ class NotificationLoad(AppBase):
 
 
 if __name__ == '__main__':
-  sys.exit(NotificationLoad().main())
+  sys.exit(NotificationLoad('load_message_queue').main())

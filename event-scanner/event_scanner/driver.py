@@ -112,4 +112,4 @@ def _decrease_priority(event, max_priority):
 
 
 if __name__ == '__main__':
-  sys.exit(ScannerApplication().main())
+  sys.exit(ScannerApplication('event_scanner').main())

@@ -48,5 +48,4 @@ class Subscriber(AppBase):
     urlopen(url, data)
 
 if __name__ == "__main__":
-  # Initialize with number of arguments script takes
-  sys.exit(Subscriber().main())
+  sys.exit(Subscriber('feed_subscription').main())
