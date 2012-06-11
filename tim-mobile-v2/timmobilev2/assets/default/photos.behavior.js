@@ -99,8 +99,12 @@ the behavior for the photo feature
   		initialize: function(options) {
   		  options = options || {};
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+
-  		  this.initializePaging({pageSize:100});
+  		  
   		  this.max = options.max || 0;
+  		  var pageSize = this.max || 100;
+  		  
+  		  this.initializePaging({pageSize:pageSize});
+  		  
   		  var authorName = TIM.pageInfo.authorFirstName;
   			this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + authorName 
@@ -117,14 +121,20 @@ the behavior for the photo feature
   		//
   		
   		setURL: function(searchTerm, pageSize) {
+  		  
   		  searchTerm = searchTerm || this.searchTerm;
   		  this.searchTerm = searchTerm;
   		  
-  		  pageSize = pageSize || this.pageSize;
+  		  pageSize = pageSize || this.max;
+  		  console.log("setting url for photo collection: ", this);
+  		  
+  		  /*
   		  
   		  if(this.max && (this.pageSize > this.max)) {
   		    this.pageSize = this.max;
   		  }
+  		  
+  		  */
   		  
   		  searchTerm = searchTerm || TIM.pageInfo.authorFirstName;
   		  this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
@@ -136,12 +146,11 @@ the behavior for the photo feature
   
   //the 'home view' for the photos feature - a list of the author's photo albums
   TIM.views.PhotoAlbumList = Backbone.View.extend( {
-      id: "photoAlbums",
-      className: "appPage photoFeature",
+      id: "photo-albums",
+      className: "appPage photo-feature",
       numRendered: 0,
 
       initialize: function() {
-          _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
           _.bindAll(this, "render");
           this.collection.bind( "reset", this.render );
           this.collection.bind('pageLoaded', this.renderNextPageset, this);
@@ -172,9 +181,9 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			
-  			$('#photoAlbumList').css('height', TIM.getViewportSize().height - 40 + 'px');
+  			$('#photoAlbumList').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
   			
-  			this.iScrollElem = new iScroll('photoAlbumList', { hScroll: false });
+  			this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
   			setTimeout(function () { that.iScrollElem.refresh() }, 0);
   			
   		  if(!feature.showDetails) {
@@ -213,18 +222,13 @@ the behavior for the photo feature
   });
   
   
-  //basic placeholder for photo
-  //this would be the grid view
-  //need to have view for the album list
-  //and a grid view for a single album
+  //this is the 'grid view' for a photo album
   //
-  //make this grid view have an album
-  //
-  //make paging happen!
+  //reached via /photos/<album_id>
   
   TIM.views.PhotoGrid = Backbone.View.extend( {
-      id: "photoGrid",
-      className: "appPage photoFeature",
+      id: "photo-grid",
+      className: "appPage photo-feature",
       numRendered: 0,
       chunkSize: 15,
       initialRenderSize: 30,
@@ -239,15 +243,17 @@ the behavior for the photo feature
 
   		events: {
   		  "vclick .thumb": "showFlipView",
-  		  "vclick .gridLink": "showAlbumView",
+  		  "vclick .grid-link": "showAlbumView",
   			"swiperight" : "showAlbumView"
   		},
   		
   		setCollection: function(album) {
   		  this.album = album;
         this.collection = album.photos;
+        this.collection.max = album.get("count");
+        this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			this.collection.bind( "reset", this.render );
+  			this.collection.bind("reset", this.render);
       },
 
 
@@ -271,9 +277,7 @@ the behavior for the photo feature
   					console.log(err);
   				}
   			  (that.$el).append(out);
-  			  //that.numRendered = that.collection.length;
   			});
-  			//alert(that.$el.html());
   			
   			//if there's an existing iscroll element, destroy it!
   			if (this.iScrollElem) {
@@ -289,7 +293,7 @@ the behavior for the photo feature
         options = options || {};
         var that = this;
         //make sure the elem container is the right height
-        $('#photoGridScroll').css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
+        $('#photo-grid-scroll').css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
         if (this.iScrollElem) {
           if (options.destroy) {
             this.iScrollElem.destroy();
@@ -302,7 +306,7 @@ the behavior for the photo feature
           }
           
         }
-        this.iScrollElem = new iScroll('photoGridScroll', { 
+        this.iScrollElem = new iScroll('photo-grid-scroll', { 
             //maybe instead of checking vs. the iscroll value, check to see which item is currently in view, then render next chunk if it's not visible & we're getting close to needing it
           		onScrollMove: function () {
           		},
@@ -347,7 +351,7 @@ the behavior for the photo feature
       renderChunk: function(chunkSize) {
           var that = this;
           if (this.chunkRendering) {
-            console.log('chunk rendering - gonna return now');
+            console.log('chunk rendering already in process - gonna return now');
             return;
           }
           this.chunkRendering = true;
@@ -395,7 +399,7 @@ the behavior for the photo feature
     					console.log(err);
     				}
     				//that.iScrollElem.destroy();
-    			  $('#photoGridScroll .gridContainer').append(out);
+    			  $('#photo-grid-scroll .grid-container').append(out);
     			  that.resetScrollElem();
     			  that.numRendered += photos.length;
     			  TIM.setLoading(false);
@@ -420,9 +424,9 @@ the behavior for the photo feature
   
   TIM.views.PhotoList = Backbone.View.extend( {
           
-      id: "photoListContainer",
+      id: "photo-list-container",
       
-      className: "appPage flipMode photoFeature",
+      className: "appPage flip-mode photo-feature",
       
       pageTemplate: "photoPage",
       
@@ -436,26 +440,26 @@ the behavior for the photo feature
 
       initialize: function(spec) {
           
-          
-          //add flipset functionality to this view
-          _.extend(this, TIM.mixins.flipset);
-          
-          _.bindAll(this);
-          console.log ('photo detail view: ', this);
-          
-          this.initializeFlipset();
-          
-          if(TIM.appContainerElem.find(this.el).length == 0)  {
-    			  TIM.appContainerElem.append(this.$el);
-    			}
-    			this.collection.bind('pageLoaded', this.renderNextPageset, this);
-    			this.collection.bind( "reset", this.render );
+        //add flipset functionality to this view
+        _.extend(this, TIM.mixins.flipset);
+        
+        _.bindAll(this);
+        console.log ('photo detail view: ', this);
+        
+        this.initializeFlipset();
+        
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+  			  TIM.appContainerElem.append(this.$el);
+  			}
+  			this.collection.bind('pageLoaded', this.renderNextPageset, this);
+  			this.collection.bind( "reset", this.render );
       },
       
       setCollection: function(album) {
         this.album = album
         this.collection = album.photos;
         this.collection.max = album.get("count");
+        this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
       },
@@ -465,11 +469,14 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			"vclick .detailLink" : "toggleMode",
-    			"vclick .gridLink" : "showGridView",
-    			//"vclick .image" : "toggleMode",
-    			"vclick .fullPhoto" : "toggleMode",
-    			"swiperight" : "showGridView"
+    			"vclick .detail-link" : "toggleMode",
+    			"vclick .grid-link" : "showGridView",
+    			"vclick .full-photo" : "toggleMode",
+    			"click .interaction-icons .comments" : "showComments",
+    			"click .interaction-icons .location" : "showLocation",
+    			"vclick .interaction-icons" : "interactionIconsClicked",
+    			"swiperight" : "showGridView",
+    			
   		},
 
       render: function( ) {
@@ -495,19 +502,9 @@ the behavior for the photo feature
         }
         var that = this;
         feature.showDetails = false;
-        feature.showGridView({albumId: this.album.id, reverse:true});
-        /*
-          TIM.transitionPage(feature.gridView.$el, {
-          //TIM.transitionPage(feature.albumListView.$el, {
-              animationName: "slide", 
-              reverse: true,
-              callback: function() {
-                feature.gridView.resetScrollElem();
-                TIM.app.navigate('/photos/' + that.album.id);
-              }
-          });
-        */
+        feature.showGridView({albumId: this.album.id, reverse:true, animationName: "slide"});
       },
+      
       //we're attempting to load ahead of teh flip
       renderNextPageset: function() {
         this.renderFlipSet();
@@ -524,14 +521,19 @@ the behavior for the photo feature
       
       toggleMode: function(event) {
         var that = this;
+        
+        //testing out the 'loading indicator thinngy'
+        
+        //this.flipSet.testLoadingFlip();
+        //return;
   		  
   		  if (this.flipMode) {
-  		    this.$el.toggleClass('flipMode');
+  		    this.$el.toggleClass('flip-mode');
   		    this.flipMode = false;
   		    
   		    //make an iscroll container
   		    //get the actual photo image & lay the over the actual flip area?
-  		    var overlay = $("<div class='scrollOverlay photoFeature'></div>");
+  		    var overlay = $("<div class='scroll-overlay photo-feature'></div>");
   		    //this.$el.prepend(overlay);
   		    $('#contentContainer').prepend(overlay);
   		    var clonedPage = $('.back .photoPage').eq(1).clone();
@@ -562,9 +564,9 @@ the behavior for the photo feature
   		  } else {
   		     this.$el.removeClass('hidden');
   		     window.setTimeout(function() {
-    		      that.$el.toggleClass('flipMode');
+    		      that.$el.toggleClass('flip-mode');
     		    }, 10);
-  		    $('.scrollOverlay').remove();
+  		    $('.scroll-overlay').remove();
   		    this.flipMode = true;
   		    this.iScrollElem.destroy();
           this.iScrollElem = null;
@@ -577,12 +579,37 @@ the behavior for the photo feature
       
       toolbarClicked: function(info) {
         console.log("toolbar clicked: ", info);
-        if(info === 'detailLink') {
+        if(info === 'detail-link') {
           this.toggleMode();
         }
-        if(info === 'gridLink') {
+        if(info === 'grid-link') {
           this.showGridView();
         }
+      },
+      
+      //call the features 'show comments view' method & pass in the id of the photo/resource to get comments for...
+      showComments: function(event) {
+        //event.stopPropagation();
+        
+        //get photo id from the data attribute... maybe this view should simply know what photo id we're on so we don't have to do this
+        var photoId = 0;
+  		  if (event) {
+  		    photoId = $(event.currentTarget).data('photo_id');
+  		  }
+        
+        event.preventDefault();
+        feature.showCommentsView({albumId: this.album.id, photoId: photoId});
+      },
+      
+      showLocation: function(event) {
+        //event.stopPropagation();
+        event.preventDefault();
+        alert('hey!  showing location!!!!!');
+      },
+      
+      //if the user clicks near the 'interaction icons (comments, location)', prevent from going into 'detail mode'
+      interactionIconsClicked: function(event) {
+        event.stopPropagation();
       },
       
       //keep track of our album id & current photo id?
@@ -610,6 +637,10 @@ the behavior for the photo feature
     
     var albumId = args[0];
     var photoId = args[1];
+    var showComments = false;
+    if(args[2] && args[2] == "comments" || args[1] && args[1] == "comments") {
+      showComments = true;
+    }
    
     feature.albumCollection = feature.albumCollection || new TIM.collections.PhotoAlbums();
     feature.mainCollection = feature.mainCollection || new TIM.collections.Photos();
@@ -620,48 +651,49 @@ the behavior for the photo feature
     
     feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
-
-    
-    //always make sure we have a list of albums?
-    var showView = function(options) {
-      if(options.albumId) {
-  		  if(photoId) {
-  		    feature.showListView(options);
-  		  } else {
-  		    feature.showGridView(options);
-  		  }
-  		} else {
-  		  feature.showAlbumListView();
-  		}
-    }
     
     if(!feature.hasFetchedCollection) {
-      console.log('fetching collection!'); 
       
       //this will eventually get the photo albums for the author
       //it should be paged via (perhaps) infinite scroll
+      
       feature.fakeAlbumData = feature.fakeAlbumData.concat(getFakeAlbums(35));
-      console.log("feature.fakeAlbumData", feature.fakeAlbumData);
       
       feature.albumCollection.reset(feature.fakeAlbumData);
   		feature.hasFetchedCollection = true;
-  		showView({albumId: albumId, photoId: photoId});
+  		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   	} else {
-  	  showView({albumId: albumId, photoId: photoId});
+  	  feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   	}
   };
   
+  //always make sure we have a list of albums?
+  feature.showView = function(options) {
+    if(options.showComments) {
+      feature.showCommentsView();
+      return;
+    }
+    if(options.albumId) {
+      if(options.photoId) {
+        feature.showListView(options);
+      } else {
+        feature.showGridView(options);
+      }
+    } else {
+      feature.showAlbumListView();
+    }
+  }
+  
+  //be sure to specify the proper transition
   feature.showAlbumListView = function(options) {
     options = options || {};
     TIM.transitionPage (feature.albumListView.$el);
   }
   
+  //show the list view for an album
+  //this is the 'flippable' view with one photo per page
   //
-  //maybe have methods to show detail view, show list view, show grid view?
-  //in this case, resourceId is the ID of the first resource to show
-  //have to fetch the collection if it doesn't aready exist
-  //should jump straight to the page that has that resource ID if possible
-  //
+  //when coming here 'out of nowhere', maybe have an animation where it flips a bit to give a visual indication that this is 'flippable'
   
   feature.showListView = function(options) {
     
@@ -674,9 +706,8 @@ the behavior for the photo feature
     TIM.disableScrolling();
     resourceId = options.photoId;
     var album = feature.albumCollection.get(options.albumId);
-    album.photos.setURL(album.get("searchTerm"));
-    
-    var collection = album.photos; // || feature.mainCollection;
+    var collection = album.photos;
+    collection.setURL();
     
     var showView = function(album) {
         //this isn't ideal - should be able to re-use the flip view if it's the last one the user saw
@@ -692,7 +723,7 @@ the behavior for the photo feature
 
         var model = collection.find(function(model){return model.get('id') == resourceId});
         listView.model = model;
-        var pageNum = model ? collection.indexOf(model) + 1 : 1;
+        var pageNum = model ? collection.indexOf(model) + 1 : 1; //pageNum is 1-based
         listView.goToPage(pageNum);
         TIM.app.navigate('/photos/' + album.id + "/" + resourceId);
         TIM.transitionPage (listView.$el, {"animationName":options.animationName || "fade", "reverse": options.reverse});
@@ -700,8 +731,10 @@ the behavior for the photo feature
         feature.showDetails = false;
         TIM.setLoading(false);
      }
-    
+    //make this a method with a callback
     if (!album.hasFetchedPhotos) {
+      album.photos.max = album.get("count");
+      album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
   			dataType: "jsonp",
   			success: function(resp) {
@@ -726,28 +759,37 @@ the behavior for the photo feature
     TIM.setLoading(true);
     options = options || {};
     var album = feature.albumCollection.get(options.albumId);
-    album.photos.setURL(album.get("searchTerm"));
     //don't make a new one each time?
     feature.gridView = feature.gridView || new TIM.views.PhotoGrid({collection: album.photos});
     feature.gridView.album = album;
     
+    //have an inner function here so it's available via callback if we have to fetch
     var showView = function () {
       //transition to this view
-			//this needs to not be so silly - shouldn't do this by default
 			//
+			feature.gridView.setCollection(album);
+      feature.gridView.render();
 		  TIM.setLoading(false);
+		  
 	    TIM.app.navigate('/photos/' + album.id);
-	    TIM.transitionPage (feature.gridView.$el, {animationName: "slide", reverse: options.reverse});
+	    TIM.transitionPage (feature.gridView.$el, {
+	      animationName: "slide", reverse: options.reverse,
+	      callback: function() {
+	        feature.gridView.resetScrollElem();
+	      }
+	    });
     }
     
+    //make this a method with a callback since it's repeated between the list/grid views
+    
     if (!album.hasFetchedPhotos) {
+      album.photos.max = album.get("count");
+      album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
   			dataType: "jsonp",
   			success: function(resp) {
   		    //alert('got photos for album!');
           album.hasFetchedPhotos = true;
-          feature.gridView.setCollection (album);
-          feature.gridView.render();
           showView();
   			},
   			error: function(resp) {
@@ -756,16 +798,40 @@ the behavior for the photo feature
   		});
     } else {
       //just show the album?
-      feature.gridView.setCollection (album);
-      feature.gridView.render();
       showView();
     }
+  }
+  
+  //comments view should have...
+  //a base resource/event id that it's based on
+  //one or more 'comments collections' - one for each 'source'
+  //these collections should be 'pageable'
+  //
+  //the 'comments area' should be (infinitely?) scrollable
+  //
+  //
+  //the comments view has a way to toggle between comments collections per source/service
+   
+  
+  feature.showCommentsView = function (options) {
+    options = options || {};
+    var resourceId = options.photoId || options.albumId;
+    //if ()
+    feature.commentsView = feature.commentsView || 
+      new TIM.views.Comments({
+          resourceId:resourceId,
+          sources:[{source_name:"facebook", selected:"selected"}, {source_name:"twitter", selected:"selected"}, {source_name:"instagram", selected:"selected"}]
+      });
+    feature.commentsView.render();
+    console.log("comments view:", feature.commentsView);
+    TIM.app.navigate('/photos/album/' + resourceId + "/comments");
+    TIM.transitionPage (feature.commentsView.$el, {animationName: "slide"});
   }
   
   //add to feature?
   TIM.features.getByName("photos").behavior = feature;
   
-  TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging?
+  TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging...
   
   //the rest of the code here is for generating fake photo album data to drive the feature
   

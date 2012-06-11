@@ -5,14 +5,15 @@ Created on Dec 14, 2011
 @author: howard
 '''
 
-import sys, json
+import sys
+import json
 
 from ConfigParser import ConfigParser
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from mi_utils.app_base import AppBase
+from tim_commons.app_base import AppBase
 
 from event_collectors.collector_factory import EventCollectorFactory
 

@@ -53,7 +53,7 @@ $(function() {
       var height =  $(window).height(),
           width =  $(window).width();
       //don't bother for desktop sizes!
-      if (height > 600) return;
+      if (height > 450) return;
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
@@ -98,7 +98,7 @@ $(function() {
 	}
 	
 	TIM.isLoading = function() {
-	  return TIM.loading_;
+	  return TIM._loading;
 	}
 	
 	TIM.setTransitioning = function (transitioning) {
@@ -161,6 +161,7 @@ $(function() {
     	TIM.eventAggregator.bind('featurenavrendered', this.featureNavRendered, this);
     	TIM.eventAggregator.bind('detailLinkClicked', this.detailLinkClicked, this);
     	TIM.eventAggregator.bind('error:featureload', this.featureLoadError, this);
+    	TIM.eventAggregator.bind('error', this.handleError, this);
     	
     	//move these to backbone views?
     	//make sure we have vclick event
@@ -197,7 +198,11 @@ $(function() {
     featureLoadError: function(options) {
       console.log("Feature loaded failed: ", options);
       TIM.showErrorMessage(options);
-      TIM.setLoading(false);
+    },
+    
+    handleError: function(options) {
+      console.log("Error: ", options);
+      TIM.showErrorMessage(options);
     },
   
     featureNavRendered: function(){
@@ -313,6 +318,7 @@ $(function() {
 	  $('#app').addClass('transitioning'); //make this a TIM method?
 	  if (fromPage) {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
+	    //should have an 'official' list of transitions to remove rather than hardcoding here
 	    fromPage.removeClass('in reverse slide fade flip').addClass(outClasses).animationComplete(function() {
 	      $(this).removeClass(outClasses + " slide fade flip");
 	      $('#app').removeClass('transitioning');

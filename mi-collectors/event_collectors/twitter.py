@@ -7,7 +7,7 @@ import json
 import urllib
 import oauth2 as oauth
 
-from mi_utils.oauth import make_request
+from tim_commons.oauth import make_request
 from mi_schema.models import Author
 
 from mi_model import Event

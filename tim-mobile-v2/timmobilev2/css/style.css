@@ -232,6 +232,21 @@ td { vertical-align: top; }
     height:100%;
     width:100%;
     z-index:100;
+    text-align:center;
+  }
+  
+  #loadingImg > div {
+    background:rgba(60,60,60,.6);
+    position:absolute;
+    top:40%;
+    height:60px;
+    line-height:30px;
+    width:30%;
+    border:1px solid #999;
+    border-radius:8px;
+    left:35%;
+    margin:0 auto;
+    color:#ccc;
   }
   
   .loading #loadingImg {
@@ -262,7 +277,7 @@ td { vertical-align: top; }
     /* left:-80px; */
   }
   
-  @media screen and (min-width: 400px) {
+  @media screen and (min-width: 420px) {
     #app {
       /* gotta get rid of these explicit pixel sizes */
       width:320px;
@@ -277,6 +292,13 @@ td { vertical-align: top; }
       min-height:370px;
     }
   }
+  
+  @media screen and (width: 390px) {
+     #app {
+       /* gotta get rid of these explicit pixel sizes */
+       min-height:390px;
+     }
+   }
   
   @media screen and (height: 320px) {
     #app {
@@ -314,6 +336,10 @@ td { vertical-align: top; }
   
   .appPage.active {
     display:block;
+  }
+  
+  .appPage.toolbar-top {
+    padding-top:40px;
   }
   
   #contentContainer {
@@ -383,6 +409,148 @@ td { vertical-align: top; }
    #featureNav .selected {
       font-weight:bold;
     }
+    
+    
+   .loadingPrevious {
+     position:absolute;
+     height:100%;
+     width:100%;
+     background:#333 url(/img/loading.gif) center 2% no-repeat;
+     z-index:0;
+   }
+   
+   .loadingNext {
+     position:absolute;
+     height:100%;
+     width:100%;
+     background:#333 url(/img/loading.gif) center 98% no-repeat;
+     z-index:0;
+   }
+   
+   /* styles for comments */
+   
+   .comment-list {
+     background-color:#fff;
+     font-size:12px;
+   }
+   
+   .comment-list .split-pane {
+      padding-left:52px;
+    }
+   
+   .comment-list ul.service-tabs {
+     width:45px;
+     list-style: none;
+     padding:0;
+     margin:8px 0 0 -45px;
+     float:left;
+     
+   }
+   
+   .comment-list .service-tabs li {
+     padding:0; margin:0;
+     height:35px;
+     width:45px;
+     margin-bottom:8px;
+     margin-left:0px;
+     position:relative;
+     right:-1px;
+   }
+   
+   .comment-list .service-tabs li.selected {
+      background: url(/img/selected_border.png) right center no-repeat;
+    }
+   
+   .comment-list .service-tabs li.facebook {
+      background: url(/img/icons/35/facebook_35.png) 2px center no-repeat;
+    }
+  
+    .comment-list .service-tabs li.twitter {
+        background: url(/img/icons/35/twitter_35.png) 2px center no-repeat;
+      }
+    
+    .comment-list .service-tabs li.instagram {
+        background: url(/img/icons/35/instagram_35.png) 2px center no-repeat;
+      }
+    
+      .comment-list .service-tabs li.facebook.selected {
+          background: url(/img/icons/35/facebook_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
+        }
+        
+    .comment-list .service-tabs li.twitter.selected {
+         background: url(/img/icons/35/twitter_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
+       }
+       
+       .comment-list .service-tabs li.instagram.selected {
+             background: url(/img/icons/35/instagram_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
+           }
+     
+   
+   .comment-list .comments {
+     box-sizing:box-border;
+     padding:8px 16px 8px 0;
+     border-left:1px solid #ccc;
+   }   
+   
+   .comment-list .comment {
+     margin-bottom:8px;
+     padding-left:50px;
+     padding-bottom:4px;
+     border-bottom:1px solid #f6f6f6;
+   }
+   
+   .comment-list .user-thumb {
+      float:left;
+      margin-left:-45px;
+      background: url(/img/profile_thumb_35.png) center center no-repeat;
+      height:35px;
+      width:35px;
+    }
+    
+    .comment-list .user-name {
+        font-weight:bold;
+        margin-bottom:4px;
+      }
+      
+        .comment-list .time-ago {
+            float:right;
+            color:#999;
+            font-weight:normal;
+          }
+   
+  .comment-list .toolbar {
+    position:absolute;
+    top:0px;
+    height:36px;
+    color:#fff;
+    background:rgba(60,60,60,.8);
+    width:100%;
+    z-index:9000;
+    overflow:hidden;
+
+    -moz-box-shadow:    0 0px 7px 2px #555;
+    -webkit-box-shadow: 0 0px 7px 2px #555;
+    box-shadow:         0 0px 7px 2px #555;
+    text-align:center;
+  }
+  
+  .comment-list .toolbar h1 {
+    font-size:18px;
+    font-weight:normal;
+    text-shadow:#333 1px 1px 2px;
+    line-height:40px;
+    text-align:center;
+  }
+  
+  .comment-list  .toolbar .back-link  {
+    position:absolute;
+    left:8px;
+    top:2px;
+    height:36px;
+    width:24px;
+    background: transparent url(/img/back_arrow.png) no-repeat center center;
+  }
+  
    
    .mi-header { }
    

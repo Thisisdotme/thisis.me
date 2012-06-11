@@ -96,7 +96,8 @@ class EventProcessor:
         existing_event.content = interpreter.get_content()
         existing_event.photo_url = interpreter.get_photo()
         existing_event.auxillary_content = interpreter.get_auxiliary_content()
-        existing_event.modify_time = datetime.datetime.utcnow()
+        existing_event.modify_time = interpreter.get_update_time() if interpreter.get_update_time() \
+                                                                 else datetime.datetime.utcnow()
 
       else:
         # skip event
@@ -122,8 +123,12 @@ class EventProcessor:
       profile_image = None
 
       service_event = ServiceEvent(asm.id,
+                                   interpreter.get_type(),
+                                   asm.author_id,
+                                   asm.service_id,
                                    interpreter.get_id(),
                                    interpreter.get_create_time(),
+                                   interpreter.get_update_time(),
                                    url,
                                    caption,
                                    content,
@@ -166,7 +171,7 @@ def update_scanner(event_updated,
     event_age = datetime.datetime.utcnow() - update_time
     event_age_in_sec = total_seconds(event_age)
     if event_age_in_sec < 0.0:
-      event_age_in_sec = math.abs(event_age_in_sec)
+      event_age_in_sec = math.fabs(event_age_in_sec)
       if event_age_in_sec > min_duration_in_sec:
         logging.warning('Time clock are out of sync by at least: %s', event_age_in_sec)
 

@@ -239,6 +239,28 @@ class AuthorGroupMap(Base):
 
 
 '''
+TABLE: service_object_type
+'''
+
+
+class ServiceObjectType(Base):
+
+  __tablename__ = 'service_object_type'
+
+  type_id = Column(Integer, primary_key=True)
+
+  label = Column(String(255), nullable=False)
+
+  def __init__(self, type_id, label):
+    self.type_id = type_id
+    self.label = label
+
+  def __repr__(self):
+    # not including the JSON
+    return "<ServiceObjectType('{0},{1}')".format(self.type_id, self.label)
+
+
+'''
 TABLE: service_event
 '''
 
@@ -254,6 +276,10 @@ class ServiceEvent(Base):
                     {})
 
   id = Column(Integer, primary_key=True)
+
+  type_id = Column(Integer, ForeignKey('service_object_type.type_id', ondelete='CASCADE'), nullable=False)
+  author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
+  service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), nullable=False)
 
   parent_id = Column(Integer, ForeignKey('service_event.id', ondelete='CASCADE'), nullable=True)
 
@@ -284,8 +310,12 @@ class ServiceEvent(Base):
 
   def __init__(self,
                author_service_map_id,
+               type_id,
+               author_id,
+               service_id,
                event_id,
                create_time,
+               modify_time,
                url=None,
                caption=None,
                content=None,
@@ -294,9 +324,12 @@ class ServiceEvent(Base):
                authorProfileImageUrl=None,
                json=None):
     self.author_service_map_id = author_service_map_id
+    self.type_id = type_id
+    self.author_id = author_id
+    self.service_id = service_id
     self.event_id = event_id
     self.create_time = create_time
-    self.modify_time = create_time
+    self.modify_time = modify_time if modify_time else create_time
     self.url = url
     self.caption = caption
     self.content = content
@@ -307,14 +340,77 @@ class ServiceEvent(Base):
 
   def __repr__(self):
     # not including the JSON
-    return "<ServiceEvent('%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,
+    return "<ServiceEvent('%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s')>" % (self.id,
                                                           self.author_service_map_id,
+                                                          self.type_id,
+                                                          self.author_id,
+                                                          self.service_id,
                                                           self.create_time,
                                                           self.url,
                                                           self.caption,
                                                           self.content,
                                                           self.photo_url,
                                                           self.auxillary_content)
+
+
+'''
+TABLE: relationship_type
+'''
+
+
+class RelationshipType(Base):
+
+  __tablename__ = 'relationship_type'
+
+  type_id = Column(Integer, primary_key=True)
+
+  label = Column(String(255), nullable=False)
+
+  def __init__(self, type_id, label):
+    self.type_id = type_id
+    self.label = label
+
+  def __repr__(self):
+    # not including the JSON
+    return "<RelationshipType('{0},{1}')".format(self.type_id, self.label)
+
+
+'''
+TABLE: relationship
+'''
+
+
+class Relationship(Base):
+
+  __tablename__ = 'relationship'
+  __table_args__ = (UniqueConstraint('relationship_type_id',
+                                     'parent_asm_id',
+                                     'parent_service_event_id',
+                                     'child_asm_id',
+                                     'child_service_event_id',
+                                     name='uidx_relationship_1'),
+                                     {})
+
+  relationship_type_id = Column(Integer, ForeignKey('relationship_type.type_id', ondelete='CASCADE'), primary_key=True)
+
+  parent_asm_id = Column(Integer, ForeignKey('author_service_map.id', ondelete='CASCADE'), primary_key=True)
+  parent_service_event_id = Column(String(255), primary_key=True)
+
+  child_asm_id = Column(Integer, ForeignKey('author_service_map.id', ondelete='CASCADE'), primary_key=True)
+  child_service_event_id = Column(String(255), primary_key=True)
+
+  def __init__(self, relationship_type,
+               parent_asm_id, parent_service_event_id,
+               child_asm_id, child_service_event_id):
+    self.relationship_type_id = relationship_type
+    self.parent_asm_id = parent_asm_id
+    self.parent_service_event_id = parent_service_event_id
+    self.child_asm_id = child_asm_id
+    self.child_service_event_id = child_service_event_id
+
+  def __repr__(self):
+    # not including the JSON
+    return "<Relationship('{0},{1},{2},{3},{4}')".format(self.type_id, self.label)
 
 
 class OriginMap(Base):

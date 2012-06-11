@@ -25,6 +25,38 @@ TIM.collections.Features = Backbone.Collection.extend({
 		}
 });
 
+//
+// base collections for all comments in teh system
+//
+
+TIM.collections.Comments = Backbone.Collection.extend({
+	 	model: TIM.models.Comment,
+		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName, //obviously this isnt' right... maybe will go to our API, maybe directly to the API of the service, i.e. facebook, twitter, etc.
+		
+		initialize: function(options) {
+		  options = options || {};
+		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
+		  this.initializePaging();
+		  this.source = options.source; //should be service... a TIM.models.Service?
+			//set url for source...
+		},
+		
+});
+
+//
+// base collections for all services, eg. facebook, twitter, instagram
+//
+
+TIM.collections.Services = Backbone.Collection.extend({
+	 	model: TIM.models.Service,
+		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		
+		initialize: function(options) {
+		  options = options || {};
+		},
+		
+});
+
 //paging for collection as a mixin
 //
 //have some sort of variable that says whether there's a maximum/total count - after reaching this count, don't try to get the next page?
@@ -49,16 +81,10 @@ TIM.mixins.paging = {
     var that = this;
     
     if(this.max) {
-       if (this.max && this.length >= max) {
+       if (this.max && this.length >= this.max) {
           console.log("tried to page too far!")
           return;
-        }
-
-        //hacky way to make the search cut off at a specific number
-        if (this.length + this.pageSize > this.max) {
-          this.setURL(undefined, this.max - this.length);
-        }
-      
+        }      
     }
   
     this.page++;

@@ -500,7 +500,6 @@ class FoursquareEvent(PlaceEvent):
     ''' Customization
     '''
     caption = fromJSON['venue'].get('name', '')
-    shout = fromJSON.get('shout', None)
     address = fromJSON['venue']['location'].get('address')
     city = fromJSON['venue']['location'].get('city')
 
@@ -515,14 +514,12 @@ class FoursquareEvent(PlaceEvent):
 
     location = ' (%s)' % location if location else ''
 
-    self.source = location
-
     source_name = fromJSON['source'].get('name', '')
     source_url = fromJSON['source'].get('url', '')
 
     self.source = {"name": source_name, "url": source_url}
 
-    self.caption = shout
+    self.caption = fromJSON.get('shout', None)
     self.content = '%s%s' % (caption, location)
 
     return self

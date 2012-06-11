@@ -9,7 +9,7 @@ import oauth2 as oauth
 from datetime import timedelta
 from time import mktime
 
-from mi_utils.oauth import make_request
+from tim_commons.oauth import make_request
 from mi_schema.models import Author
 
 from full_collector import FullCollector

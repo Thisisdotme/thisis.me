@@ -4,17 +4,17 @@
 body {
 }
 
-#photoGrid {
+#photo-grid {
   background-color:#333;
  
 }
 
-#photoGrid .photoGrid {
+#photo-grid .photo-grid {
   padding:8px 4px;
    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 
-#photoGrid h2 {
+#photo-grid h2 {
   font-family:"Holtwood One SC",sans-serif;
   clear:both;
   font-size:24px;
@@ -23,7 +23,7 @@ body {
   line-height:1.0;
 }
 
-#photoGrid .loading {
+#photo-grid .loading {
   color:#fff;
   font-size:14px;
   font-weight:normal;
@@ -32,7 +32,7 @@ body {
   text-align:center;
 }
 
-#photoGrid .thumb, .thumbs .thumb {
+#photo-grid .thumb, .thumbs .thumb {
   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
   /* width:33.333%;
   min-width:33.333%; */
@@ -56,17 +56,17 @@ body {
   background-size:cover;
 }
 
-#photoDetailContainer {
+#photo-detail-container {
   background-color:#000;
   overflow:hidden;
   height:100%;
 }
 
-#photoStreamContainer {
+#photo-stream-container {
   max-height:170px;
 }
 
-.photoFeature .toolbar {
+.photo-feature .toolbar {
   position:absolute;
   top:0px;
   height:36px;
@@ -82,16 +82,16 @@ body {
   text-align:center;
 }
 
-#photoListContainer .toolbar {
+#photo-list-container .toolbar {
   top:-36px;
   -webkit-transition: all .3s linear;
 }
 
-#photoListContainer.flipMode .toolbar {
+#photo-list-container.flip-mode .toolbar {
   top:0px;
 }
 
-.photoFeature  .toolbar .gridLink  {
+.photo-feature  .toolbar .grid-link  {
   position:absolute;
   left:8px;
   top:2px;
@@ -100,7 +100,7 @@ body {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-#contentContainer .scrollOverlay {
+#contentContainer .scroll-overlay {
   position:absolute;
   top:0px;
   left:0px;
@@ -122,11 +122,11 @@ body {
     to { -webkit-transform: translateY(-50px); opacity:0 }
 }
 
-#contentContainer .scrollOverlay > div {
+#contentContainer .scroll-overlay > div {
  overflow:visible;
 }
 
-.photoPage .fullPhoto {
+.photo-page .full-photo {
   height:100%;
   width:100%;
   background-size:cover;
@@ -134,18 +134,18 @@ body {
   height:370px; /* need to make dynamic? */
 }
 
-.scrollOverlay .photoPage {
+.scroll-overlay .photo-page {
   height:1000px;
   width:1000px;
 }
 
-.scrollOverlay .photoPage .fullPhoto {
+.scroll-overlay .photo-page .full-photo {
   background-size:contain;
   /*height:1000px;
   width:1000px; */
 }
 
-.photoPage .caption .gridLink, .photoDetail .caption .gridLink {
+.photo-page .caption .grid-link, .photo-detail .caption .grid-link {
   position:absolute;
   right:34px;
   bottom:4px;
@@ -154,15 +154,15 @@ body {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-.photoDetail {
+.photo-detail {
   min-height:100%;
 }
 
-.photoDetail img {
+.photo-detail img {
   /* -webkit-transform:translate3d(0,0,0)  */
 }
 
-.photoDetail .caption, .photoPage .caption, .scrollOverlay .caption {
+.photo-detail .caption, .photo-page .caption, .scroll-overlay .caption {
   position:absolute;
   bottom:-50px;
   color:#fff;
@@ -173,12 +173,12 @@ body {
   -webkit-transition: all .3s linear;
 }
 
-.flipMode .photoPage .caption, .scrollOverlay .caption {
+.flip-mode .photo-page .caption, .scroll-overlay .caption {
   -webkit-transition: all .3s linear;
   bottom:0px;
 }
 
-.scrollOverlay.noToolbars .caption {
+.scroll-overlay.no-toolbars .caption {
   -webkit-animation-name: slideDownAndDisappear;
   -webkit-animation-timing-function: linear;
 	-webkit-animation-duration: 500ms;
@@ -186,7 +186,7 @@ body {
 	opacity:0;
 }
 
-.scrollOverlay.noToolbars .toolbar {
+.scroll-overlay.no-toolbars .toolbar {
   -webkit-animation-name: slideUpAndDisappear;
   -webkit-animation-timing-function: linear;
 	-webkit-animation-duration: 500ms;
@@ -195,12 +195,12 @@ body {
 }
 
 
-.photoDetail .caption > div, .photoPage .caption > div, .scrollOverlay .caption > div {
+.photo-page .caption > .main-text, .scroll-overlay .caption .main-text {
   padding:8px 16px;
 }
 
 
-.photoPage .caption .gridLink, .photoDetail .caption .gridLink {
+.photo-page .caption .grid-link, .photo-detail .caption .grid-link {
   position:absolute;
   right:34px;
   bottom:4px;
@@ -209,7 +209,7 @@ body {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-.photoDetail .caption .listLink {
+.photo-detail .caption .list-link {
   position:absolute;
   right:4px;
   bottom:4px;
@@ -218,19 +218,94 @@ body {
   background: transparent url(/img/listIcon.png) no-repeat center center;
 }
 
-#photoGridScroll {
+/* let's do some god-dam caption styling here */
+
+.photo-page .caption .profile-thumb {
+  float:left;
+  height:25px;
+  width:25px;
+  border:1px solid #ccc;
+  margin:8px;
+  background: transparent url(/img/profile_thumb.png) no-repeat center center;
+}
+
+
+.photo-page .caption .source-img {
+  float:left;
+  height:15px;
+  width:15px;
+  margin-right:4px;
+}
+
+/* make these sprites.... or inline base 64? */
+
+.photo-page .caption .source-img.linkedIn {
+  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center;
+}
+
+.photo-page .caption .source-img.facebook {
+  background: transparent url(/img/icons/facebook_15.png) no-repeat center center;
+}
+
+.photo-page .caption .source-img.instagram {
+  background: transparent url(/img/icons/instagram_15.png) no-repeat center center;
+}
+
+.photo-page .caption .source-img.flickr {
+  background: transparent url(/img/icons/flickr_15.png) no-repeat center center;
+}
+
+.photo-page .caption .source-img.twitter {
+  background: transparent url(/img/icons/twitter_15.png) no-repeat center center;
+}
+
+.photo-page .caption .source-img.google {
+  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center;
+}
+
+.photo-page .interaction-icons {
+  position:absolute;
+  left:2px;
+  bottom:60px;
+  height:100px;
+  width:50px;
+  x-border:1px solid yellow;
+  /* background:rgba(60,60,60,.1); */
+}
+
+.photo-page .interaction-icons .comments {
+  position:absolute;
+  height:35px;
+  width:35px;
+  left:0px;
+  x-border:1px solid green;
+  background: transparent url(/img/comments_icon.png) no-repeat center center;
+}
+
+.photo-page .interaction-icons .location {
+  position:absolute;
+  top:55px;
+  left:0px;
+  height:35px;
+  width:35px;
+  x-border:1px solid red;
+  background: transparent url(/img/location_pin_icon.png) no-repeat center center;
+}
+
+
+#photo-grid-scroll {
   position:absolute;
   top:40px;
   height:320px;
   overflow:hidden;
 }
 
-#photoAlbums {
+#photo-albums {
   background-color:#333;
   color:#ccc;
 }
 
-.photoAlbums {
+.photo-albums {
   position:absolute;
   top:40px;
   height:320px;
@@ -238,7 +313,7 @@ body {
   overflow:hidden;
 }
 
-.photoAlbums .album {
+.photo-albums .album {
   x-background-color:#fff;
   box-sizing:border-box;
   -moz-box-sizing:border-box; /* Firefox */
@@ -247,15 +322,15 @@ body {
   padding:8px;  
 }
 
-.photoAlbums .album .albumInfo {
+.photo-albums .album .album-info {
  padding:4px 0;  
 }
 
-.photoAlbums .album .moreLink {
+.photo-albums .album .more-link {
   float:right; 
 }
 
-.photoFeature .toolbar h1 {
+.photo-feature .toolbar h1 {
   font-size:18px;
   font-weight:normal;
   text-shadow:#333 1px 1px 2px;
