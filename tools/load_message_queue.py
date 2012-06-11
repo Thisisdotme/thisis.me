@@ -11,36 +11,33 @@ class NotificationLoad(AppBase):
   def display_usage(self):
     return 'usage: %prog [options] queues...'
 
-  def init_args(self):
-    self.option_parser.add_option('--url',
-                            dest='url',
-                            default='amqp://localhost',
-                            help='URL for the message queue')
-    self.option_parser.add_option('--messagefile',
-                            dest='message_file',
-                            default='{tim_data}/messages.json',
-                            help='File containing all the message events')
-    self.option_parser.add_option('--non-durable',
-                            dest='durable',
-                            action='store_false',
-                            default=True,
-                            help='Flag specifying message queue durability')
+  def init_args(self, option_parser):
+    option_parser.add_option('--url',
+                             dest='url',
+                             default='amqp://localhost',
+                             help='URL for the message queue')
+    option_parser.add_option('--messagefile',
+                             dest='message_file',
+                             default='{tim_data}/messages.json',
+                             help='File containing all the message events')
+    option_parser.add_option('--non-durable',
+                             dest='durable',
+                             action='store_false',
+                             default=True,
+                             help='Flag specifying message queue durability')
 
-  def parse_args(self, ignore):
-    (self.option, self.queues) = self.option_parser.parse_args()
+  def parse_args(self, queues):
+    if len(queues) < 1:
+      self.error('Most specify a queue')
 
-    if len(self.queues) < 1:
-      self.option_parser.print_help()
-      sys.exit()
-
-  def main(self):
+  def app_main(self, config, options, queues):
     TIM_DATA = 'TIM_DATA'
     data_directory = os.environ.get(TIM_DATA, None)
     if data_directory is None:
       logging.error('Environment variable %s not defined', TIM_DATA)
       sys.exit()
 
-    file = self.option.message_file.format(tim_data=data_directory)
+    file = options.message_file.format(tim_data=data_directory)
 
     if not os.path.exists(file):
       logging.warning('File "%s" does not exist', file)
@@ -54,15 +51,15 @@ class NotificationLoad(AppBase):
       raise
 
     # create amqp connection
-    client = create_message_client(self.option.url)
+    client = create_message_client(options.url)
 
     # create all of the required queues
-    create_queues(client, self.queues, durable=self.option.durable)
+    create_queues(client, queues, durable=options.durable)
 
     # itereate and send all the interesting messages
     for message in messages:
       queue = message['header']['type']
-      if queue in self.queues:
+      if queue in queues:
         send_messages(client, [message])
         sys.stdout.write('.')
     sys.stdout.write('\n')

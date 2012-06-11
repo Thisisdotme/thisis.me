@@ -13,31 +13,18 @@ from mi_schema.models import EventScannerPriority
 
 
 class ScannerApplication(AppBase):
-  def display_usage(self):
-    return '%prog [options]'
+  def app_main(self, config, options, args):
+    db_url = config['db']['sqlalchemy.url']
+    message_url = config['broker']['url']
 
-  def init_args(self):
-    pass
-
-  def parse_args(self, ignore):
-    (ignore, ignore) = self.option_parser.parse_args()
-
-    if ignore:
-      self.option_parser.print_help()
-      sys.exit()
-
-  def main(self):
-    db_url = self.config['db']['sqlalchemy.url']
-    message_url = self.config['broker']['url']
-
-    maximum_priority = int(self.config['scanner']['maximum_priority'])
-    iteration_minimum_duration = float(self.config['scanner']['iteration_minimum_duration'])
+    maximum_priority = int(config['scanner']['maximum_priority'])
+    iteration_minimum_duration = float(config['scanner']['iteration_minimum_duration'])
     iteration_minimum_duration = datetime.timedelta(seconds=iteration_minimum_duration)
 
     db.configure_session(db_url)
 
     message_client = message_queue.create_message_client(message_url)
-    _create_event_queues(message_client, self.config['queues'])
+    _create_event_queues(message_client, config['queues'])
     message_queue.close_message_client(message_client)
 
     for priority in range(0, maximum_priority + 1):

@@ -8,23 +8,12 @@ from tim_commons import db
 
 
 class EventCollectorDriver(AppBase):
-
-  def display_usage(self):
-    return 'usage: %prog [options]'
-
-  def init_args(self):
-    self.option_parser.add_option('--service',
-                                  dest='services',
-                                  action='append',
-                                  default=[],
-                                  help='Services to process')
-
-  def parse_args(self, ignore):
-    (self.option, ignore) = self.option_parser.parse_args()
-
-    if ignore:
-      self.option_parser.print_help()
-      sys.exit()
+  def init_args(self, option_parser):
+    option_parser.add_option('--service',
+                              dest='services',
+                              action='append',
+                              default=[],
+                              help='Services to process')
 
   def create_event_callback(self):
     def handler(message):
@@ -39,18 +28,18 @@ class EventCollectorDriver(AppBase):
 
     return handler
 
-  def main(self):
-    logging.info("Beginning: " + self.name)
+  def app_main(self, config, options, args):
+    logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = self.config['db']['sqlalchemy.url']
+    db_url = config['db']['sqlalchemy.url']
     # get the broker and queue config
-    broker_url = self.config['broker']['url']
+    broker_url = config['broker']['url']
 
     # initialize the db engine & session
     db.configure_session(db_url)
 
-    services = services_configuration(self.option.services, self.config)
+    services = services_configuration(options.services, config)
 
     # Get a list of all the queues and all the handlers
     queues = []
@@ -76,7 +65,7 @@ class EventCollectorDriver(AppBase):
 
     join(self.client, handlers)
 
-    logging.info("Finished: " + self.name)
+    logging.info("Finished...")
 
 
 def services_configuration(services, config):
