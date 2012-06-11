@@ -17,7 +17,7 @@ LIMIT = 200
 
 class FoursquareEventCollector(EventCollector):
 
-  PRUNE_ITEMS = {'venue': {'stats': None, 'events': None}}
+  PRUNE_ITEMS = {'venue': {'stats': None, 'events': None}, 'user': None}
 
   def fetch(self, service_author_id, callback):
 
