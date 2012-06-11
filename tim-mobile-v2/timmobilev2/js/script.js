@@ -11,7 +11,7 @@ TIM.loadedFeatures = TIM.loadedFeatures || {};
 TIM.authorFeatures = TIM.authorFeatures || {};
 TIM.currentPageElem = $('#splashScreen');
 TIM.previousPageElem = undefined;
-TIM.appContainerElem = $('#contentContainer');
+TIM.appContainerElem = $('#content-container');
 TIM.defaultTransition = "fade";
 TIM.loading_ = false;
 TIM.transitioning_ = false;
@@ -166,10 +166,10 @@ $(function() {
     	//move these to backbone views?
     	//make sure we have vclick event
     	
-    	$('#navToggle').on('vclick', (function(event){
+    	$('#nav-toggle').on('vclick', (function(event){
     	  event.preventDefault();
     	  event.stopPropagation();
-    	  $('#app').toggleClass('navOpen');
+    	  $('#app').toggleClass('nav-open');
     	}));
     	
     	$('#app').on('vclick', (function(event){
@@ -249,13 +249,16 @@ $(function() {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
   	    var feature = TIM.features.getByName(featureName);
-  	    
   	    if (TIM.features.getSelectedFeature()) {
   	      TIM.setLoading(true); //make this a method on TIM
   	    }
   	    
   	    if(!feature) {
   	      console.log('no feature');
+  	      if (TIM.features.length == 0) {
+  	        TIM.eventAggregator.trigger("error", {exception: "No features loaded for this author"});
+  	        return;
+  	      }
   	      //we get here if there was no feature in the URL
   	      //stay on the current feature if there is one, or else go to the cover page
   	      if(TIM.features.getSelectedFeature()) {
@@ -295,7 +298,7 @@ $(function() {
   //should keep a history stack & use that to determine whether to do a forward or revers transition
   
 	TIM.transitionPage = function (toPage, options) {
-	  $('#app').removeClass('loading initializing navOpen');
+	  $('#app').removeClass('loading initializing nav-open');
 	  options = options || {};
 	  var fromPage = options.fromPage || TIM.currentPageElem;
 	  

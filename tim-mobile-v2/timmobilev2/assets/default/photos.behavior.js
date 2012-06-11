@@ -147,7 +147,7 @@ the behavior for the photo feature
   //the 'home view' for the photos feature - a list of the author's photo albums
   TIM.views.PhotoAlbumList = Backbone.View.extend( {
       id: "photo-albums",
-      className: "appPage photo-feature",
+      className: "app-page photo-feature",
       numRendered: 0,
 
       initialize: function() {
@@ -181,7 +181,7 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			
-  			$('#photoAlbumList').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
+  			$('#photo-album-list').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
   			
   			this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
   			setTimeout(function () { that.iScrollElem.refresh() }, 0);
@@ -228,7 +228,7 @@ the behavior for the photo feature
   
   TIM.views.PhotoGrid = Backbone.View.extend( {
       id: "photo-grid",
-      className: "appPage photo-feature",
+      className: "app-page photo-feature",
       numRendered: 0,
       chunkSize: 15,
       initialRenderSize: 30,
@@ -426,7 +426,7 @@ the behavior for the photo feature
           
       id: "photo-list-container",
       
-      className: "appPage flip-mode photo-feature",
+      className: "app-page flip-mode photo-feature",
       
       pageTemplate: "photoPage",
       
@@ -535,7 +535,7 @@ the behavior for the photo feature
   		    //get the actual photo image & lay the over the actual flip area?
   		    var overlay = $("<div class='scroll-overlay photo-feature'></div>");
   		    //this.$el.prepend(overlay);
-  		    $('#contentContainer').prepend(overlay);
+  		    $('#content-container').prepend(overlay);
   		    var clonedPage = $('.back .photoPage').eq(1).clone();
   		    //alert(img.css('background-image'));
   		    
@@ -553,7 +553,7 @@ the behavior for the photo feature
   		      that.toggleMode();
   		    })
   		    var containerEl = overlay.get(0);
-  		    //var containerEl = $("#contentContainer").css('height','200px');//this.$el.get(0);
+  		    //var containerEl = $("#content-container").css('height','200px');//this.$el.get(0);
   		    if(containerEl) {
   		      this.iScrollElem = new iScroll(containerEl, { zoom: true, vScroll: true, hScroll: true, hScrollbar: false, vScrollbar: false });
   		       window.setTimeout(function() {

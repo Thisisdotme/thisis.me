@@ -30,11 +30,11 @@ TIM.views.renderTemplate = function(template, context) {
 TIM.renderTemplate = TIM.views.renderTemplate; //shorthand?
 
 TIM.views.ErrorMessage = Backbone.View.extend( {
-   id: "errorMessage",
+   id: "error-message",
    
    initialize: function() {
        _.bindAll(this);
-       this.$messageEl = $('#errorMessage > div');
+       this.$messageEl = $('#error-message > div');
    },
    
    render: function (options) {
@@ -50,7 +50,7 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
    
 
 TIM.views.FeatureNav = Backbone.View.extend( {
-   el: $( "#featureNavItems" ),
+   el: $( "#feature-nav-items" ),
 		
    initialize: function() {
        this.collection.bind( "reset", this.render, this );
@@ -64,8 +64,8 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    },
 		
   addOne : function ( item ) {
-  	var view = new TIM.views.FeatureViewItem({model:item});
-  	$( "#featureNavItems" ).append(view.render().el);
+  	var view = new TIM.views.FeatureNavItem({model:item});
+  	$( "#feature-nav-items" ).append(view.render().el);
   },
 
   render: function() {
@@ -81,11 +81,11 @@ TIM.views.FeatureNav = Backbone.View.extend( {
  	    }
  	    //console.log(feature);
  	  });
- 	  $("#featureNav").removeClass('active');
+ 	  $("#feature-nav").removeClass('active');
  	}
 })
 
-TIM.views.FeatureViewItem = Backbone.View.extend({
+TIM.views.FeatureNavItem = Backbone.View.extend({
 	tagName : 'li',
 
 	initialize: function() {
@@ -101,7 +101,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 	render : function () {
 	  var self = this;
 	  var selected = this.model.get('selected');
-	  //console.log('rendering menu item');
+	  console.log('rendering menu item');
 	  dust.render("featureNavItem", this.model.toJSON(), function(err, out) {
 		  if(err != null) {
 				console.log(err);
@@ -140,7 +140,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 
 TIM.views.Comments = Backbone.View.extend( {
         
-    className: "appPage comment-list toolbar-top",
+    className: "app-page comment-list toolbar-top",
     template: "commentList",
     commentCollections: [],
     collectionNum: 0,

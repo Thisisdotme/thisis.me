@@ -81,7 +81,7 @@
 
   TIM.views.HighlightList = Backbone.View.extend( {
       id: "highlights",
-      className: "flippage flippage-container appPage",
+      className: "flippage flippage-container app-page",
       
       /* flipset vars - can't come from teh mixin? */
       /* pageNum: 0,
@@ -134,7 +134,7 @@
   		    console.log('have a model for the detail');
   		    feature.detailView.model = model;
     		  feature.detailView.render();
-    		  TIM.transitionPage ($('#detailContainer'), {"animationName":"slide"});
+    		  TIM.transitionPage ($('#detail-container'), {"animationName":"slide"});
     		} else {
     		  console.log("can't find a model for the detail");
     		  //go staight to the list view
@@ -148,9 +148,9 @@
   _.extend(TIM.views.HighlightList.prototype, TIM.mixins.flipset);
   
   TIM.views.HighlightDetail = Backbone.View.extend( {
-      id: "detailContainer",
+      id: "detail-container",
       
-      className: "appPage",
+      className: "app-page",
       
       initialize: function(spec) {
           _.bindAll(this);
@@ -246,7 +246,7 @@
   	  //feature.gridView.render();
   	  //feature.timelineView.render();
   	  if (feature.showDetails) {
-  	    //TIM.transitionPage ($("#detailContainer"));
+  	    //TIM.transitionPage ($("#detail-container"));
   	    //feature.timelineView.showDetail();
   	    feature.showDetailView(resourceId);
   	  } else {
@@ -267,7 +267,7 @@
 	    console.log('have a model for the detail');
 	    feature.detailView.model = model;
 		  feature.detailView.render();
-		  TIM.transitionPage ($('#detailContainer'), {"animationName":"slide"});
+		  TIM.transitionPage ($('#detail-container'), {"animationName":"slide"});
 		  feature.showDetailsId = 0;
 		  feature.showDetails = false;
 		} else {

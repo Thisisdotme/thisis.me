@@ -223,7 +223,7 @@ td { vertical-align: top; }
     height:100%;
   }
   
-  #loadingImg {
+  #loading-img {
     display:none;
     background:transparent url(/img/loading.gif) center center no-repeat;
     position:absolute;
@@ -235,7 +235,7 @@ td { vertical-align: top; }
     text-align:center;
   }
   
-  #loadingImg > div {
+  #loading-img > div {
     background:rgba(60,60,60,.6);
     position:absolute;
     top:40%;
@@ -249,18 +249,18 @@ td { vertical-align: top; }
     color:#ccc;
   }
   
-  .loading #loadingImg {
+  .loading #loading-img {
     display:block;
   }
   
-  #errorMessage {
+  #error-message {
     position:absolute;
     bottom:0;
     width:100%;
     background-color:yellow;
   }
   
-  #errorMessage > div {
+  #error-message > div {
     text-align:center;
     padding:12px;
   }
@@ -273,7 +273,7 @@ td { vertical-align: top; }
     overflow:hidden; 
   }
   
-  .navOpen #contentContainer {
+  .nav-open #content-container {
     /* left:-80px; */
   }
   
@@ -320,7 +320,7 @@ td { vertical-align: top; }
     -webkit-perspective:1000;
   }
   
-  .appPage {
+  .app-page {
     position:absolute;
     width:100%;
     min-height:100%;
@@ -334,15 +334,15 @@ td { vertical-align: top; }
    -webkit-box-sizing:border-box; /* Safari */
   }
   
-  .appPage.active {
+  .app-page.active {
     display:block;
   }
   
-  .appPage.toolbar-top {
+  .app-page.toolbar-top {
     padding-top:40px;
   }
   
-  #contentContainer {
+  #content-container {
     position:absolute;
     top:0;
     left:0;
@@ -352,14 +352,14 @@ td { vertical-align: top; }
     /* background-color:#666; */
   }
   
-  #splashScreen {
+  #splash-screen {
     background-color:#cd212b;
     background:#cd212b url(/img/thisisme_logo.png) center 30% no-repeat;
   }
       
   h1 { margin:0 }
 
-   #navToggle {
+   #nav-toggle {
       position:absolute;
        right:0px;
       display:block;
@@ -370,15 +370,15 @@ td { vertical-align: top; }
       z-index:10000;
    }
    
-   .initializing #featureNav, .initializing #navToggle {
+   .initializing #feature-nav, .initializing #nav-toggle {
       display:none;
      }
    
-   .navOpen #featureNav {
+   .nav-open #feature-nav {
      right:0px;
     }
     
-    #featureNav {
+    #feature-nav {
        position:absolute;
        right:-80px;
        top:0px;
@@ -388,7 +388,7 @@ td { vertical-align: top; }
       z-index:30;
     }
     
-  #featureNav ul {
+  #feature-nav ul {
     background-color:#cd212b;
     /* display:none; */
     color:#fff;
@@ -396,22 +396,22 @@ td { vertical-align: top; }
     padding-top:45px;
   }
   
-  #featureNav.active ul {
+  #feature-nav.active ul {
     display:block;
   }
    
-   #featureNav li {
+   #feature-nav li {
      list-style:none;
      padding:12px 4px;
      font-size:14px;
    }
    
-   #featureNav .selected {
+   #feature-nav .selected {
       font-weight:bold;
     }
     
     
-   .loadingPrevious {
+   .loading-previous {
      position:absolute;
      height:100%;
      width:100%;
@@ -419,7 +419,7 @@ td { vertical-align: top; }
      z-index:0;
    }
    
-   .loadingNext {
+   .loading-next {
      position:absolute;
      height:100%;
      width:100%;
@@ -556,13 +556,13 @@ td { vertical-align: top; }
    
    #feature .event { clear: both; border-bottom:1px dotted black; margin-bottom:1em; }
 
-   .featureIcon { float:left; margin-right:1em; } 
+   .feature-icon { float:left; margin-right:1em; } 
 
    /*.event { min-height: 5em; }
    .event em { font-size:75%; }
    .event p { margin-top:.33em; }*/
 
-   #authorFeatures .ui-content a { margin: 1em; display: inline-block;}
+   #author-features .ui-content a { margin: 1em; display: inline-block;}
    
     
     /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
@@ -691,7 +691,7 @@ td { vertical-align: top; }
     
     
    
-   #detailContainer {
+   #detail-container {
      background-color:#fff;
    }
    

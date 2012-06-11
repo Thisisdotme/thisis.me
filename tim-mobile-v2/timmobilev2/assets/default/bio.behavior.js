@@ -48,9 +48,9 @@
   
   //basic placeholder for photo
   TIM.views.Bio = Backbone.View.extend( {
-      id: "bioPage",
+      id: "bio-age",
       
-      className: "appPage",
+      className: "app-page",
       
       iScrollElem: undefined,
 

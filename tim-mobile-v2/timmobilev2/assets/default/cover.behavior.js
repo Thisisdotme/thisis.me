@@ -72,9 +72,9 @@
   
   //basic placeholder for photo
   TIM.views.Cover = Backbone.View.extend( {
-      id: "coverContainer",
+      id: "cover-container",
       
-      className: "appPage",
+      className: "app-page",
       
       events: {
         "vclick .highlight" : "showHighlight",
@@ -157,7 +157,7 @@
   			}
   		});
     } else {
-      TIM.transitionPage ($("#coverContainer"));
+      TIM.transitionPage ($("#cover-container"));
     }
   };
   

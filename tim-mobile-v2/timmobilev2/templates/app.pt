@@ -1,16 +1,16 @@
 <metal:index use-macro="load: master_template.html">
   
 	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
-  	<a href="#" id="navToggle"></a>
+  	<a href="#" id="nav-toggle"></a>
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
 		
 		
-		<div id="contentContainer">
-		  <div id="splashScreen" class="appPage active"></div>
-		  <div id="loadingImg"><div>loading...</div></div>
+		<div id="content-container">
+		  <div id="splash-screen" class="app-page active"></div>
+		  <div id="loading-img"><div>loading...</div></div>
 		</div>
-		<nav id="featureNav" class="clearfix">
-  		<ul id="featureNavItems"></ul>
+		<nav id="feature-nav" class="clearfix">
+  		<ul id="feature-nav-items"></ul>
   	</nav>
   	<script src="/${author_name}/asset/coreTemplates.dust.js"></script>
   	

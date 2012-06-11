@@ -100,7 +100,7 @@ body {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-#contentContainer .scroll-overlay {
+#content-container .scroll-overlay {
   position:absolute;
   top:0px;
   left:0px;
@@ -122,7 +122,7 @@ body {
     to { -webkit-transform: translateY(-50px); opacity:0 }
 }
 
-#contentContainer .scroll-overlay > div {
+#content-container .scroll-overlay > div {
  overflow:visible;
 }
 

@@ -1,5 +1,5 @@
 <div class="bio">
-  <div id="bioWrapper">
+  <div id="bio-wrapper">
 	<h1>{name}</h1>
 	<div class="headline">{headline}</div>
 	<div class="profile_img">
