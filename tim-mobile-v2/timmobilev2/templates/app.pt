@@ -7,7 +7,7 @@
 		
 		<div id="contentContainer">
 		  <div id="splashScreen" class="appPage active"></div>
-		  <div id="loadingImg"></div>
+		  <div id="loadingImg"><div>loading...</div></div>
 		</div>
 		<nav id="featureNav" class="clearfix">
   		<ul id="featureNavItems"></ul>

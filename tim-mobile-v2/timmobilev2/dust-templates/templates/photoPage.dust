@@ -3,6 +3,19 @@
 	{#events}
 	  <div class="fullPhoto" style="background-image:url(http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg)" data-photo_id="{id}"/>
 		<!-- img class="image" src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" / -->
-		<div class="caption"><div>{title}</div></div>
+		<div class="caption">
+		  <div class="profileThumb"></div>		  
+		  <div class="main_text">{?title}{@truncate value="{title}" length="35"}{/truncate}{/title}</div>
+		  <div>
+		   <!-- loop through sources -->
+		   {#sources}
+		    <!-- loop through sources 2 -->
+		    <span class="source_img {source_name}"></span>
+		   {/sources}
+		   <!-- move this whole caption/bottom info bar thing to a partial! -->
+		    <div class="time_and_location">2 hrs ago, San Francisco</div>
+		  </div>
+		</div>
+		<div class="interaction_icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
 	{/events}
 </div>
