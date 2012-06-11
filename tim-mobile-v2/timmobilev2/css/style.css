@@ -429,16 +429,16 @@ td { vertical-align: top; }
    
    /* styles for comments */
    
-   .commentList {
+   .comment-list {
      background-color:#fff;
      font-size:12px;
    }
    
-   .commentList .split-pane {
+   .comment-list .split-pane {
       padding-left:52px;
     }
    
-   .commentList ul.service-tabs {
+   .comment-list ul.service-tabs {
      width:45px;
      list-style: none;
      padding:0;
@@ -447,7 +447,7 @@ td { vertical-align: top; }
      
    }
    
-   .commentList .service-tabs li {
+   .comment-list .service-tabs li {
      padding:0; margin:0;
      height:35px;
      width:45px;
@@ -457,49 +457,49 @@ td { vertical-align: top; }
      right:-1px;
    }
    
-   .commentList .service-tabs li.selected {
+   .comment-list .service-tabs li.selected {
       background: url(/img/selected_border.png) right center no-repeat;
     }
    
-   .commentList .service-tabs li.facebook {
+   .comment-list .service-tabs li.facebook {
       background: url(/img/icons/35/facebook_35.png) 2px center no-repeat;
     }
   
-    .commentList .service-tabs li.twitter {
+    .comment-list .service-tabs li.twitter {
         background: url(/img/icons/35/twitter_35.png) 2px center no-repeat;
       }
     
-    .commentList .service-tabs li.instagram {
+    .comment-list .service-tabs li.instagram {
         background: url(/img/icons/35/instagram_35.png) 2px center no-repeat;
       }
     
-      .commentList .service-tabs li.facebook.selected {
+      .comment-list .service-tabs li.facebook.selected {
           background: url(/img/icons/35/facebook_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
         }
         
-    .commentList .service-tabs li.twitter.selected {
+    .comment-list .service-tabs li.twitter.selected {
          background: url(/img/icons/35/twitter_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
        }
        
-       .commentList .service-tabs li.instagram.selected {
+       .comment-list .service-tabs li.instagram.selected {
              background: url(/img/icons/35/instagram_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat;
            }
      
    
-   .commentList .comments {
+   .comment-list .comments {
      box-sizing:box-border;
      padding:8px 16px 8px 0;
      border-left:1px solid #ccc;
    }   
    
-   .commentList .comment {
+   .comment-list .comment {
      margin-bottom:8px;
      padding-left:50px;
      padding-bottom:4px;
      border-bottom:1px solid #f6f6f6;
    }
    
-   .commentList .user-thumb {
+   .comment-list .user-thumb {
       float:left;
       margin-left:-45px;
       background: url(/img/profile_thumb_35.png) center center no-repeat;
@@ -507,18 +507,18 @@ td { vertical-align: top; }
       width:35px;
     }
     
-    .commentList .user-name {
+    .comment-list .user-name {
         font-weight:bold;
         margin-bottom:4px;
       }
       
-        .commentList .time-ago {
+        .comment-list .time-ago {
             float:right;
             color:#999;
             font-weight:normal;
           }
    
-  .commentList .toolbar {
+  .comment-list .toolbar {
     position:absolute;
     top:0px;
     height:36px;
@@ -534,7 +534,7 @@ td { vertical-align: top; }
     text-align:center;
   }
   
-  .commentList .toolbar h1 {
+  .comment-list .toolbar h1 {
     font-size:18px;
     font-weight:normal;
     text-shadow:#333 1px 1px 2px;
@@ -542,7 +542,7 @@ td { vertical-align: top; }
     text-align:center;
   }
   
-  .commentList  .toolbar .back-link  {
+  .comment-list  .toolbar .back-link  {
     position:absolute;
     left:8px;
     top:2px;

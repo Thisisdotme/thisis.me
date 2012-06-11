@@ -140,7 +140,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 
 TIM.views.Comments = Backbone.View.extend( {
         
-    className: "appPage commentList toolbar-top",
+    className: "appPage comment-list toolbar-top",
     template: "commentList",
     commentCollections: [],
     collectionNum: 0,

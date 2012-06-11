@@ -10,4 +10,4 @@ export MI_OAUTH_KEYS=$MI_CONFIG/oauth_keys.test.json
 export TIM_OAUTH_KEYS=$TIM_CONFIG/oauth_keys.test.json
 
 # define the pythonpath
-export PYTHONPATH=$TIM_HOME/mi-utils:$TIM_HOME/mi-model:$TIM_HOME/mi-db:$TIM_HOME/mi-collectors
+export PYTHONPATH=$TIM_HOME/tim-commons:$TIM_HOME/mi-model:$TIM_HOME/mi-db:$TIM_HOME/mi-collectors

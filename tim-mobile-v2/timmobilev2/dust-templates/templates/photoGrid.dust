@@ -1,8 +1,8 @@
-<div class="toolbar"><span class="gridLink" data-toolbar-item="gridLink"/><span class="detailLink" data-toolbar-item="detailLink"/><h1>{name}</h1></div>
-<div class="photoGrid">
-  <div id="photoGridScroll" class="clearfix">
+<div class="toolbar"><span class="grid-link" data-toolbar-item="gridLink"/><span class="detail-link" data-toolbar-item="detailLink"/><h1>{name}</h1></div>
+<div class="photo-grid">
+  <div id="photo-grid-scroll" class="clearfix">
     <div> 
-      <div class="clearfix gridContainer">
+      <div class="clearfix grid-container">
   	    {>_photoList/}
   	  </div>
   	  <div class="loading">loading more...</div>
