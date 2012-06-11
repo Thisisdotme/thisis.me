@@ -450,7 +450,6 @@
 					
 				
 				else {
-				  console.log('end, last', end.y, lastPositionY);
 				  return end.y > lastPositionY ? DOWN : UP;
 				}
 					

@@ -1,23 +1,12 @@
 /**
+ * adapted from:
+ *
  * jquery.flips.js
  * 
  * Copyright 2011, Pedro Botelho / Codrops
  * Free to use under the MIT license.
  *
  * Date: Fri May 4 2012
- */
- 
-/**
- * Note: This is highly experimental and just a proof-of-concept! 
- * There are some few "hacks", probably some bugs, and some functionality 
- * is incomplete... definitely not ready for a production environment.
- *
- *
- * Tested and working on:
- * - Google Chrome 18.0.1025.168
- * - Apple Safari 5.1.5
- * - Apple Safari 5.1 Mobile
- * 
  */
  
  //get rid of History?
@@ -59,11 +48,18 @@
 			
 			console.log("flipset parentview: ", this.parentView);
 			
+			this.loading = false; //flag for if the flipset is in the 'loading' state
+			
 			//DOM elements for previous, current, and next page
 			this.$twoPagesPrevious = undefined;
 			this.$previousPage = undefined;
 			this.$currentPage = undefined;
 			this.$nextPage = undefined;
+			this.$loadingNext = undefined; //use for 'loading' message?
+			this.$loadingPrevious = undefined; //use for 'loading' message?
+			
+			this.canGoNext = false;
+			this.canGoPrev = false;
 			
 			//an array to hold the DOM objects
 			this.$pageElements = [];
@@ -73,9 +69,9 @@
        	this.addSourceItem(page, {skipLayout:true});
       }
 			
-			this.currentPage	= this.options.current || 1;
+			this.currentPage	= this.options.current || 1; //this keeps track of what page number we're on... 1-based, not 0-based
 			
-			this._getWinSize();
+			this._getContainerSize();
 			this._initTouchSwipe(); //this is ok - it's just on the container el
 			
 		},
@@ -89,16 +85,82 @@
 		    this.sourceItems.push(elem);
 		  }
 		  if (!opts.skipLayout) {
-		    //this._createPageElements(); //layout puts the pages into the front/back divs and sets z-index
+		    //this.createPageElements(); //layout puts the pages into the front/back divs and sets z-index
 		  }
 		},
 		
+		//trying out a 'partial flip' with a loading indicator
+		//should let the user flip the page up to a certain level (40deg?), then stop...
+		//
+		//turnPage fn needs to be able to accept both an angle and a time...
+		//for now, just have it flip up, stop for a couple of seconds, then flip back down?
+		//
+		//change text form 'loading' to 'no more items' for now?
+		//
+		//ok
+		//yep
+		//
+		
+		//turnpage needs to take a callback?
+		//for end page flip transition?
+		
+		//in reality... maybe let the user drag out to something like 40deg, then prevent from dragging further while 'loading'
+		//
+		//as this is happening, tell the parent collection to get the next page...
+		//
+		//usually, we would 'fetch ahead' so that the user wouldn't get to this state often
+		//
+		//-let them 'undrag'/cancel the load
+		//
+		//need to be more closely coupled with the parent view/collection
+		//when the parent collection is loaded... it either has more items, which triggers a render here & flips next/prev
+		//or if it doesn't havne more items, the 'loading message' should say something like 'no more items' and flip back
+		//
+		//
+		//should have some sort of global state where we're at the end or beginning of the collection
+		//keeping track of page number
+		//
+		// collection length vs. view.numRendered
+		//
+		//
+		// definitely a 'loading' state where flipping is not allowed
+		
+		testLoadingFlip: function () {
+		  if (this.loading) {
+		     this.loading = false;
+    		 //this.$loadingNext.css('z-index',2);
+    		 
+    		 this._turnPage(0, false, 400);
+		  } else {
+		     this.loading = true;
+    		 this._setFlippingPage(this.$currentPage);
+    		 this.$loadingNext.css('z-index',4);
+    		 this._turnPage(40, false, 400);
+		  }
+		 
+		},
+		
+		testLoadingFlipPrev: function () {
+		  if (this.loading) {
+		     this.loading = false;
+    		 //this.$loadingNext.css('z-index',2);
+    		 //alert('unturning!!!!!!!!!');
+    		 this._turnPage(179.999, false, 400);
+		  } else {
+		     this.loading = true;
+    		 this._setFlippingPage (this.$previousPage);
+    		 this.$loadingPrevious.css('z-index',4);
+    		 this._turnPage(140, false, 400);
+		  }
+		 
+		},
+		
 		//this gets the size of the flipset's container element
-		_getWinSize			: function() {
+		_getContainerSize			: function() {
 			
-			var $win = this.$el;//$(window);
+			var $win = this.$el;
 			
-			this.windowProp = {
+			this.containerDimensions = {
 				width	: $win.width(),
 				height	: $win.height()
 			};
@@ -108,6 +170,7 @@
 		//
 		//adjustLayout makes sure the z-indexes and rotation of the current 4 DOM elements are correct
 		//
+		//do we need a fifth element in the case of a 'loading' message at the bottom when the user tries to page to a page beyon what's in the collection?
 		//
 		//
 		
@@ -157,7 +220,7 @@
 		//
 		//
 		
-		_createPageElements				: function() {
+		createPageElements				: function() {
 			var that = this;
 			
 			//don't loop through this necessarily - only do when necessary?
@@ -174,6 +237,9 @@
 			  this.$pageElements.pop(); //get rid of the 'special' last page that only the 'front' div populated
 			  begin--;
 			}
+			
+			//should this just do the full rendering of the initial event page, or at least tell the parent view to render it & use that html?
+			//....probably the latter....
 			
 			for(var i = begin; i < end; i++) {
   			var	page 		= that.sourceItems[i] || "<span class='big-num'>" + i  + "</span>",
@@ -202,8 +268,18 @@
 		//empty the container if anything's in there
 		
 		_initDOMVars: function (index) {
+		  
 		  index = index || this.currentPage;
 		  this.$el.html(''); //empty the DOM container
+		  
+		  //elements for showing 'loading' message...
+		  //need 2?  probably can get away with just one with content divs at the top and bottom
+		  this.$loadingPrevious = $('<div class="loadingPrevious">loading...</div>');
+		  this.$loadingNext = $('<div class="loadingNext">loading...</div>');
+		  this.$el
+	      .append(this.$loadingPrevious)
+	      .append(this.$loadingNext);
+		  
 		  this.$twoPagesPrevious = this.$pageElements[index - 2] || undefined;
 	    this.$previousPage = this.$pageElements[index - 1];
 	    this.$currentPage = this.$pageElements[index];
@@ -265,7 +341,7 @@
 				  this.$nextPage.appendTo(this.$el).css('z-index', 0);
 				} else {
 				  console.log('next page not available, currentPage is ', this.currentPage);
-				  alert('no next page!');
+				  //alert('no next page!');
 				}
 				
 				
@@ -299,6 +375,8 @@
 		
 		//this is the big 'swipe' event handler
 		//uses the jquery touchSwipe plugin...
+		//possibly eventually move to our own touch event handling code
+		//
 		
 		_initTouchSwipe		: function() {
 			
@@ -312,9 +390,9 @@
 				  if(_self.parentView && !_self.parentView.flipMode) {
 				    return;
 				  }
-					//get window size if it hasn't been set...
-					if (_self.windowProp.height == 0) {
-					  _self._getWinSize();
+					//get container size if it hasn't been set...
+					if (_self.containerDimensions.height == 0) {
+					  _self._getContainerSize();
 					}
 					
 					var startY		= start.y,
@@ -327,8 +405,8 @@
 					// check only if not animating
 					
 					// note - this isn't how flipboard does it - they use the initial direction of the swipe
-					if(!_self._isAnimating()) {
-						(startY < _self.windowProp.height / 2) ? _self.flipDirection = 'prev' : _self.flipDirection = 'next';
+					if(!_self._isAnimating() && !_self.loading) {
+						(startY < _self.containerDimensions.height / 2) ? _self.flipDirection = 'prev' : _self.flipDirection = 'next';
 					}
 					
 					if(direction === 'left' || direction === 'right') {
@@ -353,10 +431,14 @@
 					if(_self.flipDirection == 'next' && !_self.$nextPage) {
 					  console.log("no next page - try to queue it up");
 					  var $newNext = _self.$pageElements[_self.currentPage + 1];
+					  
 					  if ($newNext) {
 					    $newNext.appendTo(_self.$el).css('z-index', 0);
 					    _self.$nextPage = $newNext;
 					  } else {
+					    //try the 'fake flip' here...
+					    console.log("no new next: ", _self.currentPage);
+					    _self.testLoadingFlip();
 					    console.log("trying to go forward too far!");
 					    return false;
 					  }
@@ -369,9 +451,9 @@
 					// if we would start dragging right next to [window's width / 2] then
 					// the symmetric point would be very close to the starting point. A very short swipe
 					// would be enough to flip the page..
-					sym	= _self.windowProp.height - startY;
+					sym	= _self.containerDimensions.height - startY;
 					
-					var symMargin = 0.9 * (_self.windowProp.height / 2);
+					var symMargin = 0.9 * (_self.containerDimensions.height / 2);
 					if(Math.abs(startY - sym) < symMargin) {
 						(_self.flipDirection === 'next') ? sym -= symMargin / 2 : sym += symMargin / 2;
 					}
@@ -547,13 +629,17 @@
 		
 		},
 		
-		_setFlippingPage	: function() {
+		//setFlippingPage is where the transition end handler is attached to the 
+		
+		_setFlippingPage	: function(page) {
 			
 			var _self = this;
-			(this.flipDirection === 'prev') ?
-				this.$flippingPage 	= this.$previousPage :
-				this.$flippingPage	= this.$currentPage;
-
+			if (page) {
+			  this.$flippingPage = page;
+			} else {
+			  this.$flippingPage 	= (this.flipDirection === 'prev') ? this.$previousPage : this.$currentPage;
+			}
+	
 			this.$flippingPage.one('webkitTransitionEnd.flips transitionend.flips OTransitionEnd.flips', function(event) {
 				
 				if($(event.target).hasClass('page')) {
@@ -574,6 +660,9 @@
 		},
 		
 		_onEndFlip			: function($page) {
+		  if(this.loading) {
+		    return;
+		  }
 			this._adjustLayout();
 			
 			this.$flippingPage.css({
@@ -606,19 +695,31 @@
 				this.flipSpeed = - (this.options.flipspeed / 180) * this.angle + this.options.flipspeed;
 		},
 		
-		_turnPage			: function(angle, update) {
+		//this is the fn that does the flipping
+		//
+		//it either turns a specific angle
+		//
+		//or sets a transition for the whole page flip
+		//
+		//
+		
+		_turnPage			: function(angle, update, time) {
+			
+			time = time || this.flipSpeed;
 			
 			// hack / todo: before page that was set to 181deg should have 180deg
-			this.$beforePage.css({
-				'-webkit-transform'	: 'rotateX(180deg)',
-				'-moz-transform'	: 'rotateX(180deg)'
-			});
+			if (this.$beforePage) {
+			  this.$beforePage.css({
+  				'-webkit-transform'	: 'rotateX(180deg)',
+  				'-moz-transform'	: 'rotateX(180deg)'
+  			});
+			}
 			
 			// if not moving manually set a transition to flip the page
 			if(!update) {
 				this.$flippingPage.css({
-					'-webkit-transition' : '-webkit-transform ' + this.flipSpeed + 'ms ' + this.options.fliptimingfunction,
-					'-moz-transition' : '-moz-transform ' + this.flipSpeed + 'ms ' + this.options.fliptimingfunction
+					'-webkit-transition' : '-webkit-transform ' + time + 'ms ' + this.options.fliptimingfunction,
+					'-moz-transition' : '-moz-transform ' + time + 'ms ' + this.options.fliptimingfunction
 				});
 			}
 			
@@ -656,6 +757,7 @@
 			this.hasOverlays	= true;
 			
 			// overlays for the flipping page. One in the front, one in the back.
+			//just keep these around in variables & append/detach as needed?
 			
 			this.$frontoverlay	= $('<div class="flipoverlay"></div>').appendTo(this.$flippingPage.find('div.front > .outer'));
 			this.$backoverlay	= $('<div class="flipoverlay"></div>').appendTo(this.$flippingPage.find('div.back > .outer'))

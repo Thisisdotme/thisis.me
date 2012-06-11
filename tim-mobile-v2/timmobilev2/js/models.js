@@ -107,6 +107,16 @@
       }
     }
   });
+  
+  //base model for all comments
+  TIM.models.Comment  = Backbone.Model.extend({
+    
+  });
+  
+  //model for services, e.g. facebook, twitter, etc.
+  TIM.models.Service  = Backbone.Model.extend({
+    
+  });
 	
 	
 })( TIM );

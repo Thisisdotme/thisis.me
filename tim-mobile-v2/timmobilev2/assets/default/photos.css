@@ -195,7 +195,7 @@ body {
 }
 
 
-.photoDetail .caption > div, .photoPage .caption > div, .scrollOverlay .caption > div {
+.photoPage .caption > .main_text, .scrollOverlay .caption .main_text {
   padding:8px 16px;
 }
 
@@ -217,6 +217,81 @@ body {
   width:20px;
   background: transparent url(/img/listIcon.png) no-repeat center center;
 }
+
+/* let's do some god-dam caption styling here */
+
+.photoPage .caption .profileThumb {
+  float:left;
+  height:25px;
+  width:25px;
+  border:1px solid #ccc;
+  margin:8px;
+  background: transparent url(/img/profile_thumb.png) no-repeat center center;
+}
+
+
+.photoPage .caption .source_img {
+  float:left;
+  height:15px;
+  width:15px;
+  margin-right:4px;
+}
+
+/* make these sprites.... or inline base 64? */
+
+.photoPage .caption .source_img.linkedIn {
+  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center;
+}
+
+.photoPage .caption .source_img.facebook {
+  background: transparent url(/img/icons/facebook_15.png) no-repeat center center;
+}
+
+.photoPage .caption .source_img.instagram {
+  background: transparent url(/img/icons/instagram_15.png) no-repeat center center;
+}
+
+.photoPage .caption .source_img.flickr {
+  background: transparent url(/img/icons/flickr_15.png) no-repeat center center;
+}
+
+.photoPage .caption .source_img.twitter {
+  background: transparent url(/img/icons/twitter_15.png) no-repeat center center;
+}
+
+.photoPage .caption .source_img.google {
+  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center;
+}
+
+.photoPage .interaction_icons {
+  position:absolute;
+  left:2px;
+  bottom:60px;
+  height:100px;
+  width:50px;
+  x-border:1px solid yellow;
+  /* background:rgba(60,60,60,.1); */
+}
+
+.photoPage .interaction_icons .comments {
+  position:absolute;
+  height:35px;
+  width:35px;
+  left:0px;
+  x-border:1px solid green;
+  background: transparent url(/img/comments_icon.png) no-repeat center center;
+}
+
+.photoPage .interaction_icons .location {
+  position:absolute;
+  top:55px;
+  left:0px;
+  height:35px;
+  width:35px;
+  x-border:1px solid red;
+  background: transparent url(/img/location_pin_icon.png) no-repeat center center;
+}
+
 
 #photoGridScroll {
   position:absolute;
