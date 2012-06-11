@@ -8,20 +8,11 @@ from tim_commons.app_base import AppBase
 
 
 class Subscriber(AppBase):
-  def display_usage(self):
-    return ''
-
-  def init_args(self):
-    pass
-
-  def parse_args(self, ignore):
-    pass
-
-  def main(self):
-    verify_token = self.config['feed']['verify_token']
-    feed_base_url = self.config['feed']['base_url']
-    app_id = self.config['oauth']['facebook']['key']
-    app_secret = self.config['oauth']['facebook']['secret']
+  def app_main(self, config, options, args):
+    verify_token = config['feed']['verify_token']
+    feed_base_url = config['feed']['base_url']
+    app_id = config['oauth']['facebook']['key']
+    app_secret = config['oauth']['facebook']['secret']
 
     # get the access token
     access_token_url = ('https://graph.facebook.com/oauth/access_token?' +
