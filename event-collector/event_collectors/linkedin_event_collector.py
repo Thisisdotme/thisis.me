@@ -1,17 +1,12 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-import json
 import urllib
 import oauth2 as oauth
 from datetime import datetime
-from time import mktime
+import calendar
 import copy
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_linkedin_event
+from tim_commons import json_serializer
 
 from event_interpreter.linkedin_event_interpreter import LinkedinEventInterpreter
 from event_collector import EventCollector
@@ -38,7 +33,7 @@ class LinkedinEventCollector(EventCollector):
 
     service_author_id = asm.service_author_id
 
-    min_age = datetime.utcnow() - self.LOOKBACK_WINDOW
+    min_age = datetime.utcnow() - self.NEW_LOOKBACK_WINDOW
 
     # setup what we need for oauth
     consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
@@ -48,17 +43,22 @@ class LinkedinEventCollector(EventCollector):
     args = {'scope': 'self',
             'count': self.PAGE_SIZE}
 
-    # optimization to request only those since we've last updated
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
     if asm.most_recent_event_timestamp:
-      args['after'] = int(mktime((asm.most_recent_event_timestamp - self.LAST_UPDATE_OVERLAP).timetuple())) * 1000
+      after = calendar.timegm((asm.most_recent_event_timestamp -
+                               self.MOST_RECENT_OVERLAP).utctimetuple()) * 1000
     else:
-      # limit to one year of data
-      args['after'] = int(mktime((datetime.utcnow() - self.LOOKBACK_WINDOW).timetuple())) * 1000
+      after = calendar.timegm((datetime.utcnow() -
+                               self.NEW_LOOKBACK_WINDOW).utctimetuple()) * 1000
+    args['after'] = after
 
     offset = 0
     args['start'] = offset
 
-    url = '%s%s?%s' % (self.oauth_config['endpoint'], UPDATE_RESOURCE, urllib.urlencode(args, True))
+    url = '%s%s?%s' % (self.oauth_config['endpoint'],
+                       UPDATE_RESOURCE,
+                       urllib.urlencode(args, True))
 
     total_count = 0
     while url:
@@ -66,15 +66,13 @@ class LinkedinEventCollector(EventCollector):
       # request the user's updates
       content = make_request(client, url, {'x-li-format': 'json'})
 
-      raw_json = json.loads(content)
+      raw_json = json_serializer.load_string(content)
 
-      if raw_json.get('_total', 0) == 0:
+      if raw_json == None or raw_json.get('_total', 0) == 0:
         url = None
         break
 
       for post in raw_json.get('values', []):
-
-#        print json.dumps(post, sort_keys=True, indent=2)
 
         update_type = post['updateType']
 
@@ -92,7 +90,7 @@ class LinkedinEventCollector(EventCollector):
 
               interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
-              if interpreter.get_time() < min_age:
+              if interpreter.get_create_time() < min_age:
                 url = None
                 break
 
@@ -103,7 +101,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -114,7 +112,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -125,7 +123,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -136,7 +134,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 
@@ -155,7 +153,7 @@ class LinkedinEventCollector(EventCollector):
 
               interpreter = LinkedinEventInterpreter(postClone, asm, self.oauth_config)
 
-              if interpreter.get_time() < min_age:
+              if interpreter.get_create_time() < min_age:
                 url = None
                 break
 
@@ -166,7 +164,7 @@ class LinkedinEventCollector(EventCollector):
 
             interpreter = LinkedinEventInterpreter(post, asm, self.oauth_config)
 
-            if interpreter.get_time() < min_age:
+            if interpreter.get_create_time() < min_age:
               url = None
               break
 

@@ -9,12 +9,28 @@ from abc import (abstractmethod, ABCMeta)
 
 class ServiceEventInterpreter(object):
 
+  HIGHLIGHT_TYPE = 1
+  PHOTOALBUM_TYPE = 2
+  PHOTO_TYPE = 3
+  CHECKIN_TYPE = 4
+  STATUS_TYPE = 5
+  FOLLOW_TYPE = 6
+  VIDEO_TYPE = 7
+  VIDEOALBUM_TYPE = 8
+
   __metaclass__ = ABCMeta
 
   def __init__(self, json, author_service_map, oauth_config):
     self.json = json
     self.author_service_map = author_service_map
     self.oauth_config = oauth_config
+
+  '''
+    get the type of the event (status, photo, album, checkin, etc.)
+  '''
+  @abstractmethod
+  def get_type(self):
+    pass
 
   '''
     get the service's unique identifier for the event
@@ -24,11 +40,17 @@ class ServiceEventInterpreter(object):
     pass
 
   '''
-    get the time the event occurred as a Python Time object
+    get the time the event the created as a Python Time object
   '''
   @abstractmethod
-  def get_time(self):
+  def get_create_time(self):
     pass
+
+  '''
+    get the time the event was last updated as a Python Time object
+  '''
+  def get_update_time(self):
+    None
 
   '''
     get the events headline - a brief caption
@@ -37,10 +59,10 @@ class ServiceEventInterpreter(object):
     return None
 
   '''
-    get the event's deck - a sentence or few sentences below a headline
-    which summarizes the article
+    get the event's tagline or deck - a sentence or few sentences which summarizes
+    # the post
   '''
-  def get_deck(self):
+  def get_tagline(self):
     return None
 
   '''

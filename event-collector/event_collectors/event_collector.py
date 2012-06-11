@@ -30,8 +30,8 @@ def from_service_name(service_name, oauth_config):
 
 class EventCollector(object):
 
-  LAST_UPDATE_OVERLAP = timedelta(hours=1)
-  LOOKBACK_WINDOW = timedelta(days=365)
+  MOST_RECENT_OVERLAP = timedelta(hours=1)
+  NEW_LOOKBACK_WINDOW = timedelta(days=365)
 
   MAX_EVENTS = 10000
 
@@ -56,10 +56,12 @@ class EventCollector(object):
                                                 AuthorServiceMap.service_author_id == service_author_id)). \
                                     one()
 
-    now = datetime.now()
-    min_event_time = now - self.LOOKBACK_WINDOW
-    if asm.last_update_time:
-      min_event_time = asm.last_update_time - self.LAST_UPDATE_OVERLAP
+    now = datetime.utcnow()
+    min_event_time = None
+    if asm.most_recent_event_timestamp:
+      min_event_time = asm.most_recent_event_timestamp - self.MOST_RECENT_OVERLAP
+    else:
+      min_event_time = now - self.NEW_LOOKBACK_WINDOW
 
     return {'now': now,
             'asm': asm,
@@ -103,7 +105,7 @@ class EventCollector(object):
 
     qualifies = False
 
-    event_time = interpreter.get_time()
+    event_time = interpreter.get_create_time()
 
     # skip any events older than the lookback window
     if event_time >= state['min_event_time']:

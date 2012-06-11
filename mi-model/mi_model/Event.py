@@ -1,10 +1,3 @@
-'''
-Created on Feb 13, 2012
-
-@author: howard
-'''
-
-import json
 from datetime import datetime
 from time import mktime
 from abc import abstractmethod
@@ -12,9 +5,7 @@ import urllib2
 import copy
 
 from tim_commons.oauth import make_request
-
-'''
-'''
+from tim_commons import json_serializer
 
 
 class Event(object):
@@ -47,11 +38,10 @@ class Event(object):
     return self.toJSONFields(propertyDict)
 
   def toJSON(self):
-    return json.dumps(self.toNormalizedObj(), sort_keys=True)
+    return json_serializer.dump_string(self.toNormalizedObj())
 
   @abstractmethod
   def toJSONFields(self, json):
-
     self.toMetadataObjFields(json)
 
     json["origin"] = self.getEventOrigin()
@@ -133,9 +123,6 @@ class Event(object):
   def getProfileImageUrl(self):
     return None
 
-'''
-'''
-
 
 class StatusEvent(Event):
   '''
@@ -147,9 +134,6 @@ class StatusEvent(Event):
     ''' customization
     '''
     return json
-
-'''
-'''
 
 
 class TwitterEvent(StatusEvent):
@@ -194,9 +178,6 @@ class TwitterEvent(StatusEvent):
     for media in self.raw_json['entities'].get('media', []):
       if media.get('type') == "photo":
         return media.get('media_url')
-
-'''
-'''
 
 
 class FacebookEvent(StatusEvent):
@@ -264,10 +245,6 @@ class FacebookEvent(StatusEvent):
     return self.raw_json['picture'] if 'picture' in self.raw_json else None
 
 
-'''
-'''
-
-
 class GooglePlusEvent(StatusEvent):
   '''
   classdocs
@@ -305,10 +282,6 @@ class GooglePlusEvent(StatusEvent):
     return self.raw_json.get('url')
 
 
-'''
-'''
-
-
 class LinkedInEvent(StatusEvent):
   '''
   classdocs
@@ -324,7 +297,6 @@ class LinkedInEvent(StatusEvent):
       if updateType in supportedTypes:
 
         if updateType == 'CONN' and post['updateContent']['person']['id'] == userId:
-#          print json.dumps(post, sort_keys=True, indent=2)
           for connection in post['updateContent']['person']['connections']['values']:
             eventId = '%s-%s' % (updateType, connection["id"])
             postClone = copy.deepcopy(post)
@@ -333,13 +305,11 @@ class LinkedInEvent(StatusEvent):
             collector.writeEvent(event, state)
 
         elif updateType == 'SHAR':
-#          print json.dumps(post, sort_keys=True, indent=2)
           eventId = post['updateKey']
           event = LinkedInShareEvent(timId, eventId).fromJSON(post)
           collector.writeEvent(event, state)
 
         elif updateType == 'MSFC':
-          print json.dumps(post, sort_keys=True, indent=2)
           if post['updateContent']['companyPersonUpdate']['person']['id'] != userId:
             continue
           eventId = post['updateKey']
@@ -347,7 +317,6 @@ class LinkedInEvent(StatusEvent):
           collector.writeEvent(event, state)
 
         elif updateType == 'PREC' or updateType == 'SVPR':
-          print json.dumps(post, sort_keys=True, indent=2)
           if post['updateContent']['person']['id'] != userId:
             continue
           eventId = post['updateKey']
@@ -355,7 +324,6 @@ class LinkedInEvent(StatusEvent):
           collector.writeEvent(event, state)
 
         elif updateType == 'JOBP':
-          print json.dumps(post, sort_keys=True, indent=2)
           if post['updateContent']['job']['jobPoster']['id'] != userId:
             continue
           eventId = post['updateKey']
@@ -364,7 +332,7 @@ class LinkedInEvent(StatusEvent):
 
       else:
         if not updateType in ignoredTypes:
-          print '???? skipping linkedIn event: %s' % updateType
+          pass
 
   def toJSONFields(self, json):
     super(LinkedInEvent, self).toJSONFields(json)
@@ -388,10 +356,6 @@ class LinkedInEvent(StatusEvent):
 
   def getEventURL(self):
     return None
-
-
-'''
-'''
 
 
 class LinkedInConnectEvent(LinkedInEvent):
@@ -420,7 +384,7 @@ class LinkedInConnectEvent(LinkedInEvent):
       try:
         # request the user's updates
         contentJSON = make_request(auxData, url, {'x-li-format': 'json'})
-        contentObj = json.loads(contentJSON)
+        contentObj = json_serializer.load_string(contentJSON)
 
         self.headline = contentObj.get('headline')
         self.summary = contentObj.get('summary')
@@ -533,12 +497,9 @@ class FoursquareEvent(PlaceEvent):
 
     self.event_id = self.raw_json['id']
 
-#    print json.dumps(fromJSON, sort_keys=True, indent=2)
-
     ''' Customization
     '''
     caption = fromJSON['venue'].get('name', '')
-    shout = fromJSON.get('shout', None)
     address = fromJSON['venue']['location'].get('address')
     city = fromJSON['venue']['location'].get('city')
 
@@ -553,14 +514,12 @@ class FoursquareEvent(PlaceEvent):
 
     location = ' (%s)' % location if location else ''
 
-    self.source = location
-
     source_name = fromJSON['source'].get('name', '')
     source_url = fromJSON['source'].get('url', '')
 
     self.source = {"name": source_name, "url": source_url}
 
-    self.caption = shout
+    self.caption = fromJSON.get('shout', None)
     self.content = '%s%s' % (caption, location)
 
     return self
@@ -596,11 +555,7 @@ class FoursquareEvent(PlaceEvent):
     if photoSizes:
       auxData['photo_sizes'] = photoSizes
 
-    return json.dumps(auxData, sort_keys=True) if venueURL else None
-
-
-'''
-'''
+    return json_serializer.dump_string(auxData) if venueURL else None
 
 
 class PhotoEvent(Event):
@@ -641,17 +596,11 @@ class InstagramEvent(PhotoEvent):
       auxData['location'] = self.raw_json['location']
     if 'images' in self.raw_json:
       auxData['images'] = self.raw_json['images']
-    return json.dumps(auxData, sort_keys=True)
-
-'''
-'''
+    return json_serializer.dump_string(auxData)
 
 
 class FlickrEvent(PhotoEvent):
   pass
-
-'''
-'''
 
 
 class SocialEvent(Event):

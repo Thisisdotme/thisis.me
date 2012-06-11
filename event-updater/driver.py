@@ -99,4 +99,4 @@ def create_updater_handler(updater, client):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventUpdaterDriver(1).main())
+  sys.exit(EventUpdaterDriver('event_updater').main())

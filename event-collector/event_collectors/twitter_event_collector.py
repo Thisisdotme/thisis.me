@@ -1,15 +1,10 @@
-'''
-Created on May 4, 2012
-
-@author: howard
-'''
-import json
 import urllib
 import oauth2 as oauth
 from datetime import datetime
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event
+from tim_commons import json_serializer
 
 from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
 from event_collector import EventCollector
@@ -49,13 +44,13 @@ class TwitterEventCollector(EventCollector):
                        USER_TIMELINE,
                        urllib.urlencode(args))
 
-    min_age = datetime.now() - self.LOOKBACK_WINDOW
+    min_age = datetime.utcnow() - self.NEW_LOOKBACK_WINDOW
     last_id = None
     while True:
 
       content = make_request(client, url)
 
-      raw_json = json.loads(content)
+      raw_json = json_serializer.load_string(content)
 
       # check if nothing returned and terminate loop if so
       if len(raw_json) == 0:
@@ -70,7 +65,7 @@ class TwitterEventCollector(EventCollector):
         last_id = interpreter.get_id()
 
         # terminate fetching any more events if we've gone beyond the lookback window
-        if interpreter.get_time() < min_age:
+        if interpreter.get_create_time() < min_age:
           url = None
           break
 

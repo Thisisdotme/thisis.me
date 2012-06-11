@@ -2,6 +2,9 @@ import os
 import sys
 import logging
 import optparse
+import socket
+import pwd
+import datetime
 from abc import abstractmethod
 
 from tim_commons.config import load_configuration
@@ -13,18 +16,16 @@ class AppBase:
   STATUS_ERROR = 1
   STATUS_WARNING = 75
 
-  def __init__(self, argsNums=None, config_file='{TIM_CONFIG}/config.ini'):
-    '''
-    Constructor
-    '''
+  def __init__(self, program_name, argsNums=None, config_file='{TIM_CONFIG}/config.ini'):
+    self.program_name = program_name
     self.name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-    self.init_logger()
+    self._init_logger()
     self.option_parser = optparse.OptionParser(usage=self.display_usage())
     self.init_args()
     if(argsNums == None):
       argsNums = 0
     self.parse_args(argsNums)
-    self.load_config(config_file)
+    self._load_config(config_file)
 
   @abstractmethod
   def display_usage(self):
@@ -77,18 +78,42 @@ class AppBase:
         self.option_parser.print_help()
         sys.exit(self.STATUS_ERROR)
 
-  def init_logger(self):
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s [%(name)s] - %(message)s',
-                        stream=sys.stdout)
+  def _init_logger(self):
+    message = '%(levelname)s %(asctime)s %(thread)d %(pathname)s:%(lineno)d] %(message)s'
+    root_logger = logging.getLogger()
+    root_logger.addHandler(self._create_stderr_handler(message))
+    root_logger.addHandler(self._create_file_handler(message))
+    root_logger.setLevel(logging.DEBUG)
 
     # Configure the sqlalchemy logger
     logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-    self.log = logging.getLogger()
+    self.log = root_logger
 
-  def load_config(self, config_file):
+  def _load_config(self, config_file):
     self.config = load_configuration(config_file)
+
+  def _create_stderr_handler(self, message_format):
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(logging.Formatter(message_format))
+
+    return handler
+
+  def _create_file_handler(self, message_format):
+    filename_args = {'program': self.program_name,
+                     'hostname': socket.gethostname(),
+                     'user': pwd.getpwuid(os.getuid())[0],
+                     'date': datetime.datetime.utcnow().date().isoformat(),
+                     'time': datetime.datetime.utcnow().time().isoformat(),
+                     'pid': os.getpid()}
+    filename = '/tmp/{program}.{hostname}.{user}.log.{date}.{time}.{pid}'.format(**filename_args)
+
+    handler = logging.FileHandler(filename)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(logging.Formatter(message_format))
+
+    return handler
 
   @abstractmethod
   def main(self):

@@ -1,9 +1,10 @@
-import json
 import urllib
 import urllib2
-from time import mktime
+from datetime import datetime
+import calendar
 
 from tim_commons.messages import create_instagram_event
+from tim_commons import json_serializer
 from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
 from event_collector import EventCollector
 
@@ -27,9 +28,15 @@ class InstagramEventCollector(EventCollector):
     args = {'access_token': asm.access_token,
             'count': self.PAGE_SIZE}
 
-    # optimization to request only those since we've last updated
-    if asm.last_update_time:
-      args['min_timestamp'] = int(mktime(asm.last_update_time.timetuple()))
+    # get only events since last update or past year depending on if this
+    # is the first collection of not
+    if asm.most_recent_event_timestamp:
+      min_timestamp = calendar.timegm((asm.most_recent_event_timestamp -
+                                       self.MOST_RECENT_OVERLAP).utctimetuple())
+    else:
+      min_timestamp = calendar.timegm((datetime.utcnow() -
+                                       self.NEW_LOOKBACK_WINDOW).utctimetuple())
+    args['min_timestamp'] = min_timestamp
 
     # setup the url for fetching a page of posts
     url = '%s%s?%s' % (self.oauth_config['endpoint'], self.USER_MEDIA, urllib.urlencode(args))
@@ -37,7 +44,7 @@ class InstagramEventCollector(EventCollector):
     total_accepted = 0
     while url and total_accepted < self.MAX_EVENTS:
 
-      raw_obj = json.load(urllib2.urlopen(url))
+      raw_obj = json_serializer.load(urllib2.urlopen(url))
 
       # for element in the feed
       for post in raw_obj.get('data', []):
