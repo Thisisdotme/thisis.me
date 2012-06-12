@@ -1,9 +1,11 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
 .cover-page {
-  width:320px;
-  height:370px;
-  background:#333 url(/loree/asset/cover_bg2.png) no-repeat left top;
+  min-width:320px;
+  min-height:370px;
+  height:100%;
+  width:100%;
+  background:#333 url(/loree/asset/cover_bg.jpg) no-repeat left top;
   position:relative;
   color:#fff;
   font-family: 'PT Sans Narrow', sans-serif;
@@ -59,7 +61,7 @@
   
 }
 
-.coverPage .tertiary-story {
+.cover-page .tertiary-story {
   position:absolute;
    bottom:25px;
    width:100px;

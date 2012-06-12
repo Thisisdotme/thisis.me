@@ -1,26 +1,27 @@
-@import url(http://fonts.googleapis.com/css?family=Creepster);
+@import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
 .cover-page {
-  width:320px;
-  height:370px;
-  background:url(default_cover_bg.png) no-repeat left top;
-  position:relative;
+  min-width:320px;
+  min-height:370px;
+  height:100%;
+  width:100%;
+  background:#333 url(default_cover_bg.jpg) no-repeat left top;
   color:#fff;
   font-family: 'PT Sans Narrow', sans-serif;
   font-weight: bold;
 }
 
 .cover-page h1.title {
-  font-size:56px;
-  font-weight:bold;
-  color:#f6f6f6;
+  font-size:34px;
+  font-weight:normal;
+  color:#fff200;
   text-align:left;
   -webkit-text-stroke: 1px #333;
   position:absolute;
-  top:42px;
+  top:22px;
   left:12px;
-  font-family: 'Creepster',cursive;
-  line-height:1.0;
+  font-family: 'Holtwood One SC',serif;
+  line-height:1.1;
   text-transform:uppercase;
 }
 
