@@ -148,6 +148,7 @@
       var coverView = new TIM.views.Cover({collection: topStories});
       feature.mainView = coverView;
       feature.mainCollection = topStories;
+      //TODO - global json fetch method with error handling
       coverView.collection.fetch({
   			dataType: "jsonp",
   			timeout : 5000,
