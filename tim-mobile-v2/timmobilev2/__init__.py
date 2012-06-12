@@ -1,7 +1,7 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from mi_utils.oauth import load_oauth_config
+from tim_commons.oauth import load_oauth_config
 
 from .models import DBSession
 
