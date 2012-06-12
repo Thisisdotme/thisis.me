@@ -506,7 +506,11 @@ TIM.mixins.flipset = {
 			}
 			console.log('in render page chunk starting with ', start);
 			//have to know how to remove the last (2?) page(s) from teh flipset & insert starting there..
-			that.flipSet.createPageElements();
+			if (that.flipSet && this.pages.length > 0) {
+			  that.flipSet.createPageElements();
+			} else {
+			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>');
+			}
 		},
 		
 		

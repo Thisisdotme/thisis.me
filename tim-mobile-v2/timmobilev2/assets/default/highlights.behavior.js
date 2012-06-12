@@ -110,6 +110,7 @@
       
       render: function() {
         //mixing in FlipSet functionality to this view, so the main purpose of 'render' is to render the flipset
+        this.collection.reset([],{silent:true});
         this.renderFlipSet();
         
         //go straight to the detail view if we got here from an external link to a story
