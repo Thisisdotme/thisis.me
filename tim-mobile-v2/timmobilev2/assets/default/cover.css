@@ -1,11 +1,13 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
-.cover-page {
-  min-width:320px;
-  min-height:370px;
-  height:100%;
-  width:100%;
+#cover-container {
   background:#333 url(default_cover_bg.jpg) no-repeat left top;
+  background-size:cover;
+}
+
+.cover-page {
+  width:100%;
+  height:100%;
   color:#fff;
   font-family: 'PT Sans Narrow', sans-serif;
   font-weight: bold;
