@@ -820,7 +820,7 @@ the behavior for the photo feature
     feature.commentsView = feature.commentsView || 
       new TIM.views.Comments({
           resourceId:resourceId,
-          sources:[{source_name:"facebook", selected:"selected"}, {source_name:"twitter", selected:"selected"}, {source_name:"instagram", selected:"selected"}]
+          sources:[{source_name:"facebook", selected:"selected"}, {source_name:"twitter", selected:""}, {source_name:"instagram", selected:""}]
       });
     feature.commentsView.render();
     console.log("comments view:", feature.commentsView);
