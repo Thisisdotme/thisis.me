@@ -611,7 +611,7 @@ var commentTexts = ["Great Photo!", "I agree!", "This is a prime example of what
                     "I like treehouses.  They're fun and special and bright and airy.", "Wait, is that a #pheasant?", "Four score and 38 years ago we desecrated a great lamppost based on burritos and vigilante justice.", "Who's going to the 1971 Philadelphia 76ers reunion banquet tomorrow?",
                     "Connect Four was a great game.", "the cartoon #Garfield is criminally underrrated.", "@hammer is my favorite thisis.me member <a href='http://thisis.me/hammer'>thisis.me/hammer</a>", "So wait, are you saying there isn't a Flying Spaghetti Monster?", "Cookie Monster is my hero.",
                     "I really think that whole Benjamin Franklin flying a kite lightning electricity thing was a #sham", "So are you trying to tell me I can't write a really, really, really long comment.  Balderdash!  I can write any kind of comment I like.  This is America, not Poland or Yugoslavia!",
-                    "cool.", "you rock, Philip!", "pancakes are best served with a touch of tragic whimsy.", "Celtics 142, Bullets 81.  Hell yes!", "Could #joebarrycarroll be the next #chiefrobertparish", "I *will* win Wimbledon this year!!", "Like hell you will!",
+                    "cool.", "you rock, Philip!", "pancakes are best served with a touch of tragic whimsy.", "Celtics 142, Bullets 81.  Oh yes!", "Could #joebarrycarroll be the next #chiefrobertparish", "I *will* win Wimbledon this year!!", "You *will* not!",
                     "...and so my thoughts on the government of Bahrain are as follows: excellent judicial system, everything else is crap."];
 var generateFakeComments = function(num) {
   var comments = [];
