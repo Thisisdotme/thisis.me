@@ -1,6 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
-.coverPage {
+.cover-page {
   width:320px;
   height:370px;
   background:#333 url(/loree/asset/cover_bg2.png) no-repeat left top;
@@ -10,7 +10,7 @@
   font-weight: bold;
 }
 
-.coverPage h1.title {
+.cover-page h1.title {
   font-size:34px;
   font-weight:normal;
   color:#fff200;
@@ -24,14 +24,14 @@
   text-transform:uppercase;
 }
 
-.coverPage a, .coverPage a:visited {
+.cover-page a, .cover-page a:visited {
   font-size:16px;
   font-weight:bold;
   color:#fff;
   text-decoration:none;
 }
 
-.coverPage .primaryStory {
+.cover-page .primary-story {
   font-size:16px;
   font-weight:bold;
   color:#fff;
@@ -44,7 +44,7 @@
   text-shadow:1px 1px #333;
 }
 
-.coverPage .secondaryStory {
+.cover-page .secondary-story {
   position:absolute;
   bottom:25px;
   width:100px;
@@ -59,7 +59,7 @@
   
 }
 
-.coverPage .tertiaryStory {
+.coverPage .tertiary-story {
   position:absolute;
    bottom:25px;
    width:100px;

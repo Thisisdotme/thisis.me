@@ -37,7 +37,7 @@ TIM.collections.Comments = Backbone.Collection.extend({
 		  options = options || {};
 		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
 		  this.initializePaging();
-		  this.source = options.source;
+		  this.source = options.source; //should be service... a TIM.models.Service?
 			//set url for source...
 		},
 		

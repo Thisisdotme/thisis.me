@@ -1,9 +1,9 @@
-<div class="coverPage">
+<div class="cover-page">
 	<h1 class="title">{name}</h1>
-	<div class="primaryStory highlight" data-event_id="{primaryStory.event_id}">
+	<div class="primary-story highlight" data-event_id="{primaryStory.event_id}">
 		<a href="timeline/{primaryStory.event_id}">{primaryStory.content.label}</a>
 	</div>
-	<div class="secondaryStory highlight" data-event_id="{secondaryStory.event_id}">
+	<div class="secondary-story highlight" data-event_id="{secondaryStory.event_id}">
 		{?secondaryStory.content.label}
 			{@truncate value="{secondaryStory.content.label}" length="35"}{/truncate}
 		{/secondaryStory.content.label}
@@ -11,7 +11,7 @@
 			{@truncate value="{secondaryStory.content.data}" length="35"}{/truncate}
 		{/secondaryStory.content.data}
 	</div>
-	<div class="tertiaryStory highlight" data-event_id="{tertiaryStory.event_id}">
+	<div class="tertiary-story highlight" data-event_id="{tertiaryStory.event_id}">
 		{tertiaryStory.content.label}
 	</div>
 </div>

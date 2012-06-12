@@ -146,8 +146,8 @@ the behavior for the photo feature
   
   //the 'home view' for the photos feature - a list of the author's photo albums
   TIM.views.PhotoAlbumList = Backbone.View.extend( {
-      id: "photoAlbums",
-      className: "appPage photoFeature",
+      id: "photo-albums",
+      className: "app-page photo-feature",
       numRendered: 0,
 
       initialize: function() {
@@ -181,9 +181,9 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			
-  			$('#photoAlbumList').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
+  			$('#photo-album-list').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
   			
-  			this.iScrollElem = new iScroll('photoAlbumList', { hScroll: false });
+  			this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
   			setTimeout(function () { that.iScrollElem.refresh() }, 0);
   			
   		  if(!feature.showDetails) {
@@ -227,8 +227,8 @@ the behavior for the photo feature
   //reached via /photos/<album_id>
   
   TIM.views.PhotoGrid = Backbone.View.extend( {
-      id: "photoGrid",
-      className: "appPage photoFeature",
+      id: "photo-grid",
+      className: "app-page photo-feature",
       numRendered: 0,
       chunkSize: 15,
       initialRenderSize: 30,
@@ -243,7 +243,7 @@ the behavior for the photo feature
 
   		events: {
   		  "vclick .thumb": "showFlipView",
-  		  "vclick .gridLink": "showAlbumView",
+  		  "vclick .grid-link": "showAlbumView",
   			"swiperight" : "showAlbumView"
   		},
   		
@@ -293,7 +293,7 @@ the behavior for the photo feature
         options = options || {};
         var that = this;
         //make sure the elem container is the right height
-        $('#photoGridScroll').css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
+        $('#photo-grid-scroll').css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
         if (this.iScrollElem) {
           if (options.destroy) {
             this.iScrollElem.destroy();
@@ -306,7 +306,7 @@ the behavior for the photo feature
           }
           
         }
-        this.iScrollElem = new iScroll('photoGridScroll', { 
+        this.iScrollElem = new iScroll('photo-grid-scroll', { 
             //maybe instead of checking vs. the iscroll value, check to see which item is currently in view, then render next chunk if it's not visible & we're getting close to needing it
           		onScrollMove: function () {
           		},
@@ -399,7 +399,7 @@ the behavior for the photo feature
     					console.log(err);
     				}
     				//that.iScrollElem.destroy();
-    			  $('#photoGridScroll .gridContainer').append(out);
+    			  $('#photo-grid-scroll .grid-container').append(out);
     			  that.resetScrollElem();
     			  that.numRendered += photos.length;
     			  TIM.setLoading(false);
@@ -424,9 +424,9 @@ the behavior for the photo feature
   
   TIM.views.PhotoList = Backbone.View.extend( {
           
-      id: "photoListContainer",
+      id: "photo-list-container",
       
-      className: "appPage flipMode photoFeature",
+      className: "app-page flip-mode photo-feature",
       
       pageTemplate: "photoPage",
       
@@ -469,12 +469,12 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			"vclick .detailLink" : "toggleMode",
-    			"vclick .gridLink" : "showGridView",
-    			"vclick .fullPhoto" : "toggleMode",
-    			"click .interaction_icons .comments" : "showComments",
-    			"click .interaction_icons .location" : "showLocation",
-    			"vclick .interaction_icons" : "interactionIconsClicked",
+    			"vclick .detail-link" : "toggleMode",
+    			"vclick .grid-link" : "showGridView",
+    			"vclick .full-photo" : "toggleMode",
+    			"click .interaction-icons .comments" : "showComments",
+    			"click .interaction-icons .location" : "showLocation",
+    			"vclick .interaction-icons" : "interactionIconsClicked",
     			"swiperight" : "showGridView",
     			
   		},
@@ -528,14 +528,14 @@ the behavior for the photo feature
         //return;
   		  
   		  if (this.flipMode) {
-  		    this.$el.toggleClass('flipMode');
+  		    this.$el.toggleClass('flip-mode');
   		    this.flipMode = false;
   		    
   		    //make an iscroll container
   		    //get the actual photo image & lay the over the actual flip area?
-  		    var overlay = $("<div class='scrollOverlay photoFeature'></div>");
+  		    var overlay = $("<div class='scroll-overlay photo-feature'></div>");
   		    //this.$el.prepend(overlay);
-  		    $('#contentContainer').prepend(overlay);
+  		    $('#content-container').prepend(overlay);
   		    var clonedPage = $('.back .photoPage').eq(1).clone();
   		    //alert(img.css('background-image'));
   		    
@@ -553,7 +553,7 @@ the behavior for the photo feature
   		      that.toggleMode();
   		    })
   		    var containerEl = overlay.get(0);
-  		    //var containerEl = $("#contentContainer").css('height','200px');//this.$el.get(0);
+  		    //var containerEl = $("#content-container").css('height','200px');//this.$el.get(0);
   		    if(containerEl) {
   		      this.iScrollElem = new iScroll(containerEl, { zoom: true, vScroll: true, hScroll: true, hScrollbar: false, vScrollbar: false });
   		       window.setTimeout(function() {
@@ -564,9 +564,9 @@ the behavior for the photo feature
   		  } else {
   		     this.$el.removeClass('hidden');
   		     window.setTimeout(function() {
-    		      that.$el.toggleClass('flipMode');
+    		      that.$el.toggleClass('flip-mode');
     		    }, 10);
-  		    $('.scrollOverlay').remove();
+  		    $('.scroll-overlay').remove();
   		    this.flipMode = true;
   		    this.iScrollElem.destroy();
           this.iScrollElem = null;
@@ -579,10 +579,10 @@ the behavior for the photo feature
       
       toolbarClicked: function(info) {
         console.log("toolbar clicked: ", info);
-        if(info === 'detailLink') {
+        if(info === 'detail-link') {
           this.toggleMode();
         }
-        if(info === 'gridLink') {
+        if(info === 'grid-link') {
           this.showGridView();
         }
       },

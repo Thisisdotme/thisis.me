@@ -9,9 +9,6 @@ from event_processors import event_processor
 
 
 class EventProcessorDriver(AppBase):
-  def display_usage(self):
-    return 'usage: %prog [options]'
-
   def init_args(self):
     self.option_parser.add_option('--service',
                                   dest='services',
@@ -19,29 +16,22 @@ class EventProcessorDriver(AppBase):
                                   default=[],
                                   help='Service to process')
 
-  def parse_args(self, ignore):
-    (self.option, ignore) = self.option_parser.parse_args()
-
-    if ignore:
-      self.option_parser.print_help()
-      sys.exit()
-
-  def main(self):
-    logging.info("Beginning: " + self.name)
+  def app_main(self, config, options, args):
+    logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = self.config['db']['sqlalchemy.url']
+    db_url = config['db']['sqlalchemy.url']
     # get the broker and queue config
-    broker_url = self.config['broker']['url']
+    broker_url = config['broker']['url']
     # get the maximum priority
-    max_priority = int(self.config['scanner']['maximum_priority'])
-    min_duration = float(self.config['scanner']['iteration_minimum_duration'])
+    max_priority = int(config['scanner']['maximum_priority'])
+    min_duration = float(config['scanner']['iteration_minimum_duration'])
     min_duration = datetime.timedelta(seconds=min_duration)
 
     # initialize the db engine & session
     db.configure_session(db_url)
 
-    services = services_configuration(self.option.services, self.config)
+    services = services_configuration(options.services, config)
 
     # Get a list of all the queues and all the handler
     queues = []
@@ -69,7 +59,7 @@ class EventProcessorDriver(AppBase):
 
     join(self.client, handlers)
 
-    logging.info("Finished: " + self.name)
+    logging.info("Finished...")
 
 
 def services_configuration(services, config):

@@ -1,9 +1,9 @@
 <div class="toolbar"><h1>Photos</h1></div>
-<div class="photoAlbums" id="photoAlbumList">
+<div class="photo-albums" id="photo-album-list">
   <div>
   {#albums}
   <div class="album" data-album_id="{id}">
-	  <div class="albumInfo">{name} ({count}) <span class="moreLink" data-album_id="{id}">see all &#187;</span></div>
+	  <div class="album-info">{name} ({count}) <span class="more-link" data-album_id="{id}">see all &#187;</span></div>
 	  <div class="thumbs clearfix">
 	    {#thumbs album_id=id}
 	      <!-- img class="thumb" src="{image_url}" data-id="{id}" data-album_id="{album_id}"/ -->
