@@ -48,7 +48,7 @@
   
   //basic placeholder for photo
   TIM.views.Bio = Backbone.View.extend( {
-      id: "bio-age",
+      id: "bio-page",
       
       className: "app-page",
       

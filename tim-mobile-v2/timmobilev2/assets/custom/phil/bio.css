@@ -10,7 +10,7 @@ body {
     height:320px;
   }
 
-#bioPage h1 {
+#bio-page h1 {
   text-transform:capitalize;
   font-size:24px;
   font-weight:bold;
@@ -19,7 +19,7 @@ body {
   font-family: 'Nosifer',cursive;
 }
 
-#bioPage .profile_img {
+#bio-page .profile-img {
  float:left;
  margin:0 8px 8px 0;
  padding:1px;
@@ -29,21 +29,21 @@ body {
 }
 
 
-#bioPage .profile_img img {
+#bio-page .profile-img img {
   
 }
 
-#bioPage .headline  {
+#bio-page .headline  {
   font-weight:bold;
   margin:12px 0;
   color:#fff200;
   font-size:14px;
 }
 
-#bioPage strong {
+#bio-page strong {
   color:#fff200;
 }
 
-#bioPage .specialties  {
+#bio-page .specialties  {
   margin:8px 0;
 }
