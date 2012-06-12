@@ -54,7 +54,7 @@ $(function() {
       var height =  $(window).height(),
           width =  $(window).width();
       //don't bother for desktop sizes!
-      if (height > 450) return;
+      if (height > 480) return;
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
