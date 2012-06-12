@@ -156,4 +156,3 @@ def main(global_config, **settings):
   config.scan('miapi')
 
   return config.make_wsgi_app()
-
