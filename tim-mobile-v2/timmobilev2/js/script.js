@@ -15,6 +15,7 @@ TIM.appContainerElem = $('#content-container');
 TIM.defaultTransition = "fade";
 TIM.loading_ = false;
 TIM.transitioning_ = false;
+TIM.errorShowing_ = true;
 TIM.errorMessageView = undefined;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
@@ -112,6 +113,16 @@ $(function() {
 	
 	TIM.isTransitioning = function() {
 	  return TIM.transitioning_;
+	}
+	
+	TIM.setErrorShowing = function (isError) {
+	  TIM.errorShowing_ = isError;
+	  if(isError) {
+	    $('#app').addClass('error');
+	    $('#app').removeClass('nav-open');
+	  } else {
+	    $('#app').removeClass('error');
+	  }
 	}
 	
 	TIM.setLoading(true);
@@ -271,7 +282,6 @@ $(function() {
   	      }
   	      resourceId = undefined;
   	    }
-  	    
   	    if (feature.behavior) {
   	        console.log('********* activating feature *********', path);
             feature.behavior.activate(path);
@@ -289,6 +299,7 @@ $(function() {
       TIM.errorMessageView = new TIM.views.ErrorMessage();
     }
     TIM.errorMessageView.render({message: options.exception});
+    TIM.setErrorShowing(true);
   };
   
   //do transition between pages?
@@ -298,6 +309,7 @@ $(function() {
   //should keep a history stack & use that to determine whether to do a forward or revers transition
   
 	TIM.transitionPage = function (toPage, options) {
+	  //TIM.setErrorShowing(false);
 	  $('#app').removeClass('loading initializing nav-open');
 	  options = options || {};
 	  var fromPage = options.fromPage || TIM.currentPageElem;
@@ -328,6 +340,7 @@ $(function() {
 	      if(options.callback) {
 	        options.callback();
 	      }
+	      TIM.setErrorShowing(false);
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {

@@ -278,7 +278,12 @@ td { vertical-align: top; }
     opacity:0.7;
     border:1px solid #BAAE04;
     border-radius:2px;
-    
+    display:none;
+    z-index:100;
+  }
+  
+  .error #error-message {
+    display:block;
   }
   
   #error-message > div {
