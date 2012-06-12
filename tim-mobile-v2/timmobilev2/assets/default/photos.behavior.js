@@ -536,17 +536,17 @@ the behavior for the photo feature
   		    var overlay = $("<div class='scroll-overlay photo-feature'></div>");
   		    //this.$el.prepend(overlay);
   		    $('#content-container').prepend(overlay);
-  		    var clonedPage = $('.back .photoPage').eq(1).clone();
+  		    var clonedPage = $('.back .photo-page').eq(1).clone();
   		    //alert(img.css('background-image'));
   		    
   		    overlay.append(clonedPage);
   		    this.$el.addClass('hidden');
   		    var img = clonedPage.find('.image');
-  		    $('.scrollOverlay > div').css('width', img.width() + 'px');
+  		    $('.scroll-overlay > div').css('width', img.width() + 'px');
   		    //console.log('imgae: ', img);
   		    
   		    window.setTimeout(function() {
-  		      overlay.addClass('noToolbars');
+  		      overlay.addClass('no-toolbars');
   		    }, 10);
   		    
   		    overlay.on('vclick', function(event){
