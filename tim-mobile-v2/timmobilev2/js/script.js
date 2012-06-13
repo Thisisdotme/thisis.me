@@ -272,6 +272,7 @@ $(function() {
   	      }
   	      //we get here if there was no feature in the URL
   	      //stay on the current feature if there is one, or else go to the cover page
+  	      $('#app').removeClass('nav-open');
   	      if(TIM.features.getSelectedFeature()) {
   	          $('#app').removeClass('loading');
   	          TIM.app.navigate(TIM.features.getSelectedFeature().get('feature_name'), {replace:true});
@@ -282,6 +283,7 @@ $(function() {
   	      }
   	      resourceId = undefined;
   	    }
+  	    $('#app').removeClass('nav-open');
   	    if (feature.behavior) {
   	        console.log('********* activating feature *********', path);
             feature.behavior.activate(path);
