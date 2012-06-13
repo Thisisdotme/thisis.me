@@ -4,6 +4,7 @@
   feature.models = {};
   feature.views = {};
   feature.collections = {};
+  feature.hasFetchedModel = false;
   
   feature.models.Bio = TIM.models.FeatureBehavior.extend({
     initialize: function() {
@@ -52,6 +53,8 @@
       
       className: "app-page",
       
+      hasRendered: false,
+      
       iScrollElem: undefined,
 
       initialize: function() {
@@ -64,12 +67,15 @@
   		
       render: function(){
         var that = this;
-  		  dust.render("bio", this.model.toJSON(), function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  $(that.el).append(out);
-  			});
+        if(!this.hasRendered) {
+          dust.render("bio", this.model.toJSON(), function(err, out) {
+    			  if(err != null) {
+    					console.log(err);
+    				}
+    			  $(that.el).append(out);
+    			});
+    			this.hasRendered = true;
+        }
 
   		  if(TIM.appContainerElem.find(this.el).length == 0)  {
   			  TIM.appContainerElem.append(this.$el);
@@ -89,21 +95,27 @@
   feature.model = new feature.models.Bio();
   
   feature.activate = function() {
-    var bioModel = new (TIM.models.Bio);
-    console.log("the bio model: " + bioModel);
-    var bioView = new TIM.views.Bio({model: bioModel});
-    bioView.model.fetch ({
-      dataType: "jsonp",
-	  	//add this timeout in case call fails...
-  		timeout : 5000,
-  		success: function(resp) {
-  		  //
-  		  console.log('fetched bio');
-  		},
-  		error: function(resp) {
-  			TIM.appContainerElem.html("couldn't find profile for " + TIM.pageInfo.authorName);
-  		}
-  	});
+    feature.bioModel = feature.bioModel || new (TIM.models.Bio);
+    console.log("the bio model: " + feature.bioModel);
+    feature.bioView = feature.bioView || new TIM.views.Bio({model: feature.bioModel});
+    if(!feature.hasFetchedModel) {
+      feature.bioView.model.fetch ({
+        dataType: "jsonp",
+  	  	//add this timeout in case call fails...
+    		timeout : 5000,
+    		success: function(resp) {
+    		  //
+    		  console.log('fetched bio');
+    		},
+    		error: function(resp) {
+    			TIM.eventAggregator.trigger("error", {exception:"couldn't find profile for " + TIM.pageInfo.authorName});
+    		}
+    	});
+    	feature.hasFetchedModel = true;
+    } else {
+      feature.bioView.render();
+    }
+
   };
   
   feature.navigate = function() {
