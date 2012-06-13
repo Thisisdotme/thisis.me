@@ -30,11 +30,11 @@ TIM.views.renderTemplate = function(template, context) {
 TIM.renderTemplate = TIM.views.renderTemplate; //shorthand?
 
 TIM.views.ErrorMessage = Backbone.View.extend( {
-   id: "errorMessage",
+   id: "error-message",
    
    initialize: function() {
        _.bindAll(this);
-       this.$messageEl = $('#errorMessage > div');
+       this.$messageEl = $('#error-message > div');
    },
    
    render: function (options) {
@@ -50,7 +50,7 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
    
 
 TIM.views.FeatureNav = Backbone.View.extend( {
-   el: $( "#featureNavItems" ),
+   el: $( "#feature-nav-items" ),
 		
    initialize: function() {
        this.collection.bind( "reset", this.render, this );
@@ -64,8 +64,8 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    },
 		
   addOne : function ( item ) {
-  	var view = new TIM.views.FeatureViewItem({model:item});
-  	$( "#featureNavItems" ).append(view.render().el);
+  	var view = new TIM.views.FeatureNavItem({model:item});
+  	$( "#feature-nav-items" ).append(view.render().el);
   },
 
   render: function() {
@@ -81,11 +81,11 @@ TIM.views.FeatureNav = Backbone.View.extend( {
  	    }
  	    //console.log(feature);
  	  });
- 	  $("#featureNav").removeClass('active');
+ 	  $("#feature-nav").removeClass('active');
  	}
 })
 
-TIM.views.FeatureViewItem = Backbone.View.extend({
+TIM.views.FeatureNavItem = Backbone.View.extend({
 	tagName : 'li',
 
 	initialize: function() {
@@ -101,7 +101,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 	render : function () {
 	  var self = this;
 	  var selected = this.model.get('selected');
-	  //console.log('rendering menu item');
+	  console.log('rendering menu item');
 	  dust.render("featureNavItem", this.model.toJSON(), function(err, out) {
 		  if(err != null) {
 				console.log(err);
@@ -140,7 +140,7 @@ TIM.views.FeatureViewItem = Backbone.View.extend({
 
 TIM.views.Comments = Backbone.View.extend( {
         
-    className: "appPage comment-list toolbar-top",
+    className: "app-page comment-list toolbar-top",
     template: "commentList",
     commentCollections: [],
     collectionNum: 0,
@@ -506,7 +506,11 @@ TIM.mixins.flipset = {
 			}
 			console.log('in render page chunk starting with ', start);
 			//have to know how to remove the last (2?) page(s) from teh flipset & insert starting there..
-			that.flipSet.createPageElements();
+			if (that.flipSet && this.pages.length > 0) {
+			  that.flipSet.createPageElements();
+			} else {
+			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>');
+			}
 		},
 		
 		
@@ -607,7 +611,7 @@ var commentTexts = ["Great Photo!", "I agree!", "This is a prime example of what
                     "I like treehouses.  They're fun and special and bright and airy.", "Wait, is that a #pheasant?", "Four score and 38 years ago we desecrated a great lamppost based on burritos and vigilante justice.", "Who's going to the 1971 Philadelphia 76ers reunion banquet tomorrow?",
                     "Connect Four was a great game.", "the cartoon #Garfield is criminally underrrated.", "@hammer is my favorite thisis.me member <a href='http://thisis.me/hammer'>thisis.me/hammer</a>", "So wait, are you saying there isn't a Flying Spaghetti Monster?", "Cookie Monster is my hero.",
                     "I really think that whole Benjamin Franklin flying a kite lightning electricity thing was a #sham", "So are you trying to tell me I can't write a really, really, really long comment.  Balderdash!  I can write any kind of comment I like.  This is America, not Poland or Yugoslavia!",
-                    "cool.", "you rock, Philip!", "pancakes are best served with a touch of tragic whimsy.", "Celtics 142, Bullets 81.  Hell yes!", "Could #joebarrycarroll be the next #chiefrobertparish", "I *will* win Wimbledon this year!!", "Like hell you will!",
+                    "cool.", "you rock, Philip!", "pancakes are best served with a touch of tragic whimsy.", "Celtics 142, Bullets 81.  Oh yes!", "Could #joebarrycarroll be the next #chiefrobertparish", "I *will* win Wimbledon this year!!", "You *will* not!",
                     "...and so my thoughts on the government of Bahrain are as follows: excellent judicial system, everything else is crap."];
 var generateFakeComments = function(num) {
   var comments = [];

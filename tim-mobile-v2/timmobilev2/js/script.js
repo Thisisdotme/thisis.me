@@ -9,12 +9,13 @@ TIM.mixins = TIM.mixins || {};
 TIM.featureHandlers = TIM.featureHandlers || {};
 TIM.loadedFeatures = TIM.loadedFeatures || {};
 TIM.authorFeatures = TIM.authorFeatures || {};
-TIM.currentPageElem = $('#splashScreen');
+TIM.currentPageElem = $('#splash-screen');
 TIM.previousPageElem = undefined;
-TIM.appContainerElem = $('#contentContainer');
+TIM.appContainerElem = $('#content-container');
 TIM.defaultTransition = "fade";
 TIM.loading_ = false;
 TIM.transitioning_ = false;
+TIM.errorShowing_ = true;
 TIM.errorMessageView = undefined;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
@@ -53,7 +54,7 @@ $(function() {
       var height =  $(window).height(),
           width =  $(window).width();
       //don't bother for desktop sizes!
-      if (height > 450) return;
+      if (height > 480) return;
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
@@ -114,6 +115,16 @@ $(function() {
 	  return TIM.transitioning_;
 	}
 	
+	TIM.setErrorShowing = function (isError) {
+	  TIM.errorShowing_ = isError;
+	  if(isError) {
+	    $('#app').addClass('error');
+	    $('#app').removeClass('nav-open');
+	  } else {
+	    $('#app').removeClass('error');
+	  }
+	}
+	
 	TIM.setLoading(true);
 	
 	//collection of features for this author
@@ -166,10 +177,10 @@ $(function() {
     	//move these to backbone views?
     	//make sure we have vclick event
     	
-    	$('#navToggle').on('vclick', (function(event){
+    	$('#nav-toggle').on('vclick', (function(event){
     	  event.preventDefault();
     	  event.stopPropagation();
-    	  $('#app').toggleClass('navOpen');
+    	  $('#app').toggleClass('nav-open');
     	}));
     	
     	$('#app').on('vclick', (function(event){
@@ -249,13 +260,16 @@ $(function() {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
   	    var feature = TIM.features.getByName(featureName);
-  	    
   	    if (TIM.features.getSelectedFeature()) {
   	      TIM.setLoading(true); //make this a method on TIM
   	    }
   	    
   	    if(!feature) {
   	      console.log('no feature');
+  	      if (TIM.features.length == 0) {
+  	        TIM.eventAggregator.trigger("error", {exception: "No features loaded for this author"});
+  	        return;
+  	      }
   	      //we get here if there was no feature in the URL
   	      //stay on the current feature if there is one, or else go to the cover page
   	      if(TIM.features.getSelectedFeature()) {
@@ -268,7 +282,6 @@ $(function() {
   	      }
   	      resourceId = undefined;
   	    }
-  	    
   	    if (feature.behavior) {
   	        console.log('********* activating feature *********', path);
             feature.behavior.activate(path);
@@ -286,6 +299,7 @@ $(function() {
       TIM.errorMessageView = new TIM.views.ErrorMessage();
     }
     TIM.errorMessageView.render({message: options.exception});
+    TIM.setErrorShowing(true);
   };
   
   //do transition between pages?
@@ -295,7 +309,8 @@ $(function() {
   //should keep a history stack & use that to determine whether to do a forward or revers transition
   
 	TIM.transitionPage = function (toPage, options) {
-	  $('#app').removeClass('loading initializing navOpen');
+	  //TIM.setErrorShowing(false);
+	  $('#app').removeClass('loading initializing nav-open');
 	  options = options || {};
 	  var fromPage = options.fromPage || TIM.currentPageElem;
 	  
@@ -325,6 +340,7 @@ $(function() {
 	      if(options.callback) {
 	        options.callback();
 	      }
+	      TIM.setErrorShowing(false);
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {

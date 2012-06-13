@@ -72,9 +72,9 @@
   
   //basic placeholder for photo
   TIM.views.Cover = Backbone.View.extend( {
-      id: "coverContainer",
+      id: "cover-container",
       
-      className: "appPage",
+      className: "app-page",
       
       events: {
         "vclick .highlight" : "showHighlight",
@@ -99,10 +99,10 @@
   				  //name, primaryStory, secondaryStory
   				*/
   				var context = {
-  				  name: this.collection.at(0).get('author').full_name,
-  				  primaryStory: this.collection.at(0).toJSON(),
-  				  secondaryStory: this.collection.at(1).toJSON(),
-  				  tertiaryStory: this.collection.at(2).toJSON()
+  				  name: this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName,
+  				  primaryStory: this.collection.at(0) ? this.collection.at(0).toJSON() : [],
+  				  secondaryStory: this.collection.at(1) ? this.collection.at(1).toJSON() : [],
+  				  tertiaryStory: this.collection.at(2) ? this.collection.at(2).toJSON() : [],
   				}
   				
   				dust.render("coverpage", context, function(err, out) {
@@ -142,22 +142,25 @@
   feature.model = new feature.models.Cover();
   
   feature.activate = function() {
+    
     if(!feature.collectionLoaded) {
       var topStories = new (TIM.collections.TopStories);
       var coverView = new TIM.views.Cover({collection: topStories});
       feature.mainView = coverView;
       feature.mainCollection = topStories;
+      //TODO - global json fetch method with error handling
       coverView.collection.fetch({
   			dataType: "jsonp",
+  			timeout : 5000,
   			success: function(resp) {
   			  feature.collectionLoaded = true;
   			},
   			error: function(resp) {
-				
+				  TIM.eventAggregator.trigger("error", {exception: "Could not load cover stories."})
   			}
   		});
     } else {
-      TIM.transitionPage ($("#coverContainer"));
+      TIM.transitionPage ($("#cover-container"));
     }
   };
   

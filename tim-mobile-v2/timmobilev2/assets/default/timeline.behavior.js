@@ -98,7 +98,7 @@
 
   TIM.views.EventList = Backbone.View.extend( {
       id: "timeline",
-      className: "flippage flippage-container appPage",   
+      className: "flippage flippage-container app-page",   
       pageTemplate: "event",
       
       initialize: function() {
@@ -146,9 +146,9 @@
   
    
    TIM.views.EventDetail = Backbone.View.extend( {
-        id: "eventDetailContainer",
+        id: "event-detail-container",
 
-        className: "appPage",
+        className: "app-page",
 
         initialize: function(spec) {
            _.bindAll(this);
@@ -210,7 +210,7 @@
   	  //feature.gridView.render();
   	  //feature.timelineView.render();
   	  if (feature.showDetails) {
-  	    //TIM.transitionPage ($("#detailContainer"));
+  	    //TIM.transitionPage ($("#detail-container"));
   	    //feature.timelineView.showDetail();
   	    feature.showDetailView(resourceId);
   	  } else {

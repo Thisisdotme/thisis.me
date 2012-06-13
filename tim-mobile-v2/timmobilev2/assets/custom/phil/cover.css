@@ -1,11 +1,11 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
-#coverContainer {
+#cover-container {
   background:#000 url(/phil/asset/cover_bg.jpg) no-repeat left top;
   background-size:cover;
 }
 
-.coverPage {
+.cover-page {
   width:100%;
   height:100%;
   color:#fff;
@@ -13,7 +13,7 @@
   font-weight: bold;
 }
 
-.coverPage h1.title {
+.cover-page h1.title {
   font-size:34px;
   font-weight:normal;
   color:#fff200;
@@ -27,7 +27,7 @@
   text-transform:uppercase;
 }
 
-.coverPage a, .coverPage a:visited {
+.cover-page a, .cover-page a:visited {
   font-size:16px;
   font-weight:bold;
   color:#fff;
@@ -35,7 +35,7 @@
 }
 
 
-.coverPage .primaryStory {
+.cover-page .primary-story {
   font-size:16px;
   font-weight:bold;
   color:#fff;
@@ -48,7 +48,7 @@
   text-shadow:1px 1px #333;
 }
 
-.coverPage .secondaryStory {
+.cover-page .secondary-story {
   position:absolute;
   bottom:25px;
   width:100px;
@@ -63,7 +63,7 @@
   
 }
 
-.coverPage .tertiaryStory {
+.cover-page .tertiary-story {
   position:absolute;
    bottom:25px;
    width:100px;

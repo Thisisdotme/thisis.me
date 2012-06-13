@@ -100,12 +100,12 @@ body {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-#contentContainer .scroll-overlay {
+#content-container .scroll-overlay {
   position:absolute;
   top:0px;
   left:0px;
   width:100%;
-  height:370px;
+  min-height:370px;
   width:320px;
   z-index:100;
 }
@@ -122,7 +122,7 @@ body {
     to { -webkit-transform: translateY(-50px); opacity:0 }
 }
 
-#contentContainer .scroll-overlay > div {
+#content-container .scroll-overlay > div {
  overflow:visible;
 }
 
@@ -131,7 +131,7 @@ body {
   width:100%;
   background-size:cover;
   background-repeat:no-repeat;
-  height:370px; /* need to make dynamic? */
+  min-height:480px; /* need to make dynamic? */
 }
 
 .scroll-overlay .photo-page {
