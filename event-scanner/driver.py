@@ -27,6 +27,7 @@ class ScannerApplication(AppBase):
     _create_event_queues(message_client, config['queues'])
     message_queue.close_message_client(message_client)
 
+    scanners = []
     for priority in range(0, maximum_priority + 1):
       scanner = threading.Thread(target=_scan_events,
                                  args=(message_url,
@@ -34,6 +35,10 @@ class ScannerApplication(AppBase):
                                        iteration_minimum_duration,
                                        maximum_priority))
       scanner.start()
+      scanners.append(scanner)
+
+    for scanner in scanners:
+      scanner.join()
 
 
 def _scan_events(message_url, priority, highest_priority_duration, maximum_priority):
@@ -99,4 +104,4 @@ def _decrease_priority(event, max_priority):
 
 
 if __name__ == '__main__':
-  sys.exit(ScannerApplication('event_scanner').main())
+  sys.exit(ScannerApplication('event_scanner', daemon_able=True).main())

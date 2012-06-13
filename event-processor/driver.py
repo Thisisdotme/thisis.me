@@ -9,12 +9,12 @@ from event_processors import event_processor
 
 
 class EventProcessorDriver(AppBase):
-  def init_args(self):
-    self.option_parser.add_option('--service',
-                                  dest='services',
-                                  action='append',
-                                  default=[],
-                                  help='Service to process')
+  def init_args(self, option_parser):
+    option_parser.add_option('--service',
+                             dest='services',
+                             action='append',
+                             default=[],
+                             help='Service to process')
 
   def app_main(self, config, options, args):
     logging.info("Beginning...")
@@ -85,4 +85,4 @@ def create_processor_handler(processor):
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventProcessorDriver('event_processor').main())
+  sys.exit(EventProcessorDriver('event_processor', daemon_able=True).main())
