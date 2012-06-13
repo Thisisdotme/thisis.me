@@ -4,8 +4,11 @@ import optparse
 import socket
 import pwd
 import datetime
+import daemon
+import setproctitle
 
 from tim_commons.config import load_configuration
+from tim_commons import PidFileContext
 
 
 class AppBase:
@@ -14,9 +17,10 @@ class AppBase:
   STATUS_ERROR = 1
   STATUS_WARNING = 75
 
-  def __init__(self, program_name, config_file='{TIM_CONFIG}/config.ini'):
+  def __init__(self, program_name, config_file='{TIM_CONFIG}/config.ini', daemon_able=False):
     self._program_name = program_name
     self._config_file = config_file
+    self._daemon_able = daemon_able
     self._option_parser = optparse.OptionParser(usage=self.display_usage(),
                                                 prog=program_name)
 
@@ -36,24 +40,53 @@ class AppBase:
   def _handle_args(self):
     self.init_args(self._option_parser)
 
+    # Add default option
+    if self._daemon_able:
+      self._option_parser.add_option('--daemon',
+                                     dest='daemon',
+                                     action='store_true',
+                                     default=False,
+                                     help='Start as a daemon')
+
     (options, args) = self._option_parser.parse_args()
     self.parse_args(args)
 
     return (options, args)
 
   def main(self):
+    setproctitle.setproctitle(self._program_name)
+
     (options, args) = self._handle_args()
+    is_daemon = _is_daemon(options)
 
-    _init_logger(self._program_name)
+    if is_daemon:
+      with daemon.DaemonContext(
+          working_directory='/',
+          pidfile=PidFileContext('/var/run/{0}.pid'.format(self._program_name))):
+        self._main(is_daemon, options, args)
+    else:
+        self._main(is_daemon, options, args)
+
+  def _main(self, is_daemon, options, args):
+    _init_logger(self._program_name, is_daemon)
     config = _load_config(self._config_file)
-
     self.app_main(config, options, args)
 
 
-def _init_logger(program_name):
+def _is_daemon(options):
+  try:
+    is_daemon = options.daemon
+  except AttributeError:
+    is_daemon = False
+
+  return is_daemon
+
+
+def _init_logger(program_name, is_daemon):
   message = '%(levelname)s %(asctime)s %(thread)d %(pathname)s:%(lineno)d] %(message)s'
   root_logger = logging.getLogger()
-  root_logger.addHandler(_create_stderr_handler(message))
+  if not is_daemon:
+    root_logger.addHandler(_create_stderr_handler(message))
   root_logger.addHandler(_create_file_handler(program_name, message))
   root_logger.setLevel(logging.DEBUG)
 

@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# processname: ${prog}
+# pidfile:     /var/run/${prog}.pid
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+prog=$(basename $0)
+project_dir=$(echo -n "$prog" | tr '_' '-')
+
+lockfile="/var/lock/subsys/${prog}"
+pidfile="/var/run/${prog}.pid"
+
+# source the tim environment
+source /etc/profile.d/tim.sh
+
+driver=$TIM_HOME/$project_dir/driver.py
+
+
+start() {
+    [ -f $driver ] || exit 5
+    echo -n $"Starting $prog: "
+    source $TIM_HOME/env/bin/activate
+    daemon python $driver --daemon
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc -p $pidfile $prog
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
+}
+
+restart() {
+    stop
+    start
+}
+
+reload() {
+    echo -n $"Reloading $prog: "
+    killproc -p $pidfile $prog -HUP
+    echo
+}
+
+rh_status() {
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        rh_status_q && exit 0
+        $1
+        ;;
+    stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+    restart)
+        $1
+        ;;
+    reload|force-reload)
+        rh_status_q || exit 7
+        reload
+        ;;
+    status|status_q)
+        rh_$1
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 7
+        restart
+	    ;;
+    *)
+        echo $"Usage: $0 {start|stop|reload|status|force-reload|restart}"
+        exit 2
+esac
