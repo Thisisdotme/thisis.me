@@ -278,7 +278,9 @@ TIM.views.Comments = Backbone.View.extend( {
     
 } );
 
+//a stab at a 'toolbar view'  that other views could theoretically add & customize & respond to
 //toolbar triggers events on its parent view?
+
 TIM.views.Toolbar = Backbone.View.extend( {
         
     className: "toolbar",
@@ -319,8 +321,7 @@ TIM.views.Toolbar = Backbone.View.extend( {
 } );
 
 //this view is used by the flipset mixin
-//do we need to have a view at all?
-//maybe to include a toolbar?
+//do we need to have a view object for this at all?
 
 TIM.views.Page = Backbone.View.extend( {
     
@@ -447,6 +448,8 @@ TIM.mixins.flipset = {
 			  itemJSON = item.toJSON();
 			  
 			  //faking adding 'sources' to photos
+			  //move this to a 'services' model/collection
+			  
 			  console.log("itemjson: ", itemJSON);
 			  var sourceList = [{source_name: "linkedIn"}, {source_name: "facebook"}, {source_name: "instagram"}, {source_name: "twitter"}, {source_name: "flickr"}, {source_name: "google"}], sources = [];
 			  

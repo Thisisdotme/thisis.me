@@ -126,6 +126,7 @@
 		// definitely a 'loading' state where flipping is not allowed
 		
 		testLoadingFlip: function () {
+		  return;
 		  if (this.loading) {
 		     this.loading = false;
     		 //this.$loadingNext.css('z-index',2);
@@ -141,6 +142,7 @@
 		},
 		
 		testLoadingFlipPrev: function () {
+		  return;//disabling this until ready for prime time
 		  if (this.loading) {
 		     this.loading = false;
     		 //this.$loadingNext.css('z-index',2);
@@ -274,11 +276,15 @@
 		  
 		  //elements for showing 'loading' message...
 		  //need 2?  probably can get away with just one with content divs at the top and bottom
+		  
+		  /*
 		  this.$loadingPrevious = $('<div class="loadingPrevious">loading...</div>');
 		  this.$loadingNext = $('<div class="loadingNext">loading...</div>');
 		  this.$el
 	      .append(this.$loadingPrevious)
 	      .append(this.$loadingNext);
+	      
+	    */
 		  
 		  this.$twoPagesPrevious = this.$pageElements[index - 2] || undefined;
 	    this.$previousPage = this.$pageElements[index - 1];
