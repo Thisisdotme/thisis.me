@@ -81,6 +81,8 @@
         "vclick a" : "linkClicked"
         
       },
+      
+      hasRendered: false,
 
       initialize: function() {
           _.bindAll(this, "render");
@@ -96,7 +98,7 @@
   				var out = "";
   				/*
   				  transform data structure into something that corresponds to cover info
-  				  //name, primaryStory, secondaryStory
+  				  //name, primaryStory, secondaryStory ... the explicitly named primary, secondary, etc. are probably stupid
   				*/
   				var context = {
   				  name: this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName,
@@ -104,16 +106,13 @@
   				  secondaryStory: this.collection.at(1) ? this.collection.at(1).toJSON() : [],
   				  tertiaryStory: this.collection.at(2) ? this.collection.at(2).toJSON() : [],
   				}
-  				
-  				dust.render("coverpage", context, function(err, out) {
-    			  if(err != null) {
-    					console.log(err);
-    				}
-    				console.log('rendered template for cover, current elem: ', TIM.currentPageElem);
-    			
-    			  $(that.el).append(out);
-    			  TIM.transitionPage(that.$el, {animationName:"fade"});
-    			});
+  				//this pattern could probably be generalized to a basic TIM view
+  				if(!this.hasRendered) {
+            var html = TIM.views.renderTemplate("coverpage", context);
+            this.$el.append(html);
+            this.hasRendered = true;
+          }
+          TIM.transitionPage(that.$el, {animationName:"fade"});
 
       },
       

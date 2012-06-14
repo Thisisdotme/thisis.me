@@ -102,12 +102,10 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	  var self = this;
 	  var selected = this.model.get('selected');
 	  console.log('rendering menu item');
-	  dust.render("featureNavItem", this.model.toJSON(), function(err, out) {
-		  if(err != null) {
-				console.log(err);
-			}
-		  $(self.el).html(out).removeClass('selected').addClass(selected ? 'selected' : '');
-		});
+	  
+	  var html = TIM.views.renderTemplate("featureNavItem", this.model.toJSON());
+    this.$el.html(html).removeClass('selected').addClass(selected ? 'selected' : '');
+    
 		return this;
 	},
 	
@@ -302,12 +300,10 @@ TIM.views.Toolbar = Backbone.View.extend( {
     
     render: function() {
       var that = this;
-      dust.render(this.template, {items:this.items}, function(err, out) {
-  		  if(err != null) {
-  				console.log(err);
-  			}
-  		  that.$el.html(out);
-  		});
+      var templateContext = {items:this.items};
+      var html = TIM.views.renderTemplate(this.template, templateContext);
+     
+  		this.$el.html(html);
   		return this.$el;
     },
     
@@ -330,6 +326,8 @@ TIM.views.Page = Backbone.View.extend( {
     
     className: "page",
     
+    hasRendered: false,
+    
     initialize: function(spec) {
         _.bindAll(this, "render");
 				this.pages = spec.pages;
@@ -340,14 +338,11 @@ TIM.views.Page = Backbone.View.extend( {
 			var that = this;
 			//console.log("pages: ", this.pages);
 			tmpl = tmpl || "event";//(this.page.events.length === 1 ? "event" : "page");
-			dust.render(tmpl, this.pages[0], function(err, out) {
-			  if(err != null) {
-			    callback(err);
-					console.log(err);
-				} else{
-				  callback(out);
-				}
-			});	
+			
+			var html = TIM.views.renderTemplate(tmpl, this.pages[0]);
+      //this.$el.append(html);
+      callback(html);
+      this.hasRendered = true;
     }
 } );
 

@@ -298,12 +298,10 @@
 		
 		_renderDOMElem:  function (pageData) {
 		  var domElem, that = this;
-			dust.render("flipPage", pageData, function(err, out) {
-			  domElem = $(out);
-			  if(err != null) {
-					console.log(err);
-				} 
-			});
+		  
+		  var html = TIM.views.renderTemplate("flipPage", pageData);
+  		domElem = $(html);
+		  
 			return domElem;
 		},
 		

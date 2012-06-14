@@ -166,52 +166,17 @@
 
       render: function( ) {
   			var that = this;
-  			dust.render("highlightDetail", this.model.toJSON(), function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  $(that.el).html(out);
-  			});	
+  			//this pattern could probably be generalized to a basic TIM view
+				
+        var html = TIM.views.renderTemplate("highlightDetail", this.model.toJSON());
+        this.$el.append(html);
+        this.hasRendered = true;
       },
       
       showListView: function(event) {
         feature.showDetails = false;
         TIM.app.navigate("/highlights");
         TIM.transitionPage($('#highlights'), {animationName: "slide", reverse: true});
-      }
-      
-  } );
-  
-  TIM.views.HighlightGrid = Backbone.View.extend( {
-      el: "#gridContainer",
-      
-      initialize: function(spec) {
-          _.bindAll(this);
-          
-          this.collection.bind( "reset", this.render );
-      },
-      
-      events: {
-  			"click .item" : "showDetail"
-  		},
-
-      render: function( ) {
-  			var that = this;
-  			dust.render("highlightGrid", {}, function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  $(that.el).html(out).removeClass("out").addClass("in");
-  			  $('#highlights').removeClass("in").addClass("out");
-  			});	
-      },
-      
-      showListView: function(event) {
-        alert("list time!");
-      },
-      
-      showDetail: function(event) {
-        alert("show details!");
       }
       
   } );
@@ -231,7 +196,6 @@
     //only fetch timeline, create view, etc. if need be...
     feature.mainCollection = feature.mainCollection || new (TIM.collections.Highlights);
     feature.timelineView = feature.timelineView || new TIM.views.HighlightList({collection: feature.mainCollection});
-    //feature.gridView = feature.gridView || new TIM.views.HighlightGrid({collection: feature.myTimeline});
     feature.detailView = feature.detailView || new TIM.views.HighlightDetail();
     if(!feature.hasFetchedCollection) {
       feature.mainCollection.fetch({
@@ -244,14 +208,9 @@
   			}
   		});
   	} else {
-  	  //feature.gridView.render();
-  	  //feature.timelineView.render();
   	  if (feature.showDetails) {
-  	    //TIM.transitionPage ($("#detail-container"));
-  	    //feature.timelineView.showDetail();
   	    feature.showDetailView(resourceId);
   	  } else {
-  	    //feature.timelineView.showDetail();
   	    TIM.transitionPage (feature.timelineView.$el);
   	  }
   	}
