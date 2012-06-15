@@ -17,6 +17,15 @@ class DummyDBSession:
     def filter(self, something):
       return self
 
+    def first(self):
+      return None
+
+    def filter_by(self, **kargs):
+      return self
+
+    def count(self):
+      return 10
+
     def __getitem__(self, key):
       return self
 

@@ -15,3 +15,9 @@ class Context:
 
   def __exit__(self, exc_type, exc_val, exc_tb):
     Session.flush()
+
+
+def configure_mock_session():
+  from tim_commons import mock
+  global Session
+  Session = mock.DummyDBSession

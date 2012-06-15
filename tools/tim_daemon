@@ -1,5 +1,7 @@
 #!/bin/sh
-
+#
+# chkconfig: 2345 99 99
+# description: TIM daemon script
 # processname: ${prog}
 # pidfile:     /var/run/${prog}.pid
 

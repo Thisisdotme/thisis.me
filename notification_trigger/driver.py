@@ -3,7 +3,7 @@ import logging
 
 from tim_commons.app_base import AppBase
 from tim_commons.messages import (create_notification_message)
-from tim_commons.message_queue import (create_message_client, create_queues, send_messages)
+from tim_commons import message_queue
 from tim_commons import db
 
 from mi_schema.models import (Service, AuthorServiceMap)
@@ -39,19 +39,21 @@ class NotificationDriver(AppBase):
     broker_url = config['broker']['url']
 
     # get message broker client and store in instance
-    client = create_message_client(broker_url)
+    client = message_queue.create_message_client(broker_url)
 
     # for each specified service
     for service_name in service_names:
 
       # create the queue for this service
-      create_queues(client, [config['queues'][service_name]['notification']])
+      message_queue.create_queues_from_config(client, config['queues'])
 
       # post a notification for each author subscribed to this service
       for asm in db.Session().query(AuthorServiceMap). \
                               join(Service, AuthorServiceMap.service_id == Service.id). \
                               filter(Service.service_name == service_name).all():
-        send_messages(client, [create_notification_message(service_name, asm.service_author_id)])
+        message_queue.send_messages(client,
+                                    [create_notification_message(service_name,
+                                                                 asm.service_author_id)])
 
     logging.info("Finished...")
 

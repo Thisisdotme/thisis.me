@@ -2,12 +2,10 @@ import logging
 import sys
 import os
 
-from tim_commons.app_base import AppBase
-from tim_commons.message_queue import create_message_client, send_messages, create_queues
-from tim_commons import json_serializer
+from tim_commons import json_serializer, app_base, message_queue
 
 
-class NotificationLoad(AppBase):
+class NotificationLoad(app_base.AppBase):
   def display_usage(self):
     return 'usage: %prog [options] queues...'
 
@@ -51,16 +49,16 @@ class NotificationLoad(AppBase):
       raise
 
     # create amqp connection
-    client = create_message_client(options.url)
+    client = message_queue.create_message_client(options.url)
 
     # create all of the required queues
-    create_queues(client, queues, durable=options.durable)
+    message_queue.create_queues_from_config(client, config['queues'])
 
     # itereate and send all the interesting messages
     for message in messages:
       queue = message['header']['type']
       if queue in queues:
-        send_messages(client, [message])
+        message_queue.send_messages(client, [message])
         sys.stdout.write('.')
     sys.stdout.write('\n')
 

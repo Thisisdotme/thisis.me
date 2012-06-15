@@ -63,6 +63,20 @@ def create_queues(client, queues, durable=True):
     client.wait(promise)
 
 
+def create_queues_from_config(client, config):
+  def convert_to_bool(value):
+    if value == 'True':
+      return True
+    elif value == 'False':
+      return False
+
+    raise Exception('Invalid string value: {0}'.format(value))
+
+  for service_queue_config in config.itervalues():
+    for queue_config in service_queue_config.itervalues():
+      create_queues(client, [queue_config['name']], convert_to_bool(queue_config['durable']))
+
+
 def send_messages(client, messages):
   ''' Sends a list of messages to the appropriate queue.
 
