@@ -63,20 +63,25 @@ class AppBase:
     # this work..
     try:
       if is_daemon:
+        config = _load_config(self._config_file)
+        pwd_database = pwd.getpwnam(config['common']['username'])
         with daemon.DaemonContext(
             working_directory='/',
-            pidfile=PidFileContext('/var/run/{0}.pid'.format(self._program_name))):
-          self._main(is_daemon, options, args)
+            pidfile=PidFileContext('/var/run/tim/{0}.pid'.format(self._program_name)),
+            umask=0o022,
+            uid=pwd_database.pw_uid,
+            gid=pwd_database.pw_gid,
+            detach_process=True):
+          self._main(is_daemon, config, options, args)
       else:
-        self._main(is_daemon, options, args)
+        self._main(is_daemon, config, options, args)
       return 0
     except:
       logging.exception('Unexpected error.')
       return 1
 
-  def _main(self, is_daemon, options, args):
+  def _main(self, is_daemon, config, options, args):
     _init_logger(self._program_name, is_daemon)
-    config = _load_config(self._config_file)
     self.app_main(config, options, args)
 
 
@@ -116,7 +121,7 @@ def _create_stderr_handler(message_format):
 def _create_file_handler(program_name, message_format):
   filename_args = {'program': program_name,
                    'hostname': socket.gethostname(),
-                   'user': pwd.getpwuid(os.getuid())[0],
+                   'user': pwd.getpwuid(os.getuid()).pw_name,
                    'date': datetime.datetime.utcnow().date().isoformat(),
                    'time': datetime.datetime.utcnow().time().isoformat(),
                    'pid': os.getpid()}

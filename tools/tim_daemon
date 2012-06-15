@@ -12,7 +12,7 @@ prog=$(basename $0)
 project_dir=$(echo -n "$prog" | tr '_' '-')
 
 lockfile="/var/lock/subsys/${prog}"
-pidfile="/var/run/${prog}.pid"
+pidfile="/var/run/tim/${prog}.pid"
 
 # source the tim environment
 source /etc/profile.d/tim.sh
