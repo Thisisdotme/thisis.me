@@ -149,6 +149,7 @@ the behavior for the photo feature
       id: "photo-albums",
       className: "app-page photo-feature",
       numRendered: 0,
+      template: "photoAlbums",
 
       initialize: function() {
           _.bindAll(this, "render");
@@ -165,18 +166,14 @@ the behavior for the photo feature
         var that = this;
 
         var albums = this.collection.toJSON();
-        var template_context = {
+        var templateContext = {
                                 "albums": albums
         };
         
-  		  dust.render("photoAlbums", template_context, function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  $(that.el).append(out);
-  			  that.numRendered = that.collection.length;
-  			});
-  		  
+        var html = TIM.views.renderTemplate(this.template, templateContext);
+    		this.$el.html(html);
+    		this.numRendered = this.collection.length;
+        
   		  if(TIM.appContainerElem.find(this.el).length == 0)  {
   			  TIM.appContainerElem.append(this.$el);
   			}
@@ -233,6 +230,7 @@ the behavior for the photo feature
       chunkSize: 15,
       initialRenderSize: 30,
       chunkRendering: false,
+      template: "photoGrid",
 
       initialize: function() {
           _.bindAll(this);
@@ -270,14 +268,10 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			//render container with no photos initially
-  			var template_context = {photos:[], name: this.album.get('name')};
+  			var templateContext = {photos:[], name: this.album.get('name')};
   			
-  			dust.render("photoGrid", template_context, function(err, out) {
-  			  if(err != null) {
-  					console.log(err);
-  				}
-  			  (that.$el).append(out);
-  			});
+  			var html = TIM.views.renderTemplate(this.template, templateContext);
+    		this.$el.append(html);
   			
   			//if there's an existing iscroll element, destroy it!
   			if (this.iScrollElem) {
@@ -393,18 +387,15 @@ the behavior for the photo feature
           
           console.log('in render chunk', chunkSize, this.numRendered, photos.length);
 
-          var template_context = {"photos": photos};
-    		  dust.render("_photoList", template_context, function(err, out) {
-    			  if(err != null) {
-    					console.log(err);
-    				}
+          var templateContext = {"photos": photos};
+          
+          var html = TIM.views.renderTemplate("_photoList", templateContext);
     				//that.iScrollElem.destroy();
-    			  $('#photo-grid-scroll .grid-container').append(out);
-    			  that.resetScrollElem();
-    			  that.numRendered += photos.length;
-    			  TIM.setLoading(false);
-    			  that.chunkRendering = false; 
-    			});
+    			$('#photo-grid-scroll .grid-container').append(html);
+  			  that.resetScrollElem();
+  			  that.numRendered += photos.length;
+  			  TIM.setLoading(false);
+  			  that.chunkRendering = false; 
       },
       
       //is this used?

@@ -68,13 +68,9 @@
       render: function(){
         var that = this;
         if(!this.hasRendered) {
-          dust.render("bio", this.model.toJSON(), function(err, out) {
-    			  if(err != null) {
-    					console.log(err);
-    				}
-    			  $(that.el).append(out);
-    			});
-    			this.hasRendered = true;
+          var html = TIM.views.renderTemplate("bio", this.model.toJSON());
+          this.$el.append(html);
+          this.hasRendered = true;
         }
 
   		  if(TIM.appContainerElem.find(this.el).length == 0)  {
@@ -96,7 +92,6 @@
   
   feature.activate = function() {
     feature.bioModel = feature.bioModel || new (TIM.models.Bio);
-    console.log("the bio model: " + feature.bioModel);
     feature.bioView = feature.bioView || new TIM.views.Bio({model: feature.bioModel});
     if(!feature.hasFetchedModel) {
       feature.bioView.model.fetch ({

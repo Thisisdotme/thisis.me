@@ -102,12 +102,10 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	  var self = this;
 	  var selected = this.model.get('selected');
 	  console.log('rendering menu item');
-	  dust.render("featureNavItem", this.model.toJSON(), function(err, out) {
-		  if(err != null) {
-				console.log(err);
-			}
-		  $(self.el).html(out).removeClass('selected').addClass(selected ? 'selected' : '');
-		});
+	  
+	  var html = TIM.views.renderTemplate("featureNavItem", this.model.toJSON());
+    this.$el.html(html).removeClass('selected').addClass(selected ? 'selected' : '');
+    
 		return this;
 	},
 	
@@ -280,7 +278,9 @@ TIM.views.Comments = Backbone.View.extend( {
     
 } );
 
+//a stab at a 'toolbar view'  that other views could theoretically add & customize & respond to
 //toolbar triggers events on its parent view?
+
 TIM.views.Toolbar = Backbone.View.extend( {
         
     className: "toolbar",
@@ -302,12 +302,10 @@ TIM.views.Toolbar = Backbone.View.extend( {
     
     render: function() {
       var that = this;
-      dust.render(this.template, {items:this.items}, function(err, out) {
-  		  if(err != null) {
-  				console.log(err);
-  			}
-  		  that.$el.html(out);
-  		});
+      var templateContext = {items:this.items};
+      var html = TIM.views.renderTemplate(this.template, templateContext);
+     
+  		this.$el.html(html);
   		return this.$el;
     },
     
@@ -323,12 +321,13 @@ TIM.views.Toolbar = Backbone.View.extend( {
 } );
 
 //this view is used by the flipset mixin
-//do we need to have a view at all?
-//maybe to include a toolbar?
+//do we need to have a view object for this at all?
 
 TIM.views.Page = Backbone.View.extend( {
     
     className: "page",
+    
+    hasRendered: false,
     
     initialize: function(spec) {
         _.bindAll(this, "render");
@@ -340,14 +339,11 @@ TIM.views.Page = Backbone.View.extend( {
 			var that = this;
 			//console.log("pages: ", this.pages);
 			tmpl = tmpl || "event";//(this.page.events.length === 1 ? "event" : "page");
-			dust.render(tmpl, this.pages[0], function(err, out) {
-			  if(err != null) {
-			    callback(err);
-					console.log(err);
-				} else{
-				  callback(out);
-				}
-			});	
+			
+			var html = TIM.views.renderTemplate(tmpl, this.pages[0]);
+      //this.$el.append(html);
+      callback(html);
+      this.hasRendered = true;
     }
 } );
 
@@ -452,6 +448,8 @@ TIM.mixins.flipset = {
 			  itemJSON = item.toJSON();
 			  
 			  //faking adding 'sources' to photos
+			  //move this to a 'services' model/collection
+			  
 			  console.log("itemjson: ", itemJSON);
 			  var sourceList = [{source_name: "linkedIn"}, {source_name: "facebook"}, {source_name: "instagram"}, {source_name: "twitter"}, {source_name: "flickr"}, {source_name: "google"}], sources = [];
 			  

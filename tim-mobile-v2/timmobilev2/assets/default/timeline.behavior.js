@@ -164,14 +164,10 @@
         },
 
         render: function( ) {
-        	var that = this;
-        	dust.render("eventDetail", this.model.toJSON(), function(err, out) {
-        	  if(err != null) {
-        			console.log(err);
-        		}
-        	  $(that.el).html(out);
-        	  //alert('detail rendered!');
-        	});	
+        	
+        	var html = TIM.views.renderTemplate("eventDetail", this.model.toJSON());
+          this.$el.html(html);
+          
         },
 
         showListView: function(event) {
