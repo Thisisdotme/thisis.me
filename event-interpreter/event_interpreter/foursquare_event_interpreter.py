@@ -6,13 +6,14 @@ Created on May 9, 2012
 
 from datetime import datetime
 from tim_commons import json_serializer
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 
 class FoursquareEventInterpreter(ServiceEventInterpreter):
 
   def get_type(self):
-    return self.CHECKIN_TYPE
+    return ServiceObjectType.CHECKIN_TYPE
 
   def get_id(self):
     return self.json['id']

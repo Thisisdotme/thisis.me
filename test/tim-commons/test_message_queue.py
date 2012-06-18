@@ -25,3 +25,13 @@ class MessageQueueTestQueue(unittest.TestCase):
     mock_client = mock.DummyMessageClient()
     message_queue.send_messages(mock_client,
                                 [messages.create_notification_message('service', 'id')])
+
+  def test_create_queues_from_config(self):
+    mock_client = mock.DummyMessageClient()
+    config = {'facebook': {'notification': {'name': 'facebook.notification',
+                                            'durable': 'True'},
+                           'event': {'name': 'facebook.event',
+                                     'durable': 'True'}},
+              'foursquare': {'notification': {'name': 'foursquare.notification',
+                                              'durable': 'True'}}}
+    message_queue.create_queues_from_config(mock_client, config)

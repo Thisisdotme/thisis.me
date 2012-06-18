@@ -3,8 +3,7 @@ import logging
 
 from tim_commons.app_base import AppBase
 from event_collectors import event_collector
-from tim_commons.message_queue import (create_message_client, join, send_messages, create_queues)
-from tim_commons import db
+from tim_commons import message_queue, db
 
 
 class EventCollectorDriver(AppBase):
@@ -17,7 +16,7 @@ class EventCollectorDriver(AppBase):
 
   def create_event_callback(self):
     def handler(message):
-      send_messages(self.client, [message])
+      message_queue.send_messages(self.client, [message])
 
     return handler
 
@@ -41,29 +40,23 @@ class EventCollectorDriver(AppBase):
 
     services = services_configuration(options.services, config)
 
-    # Get a list of all the queues and all the handlers
-    queues = []
+    # Get a list of all the handlers
     handlers = []
     for service in services:
-      # List queues
-      queues.append(service['send_queue'])
-      queues.append(service['receive_queue'])
-
       # Create handlers
       collector = event_collector.from_service_name(service['name'], service['oauth'])
-      handler = {'queue': service['receive_queue'],
+      handler = {'queue': service['queue'],
                  'handler': self.create_collector_handler(collector)}
       handlers.append(handler)
 
     logging.info('Queue broker URL: %s', broker_url)
-    logging.info('Active queues: %s', queues)
     logging.debug('Active handlers: %s', handlers)
 
     # get message broker client and store in instance -- used for both receiving and sending
-    self.client = create_message_client(broker_url)
-    create_queues(self.client, queues)
+    self.client = message_queue.create_message_client(broker_url)
+    message_queue.create_queues_from_config(self.client, config['queues'])
 
-    join(self.client, handlers)
+    message_queue.join(self.client, handlers)
 
     logging.info("Finished...")
 
@@ -76,8 +69,7 @@ def services_configuration(services, config):
 
   return [{'name': service,
            'oauth': config['oauth'][service],
-           'send_queue': config['queues'][service]['event'],
-           'receive_queue': config['queues'][service]['notification']} for service in services]
+           'queue': config['queues'][service]['notification']['name']} for service in services]
 
 
 if __name__ == '__main__':

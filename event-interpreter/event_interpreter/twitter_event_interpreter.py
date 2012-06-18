@@ -5,6 +5,7 @@ Created on May 9, 2012
 '''
 
 from datetime import datetime
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 
@@ -13,7 +14,7 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
   DATETIME_STRING_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
   def get_type(self):
-    return self.STATUS_TYPE
+    return ServiceObjectType.STATUS_TYPE
 
   def get_id(self):
     return self.json['id_str']

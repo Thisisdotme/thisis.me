@@ -1,18 +1,12 @@
 import sys
-import logging
 import datetime
-import time
 import threading
 
-from tim_commons import total_seconds
-from tim_commons.app_base import AppBase
-from tim_commons import message_queue
-from tim_commons import db
-from tim_commons.messages import create_event_update_message
-from mi_schema.models import EventScannerPriority
+from tim_commons import app_base, message_queue, db
+from event_scanner import scan_events
 
 
-class ScannerApplication(AppBase):
+class ScannerApplication(app_base.AppBase):
   def app_main(self, config, options, args):
     db_url = config['db']['sqlalchemy.url']
     message_url = config['broker']['url']
@@ -24,12 +18,12 @@ class ScannerApplication(AppBase):
     db.configure_session(db_url)
 
     message_client = message_queue.create_message_client(message_url)
-    _create_event_queues(message_client, config['queues'])
+    message_queue.create_queues_from_config(message_client, config['queues'])
     message_queue.close_message_client(message_client)
 
     scanners = []
     for priority in range(0, maximum_priority + 1):
-      scanner = threading.Thread(target=_scan_events,
+      scanner = threading.Thread(target=scan_events,
                                  args=(message_url,
                                        priority,
                                        iteration_minimum_duration,
@@ -39,68 +33,6 @@ class ScannerApplication(AppBase):
 
     for scanner in scanners:
       scanner.join()
-
-
-def _scan_events(message_url, priority, highest_priority_duration, maximum_priority):
-  priority_duration = (2 ** priority) * highest_priority_duration
-  message_client = message_queue.create_message_client(message_url)
-  current_id = ""
-
-  while True:
-    with db.Context():
-      event_count = _query_event_count(priority)
-      event_interval = highest_priority_duration
-      if event_count != 0:
-        event_interval = priority_duration / event_count
-      logging.info("Sleepging for %s seconds for priorrity %s",
-                   total_seconds(event_interval),
-                   priority)
-
-      time.sleep(total_seconds(event_interval))
-
-      view_result = _query_event(current_id, priority)
-      current_id = _send_update_message_from_event(message_client, view_result)
-      _decrease_priority(view_result, maximum_priority)
-
-
-def _query_event_count(priority):
-  query = db.Session().query(EventScannerPriority)
-  query = query.filter_by(priority=priority)
-  return query.count()
-
-
-def _create_event_queues(message_client, queues_config):
-  for service_queues in queues_config.itervalues():
-    queue = service_queues.get('update', None)
-    if queue is not None:
-      message_queue.create_queues(message_client, [queue], durable=False)
-
-
-def _send_update_message_from_event(message_client, event):
-  current_id = ""
-  if event is not None:
-    message = create_event_update_message(event.service_id,
-                                          event.service_user_id,
-                                          event.service_event_id)
-    message_queue.send_messages(message_client, [message])
-    current_id = event.hash_id
-
-  return current_id
-
-
-def _query_event(current_id, priority):
-  query = db.Session().query(EventScannerPriority)
-  query = query.filter(EventScannerPriority.hash_id > current_id)
-  query = query.filter(EventScannerPriority.priority == priority)
-
-  return query.first()
-
-
-def _decrease_priority(event, max_priority):
-  if event is not None:
-    event.priority += 1
-    if event.priority > max_priority:
-      event.priority = max_priority
 
 
 if __name__ == '__main__':

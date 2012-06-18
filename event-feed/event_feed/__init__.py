@@ -1,6 +1,6 @@
 from pyramid.config import Configurator
 from pyramid.events import ApplicationCreated, NewRequest, subscriber
-from tim_commons.message_queue import get_current_message_client, create_queues
+from tim_commons.message_queue import get_current_message_client, create_queues_from_config
 from tim_commons.config import update_pyramid_configuration, ENVIRONMENT_KEY
 
 
@@ -16,10 +16,7 @@ def create_feed_queue(event):
   environment = event.app.registry.settings[ENVIRONMENT_KEY]
 
   client = get_current_message_client(environment['broker']['url'])
-  for service_queues in environment['queues'].itervalues():
-    queue = service_queues.get('notification', None)
-    if queue is not None:
-      create_queues(client, [queue])
+  create_queues_from_config(client, environment['queue'])
 
 
 def main(global_config, **settings):

@@ -129,6 +129,17 @@ def main(global_config, **settings):
   config.add_route('author.services.profile', '/v1/authors/{authorname}/services/{servicename}/profile')
 
   #
+  # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
+  #
+  config.add_route('author.photoalbums.CRUD', '/v1/authors/{authorname}/photoalbums')
+
+  #
+  # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
+  #
+  config.add_route('author.photoalbums.photos.CRUD', '/v1/authors/{authorname}/photoalbums/{albumname}/photos')
+
+
+  #
   # SERVICE functionality
   #
   config.add_route('services', '/v1/services')

@@ -3,7 +3,7 @@ import datetime
 import logging
 
 from tim_commons.app_base import AppBase
-from tim_commons.message_queue import (create_message_client, join, create_queues)
+from tim_commons import message_queue
 from tim_commons import db
 from event_processors import event_processor
 
@@ -33,13 +33,9 @@ class EventProcessorDriver(AppBase):
 
     services = services_configuration(options.services, config)
 
-    # Get a list of all the queues and all the handler
-    queues = []
+    # Get a list of all the handler
     handlers = []
     for service in services:
-      # List queues
-      queues.append(service['queue'])
-
       # Create handlers
       processor = event_processor.from_service_name(service['name'],
                                                     max_priority,
@@ -50,14 +46,13 @@ class EventProcessorDriver(AppBase):
       handlers.append(handler)
 
     logging.info('Queue broker URL: %s', broker_url)
-    logging.info('Active queues: %s', queues)
     logging.debug('Active handlers: %s', handlers)
 
     # get message broker client and store in instance -- used for both receiving and sending
-    self.client = create_message_client(broker_url)
-    create_queues(self.client, queues)
+    self.client = message_queue.create_message_client(broker_url)
+    message_queue.create_queues_from_config(self.client, config['queues'])
 
-    join(self.client, handlers)
+    message_queue.join(self.client, handlers)
 
     logging.info("Finished...")
 
@@ -70,7 +65,7 @@ def services_configuration(services, config):
 
   return [{'name': service,
            'oauth': config['oauth'][service],
-           'queue': config['queues'][service]['event']} for service in services]
+           'queue': config['queues'][service]['event']['name']} for service in services]
 
 
 def create_processor_handler(processor):
