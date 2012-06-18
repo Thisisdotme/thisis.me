@@ -594,8 +594,7 @@ the behavior for the photo feature
 
   } );
   		
-  feature.model = new feature.models.Photos();
-  
+ 
   //maybe have the ability to prefetch collection before actually showing the feature?
   //
   //we're assuming that the url for theis feature will be /photos/<album_id>/<photo_id>
