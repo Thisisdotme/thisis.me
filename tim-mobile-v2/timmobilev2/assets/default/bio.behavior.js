@@ -5,37 +5,15 @@
   feature.views = {};
   feature.collections = {};
   feature.hasFetchedModel = false;
-  
-  feature.models.Bio = TIM.models.FeatureBehavior.extend({
-    initialize: function() {
-      this.constructor.__super__.initialize.apply(this, arguments);
-    },
-    // Default attributes 
-    defaults: {
-  		name: "bio"
-    },
-
-    navigate: function() {
-      TIM.app.navigate("/bio");
-    }
-
-    //show?  
-
-  });
-  
+    
   TIM.models.Bio = Backbone.Model.extend({
     
     url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/services/linkedin/profile',
     
     parse: function(resp) {
-      console.log(resp);
 		  return (resp);
 		},
     
-    defaults: {
-			time_ago: ""
-    },
-
     initialize: function() {
     },
 	
@@ -47,7 +25,6 @@
 
   });
   
-  //basic placeholder for photo
   TIM.views.Bio = Backbone.View.extend( {
       id: "bio-page",
       
@@ -85,10 +62,6 @@
         });
       }
   });
-
-  		
-  
-  feature.model = new feature.models.Bio();
   
   feature.activate = function() {
     feature.bioModel = feature.bioModel || new (TIM.models.Bio);
