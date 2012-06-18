@@ -7,7 +7,7 @@ Created on Dec, 2011
 import logging
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound 
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from pyramid.view import view_config
 
@@ -21,6 +21,7 @@ from .feature_utils import getAuthorFeatures
 
 log = logging.getLogger(__name__)
 
+
 class AuthorController(object):
 
   '''
@@ -30,33 +31,31 @@ class AuthorController(object):
     self.request = request
     self.dbSession = DBSession()
 
-
   ##
   ## authors
   ##
-  
+
   # GET /v1/authors
   #
   # get list of all authors
   @view_config(route_name='authors', request_method='GET', renderer='jsonp', http_cache=0)
   def authorsList(self):
-    
+
     authorlist = []
     for author in self.dbSession.query(Author).order_by(Author.author_name):
       authorJSON = author.toJSONObject()
       authorlist.append(authorJSON)
-    
-    return {'authors':authorlist}
 
+    return {'authors': authorlist}
 
   # GET /v1/authors/{authorname}
   #
   # get information about a single author
   @view_config(route_name='author.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
   def authorGet(self):
-  
+
     authorName = self.request.matchdict['authorname']
-  
+
     try:
       author = self.dbSession.query(Author).filter_by(author_name=authorName).one()
     except NoResultFound:

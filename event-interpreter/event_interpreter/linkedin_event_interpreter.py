@@ -1,5 +1,6 @@
 import oauth2 as oauth
 from datetime import datetime
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 from tim_commons.oauth import make_request
@@ -23,7 +24,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     return self._client
 
   def get_type(self):
-    return self.FOLLOW_TYPE if self.json['updateType'] == 'CONN' else self.STATUS_TYPE
+    return ServiceObjectType.FOLLOW_TYPE if self.json['updateType'] == 'CONN' else ServiceObjectType.STATUS_TYPE
 
   def get_id(self):
     eventId = self.json['updateKey']

@@ -14,6 +14,7 @@ class FacebookEventCollector(EventCollector):
   FEED_COLLECTION = 'me/posts'
   ALBUMS_COLLECTION = 'me/albums'
   PHOTOS_COLLECTION = '/photos'
+  CHECKIN_COLLECTION = 'me/checkins'
 
   def fetch(self, service_author_id, callback):
 
@@ -57,8 +58,31 @@ class FacebookEventCollector(EventCollector):
         # currently only interested in 'status' posts from the user
         if post['from']['id'] == service_author_id:
 
-          # if this is a status update and there are no actions then skip it
-          if post.get('type') == 'status' and post.get('actions') is None:
+          post_type = post.get('type', None)
+
+          # if this is a status update and there is an action or the
+          # user is tagged in the story keep it
+
+          # TODO: check for user in story_tags is experimental
+
+          if post_type == 'status':
+
+            tagged = False
+            if 'story_tags' in post:
+              for story_tag in post['story_tags'].itervalues():
+                for entity in story_tag:
+                  if int(entity['id']) == int(service_author_id):
+                    tagged = True
+                    break
+                if tagged:
+                  break
+
+            if not post.get('actions') and not tagged:
+              continue
+
+          # skip photo and checkin posts.  they will get picked-up by their respective
+          # processing below
+          if post_type == 'photo' or post_type == 'checkin':
             continue
 
           if self.screen_event(FacebookEventInterpreter(post, asm, self.oauth_config),
@@ -130,6 +154,41 @@ class FacebookEventCollector(EventCollector):
       albums_url = next_url if next_url and next_url != albums_url else None
 
     # while albums
+
+    # fetch all new checkins
+    checkins_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
+                                       self.CHECKIN_COLLECTION,
+                                       urllib.urlencode(args))
+
+    total_accepted = 0
+    while checkins_url and total_accepted < self.MAX_EVENTS:
+
+      checkins_obj = json_serializer.load(urllib2.urlopen(checkins_url))
+
+      # process the item
+
+      # TODO loop termination on various constraints is not exact
+
+      # for element in the feed
+      for checkin_obj in checkins_obj['data']:
+
+        # filter checkins not directly from this user
+        if checkin_obj['from']['id'] == service_author_id:
+
+          # set the type to checkin.  When querying for checkins the
+          # type property is missing
+          checkin_obj['type'] = 'checkin'
+
+          if self.screen_event(FacebookEventInterpreter(post, asm, self.oauth_config),
+                               state):
+            total_accepted = total_accepted + 1
+            callback(create_facebook_event(service_author_id, asm.author_id, post))
+
+      # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
+      next_url = checkins_obj['paging']['next'] if 'paging' in checkins_obj and 'next' in checkins_obj['paging'] else None
+      checkins_url = next_url if next_url and next_url != posts_url else None
+
+    # while checkins
 
     # terminate the fetch
     self.fetch_end(state)

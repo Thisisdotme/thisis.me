@@ -9,6 +9,7 @@ from datetime import datetime
 
 from pyramid.view import view_config
 
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -40,22 +41,21 @@ class AuthorServiceController(object):
   @view_config(route_name='author.services', request_method='GET', renderer='jsonp', http_cache=0)
   def listAuthorServices(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
     dbSession = DBSession()
 
     try:
-      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = dbSession.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     services = []
     for service in dbSession.query(Service). \
                              join(AuthorServiceMap). \
-                             filter(Service.id == AuthorServiceMap.service_id). \
-                             join(Author). \
-                             filter(AuthorServiceMap.author_id == authorId). \
+                             filter(and_(Service.id == AuthorServiceMap.service_id),
+                                         AuthorServiceMap.author_id == author_id). \
                              order_by(Service.service_name):
       services.append({'service_id': service.id,
                        'name': service.service_name,
@@ -66,7 +66,7 @@ class AuthorServiceController(object):
                        'mono_icon_medium_res': self.request.static_url('miapi:%s' % service.mono_icon_medium_res),
                        'mono_icon_low_res': self.request.static_url('miapi:%s' % service.mono_icon_low_res)})
 
-    return {'author_name': authorName, 'services': services}
+    return {'author_name': author_name, 'services': services}
 
   # GET /v1/authors/{authorname}/services/{servicename}
   #
@@ -75,16 +75,16 @@ class AuthorServiceController(object):
   @view_config(route_name='author.services.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
   def getAuthorServiceInfo(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
     serviceName = self.request.matchdict['servicename']
 
     dbSession = DBSession()
 
     try:
-      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = dbSession.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     try:
       serviceId, = dbSession.query(Service.id).filter_by(service_name=serviceName).one()
@@ -93,12 +93,12 @@ class AuthorServiceController(object):
       return {'error': 'unknown service %s' % serviceName}
 
     try:
-      asm = dbSession.query(AuthorServiceMap).filter_by(author_id=authorId, service_id=serviceId).one()
+      asm = dbSession.query(AuthorServiceMap).filter_by(author_id=author_id, service_id=serviceId).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown service for author'}
 
-    response = {'author': authorName,
+    response = {'author': author_name,
                 'service': serviceName,
                 'last_update_time': datetime.isoformat(asm.last_update_time) if asm.last_update_time else None}
 
@@ -117,7 +117,7 @@ class AuthorServiceController(object):
   @view_config(route_name='author.services.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def putAuthorService(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
     serviceName = self.request.matchdict['servicename']
 
     payload = self.request.json_body
@@ -128,10 +128,10 @@ class AuthorServiceController(object):
     dbSession = DBSession()
 
     try:
-      authorId, = dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = dbSession.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     try:
       serviceId, = dbSession.query(Service.id).filter_by(service_name=serviceName).one()
@@ -139,12 +139,12 @@ class AuthorServiceController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown service %s' % serviceName}
 
-    authorServiceMap = AuthorServiceMap(authorId, serviceId, accessToken, accessTokenSecret, service_author_id)
+    authorServiceMap = AuthorServiceMap(author_id, serviceId, accessToken, accessTokenSecret, service_author_id)
 
     try:
       dbSession.add(authorServiceMap)
       dbSession.commit()
-      log.info("created author/service link: %s -> %s" % (authorName, serviceName))
+      log.info("created author/service link: %s -> %s" % (author_name, serviceName))
 
     except IntegrityError, e:
       dbSession.rollback()
@@ -155,9 +155,9 @@ class AuthorServiceController(object):
     s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
     awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
     awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
-    serviceBuild(authorName, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
+    serviceBuild(author_name, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
 
-    response = {'author': authorName, 'service': serviceName}
+    response = {'author': author_name, 'service': serviceName}
 
     if accessToken:
       response['access_token'] = accessToken
