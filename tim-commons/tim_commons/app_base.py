@@ -62,8 +62,8 @@ class AppBase:
     # NOTE: This return stuff doesn't work in a daemon. I don't think there is a way to make
     # this work..
     try:
+      config = _load_config(self._config_file)
       if is_daemon:
-        config = _load_config(self._config_file)
         pwd_database = pwd.getpwnam(config['common']['username'])
         with daemon.DaemonContext(
             working_directory='/',

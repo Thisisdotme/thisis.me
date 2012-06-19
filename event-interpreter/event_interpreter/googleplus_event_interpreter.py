@@ -5,6 +5,7 @@ Created on May 9, 2012
 '''
 
 from datetime import datetime
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 
@@ -13,7 +14,7 @@ class GoogleplusStatusEventInterpreter(ServiceEventInterpreter):
   DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
   def get_type(self):
-    return self.STATUS_TYPE
+    return ServiceObjectType.STATUS_TYPE
 
   def get_id(self):
     return self.json['id']

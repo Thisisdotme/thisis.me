@@ -100,6 +100,17 @@ class Service(Base):
 
   __tablename__ = 'service'
 
+  ME_ID = 1
+  TWITTER_ID = 2
+  FACEBOOK_ID = 3
+  WORDPRESS_ID = 4
+  YOUTUBE_ID = 5
+  LINKEDID_ID = 6
+  GOOGLEPLUS_ID = 7
+  FOURSQUARE_ID = 8
+  INSTAGRAM_ID = 9
+  FLICKR_ID = 10
+
   id = Column(Integer, primary_key=True)
 
   service_name = Column(String(255), unique=True, nullable=False)
@@ -146,6 +157,10 @@ class AuthorServiceMap(Base):
                     UniqueConstraint('service_id', 'service_author_id', name='uidx_author_service_map_2'),
                     {})
 
+  ALL_PHOTOS_ID = '_tim_album_all'
+  OFME_PHOTOS_ID = '_tim_album_ofme'
+  LIKED_PHOTOS_ID = '_tim_album_liked'
+
   id = Column(Integer, primary_key=True)
 
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
@@ -161,7 +176,7 @@ class AuthorServiceMap(Base):
   most_recent_event_id = Column(String(255))
   most_recent_event_timestamp = Column(DateTime)
 
-  def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, service_author_id=None):
+  def __init__(self, authorId, serviceId, accessToken=None, accessTokenSecret=None, service_author_id=None):
     self.author_id = authorId
     self.service_id = serviceId
     self.access_token = accessToken
@@ -251,6 +266,15 @@ class ServiceObjectType(Base):
 
   label = Column(String(255), nullable=False)
 
+  HIGHLIGHT_TYPE = 1
+  PHOTO_ALBUM_TYPE = 2
+  PHOTO_TYPE = 3
+  CHECKIN_TYPE = 4
+  STATUS_TYPE = 5
+  FOLLOW_TYPE = 6
+  VIDEO_TYPE = 7
+  VIDEO_ALBUM_TYPE = 8
+
   def __init__(self, type_id, label):
     self.type_id = type_id
     self.label = label
@@ -286,11 +310,6 @@ class ServiceEvent(Base):
   author_service_map_id = Column(Integer,
                                  ForeignKey('author_service_map.id', ondelete='CASCADE'),
                                  nullable=False)
-
-  # added for convenience.  Not sure if we want them long term but they make querying service_events by service and
-  # author easy and more efficient (no join to author_service_map)
-#  service_id = Column(Integer, ForeignKey('service.id'), nullable=False)
-#  author_id = Column(Integer, ForeignKey('author.id'), nullable=False)
 
   event_id = Column(String(255), nullable=False)
   create_time = Column(DateTime, nullable=False)

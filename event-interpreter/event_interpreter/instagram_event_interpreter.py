@@ -6,13 +6,14 @@ Created on May 9, 2012
 
 from datetime import datetime
 from tim_commons import json_serializer
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 
 class InstagramEventInterpreter(ServiceEventInterpreter):
 
   def get_type(self):
-    return self.PHOTO_TYPE
+    return ServiceObjectType.PHOTO_TYPE
 
   def get_id(self):
     return self.json['id']
@@ -33,4 +34,3 @@ class InstagramEventInterpreter(ServiceEventInterpreter):
     if 'images' in self.json:
       auxData['images'] = self.json['images']
     return json_serializer.dump_string(auxData)
-

@@ -7,6 +7,7 @@ Created on May 9, 2012
 from abc import ABCMeta
 
 from datetime import datetime
+from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
 
@@ -17,7 +18,8 @@ class FacebookEventInterpreter(ServiceEventInterpreter):
   DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+0000'
 
   def get_id(self):
-    return self.json.get('id', None)
+    # allow the object_id to have precedence if it exists
+    return self.json['object_id'] if 'object_id' in self.json else self.json.get('id', None)
 
   def get_create_time(self):
     return datetime.strptime(self.json['created_time'], self.DATETIME_FORMAT)
@@ -32,7 +34,7 @@ class FacebookEventInterpreter(ServiceEventInterpreter):
 class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return self.STATUS_TYPE
+    return ServiceObjectType.STATUS_TYPE
 
   def get_headline(self):
     # this handles events from Nike which is a repetition event
@@ -59,16 +61,19 @@ class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 class FacebookPhotoAlbumEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return self.PHOTOALBUM_TYPE
+    return ServiceObjectType.PHOTO_ALBUM_TYPE
 
   def get_headline(self):
     return self.json.get('name', None)
+
+  def get_photo(self):
+    pass
 
 
 class FacebookPhotoEventInterpreter(FacebookEventInterpreter):
 
   def get_type(self):
-    return self.PHOTO_TYPE
+    return ServiceObjectType.PHOTO_TYPE
 
   def get_headline(self):
     return self.json.get('name', None)
@@ -79,3 +84,18 @@ class FacebookPhotoEventInterpreter(FacebookEventInterpreter):
     if images and len(images) > 0:
       photo = images[0].get('source', None)
     return photo
+
+
+class FacebookCheckinInterpreter(FacebookEventInterpreter):
+
+  def get_type(self):
+    return ServiceObjectType.CHECKIN_TYPE
+
+  def get_headline(self):
+    return self.json.get('message', None)
+
+  def get_tagline(self):
+    return self.json['place'].get('name', None) if 'place' in self.json else None
+
+  def get_content(self):
+    return self.get_tagline()
