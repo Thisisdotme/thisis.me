@@ -373,8 +373,10 @@ TIM.mixins.flipset = {
 		},
 		
 		//send pages to the flips script one at a time as strings?
+		//maybe have the flips script render the pages instead?
+		
 		renderPage: function(pages){
-			//send pages, which can be 1-3 events to the page View
+			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({pages: pages});
 	    var tmpl = this.pageTemplate;
 	    var that = this;
@@ -449,9 +451,15 @@ TIM.mixins.flipset = {
 			  
 			  //faking adding 'sources' to photos
 			  //move this to a 'services' model/collection
+			  //
 			  
-			  console.log("itemjson: ", itemJSON);
-			  var sourceList = [{source_name: "linkedIn"}, {source_name: "facebook"}, {source_name: "instagram"}, {source_name: "twitter"}, {source_name: "flickr"}, {source_name: "google"}], sources = [];
+			  var sourceList = [{source_name: "linkedIn"}, 
+			                    {source_name: "facebook"}, 
+			                    {source_name: "instagram"}, 
+			                    {source_name: "twitter"}, 
+			                    {source_name: "flickr"}, 
+			                    {source_name: "google"}],
+			                     sources = [];
 			  
 			  for(var i = 0; i < sourceList.length; i++) {
 			    sources.push(sourceList[Math.floor(Math.random()*sourceList.length)]);
@@ -502,12 +510,11 @@ TIM.mixins.flipset = {
 			  this.renderPage([this.pages[i]]);
   			this.renderedIndex++;
 			}
-			console.log('in render page chunk starting with ', start);
-			//have to know how to remove the last (2?) page(s) from teh flipset & insert starting there..
+			
 			if (that.flipSet && this.pages.length > 0) {
 			  that.flipSet.createPageElements();
 			} else {
-			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>');
+			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>'); //hack for empty highlights, should be generalized
 			}
 		},
 		
@@ -541,8 +548,6 @@ TIM.mixins.flipset = {
     
     //this is called when the user has flipped to the previous page in the flipset...
 		flipPrevious: function(){
-			//$.mobile.silentScroll(0);
-			//window.scrollTo( 0, 1 );
 
 			if (this.pageNum == 0) {
 				//check for newer events at this point?
@@ -550,7 +555,6 @@ TIM.mixins.flipset = {
 			} 
 
 			if (true || this.flipSet.canGoPrevious()) {
-				//this.flipSet.previous(function(){});
 				this.pageNum--;
 			}
 			if (this.updateRouter) {
@@ -597,6 +601,9 @@ TIM.mixins.flipset = {
 //set height, change height of container (full window, specific height, full height - toolbar, etc.)
 //
 //...or 'scrollable' mixin?  ...which could have one or more scrollable areas...
+//
+//probably would base this on class names, eg. 'scrollable-vert', 'scrollable-horiz'?
+//
 
 
 TIM.views.scrollElem = {
@@ -611,6 +618,7 @@ var commentTexts = ["Great Photo!", "I agree!", "This is a prime example of what
                     "I really think that whole Benjamin Franklin flying a kite lightning electricity thing was a #sham", "So are you trying to tell me I can't write a really, really, really long comment.  Balderdash!  I can write any kind of comment I like.  This is America, not Poland or Yugoslavia!",
                     "cool.", "you rock, Philip!", "pancakes are best served with a touch of tragic whimsy.", "Celtics 142, Bullets 81.  Oh yes!", "Could #joebarrycarroll be the next #chiefrobertparish", "I *will* win Wimbledon this year!!", "You *will* not!",
                     "...and so my thoughts on the government of Bahrain are as follows: excellent judicial system, everything else is crap."];
+
 var generateFakeComments = function(num) {
   var comments = [];
   for (var i = 0; i < num; i++) {

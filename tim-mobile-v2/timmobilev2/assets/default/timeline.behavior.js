@@ -11,21 +11,6 @@
   feature.showDetailId = 0;
   feature.path = "/timeline/";
   feature.detailCache = {};
-
-  feature.models.Timeline = TIM.models.FeatureBehavior.extend({
-    initialize: function() {
-      this.constructor.__super__.initialize.apply(this, arguments);
-    },
-    // Default attributes 
-    defaults: {
-  		name: "timeline"
-    },
-
-    navigate: function() {
-      TIM.app.navigate("/timeline");
-    }
-
-  });
   
   TIM.models.Event = Backbone.Model.extend({
 
@@ -70,9 +55,6 @@
 
   });
 
-  //should this collection have the equivalent of 'paging info', the 'flipset', etc.?
-  //this should handle both highlights and regular events, right?
-
   TIM.collections.Events = Backbone.Collection.extend({
   		//setting which subclass the model is here?  not sure if this is necessary....
   	 	model: function(attrs) {
@@ -84,9 +66,14 @@
              return new TIM.models.Event(attrs);
          }
   		},
+  		
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/events?callback=?',
+  		
   		initialize: function() {
+  		   _.extend(this, TIM.mixins.paging);  //give this collection the ability to page
+    		 this.initializePaging();
   		},
+  		
   		//could also subclass in parse?
   		parse: function(resp) {
   		  return (resp.events);
@@ -109,15 +96,10 @@
           _.bindAll(this, "render", "renderPage");
           
   				//collection fires 'reset' event when fetch is complete
-  				//should collection have methods to get newer and older events so we don't have to get all at once?
-  				//is this the right place to have all this info?
           this.collection.bind( "reset", this.render );
       },
 
   		events: {
-  			//"swipeup .flip-set" : "flipNext",
-  			//  "swipedown .flip-set" : "flipPrevious",
-  			// "click .event" : "showDetail",
   			"click .event" : "showDetailView"
   		},
 
@@ -125,6 +107,8 @@
         //mixing in FlipSet functionality to this view, so the main purpose of 'render' is to render the flipset
         this.renderFlipSet();
         //go straight to the detail view if we got here from an external link to a story
+        //change this to more like what the photo feature does...
+        
         if(feature.showDetails) {
           feature.showDetailView();
           feature.showDetails = false;
@@ -145,43 +129,43 @@
   } );
   
    
-   TIM.views.EventDetail = Backbone.View.extend( {
-        id: "event-detail-container",
+  TIM.views.EventDetail = Backbone.View.extend( {
+      id: "event-detail-container",
 
-        className: "app-page",
+      className: "app-page",
 
-        initialize: function(spec) {
-           _.bindAll(this);
-           if(TIM.appContainerElem.find(this.el).length == 0)  {
-        		  TIM.appContainerElem.append(this.$el);
-        		}
-        	this.model.bind( "change", this.render );	
-        		
-        },
-
-        events: {
-          "swiperight" : "showListView"
-        },
-
-        render: function( ) {
-        	
-        	var html = TIM.views.renderTemplate("eventDetail", this.model.toJSON());
-          this.$el.html(html);
-          
-        },
-
-        showListView: function(event) {
-           feature.showDetails = false;
-           TIM.app.navigate("/timeline");
-           TIM.transitionPage($('#timeline'), {animationName: "slide", reverse: true});
+      initialize: function(spec) {
+        _.bindAll(this);
+        //this thing below is repeated all over the place...
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+          TIM.appContainerElem.append(this.$el);
         }
+        this.model.bind( "change", this.render );	
+    		
+      },
 
-   } );
+      events: {
+        "swiperight" : "showListView"
+      },
+
+      render: function( ) {
+    	
+      	var html = TIM.views.renderTemplate("eventDetail", this.model.toJSON());
+        this.$el.html(html);
+      
+      },
+
+      showListView: function(event) {
+         feature.showDetails = false;
+         TIM.app.navigate("/timeline");
+         TIM.transitionPage($('#timeline'), {animationName: "slide", reverse: true});
+      }
+
+  } );
   
-  feature.model = new feature.models.Timeline();
-  
+  //this should follow the /authorname/feature/detail_id pattern?
   feature.activate = function(resourceId) {
-    console.log('activating timeline with resource ID: ', resourceId);
+
     if(resourceId) {
       //go straight to detail view for this resource...
       //load collection first?
@@ -191,7 +175,7 @@
     //only fetch timeline, create view, etc. if need be...
     feature.mainCollection = feature.mainCollection || new (TIM.collections.Events);
     feature.timelineView = feature.timelineView || new TIM.views.EventList({collection: feature.mainCollection});
-    //feature.gridView = feature.gridView || new TIM.views.HighlightGrid({collection: feature.myTimeline});
+  
     if(!feature.collectionInitialized) {
       feature.mainCollection.fetch({
   			dataType: "jsonp",
@@ -203,14 +187,9 @@
   			}
   		});
   	} else {
-  	  //feature.gridView.render();
-  	  //feature.timelineView.render();
   	  if (feature.showDetails) {
-  	    //TIM.transitionPage ($("#detail-container"));
-  	    //feature.timelineView.showDetail();
   	    feature.showDetailView(resourceId);
   	  } else {
-  	    //feature.timelineView.showDetail();
   	    TIM.transitionPage (feature.timelineView.$el);
   	  }
   	}
@@ -229,7 +208,7 @@
       })
     });
     
-    var model = feature.detailCache['' + resourceId];//feature.mainCollection.find(function(model){return model.get('event_id') == resourceId});
+    var model = feature.detailCache['' + resourceId];
     
 	  if(model) {
 	    console.log('have a model for the detail');
@@ -240,9 +219,7 @@
 		  feature.showDetails = false;
 		} else {
 		  //fetch the model from the server
-		  
-		  console.log('FETCHING DETAILLLLL!!!!!!');
-		  
+		  	  
 		  feature.detailView.model = new TIM.models.EventDetail({id: resourceId});
 		  feature.detailView.model.fetch({
 		    dataType: "jsonp",
@@ -250,7 +227,7 @@
           console.log('fetched model: ', model);
           feature.detailView.render();
           TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
-          feature.detailCache['' + resourceId] = model;
+          feature.detailCache['' + resourceId] = model; //so we don't have to get the same details twice
 		    }
 		  });
 		}

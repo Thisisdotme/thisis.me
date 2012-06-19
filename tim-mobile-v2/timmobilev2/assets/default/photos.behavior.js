@@ -20,25 +20,7 @@ the behavior for the photo feature
   feature.showDetails = false;
   feature.showDetailId = 0;
   feature.cachedResources = {};
-  
-  feature.models.Photos = TIM.models.FeatureBehavior.extend({
-    initialize: function() {
-      this.constructor.__super__.initialize.apply(this, arguments);
-    },
-    // Default attributes 
-    defaults: {
-  		name: "photos"
-    },
-
-    navigate: function() {
-      TIM.app.navigate("/photos");
-    }
-
-    //show list view
-    //show detail view  
-
-  });
-  
+    
   TIM.models.PhotoAlbum = Backbone.Model.extend({
 
     initialize: function() {
@@ -504,7 +486,7 @@ the behavior for the photo feature
         TIM.setLoading(false);
       },
       
-      //this is going to need some work to be able to (fairly) seamlessly transition between
+      // this is going to need some work to be able to (fairly) seamlessly transition between
       // 'flip mode' and a mode where the image is scrollable and zoomable
       //
       // also should have a 'comments mode' and perhaps a 'map mode'
@@ -578,7 +560,7 @@ the behavior for the photo feature
         }
       },
       
-      //call the features 'show comments view' method & pass in the id of the photo/resource to get comments for...
+      //call the feature's 'show comments view' method & pass in the id of the photo/resource to get comments for...
       showComments: function(event) {
         //event.stopPropagation();
         
@@ -612,8 +594,7 @@ the behavior for the photo feature
 
   } );
   		
-  feature.model = new feature.models.Photos();
-  
+ 
   //maybe have the ability to prefetch collection before actually showing the feature?
   //
   //we're assuming that the url for theis feature will be /photos/<album_id>/<photo_id>
