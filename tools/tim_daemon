@@ -9,7 +9,6 @@
 . /etc/rc.d/init.d/functions
 
 prog=$(basename $0)
-project_dir=$(echo -n "$prog" | tr '_' '-')
 
 lockfile="/var/lock/subsys/${prog}"
 pidfile="/var/run/tim/${prog}.pid"
@@ -17,7 +16,7 @@ pidfile="/var/run/tim/${prog}.pid"
 # source the tim environment
 source /etc/profile.d/tim.sh
 
-driver=$TIM_HOME/$project_dir/driver.py
+driver=$TIM_HOME/$prog/driver.py
 
 
 start() {
