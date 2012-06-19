@@ -66,6 +66,9 @@ class FacebookPhotoAlbumEventInterpreter(FacebookEventInterpreter):
   def get_headline(self):
     return self.json.get('name', None)
 
+  def get_photo(self):
+    pass
+
 
 class FacebookPhotoEventInterpreter(FacebookEventInterpreter):
 

@@ -136,7 +136,7 @@ def main(global_config, **settings):
   #
   # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
   #
-  config.add_route('author.photoalbums.photos.CRUD', '/v1/authors/{authorname}/photoalbums/{albumname}/photos')
+  config.add_route('author.photoalbums.photos.CRUD', '/v1/authors/{authorname}/photoalbums/{albumID}/photos')
 
 
   #

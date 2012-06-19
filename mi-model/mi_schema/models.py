@@ -157,6 +157,10 @@ class AuthorServiceMap(Base):
                     UniqueConstraint('service_id', 'service_author_id', name='uidx_author_service_map_2'),
                     {})
 
+  ALL_PHOTOS_ID = '_tim_album_all'
+  OFME_PHOTOS_ID = '_tim_album_ofme'
+  LIKED_PHOTOS_ID = '_tim_album_liked'
+
   id = Column(Integer, primary_key=True)
 
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
@@ -172,7 +176,7 @@ class AuthorServiceMap(Base):
   most_recent_event_id = Column(String(255))
   most_recent_event_timestamp = Column(DateTime)
 
-  def __init__(self, authorId, serviceId, accessToken, accessTokenSecret, service_author_id=None):
+  def __init__(self, authorId, serviceId, accessToken=None, accessTokenSecret=None, service_author_id=None):
     self.author_id = authorId
     self.service_id = serviceId
     self.access_token = accessToken

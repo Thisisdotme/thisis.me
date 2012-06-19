@@ -96,8 +96,13 @@ class FacebookEventCollector(EventCollector):
 
     # while posts
 
-    # collect photos for all time.  If this is the first update then
-    photo_since = since if asm.most_recent_event_timestamp else None
+    # collect photos for all time if this is the first update; otherwise
+    # only collect photos since the last update.  Setting since to None
+    # and remove the 'since' property from the query args will collect
+    # all photos
+    if not asm.most_recent_event_timestamp:
+      since = None
+      del args['since']
 
     albums_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
                                      self.ALBUMS_COLLECTION,
@@ -116,7 +121,7 @@ class FacebookEventCollector(EventCollector):
         created_time = calendar.timegm(datetime.strptime(album['created_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
         updated_time = calendar.timegm(datetime.strptime(album['updated_time'], "%Y-%m-%dT%H:%M:%S+0000").utctimetuple())
 
-        if photo_since == None or created_time >= photo_since or updated_time >= photo_since:
+        if since == None or created_time >= since or updated_time >= since:
 
           # set the type to 'album so it will match what you get when it's directly
           # queried; also makes it easier for the event process to identify it
