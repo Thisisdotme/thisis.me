@@ -479,7 +479,7 @@ TIM.mixins.flipset = {
 			  
 			  //shouldn't skip too many non-one-page events...
 			  
-				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
+				if(item.get('title') !== undefined || item.get("type") === "photo" || item.get("content").photo_url !== undefined) {
 					self.pages.push({num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
 					page.push(item);

@@ -131,16 +131,23 @@ body {
   width:100%;
   background-size:cover;
   background-repeat:no-repeat;
-  min-height:480px; /* need to make dynamic? */
+  /* min-height:480px; /* need to make dynamic? */
+  background-size:100%,auto;
+}
+
+.photo-page {
+  height:100%;
+  width:100%;
 }
 
 .scroll-overlay .photo-page {
-  height:1000px;
-  width:1000px;
+  height:500px;
+  width:500px;
 }
 
 .scroll-overlay .photo-page .full-photo {
-  background-size:contain;
+  /*background-size:auto 80%;
+  background-position: 0 10%;
   /*height:1000px;
   width:1000px; */
 }

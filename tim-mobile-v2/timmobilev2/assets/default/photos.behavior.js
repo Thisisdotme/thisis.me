@@ -24,7 +24,7 @@ the behavior for the photo feature
   TIM.models.PhotoAlbum = Backbone.Model.extend({
 
     initialize: function() {
-      this.photos = new TIM.collections.Photos();
+      this.photos = new TIM.collections.Photos({albumId: this.id});
     },
 	
     clear: function() {
@@ -36,20 +36,20 @@ the behavior for the photo feature
   
   TIM.collections.PhotoAlbums = Backbone.Collection.extend({
   	 	model: TIM.models.PhotoAlbum,
-  		//url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
+  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums?callback=?',
   		
   		//let's fake this with flickr
 			  		
   		initialize: function(options) {
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
   		  this.initializePaging();
-  			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoAlbums?callback=?';
   		  //alert(this.url);
   		},
   		
   		
   		parse: function(resp) {
-  		  return (resp.photos.photo);
+  		  //return (resp.photos.photo);
+  		  return (resp.photo_albums);
   		}
 
   });
@@ -73,14 +73,17 @@ the behavior for the photo feature
   
   TIM.collections.Photos = Backbone.Collection.extend({
   	 	model: TIM.models.Photo,
-  		//url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
+  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
   		
   		//let's fake this with flickr
   		max: 0,
+  		albumId:0,
 			  		
   		initialize: function(options) {
   		  options = options || {};
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+
+  		  
+  		  this.albumId = options.albumId || 0;
   		  
   		  this.max = options.max || 0;
   		  var pageSize = this.max || 100;
@@ -88,14 +91,19 @@ the behavior for the photo feature
   		  this.initializePaging({pageSize:pageSize});
   		  
   		  var authorName = TIM.pageInfo.authorFirstName;
+  		  /*
   			this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + authorName 
   			            + "&per_page=" + this.pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
+  			*/
+  			
+  			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.albumId + '/photos?callback=';
+  			
   		},
   		
   		
   		parse: function(resp) {
-  		  return (resp.photos.photo);
+  		  return (resp.photos);
   		},
   		
   		//trying to make this so it doesn't get photos past teh album's 'count'
@@ -119,9 +127,11 @@ the behavior for the photo feature
   		  */
   		  
   		  searchTerm = searchTerm || TIM.pageInfo.authorFirstName;
+  		  //this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.id + '/photos';
+  		  /*
   		  this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
   			            + searchTerm 
-  			            + "&per_page=" + pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
+  			            + "&per_page=" + pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8"; */
   		}
 
   });
@@ -631,7 +641,19 @@ the behavior for the photo feature
       
       feature.fakeAlbumData = feature.fakeAlbumData.concat(getFakeAlbums(35));
       
-      feature.albumCollection.reset(feature.fakeAlbumData);
+      //feature.albumCollection.reset(feature.fakeAlbumData);
+      //call fetch here
+      feature.albumCollection.fetch({
+    			dataType: "jsonp",
+    			success: function(resp) {
+    		    //alert('got photos for album!');
+    			},
+    			error: function(resp) {
+            console.log("error: ", resp);
+    			}
+    		});
+      
+      
   		feature.hasFetchedCollection = true;
   		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   	} else {
