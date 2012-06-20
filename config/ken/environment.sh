@@ -4,6 +4,9 @@ environment=ken
 # files, etc.
 export TIM_HOME=~/Projects/thisisme/thisis.me-MVP
 
+# Soure the python virtual environment
+. $TIM_HOME/env/bin/activate
+
 # Define root location for data file
 export TIM_DATA=$TIM_HOME/data/$environment
 

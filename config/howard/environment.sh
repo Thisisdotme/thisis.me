@@ -4,6 +4,9 @@ environment=howard
 # files, etc.
 export TIM_HOME=/Users/howard/dev
 
+# Soure the python virtual environment
+. $TIM_HOME/env/bin/activate
+
 # Define root location for data file
 export TIM_DATA=$TIM_HOME/data/$environment
 
