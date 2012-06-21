@@ -96,8 +96,10 @@ class EventProcessor:
         existing_event.content = interpreter.get_content()
         existing_event.photo_url = interpreter.get_photo()
         existing_event.auxillary_content = interpreter.get_auxiliary_content()
-        existing_event.modify_time = interpreter.get_update_time() if interpreter.get_update_time() \
-                                                                 else datetime.datetime.utcnow()
+        if interpreter.get_update_time():
+          existing_event.modify_time = interpreter.get_update_time()
+        else:
+          existing_event.modify_time = datetime.datetime.utcnow()
 
       else:
         # skip event
