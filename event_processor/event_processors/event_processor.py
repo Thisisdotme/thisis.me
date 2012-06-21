@@ -149,7 +149,7 @@ class EventProcessor:
         except IntegrityError:
           logging.error("Relationship already exists")
           print relationship.__repr__()
-          print "Exists: {0}, updated: {1}".format(existing_event != None, event_updated)
+          print unicode('Exists: {0}, updated: {1}').format(existing_event != None, event_updated)
 
     update_time = interpreter.get_update_time()
     if update_time is None:

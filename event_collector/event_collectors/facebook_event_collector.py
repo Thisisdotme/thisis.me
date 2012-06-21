@@ -43,9 +43,9 @@ class FacebookEventCollector(EventCollector):
     args['since'] = since
 
     # fetch all new posts
-    posts_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
-                                    self.FEED_COLLECTION,
-                                    urllib.urlencode(args))
+    posts_url = unicode('{0}{1}?{2}').format(self.oauth_config['endpoint'],
+                                             self.FEED_COLLECTION,
+                                             urllib.urlencode(args))
 
     total_accepted = 0
     while posts_url and total_accepted < self.MAX_EVENTS:
@@ -108,9 +108,9 @@ class FacebookEventCollector(EventCollector):
       since = None
       del args['since']
 
-    albums_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
-                                     self.ALBUMS_COLLECTION,
-                                     urllib.urlencode({'access_token': asm.access_token}))
+    albums_url = unicode('{0}{1}?{2}').format(self.oauth_config['endpoint'],
+                                              self.ALBUMS_COLLECTION,
+                                              urllib.urlencode({'access_token': asm.access_token}))
 
     while albums_url:
 
@@ -141,10 +141,10 @@ class FacebookEventCollector(EventCollector):
         album_id = album['id']
 
         # check for any new photos in the album
-        photos_url = '{0}{1}{2}?{3}'.format(self.oauth_config['endpoint'],
-                                            album_id,
-                                            self.PHOTOS_COLLECTION,
-                                            urllib.urlencode(args))
+        photos_url = unicode('{0}{1}{2}?{3}').format(self.oauth_config['endpoint'],
+                                                     album_id,
+                                                     self.PHOTOS_COLLECTION,
+                                                     urllib.urlencode(args))
         while photos_url:
 
           photos_obj = json_serializer.load(urllib2.urlopen(photos_url))
@@ -176,9 +176,9 @@ class FacebookEventCollector(EventCollector):
     # while albums
 
     # fetch all new checkins
-    checkins_url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'],
-                                       self.CHECKIN_COLLECTION,
-                                       urllib.urlencode(args))
+    checkins_url = unicode('{0}{1}?{2}').format(self.oauth_config['endpoint'],
+                                                self.CHECKIN_COLLECTION,
+                                                urllib.urlencode(args))
 
     total_accepted = 0
     while checkins_url and total_accepted < self.MAX_EVENTS:
