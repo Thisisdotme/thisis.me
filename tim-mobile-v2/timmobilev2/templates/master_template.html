@@ -35,13 +35,9 @@
   <!--the script prevents links from opening in mobile safari. https://gist.github.com/1042026-->
   <script>(function(a,b,c){if(c in b&&b[c]){var d,e=a.location,f=/^(a|html)$/i;a.addEventListener("click",function(a){d=a.target;while(!f.test(d.nodeName))d=d.parentNode;"href"in d&&(d.href.indexOf("http")||~d.href.indexOf(e.host))&&(a.preventDefault(),e.href=d.href)},!1)}})(document,window.navigator,"standalone")</script>
 
-  <!--<link rel="apple-touch-startup-image" href="img/l/splash.png">-->
-
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="/css/style.css?v=1">
-	<!-- link rel="stylesheet" href="/css/flipboard.css?v=1" -->
 	<link rel="stylesheet" href="/css/flips.css?v=1">
-  <!-- link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css" / -->
 
   <!-- All JavaScript at the bottom, except for Modernizr which enables HTML5 elements & feature detects -->
   <script src="/js/libs/modernizr-custom.js"></script>
@@ -51,7 +47,7 @@
  
 </head> 
 
-<body tal:define="fragments load: fragments.html" class="mobile-viewport">
+<body tal:define="fragments load: fragments.html" class="mobile-viewport" style="background-color:#cd212b;">
 
 	<div id="container" data-role="page" metal:define-slot="page_content" > 
 		<div data-role="header"><h1>thisis.me</h1></div> 
@@ -78,7 +74,6 @@
 	<script src="/js/libs/jquery.swipe-events.js"></script>
 	<script src="/js/libs/jquery.touchSwipe-1.2.5.js"></script>
 	<script src="/js/libs/flips.js"></script>
-	<!-- script src="/js/libs/jquery.virtual-events.js"></script -->
 	
   <!-- scripts concatenated and minified via ant build script -->
   <script src="/js/mylibs/helper.js"></script>

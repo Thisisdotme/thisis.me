@@ -29,7 +29,7 @@ window.addEventListener("load",function() {
 
 $(function() {
   
-  //set up global event dispatcher
+  //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
   
   //if there's no author, don't do anything!
@@ -72,6 +72,8 @@ $(function() {
   }
   
   TIM.setViewportSize();
+  
+  //what is this preventscrolling nonsense?
   
   TIM.disableScrolling = function() {
     //$(document).on("touchstart", preventScrolling);
@@ -128,7 +130,10 @@ $(function() {
 	TIM.setLoading(true);
 	
 	//collection of features for this author
-	TIM.features = new TIM.collections.Features;
+	TIM.features = new TIM.collections.Features();
+	
+	//all available services
+	TIM.services = new TIM.collections.Services();
 	
 	//set up the main feature nav
 	TIM.featureNavView = new TIM.views.FeatureNav({
@@ -151,6 +156,20 @@ $(function() {
 		error: function(resp) {
 			TIM.showErrorMessage({
 			    exception: "loading features failed for " + TIM.pageInfo.authorName + ". perhaps this author doesn't exist?"
+			});
+		}
+	});
+	
+	TIM.services.fetch({
+		dataType: "jsonp",
+		//add this timeout in case call fails...
+		timeout : 5000,
+		success: function(resp) {
+		  console.log('fetched services');
+		},
+		error: function(resp) {
+			TIM.showErrorMessage({
+			    exception: "loading services failed."
 			});
 		}
 	});

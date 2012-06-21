@@ -219,7 +219,7 @@ td { vertical-align: top; }
     font-family:arial, sans-serif;
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* remove highlight color for tap events */
     -webkit-backface-visibility: hidden; /* helps with flickering? */
-    background-color:#666;
+    background-color:#cd212b;
     height:100%;
   }
   
@@ -315,7 +315,7 @@ td { vertical-align: top; }
     #app {
       /* gotta get rid of these explicit pixel sizes */
       width:320px;
-      min-height:370px;
+      min-height:100%;
     }
   }
   

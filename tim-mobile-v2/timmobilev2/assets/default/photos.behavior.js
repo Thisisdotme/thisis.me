@@ -639,23 +639,21 @@ the behavior for the photo feature
       //this will eventually get the photo albums for the author
       //it should be paged via (perhaps) infinite scroll
       
-      feature.fakeAlbumData = feature.fakeAlbumData.concat(getFakeAlbums(35));
-      
-      //feature.albumCollection.reset(feature.fakeAlbumData);
       //call fetch here
       feature.albumCollection.fetch({
-    			dataType: "jsonp",
-    			success: function(resp) {
-    		    //alert('got photos for album!');
-    			},
-    			error: function(resp) {
-            console.log("error: ", resp);
-    			}
-    		});
-      
-      
-  		feature.hasFetchedCollection = true;
-  		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
+  			dataType: "jsonp",
+  			success: function(resp) {
+  		    //alert('got photos for album!');
+  		    feature.hasFetchedCollection = true;
+      		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
+  			},
+  			error: function(resp) {
+          console.log("error: ", resp);
+          feature.hasFetchedCollection = true;
+      		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
+  			}
+  		});
+    
   	} else {
   	  feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   	}
@@ -824,124 +822,7 @@ the behavior for the photo feature
   
   //add to feature?
   TIM.features.getByName("photos").behavior = feature;
-  
   TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging...
-  
-  //the rest of the code here is for generating fake photo album data to drive the feature
-  
-  var searchTerms = ["frog","cat","horse","groovy","magnetic","spacy","elephant","water","mountains","jackson","music","angry","bloody","beautiful","jazz","bass",
-  "elvin","coltrane","butterfly","marathon","bert","lsd","philadelphia","macrame","jungle","philosophy","philandering","boorish","race","fly","cimena","basketball","boxing","instagram","scale","architecture",
-  "elusive","spiral","spiritual","lake","droplet"];
-  
-  var thumbUrls = ["http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg","http://farm8.static.flickr.com/7101/7317518440_575f7473e9_s.jpg","http://farm8.static.flickr.com/7102/7317495298_6f865be565_s.jpg",
-  "http://farm9.static.flickr.com/8019/7317489980_9d0948e075_s.jpg","http://farm8.static.flickr.com/7074/7317442018_1401bf1bdf_s.jpg","http://farm8.static.flickr.com/7071/7315388362_5f94d64f9e_s.jpg",
-  "http://farm3.static.flickr.com/2650/3979691504_b570db2465_s.jpg","http://farm9.static.flickr.com/8008/7317204782_a9be30ffe4_s.jpg","http://farm9.static.flickr.com/8148/7310548548_dd8c16edd9_s.jpg",
-  "http://farm8.static.flickr.com/7077/7309112088_30b4e0295f_s.jpg","http://farm8.static.flickr.com/7076/7317232294_5799de05bf_s.jpg","http://farm8.static.flickr.com/7244/7317325330_918e450255_s.jpg",
-  "http://farm8.static.flickr.com/7097/7316591786_14cce6b6af_s.jpg","http://farm8.static.flickr.com/7243/7315224968_7ea76566bb_s.jpg","http://farm9.static.flickr.com/8156/7317521928_b274e5e203_s.jpg",
-  "http://farm8.static.flickr.com/7226/7317491966_37b3b759b6_s.jpg"];
-  
-  feature.fakeAlbumData = [
-    {
-      name: "All Photos",
-      count: "318",
-      id: 1000,
-      searchTerm: TIM.pageInfo.authorFirstName,
-      thumbs: [
-        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-       /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-        //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-      ]
-    },
-    {
-      name: "Photos of " + TIM.pageInfo.authorFirstName,
-      count: "31",
-      id: 1001,
-      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
-       thumbs: [
-          {image_url: "http://farm8.static.flickr.com/7212/7296052850_4b75dae217_s.jpg", id: 123},
-          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-        ]
-    },
-    {
-      name: "Photos " + TIM.pageInfo.authorFirstName + " has taken",
-      count: "156",
-      id: 1002,
-      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
-      thumbs: [
-        {image_url: "http://farm8.static.flickr.com/7098/7296136912_d29bb66142_s.jpg", id: 123},
-        /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-          //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-      ]
-    },
-    {
-      name: "Photos " + TIM.pageInfo.authorFirstName + " has liked",
-      count: "23",
-      id: 1003,
-      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
-       thumbs: [
-          {image_url: "http://farm8.static.flickr.com/7220/7296052840_6372ef6dff_s.jpg", id: 123},
-          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-        ]
-    },
-    {
-      name: "Detroit, May 1977",
-      count: "15",
-      id: 1004,
-      searchTerm: searchTerms[Math.floor((Math.random()*searchTerms.length)+1)],
-       thumbs: [
-          {image_url: "http://farm8.static.flickr.com/7082/7295851342_99f8612529_s.jpg", id: 123},
-          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-        ]
-    },
-    {
-      name: "Tahoe 2009",
-      count: "37",
-      id: 1005,
-      searchTerm: "tahoe",
-       thumbs: [
-          {image_url: "http://farm8.static.flickr.com/7228/7314556638_e004c47b52_s.jpg", id: 123},
-          /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-            //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-        ]
-    }
-  ]
-  var album_id_num = 1006;
-  
-  
-  var getFakeAlbums = function (num) {
-    num = num || 10;
-    var fakeAlbums = [];
-    for (var i = 0; i < num; i++) {
-      fakeAlbums.push(generateAlbumJSON());
-    }
-    return fakeAlbums;
-  }
-  
-  var generateAlbumJSON = function () {
-    var searchTerm = searchTerms[Math.floor((Math.random()*searchTerms.length))];
-    var thumb = thumbUrls[Math.floor((Math.random()*thumbUrls.length))];
-    return {
-     name: searchTerm,
-     count: Math.floor((Math.random()*78)+1),
-     id: album_id_num++,
-     searchTerm: searchTerm,
-      thumbs: [
-         {image_url: thumb, id: 123},
-         /* {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-           {image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123},
-           //{image_url: "http://farm8.static.flickr.com/7071/7263178698_0706a03933_s.jpg", id: 123} */
-       ]
-    }
-  }
-  
+    
   
 })(TIM);

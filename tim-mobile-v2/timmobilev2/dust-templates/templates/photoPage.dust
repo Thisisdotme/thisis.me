@@ -3,19 +3,18 @@
 	{#events}
 	  <div class="full-photo" style="background-image:url({url})" data-photo_id="{id}"/>
 		<!-- img class="image" src="{url}" data-photo_id="{id}" / -->
-		<div class="caption">
+		<footer class="caption">
 		  <div class="profile-thumb"></div>		  
 		  <div class="main-text">{?title}{@truncate value="{title}" length="35"}{/truncate}{/title}</div>
 		  <div>
 		   <!-- loop through sources -->
 		   {#sources}
-		    <!-- loop through sources 2 -->
 		    <span class="source-img {source_name}"></span>
 		   {/sources}
 		   <!-- move this whole caption/bottom info bar thing to a partial! -->
 		    <div class="time-and-location">2 hrs ago, San Francisco</div>
 		  </div>
-		</div>
+		</footer>
 		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
 	{/events}
 </div>
