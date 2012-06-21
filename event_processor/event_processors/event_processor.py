@@ -7,8 +7,9 @@ import datetime
 
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 
-from mi_schema.models import (ServiceEvent, AuthorServiceMap, Service, EventScannerPriority)
+from mi_schema.models import (ServiceEvent, AuthorServiceMap, Service, EventScannerPriority, Relationship)
 from tim_commons import json_serializer
 from tim_commons import db
 from tim_commons import total_seconds
@@ -48,7 +49,7 @@ class EventProcessor:
   def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
     pass
 
-  def process(self, tim_author_id, service_author_id, service_event_json):
+  def process(self, tim_author_id, service_author_id, service_event_id, state, service_event_json, links):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
     query = db.Session().query(AuthorServiceMap)
@@ -137,6 +138,18 @@ class EventProcessor:
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
       db.Session().add(service_event)
+
+    # process any links for this event
+    if links:
+      for link in links:
+        relationship = Relationship(tim_author_id, link['service_id'], link['service_event_id'], tim_author_id, asm.service_id, interpreter.get_id())
+        try:
+          db.Session().add(relationship)
+          db.Session().flush()
+        except IntegrityError:
+          logging.error("Relationship already exists")
+          print relationship.__repr__()
+          print "Exists: {0}, updated: {1}".format(existing_event != None, event_updated)
 
     update_time = interpreter.get_update_time()
     if update_time is None:

@@ -18,6 +18,8 @@ from miapi.models import DBSession
 
 from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, AuthorServiceMap
 
+from . import make_photo_obj
+
 log = logging.getLogger(__name__)
 
 
@@ -30,51 +32,15 @@ def get_album_name(event):
   return well_known_albums[event.event_id[:event.event_id.index('@')]] if event.service_id == Service.ME_ID else event.caption
 
 
-def make_photo_obj(event):
-
-  photo = {'type': 'photo', 'id': event.id}
-
-  if event.service_id == Service.FACEBOOK_ID:
-
-    json_obj = load_string(event.json)
-
-    # for some reason not all facebook photo events have an image property; if
-    # it doesn't skip it
-    if 'images' not in json_obj:
-      log.warning('Skipping Facebook event with no images')
-      return None
-
-    # default selection to first image
-    selection = json_obj['images'][0]
-
-    # find the minimum width photo above 640
-    min_resolution = sys.maxint
-    for candidate in json_obj.get('images', []):
-      if candidate['width'] > 640:
-        selection = candidate if candidate['width'] < min_resolution else selection
-
-    if selection:
-      photo['url'] = selection['source']
-      photo['width'] = selection['width']
-      photo['height'] = selection['height']
-
-  elif event.service_id == Service.INSTAGRAM_ID:
-
-    json_obj = load_string(event.json)
-
-    selection = json_obj['images']['standard_resolution']
-    photo['url'] = selection['url']
-    photo['width'] = selection['width']
-    photo['height'] = selection['height']
-
-  return photo
+def get_album_count(event):
+  return 25
 
 
 class AuthorPhotoAlbumController(object):
 
   def __init__(self, request):
     self.request = request
-    self.dbSession = DBSession()
+    self.db_session = DBSession()
 
   # GET /v1/authors/{authorname}/photoalbums
   #
@@ -84,10 +50,10 @@ class AuthorPhotoAlbumController(object):
 
     author_name = self.request.matchdict['authorname']
 
-    dbSession = DBSession()
+    db_session = DBSession()
 
     try:
-      author_id, = dbSession.query(Author.id).filter_by(author_name=author_name).one()
+      author_id, = db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
@@ -95,34 +61,37 @@ class AuthorPhotoAlbumController(object):
     albums = []
 
     # get all well know albums first
-    for album in dbSession.query(ServiceEvent). \
+    for album in db_session.query(ServiceEvent). \
                             filter(and_(ServiceEvent.author_id == author_id,
                                         ServiceEvent.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE,
                                         ServiceEvent.service_id == Service.ME_ID)). \
                             order_by(ServiceEvent.id):
 
       # create the base album obj
-      album_obj = {'type': 'photo-album', 'id': album.id, 'name': get_album_name(album)}
+      album_obj = {'type': 'photo-album', 'id': album.id, 'name': get_album_name(album), 'count': get_album_count(album)}
 
       # get the most recent photo for the cover photo
-      photo = dbSession.query(ServiceEvent). \
-                          filter(and_(ServiceEvent.author_id == author_id,
-                                      ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-                          order_by(ServiceEvent.create_time.desc()). \
-                          first()
+      photo, service_name = db_session.query(ServiceEvent, Service.service_name). \
+                                       join(Service, ServiceEvent.service_id == Service.id). \
+                                       filter(and_(ServiceEvent.author_id == author_id,
+                                                   ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
+                                       order_by(ServiceEvent.create_time.desc()). \
+                                       first()
 
-      cover_photo = make_photo_obj(photo)
+      cover_photo = make_photo_obj(self.db_session, self.request, photo, service_name)
       if cover_photo:
         album_obj['cover_photo'] = cover_photo
 
       albums.append(album_obj)
 
     # get all other albums
-    for album in dbSession.query(ServiceEvent). \
+    for album in db_session.query(ServiceEvent). \
                             filter(and_(ServiceEvent.author_id == author_id,
                                         ServiceEvent.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE,
                                         ServiceEvent.service_id != Service.ME_ID)). \
                             order_by(ServiceEvent.create_time.desc()):
+
+      album_obj = {'type': 'photo-album', 'id': album.id, 'name': get_album_name(album), 'count': get_album_count(album)}
 
       cover_photo = None
 
@@ -132,14 +101,14 @@ class AuthorPhotoAlbumController(object):
         photo_id = json_obj.get('cover_photo')
         if photo_id:
           try:
-            photo = dbSession.query(ServiceEvent). \
-                                filter(and_(ServiceEvent.service_id == Service.FACEBOOK_ID,
-                                            ServiceEvent.event_id == photo_id)).one()
-            cover_photo = make_photo_obj(photo)
+            photo, service_name = db_session.query(ServiceEvent, Service.service_name). \
+                                             join(Service, ServiceEvent.service_id == Service.id). \
+                                             filter(and_(ServiceEvent.service_id == Service.FACEBOOK_ID,
+                                                         ServiceEvent.event_id == photo_id)).one()
+            cover_photo = make_photo_obj(self.db_session, self.request, photo, service_name)
           except NoResultFound:
             pass
 
-      album_obj = {'type': 'photo-album', 'id': album.id, 'name': get_album_name(album)}
       if cover_photo:
         album_obj['cover_photo'] = cover_photo
 

@@ -40,5 +40,5 @@ class PidFileContext():
     except IOError as err:
       # ok if file was just closed elsewhere
       if err.errno != 9:
-         raise
+        raise
     os.remove(self._path)

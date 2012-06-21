@@ -1,9 +1,12 @@
 import urllib2
 import urllib
 
-from tim_commons.messages import create_foursquare_event
+from tim_commons.messages import create_foursquare_event, CURRENT_STATE
 from tim_commons import json_serializer
 from tim_commons import prune_dictionary
+
+from event_interpreter.foursquare_event_interpreter import FoursquareEventInterpreter
+
 from event_updater import EventUpdater
 
 CHECKIN_RESOURCE = 'checkins/'
@@ -53,4 +56,6 @@ class FoursquareEventUpdater(EventUpdater):
 
     prune_dictionary(checkin_obj, self.PRUNE_ITEMS)
 
-    callback(create_foursquare_event(service_author_id, asm.author_id, checkin_obj))
+    interpreter = FoursquareEventInterpreter(checkin_obj, asm, self.oauth_config)
+
+    callback(create_foursquare_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), checkin_obj))

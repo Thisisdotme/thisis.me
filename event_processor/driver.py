@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import datetime
 import logging
@@ -74,7 +76,10 @@ def create_processor_handler(processor):
     with db.Context():
       processor.process(body['tim_author_id'],
                         body['service_author_id'],
-                        body['service_event_json'])
+                        body['service_event_id'],
+                        body['state'],
+                        body['service_event_json'],
+                        body['links'])
   return handler
 
 

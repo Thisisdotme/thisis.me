@@ -3,9 +3,11 @@ import urllib2
 from datetime import datetime
 import calendar
 
-from tim_commons.messages import create_instagram_event
+from tim_commons.messages import create_instagram_event, CURRENT_STATE
 from tim_commons import json_serializer
+
 from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
+
 from event_collector import EventCollector
 
 
@@ -49,9 +51,11 @@ class InstagramEventCollector(EventCollector):
       # for element in the feed
       for post in raw_obj.get('data', []):
 
-        if self.screen_event(InstagramEventInterpreter(post, asm, self.oauth_config), state):
+        interpreter = InstagramEventInterpreter(post, asm, self.oauth_config)
+
+        if self.screen_event(interpreter, state):
           total_accepted = total_accepted + 1
-          callback(create_instagram_event(service_author_id, asm.author_id, post))
+          callback(create_instagram_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
         # if
       # for
