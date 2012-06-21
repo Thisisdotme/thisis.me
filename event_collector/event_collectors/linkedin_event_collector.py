@@ -5,10 +5,11 @@ import calendar
 import copy
 
 from tim_commons.oauth import make_request
-from tim_commons.messages import create_linkedin_event
+from tim_commons.messages import create_linkedin_event, CURRENT_STATE
 from tim_commons import json_serializer
 
 from event_interpreter.linkedin_event_interpreter import LinkedinEventInterpreter
+
 from event_collector import EventCollector
 
 UPDATE_RESOURCE = 'people/~/network/updates'
@@ -95,7 +96,7 @@ class LinkedinEventCollector(EventCollector):
                 break
 
               if self.screen_event(interpreter, state):
-                callback(create_linkedin_event(service_author_id, asm.author_id, postClone))
+                callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), postClone))
 
           elif (update_type == 'PREC' or update_type == 'SVPR') and post['updateContent']['person']['id'] == service_author_id:
 
@@ -106,7 +107,7 @@ class LinkedinEventCollector(EventCollector):
               break
 
             if self.screen_event(interpreter, state):
-              callback(create_linkedin_event(service_author_id, asm.author_id, post))
+              callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
           elif update_type == 'SHAR':
 
@@ -117,7 +118,7 @@ class LinkedinEventCollector(EventCollector):
               break
 
             if self.screen_event(interpreter, state):
-              callback(create_linkedin_event(service_author_id, asm.author_id, post))
+              callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
           elif update_type == 'MSFC' and post['updateContent']['companyPersonUpdate']['person']['id'] == service_author_id:
 
@@ -128,7 +129,7 @@ class LinkedinEventCollector(EventCollector):
               break
 
             if self.screen_event(interpreter, state):
-              callback(create_linkedin_event(service_author_id, asm.author_id, post))
+              callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
           elif update_type == 'JOBP' and post['updateContent']['job']['jobPoster']['id'] == service_author_id:
 
@@ -139,7 +140,7 @@ class LinkedinEventCollector(EventCollector):
               break
 
             if self.screen_event(interpreter, state):
-              callback(create_linkedin_event(service_author_id, asm.author_id, post))
+              callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
           elif update_type == 'JGRP' and post['updateContent']['person']['id'] == service_author_id:
 
@@ -158,7 +159,7 @@ class LinkedinEventCollector(EventCollector):
                 break
 
               if self.screen_event(interpreter, state):
-                callback(create_linkedin_event(service_author_id, asm.author_id, postClone))
+                callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), postClone))
 
           elif update_type == 'STAT' and post['updateContent']['person']['id'] == service_author_id:
 
@@ -169,7 +170,7 @@ class LinkedinEventCollector(EventCollector):
               break
 
             if self.screen_event(interpreter, state):
-              callback(create_linkedin_event(service_author_id, asm.author_id, post))
+              callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
         else:
           if not update_type in self.IGNORED_TYPES:

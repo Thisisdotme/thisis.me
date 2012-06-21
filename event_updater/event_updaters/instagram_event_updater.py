@@ -1,8 +1,11 @@
 import urllib2
 import urllib
 
-from tim_commons.messages import create_instagram_event
+from tim_commons.messages import create_instagram_event, CURRENT_STATE
 from tim_commons import json_serializer
+
+from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
+
 from event_updater import EventUpdater
 
 
@@ -21,4 +24,8 @@ class InstagramEventUpdater(EventUpdater):
 
     raw_obj = json_serializer.load(urllib2.urlopen(url))
 
-    callback(create_instagram_event(service_author_id, asm.author_id, raw_obj['data']))
+    post = raw_obj['data']
+
+    interpreter = InstagramEventInterpreter(post, asm, self.oauth_config)
+
+    callback(create_instagram_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))

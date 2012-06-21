@@ -14,7 +14,10 @@ def createServiceEvent(dbSession, request, fe, serviceName, author):
   sourcesItems = [{'service_name':serviceName, 'service_image_url':request.static_url('miapi:img/l/services/color/%s.png' % serviceName)}]
 
   # determine all the shared sources -- all service_event rows whose parent_id is this service_event
-  for sharedFeatureName in dbSession.query(Service.service_name).join(AuthorServiceMap, AuthorServiceMap.service_id == Service.id).join(ServiceEvent, AuthorServiceMap.id == ServiceEvent.author_service_map_id).filter(ServiceEvent.parent_id == fe.id).all():
+  for sharedFeatureName in dbSession.query(Service.service_name). \
+                                     join(AuthorServiceMap, AuthorServiceMap.service_id == Service.id). \
+                                     join(ServiceEvent, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
+                                     filter(ServiceEvent.parent_id == fe.id).all():
     sourcesItems.append({'service_name': sharedFeatureName, 'service_image_url': request.static_url('miapi:img/l/services/color_by_fn/%s.png' % serviceName)})
 
   # collect the pieces of available content

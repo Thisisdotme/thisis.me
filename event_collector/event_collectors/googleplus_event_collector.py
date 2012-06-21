@@ -1,9 +1,11 @@
 import urllib
 import urllib2
 
-from tim_commons.messages import create_googleplus_event
+from tim_commons.messages import create_googleplus_event, CURRENT_STATE
 from tim_commons import json_serializer
+
 from event_interpreter.googleplus_event_interpreter import GoogleplusStatusEventInterpreter
+
 from event_collector import EventCollector
 
 
@@ -54,10 +56,11 @@ class GoogleplusEventCollector(EventCollector):
 
         if post['kind'] == 'plus#activity':
 
-          if self.screen_event(GoogleplusStatusEventInterpreter(post, asm, self.oauth_config),
-                               state):
+          interpreter = GoogleplusStatusEventInterpreter(post, asm, self.oauth_config)
+
+          if self.screen_event(interpreter, state):
             total_accepted = total_accepted + 1
-            callback(create_googleplus_event(service_author_id, asm.author_id, post))
+            callback(create_googleplus_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
         # if
       # for

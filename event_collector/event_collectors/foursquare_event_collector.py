@@ -3,10 +3,12 @@ import urllib2
 from datetime import datetime
 import calendar
 
-from tim_commons.messages import create_foursquare_event
+from tim_commons.messages import create_foursquare_event, CURRENT_STATE
 from tim_commons import json_serializer
 from tim_commons import prune_dictionary
+
 from event_interpreter.foursquare_event_interpreter import FoursquareEventInterpreter
+
 from event_collector import EventCollector
 
 USER_CHECKINS = 'users/self/checkins'
@@ -69,7 +71,7 @@ class FoursquareEventCollector(EventCollector):
 
         if self.screen_event(interpreter, state):
           total_accepted = total_accepted + 1
-          callback(create_foursquare_event(service_author_id, asm.author_id, post))
+          callback(create_foursquare_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
       # for
 

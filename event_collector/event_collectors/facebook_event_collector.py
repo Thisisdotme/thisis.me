@@ -3,9 +3,13 @@ import urllib2
 from datetime import datetime
 import calendar
 
-from tim_commons.messages import create_facebook_event
+from tim_commons.messages import create_facebook_event, CURRENT_STATE, create_event_link
 from tim_commons import json_serializer
+
+from mi_schema.models import Service
+
 from event_interpreter.facebook_event_interpreter import FacebookEventInterpreter
+
 from event_collector import EventCollector
 
 
@@ -85,10 +89,10 @@ class FacebookEventCollector(EventCollector):
           if post_type == 'photo' or post_type == 'checkin':
             continue
 
-          if self.screen_event(FacebookEventInterpreter(post, asm, self.oauth_config),
-                               state):
+          interpreter = FacebookEventInterpreter(post, asm, self.oauth_config)
+          if self.screen_event(interpreter, state):
             total_accepted = total_accepted + 1
-            callback(create_facebook_event(service_author_id, asm.author_id, post))
+            callback(create_facebook_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
       next_url = posts_obj['paging']['next'] if 'paging' in posts_obj and 'next' in posts_obj['paging'] else None
@@ -127,14 +131,18 @@ class FacebookEventCollector(EventCollector):
           # queried; also makes it easier for the event process to identify it
           album['type'] = 'album'
 
+          interpreter = FacebookEventInterpreter(post, asm, self.oauth_config)
+
           # send event message
-          callback(create_facebook_event(service_author_id, asm.author_id, album))
+          callback(create_facebook_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), album))
 
         # if
 
+        album_id = album['id']
+
         # check for any new photos in the album
         photos_url = '{0}{1}{2}?{3}'.format(self.oauth_config['endpoint'],
-                                            album['id'],
+                                            album_id,
                                             self.PHOTOS_COLLECTION,
                                             urllib.urlencode(args))
         while photos_url:
@@ -145,8 +153,15 @@ class FacebookEventCollector(EventCollector):
 
             photo['type'] = 'photo'
 
+            interpreter = FacebookEventInterpreter(post, asm, self.oauth_config)
+
             # event message
-            callback(create_facebook_event(service_author_id, asm.author_id, photo))
+            callback(create_facebook_event(asm.author_id,
+                                           CURRENT_STATE,
+                                           service_author_id,
+                                           interpreter.get_id(),
+                                           photo,
+                                           [create_event_link(Service.FACEBOOK_ID, album_id)]))
 
           # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
           next_url = photos_obj['paging']['next'] if 'paging' in photos_obj and 'next' in photos_obj['paging'] else None
@@ -184,10 +199,11 @@ class FacebookEventCollector(EventCollector):
           # type property is missing
           checkin_obj['type'] = 'checkin'
 
-          if self.screen_event(FacebookEventInterpreter(post, asm, self.oauth_config),
-                               state):
+          interpreter = FacebookEventInterpreter(post, asm, self.oauth_config)
+
+          if self.screen_event(interpreter, state):
             total_accepted = total_accepted + 1
-            callback(create_facebook_event(service_author_id, asm.author_id, post))
+            callback(create_facebook_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
       # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
       next_url = checkins_obj['paging']['next'] if 'paging' in checkins_obj and 'next' in checkins_obj['paging'] else None

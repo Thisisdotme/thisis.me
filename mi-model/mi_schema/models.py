@@ -373,28 +373,6 @@ class ServiceEvent(Base):
 
 
 '''
-TABLE: relationship_type
-'''
-
-
-class RelationshipType(Base):
-
-  __tablename__ = 'relationship_type'
-
-  type_id = Column(Integer, primary_key=True)
-
-  label = Column(String(255), nullable=False)
-
-  def __init__(self, type_id, label):
-    self.type_id = type_id
-    self.label = label
-
-  def __repr__(self):
-    # not including the JSON
-    return "<RelationshipType('{0},{1}')".format(self.type_id, self.label)
-
-
-'''
 TABLE: relationship
 '''
 
@@ -402,34 +380,29 @@ TABLE: relationship
 class Relationship(Base):
 
   __tablename__ = 'relationship'
-  __table_args__ = (UniqueConstraint('relationship_type_id',
-                                     'parent_asm_id',
-                                     'parent_service_event_id',
-                                     'child_asm_id',
-                                     'child_service_event_id',
-                                     name='uidx_relationship_1'),
-                                     {})
 
-  relationship_type_id = Column(Integer, ForeignKey('relationship_type.type_id', ondelete='CASCADE'), primary_key=True)
-
-  parent_asm_id = Column(Integer, ForeignKey('author_service_map.id', ondelete='CASCADE'), primary_key=True)
+  parent_author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), primary_key=True)
+  parent_service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), primary_key=True)
   parent_service_event_id = Column(String(255), primary_key=True)
 
-  child_asm_id = Column(Integer, ForeignKey('author_service_map.id', ondelete='CASCADE'), primary_key=True)
+  child_author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), primary_key=True)
+  child_service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), primary_key=True)
   child_service_event_id = Column(String(255), primary_key=True)
 
-  def __init__(self, relationship_type,
-               parent_asm_id, parent_service_event_id,
-               child_asm_id, child_service_event_id):
-    self.relationship_type_id = relationship_type
-    self.parent_asm_id = parent_asm_id
+  def __init__(self,
+               parent_author_id, parent_service_id, parent_service_event_id,
+               child_author_id, child_service_id, child_service_event_id):
+    self.parent_author_id = parent_author_id
+    self.parent_service_id = parent_service_id
     self.parent_service_event_id = parent_service_event_id
-    self.child_asm_id = child_asm_id
+    self.child_author_id = child_author_id
+    self.child_service_id = child_service_id
     self.child_service_event_id = child_service_event_id
 
   def __repr__(self):
     # not including the JSON
-    return "<Relationship('{0},{1},{2},{3},{4}')".format(self.type_id, self.label)
+    return "<Relationship('{0},{1},{2},{3},{4},{5}')".format(self.parent_author_id, self.child_service_id, self.parent_service_event_id,
+                                                             self.child_author_id, self.child_service_id, self.child_service_event_id)
 
 
 class OriginMap(Base):

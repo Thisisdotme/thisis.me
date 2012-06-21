@@ -3,11 +3,13 @@ import oauth2 as oauth
 from sqlalchemy import (and_)
 
 from tim_commons.oauth import make_request
-from tim_commons.messages import create_linkedin_event
+from tim_commons.messages import create_linkedin_event, CURRENT_STATE
 from tim_commons import json_serializer
 from tim_commons import db
 
 from mi_schema.models import ServiceEvent
+
+from event_interpreter.linkedin_event_interpreter import LinkedinEventInterpreter
 
 from event_updater import EventUpdater
 
@@ -51,9 +53,12 @@ class LinkedinEventUpdater(EventUpdater):
 
       if update_obj:
         event_obj['updateComments'] = update_obj
+
       if likes_obj:
         event_obj['isLiked'] = likes_obj['_total'] > 0
         event_obj['numLikes'] = likes_obj['_total']
         event_obj['likes'] = likes_obj
 
-      callback(create_linkedin_event(service_author_id, asm.author_id, event_obj))
+      interpreter = LinkedinEventInterpreter(event_obj, asm, self.oauth_config)
+
+      callback(create_linkedin_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), event_obj))
