@@ -1,8 +1,11 @@
 import urllib2
 import urllib
 
-from tim_commons.messages import create_googleplus_event
+from tim_commons.messages import create_googleplus_event, CURRENT_STATE
 from tim_commons import json_serializer
+
+from event_interpreter.googleplus_event_interpreter import GoogleplusStatusEventInterpreter
+
 from event_updater import EventUpdater
 
 
@@ -24,6 +27,7 @@ class GoogleplusEventUpdater(EventUpdater):
                                    ('client_secret', self.oauth_config['secret']),
                                    ('refresh_token', asm.access_token),
                                    ('grant_type', 'refresh_token')])
+
     raw_obj = json_serializer.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'], query_args))
 
     access_token = raw_obj['access_token']
@@ -35,4 +39,6 @@ class GoogleplusEventUpdater(EventUpdater):
 
     raw_obj = json_serializer.load(urllib2.urlopen(url))
 
-    callback(create_googleplus_event(service_author_id, asm.author_id, raw_obj))
+    interpreter = GoogleplusStatusEventInterpreter(raw_obj, asm, self.oauth_config)
+
+    callback(create_googleplus_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), raw_obj))

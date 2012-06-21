@@ -3,7 +3,7 @@ import oauth2 as oauth
 from datetime import datetime
 
 from tim_commons.oauth import make_request
-from tim_commons.messages import create_twitter_event
+from tim_commons.messages import create_twitter_event, CURRENT_STATE
 from tim_commons import json_serializer
 
 from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
@@ -70,7 +70,7 @@ class TwitterEventCollector(EventCollector):
           break
 
         if self.screen_event(interpreter, state):
-          callback(create_twitter_event(service_author_id, asm.author_id, post))
+          callback(create_twitter_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), post))
 
       if not url:
         break

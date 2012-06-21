@@ -1,21 +1,20 @@
 <div class="photo-page">
   <div class="toolbar"><span class="grid-link" data-toolbar-item="grid-link"/><span class="detail-link" data-toolbar-item="detail-link"/><h1>{num} of {options.pageMetaData.count}</h1></div>
 	{#events}
-	  <div class="full-photo" style="background-image:url(http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg)" data-photo_id="{id}"/>
-		<!-- img class="image" src="http://farm{farm}.static.flickr.com/{server}/{id}_{secret}.jpg" data-photo_id="{id}" / -->
-		<div class="caption">
+	  <div class="full-photo" style="background-image:url({url})" data-photo_id="{id}"/>
+		<!-- img class="image" src="{url}" data-photo_id="{id}" / -->
+		<footer class="caption">
 		  <div class="profile-thumb"></div>		  
 		  <div class="main-text">{?title}{@truncate value="{title}" length="35"}{/truncate}{/title}</div>
 		  <div>
 		   <!-- loop through sources -->
 		   {#sources}
-		    <!-- loop through sources 2 -->
 		    <span class="source-img {source_name}"></span>
 		   {/sources}
 		   <!-- move this whole caption/bottom info bar thing to a partial! -->
 		    <div class="time-and-location">2 hrs ago, San Francisco</div>
 		  </div>
-		</div>
+		</footer>
 		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
 	{/events}
 </div>

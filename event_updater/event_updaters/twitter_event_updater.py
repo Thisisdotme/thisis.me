@@ -2,8 +2,10 @@ import urllib
 import oauth2 as oauth
 
 from tim_commons.oauth import make_request
-from tim_commons.messages import create_twitter_event
+from tim_commons.messages import create_twitter_event, CURRENT_STATE
 from tim_commons import json_serializer
+
+from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
 
 from event_updater import EventUpdater
 
@@ -24,6 +26,8 @@ class TwitterEventUpdater(EventUpdater):
                                            'include_entities': '1',
                                            'trim_user': '1'}))
 
-    event_json = json_serializer.load_string(make_request(client, url))
+    json_obj = json_serializer.load_string(make_request(client, url))
 
-    callback(create_twitter_event(service_author_id, asm.author_id, event_json))
+    interpreter = TwitterEventInterpreter(json_obj, asm, self.oauth_config)
+
+    callback(create_twitter_event(asm.author_id, CURRENT_STATE, service_author_id, interpreter.get_id(), json_obj))

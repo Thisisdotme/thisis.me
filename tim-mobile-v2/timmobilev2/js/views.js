@@ -453,6 +453,8 @@ TIM.mixins.flipset = {
 			  //move this to a 'services' model/collection
 			  //
 			  
+			  /*
+			  
 			  var sourceList = [{source_name: "linkedIn"}, 
 			                    {source_name: "facebook"}, 
 			                    {source_name: "instagram"}, 
@@ -463,10 +465,10 @@ TIM.mixins.flipset = {
 			  
 			  for(var i = 0; i < sourceList.length; i++) {
 			    sources.push(sourceList[Math.floor(Math.random()*sourceList.length)]);
-			  }
+			  } */
 			  
 			  if(!itemJSON.sources) {
-			    itemJSON.sources = _.uniq(sources);
+			    itemJSON.sources = []; //_.uniq(sources);
 			  }
 			  
 			  if(options.pageMetaData) {
@@ -479,7 +481,7 @@ TIM.mixins.flipset = {
 			  
 			  //shouldn't skip too many non-one-page events...
 			  
-				if(item.get('title') !== undefined || item.get("content").photo_url !== undefined) {
+				if(item.get('title') !== undefined || item.get("type") === "photo" || item.get("content").photo_url !== undefined) {
 					self.pages.push({num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
 					page.push(item);
@@ -501,7 +503,6 @@ TIM.mixins.flipset = {
 		renderPageChunk: function(start) {
 			//would this fn check for earlier/later events if they haven't been loaded?
 			
-      var that = this;
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
 				end = this.pages.length;
@@ -511,8 +512,8 @@ TIM.mixins.flipset = {
   			this.renderedIndex++;
 			}
 			
-			if (that.flipSet && this.pages.length > 0) {
-			  that.flipSet.createPageElements();
+			if (this.flipSet && this.pages.length > 0) {
+			  this.flipSet.createPageElements();
 			} else {
 			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>'); //hack for empty highlights, should be generalized
 			}
@@ -610,6 +611,9 @@ TIM.views.scrollElem = {
   
   
 }
+
+//a bunch of nonsense below to make fake comments!
+
 var commenterNames = ["Charlie Smith", "Emma Fallon", "Kelly Toms", "George Burrows", "Jose Williams", "Englebert Humperdink", "Fleegj Wilsheim", "Grover Cleveland the 44th", "Jerry", "Mr. Wilkinson", "The Junkyard Dog", "Kevin McHale", "Dan Roundfield", "Brian Sipe", "Tim O'Reilly",
                       "Freddy Deltoids", "Napoleon Khan", "Madeline Albright", "Dan Fouts", "Kris Kristofferson", "Fu-Hang Schmlertervlowitz", "Bub", "Timmy the Talking Unicycle", "Long Tall Steve", "Conquistador #7", "Margaret Blumenfeld", "Ramon Ramen", "Ramona X."];
 var commentTexts = ["Great Photo!", "I agree!", "This is a prime example of what makes America great: shoehorns", "Foghorn Leghorn is my favorite bicyclist", "So the casserole goes in the oven for 2 hours and 35 minutes at 450 degrees? Thanks!",

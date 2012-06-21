@@ -49,10 +49,13 @@ TIM.collections.Comments = Backbone.Collection.extend({
 
 TIM.collections.Services = Backbone.Collection.extend({
 	 	model: TIM.models.Service,
-		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
 		
 		initialize: function(options) {
 		  options = options || {};
+		},
+		parse: function(resp) {
+		  return (resp.services);
 		},
 		
 });
@@ -93,6 +96,7 @@ TIM.mixins.paging = {
     
     this.fetch({
       add:true,
+      dataType:"jsonp",
       data: {page: this.page},
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
