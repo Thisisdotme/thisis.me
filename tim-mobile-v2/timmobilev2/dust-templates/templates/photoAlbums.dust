@@ -5,10 +5,10 @@
   <div class="album" data-album_id="{id}">
 	  <div class="album-info">{name} ({count}) <span class="more-link" data-album_id="{id}">see all &#187;</span></div>
 	  <div class="thumbs clearfix">
-	    {#thumbs album_id=id}
-	      <!-- img class="thumb" src="{image_url}" data-id="{id}" data-album_id="{album_id}"/ -->
-	      <div class="thumb" style="background-image:url({image_url})" data-id="{id}" data-album_id="{album_id}"></div>
-	    {/thumbs}
+	    {#cover_photo album_id=id}
+	      <!-- img class="thumb" src="{url}" data-id="{id}" data-album_id="{album_id}"/ -->
+	      <div class="thumb" style="background-image:url({url});" data-id="{id}" data-album_id="{album_id}"></div>
+	    {/cover_photo}
 	  </div>
   </div>
 	{/albums}

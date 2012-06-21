@@ -5,10 +5,10 @@
 	</div>
 	<div class="secondary-story highlight" data-event_id="{secondaryStory.event_id}">
 		{?secondaryStory.content.label}
-			{@truncate value="{secondaryStory.content.label}" length="35"}{/truncate}
+			{@truncate value="{secondaryStory.content.label}" length="50"}{/truncate}
 		{/secondaryStory.content.label}
 		{?secondaryStory.content.data}
-			{@truncate value="{secondaryStory.content.data}" length="35"}{/truncate}
+			{@truncate value="{secondaryStory.content.data}" length="50"}{/truncate}
 		{/secondaryStory.content.data}
 	</div>
 	<div class="tertiary-story highlight" data-event_id="{tertiaryStory.event_id}">
