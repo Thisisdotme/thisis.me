@@ -334,7 +334,7 @@ class ServiceEvent(Base):
                service_id,
                event_id,
                create_time,
-               modify_time,
+               modify_time=None,
                url=None,
                caption=None,
                content=None,

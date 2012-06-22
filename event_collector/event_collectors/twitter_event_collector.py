@@ -1,6 +1,7 @@
 import urllib
 import oauth2 as oauth
 from datetime import datetime
+import urllib2
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event, CURRENT_STATE
@@ -26,15 +27,20 @@ class TwitterEventCollector(EventCollector):
 
     asm = state['asm']
 
-    consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
-    token = oauth.Token(asm.access_token, asm.access_token_secret)
-
-    client = oauth.Client(consumer, token)
+    # use authenticated access if we can
+    if asm.access_token:
+      consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
+      token = oauth.Token(asm.access_token, asm.access_token_secret)
+      client = oauth.Client(consumer, token)
 
     args = {'include_rts': 1,
             'include_entities': 1,
             'trim_user': 1,
             'count': 100}
+
+    # if not authenticated provide the user_id query arg
+    if not asm.access_token:
+      args['user_id'] = asm.service_author_id
 
     if asm.most_recent_event_id:
       args['since_id'] = asm.most_recent_event_id
@@ -48,9 +54,8 @@ class TwitterEventCollector(EventCollector):
     last_id = None
     while True:
 
-      content = make_request(client, url)
-
-      raw_json = json_serializer.load_string(content)
+      raw_json = json_serializer.load_string(make_request(client, url)) if asm.access_token \
+                 else json_serializer.load(urllib2.urlopen(url))
 
       # check if nothing returned and terminate loop if so
       if len(raw_json) == 0:

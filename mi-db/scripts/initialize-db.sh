@@ -27,7 +27,7 @@ curl -X PUT api.thisis.me/v1/features/places
 
 # create new author howard and associate services
 #
-curl -i -X PUT -d '{"password":"mi","fullname":"Howard Burrows","email":"howard@mobileidentity.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard
+curl -i -X PUT -d '{"password":"mi","fullname":"Howard Burrows","email":"howard@thisis.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard
 
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/services/me
 curl -i -X PUT -d '{"access_token":"14058912-DWWuU3QOcNVwEXMQO8oZT0XsEX8BV3ABbnNhsp80Q","access_token_secret":"qxg2IOkLfj82KQlJTuZ1LwtkpVZ0xdDBel6Q2MS9ik"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/howard/services/twitter
@@ -43,7 +43,7 @@ curl -X PUT api.thisis.me/v1/authors/howard/features/cover
 
 # create new author loree and associate services
 #
-curl -i -X PUT -d '{"password":"mi","fullname":"Loree Hirschman","email":"loree@mobileidentity.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree
+curl -i -X PUT -d '{"password":"mi","fullname":"Loree Hirschman","email":"loree@thisis.me"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree
 
 curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/services/me
 curl -i -X PUT -d '{"access_token":"14603721-z82wscRuTCjIeTRqlqE8ckKjeuy7P9TBZhnnuwKk","access_token_secret":"AI2fWbgEkErymyd3GUgD0uQvjhKNGC61kYj6H5I"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/loree/services/twitter
@@ -77,8 +77,8 @@ curl -i -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.th
 # create new user phil - user has non-ascii character
 #
 
-# Philip Goffin <phil@mobileidentity.me>
-curl -X PUT -F password=mi -F fullname="Philip Goffin" -F email=phil@mobileidentity.me api.thisis.me/v1/authors/phil
+# Philip Goffin <phil@thisis.me>
+curl -X PUT -F password=mi -F fullname="Philip Goffin" -F email=phil@thisis.me api.thisis.me/v1/authors/phil
 curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/phil/services/me
 
 curl -X PUT api.thisis.me/v1/authors/phil/features/highlights
@@ -88,8 +88,8 @@ curl -X PUT api.thisis.me/v1/authors/phil/features/bio
 curl -X PUT api.thisis.me/v1/authors/phil/features/cover
 
 
-# Harry Thompson <harry@mobileidentity.me>
-curl -X PUT -F password=mi -F fullname="Harry Thompson" -F email=harry@mobileidentity.me api.thisis.me/v1/authors/harry
+# Harry Thompson <harry@thisis.me>
+curl -X PUT -F password=mi -F fullname="Harry Thompson" -F email=harry@thisis.me api.thisis.me/v1/authors/harry
 curl -X PUT -d '{}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/harry/services/me
 
 # Phil Black <pblack@trueventures.com>
@@ -101,4 +101,52 @@ curl -X PUT api.thisis.me/v1/authors/philblack/features/timeline
 curl -X PUT api.thisis.me/v1/authors/philblack/features/photos
 curl -X PUT api.thisis.me/v1/authors/philblack/features/bio
 curl -X PUT api.thisis.me/v1/authors/philblack/features/cover
+
+# MC Hammer
+curl -i -X PUT -d '{"password":"mi","fullname":"MC Hammer","email":""}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/mchammer
+curl -X PUT api.thisis.me/v1/authors/mchammer/features/timeline
+curl -X PUT api.thisis.me/v1/authors/mchammer/features/photos
+curl -X PUT api.thisis.me/v1/authors/mchammer/features/bio
+curl -X PUT api.thisis.me/v1/authors/mchammer/features/cover
+
+curl -X PUT api.thisis.me/v1/authors/mchammer/features/default/cover
+
+curl -i -X PUT -d '{"service_author_id":6273552}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/mchammer/services/twitter
+curl -i -X PUT -d '{"service_author_id":4701871}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/mchammer/services/instagram
+
+
+# Tim O'Reilly
+curl -i -X PUT -d '{"password":"mi","fullname":"Tim OReilly","email":"timoreilly"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/timoreilly
+curl -X PUT api.thisis.me/v1/authors/timoreilly/features/timeline
+curl -X PUT api.thisis.me/v1/authors/timoreilly/features/photos
+curl -X PUT api.thisis.me/v1/authors/timoreilly/features/bio
+curl -X PUT api.thisis.me/v1/authors/timoreilly/features/cover
+
+curl -X PUT api.thisis.me/v1/authors/timoreilly/features/default/cover
+
+curl -i -X PUT -d '{"service_author_id":2384071}' -H "Content-Type: application/json; charset=utf-8" localhost:6543/v1/authors/timoreilly/services/twitter
+
+# Bryce Roberts
+curl -i -X PUT -d '{"password":"mi","fullname":"Bryce Roberts","email":"bryceroberts"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce
+curl -X PUT api.thisis.me/v1/authors/bryce/features/timeline
+curl -X PUT api.thisis.me/v1/authors/bryce/features/photos
+curl -X PUT api.thisis.me/v1/authors/bryce/features/bio
+curl -X PUT api.thisis.me/v1/authors/bryce/features/cover
+
+curl -X PUT api.thisis.me/v1/authors/bryce/features/default/cover
+
+curl -i -X PUT -d '{"service_author_id":6160742}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce/services/twitter
+curl -i -X PUT -d '{"service_author_id":84}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce/services/instagram
+
+# Om Malik
+curl -i -X PUT -d '{"password":"mi","fullname":"Om Malik","email":"ommalik"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om
+curl -X PUT api.thisis.me/v1/authors/om/features/timeline
+curl -X PUT api.thisis.me/v1/authors/om/features/photos
+curl -X PUT api.thisis.me/v1/authors/om/features/bio
+curl -X PUT api.thisis.me/v1/authors/om/features/cover
+
+curl -X PUT api.thisis.me/v1/authors/om/features/default/cover
+
+curl -i -X PUT -d '{"service_author_id":989}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om/services/twitter
+curl -i -X PUT -d '{"service_author_id":2637}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om/services/instagram
 

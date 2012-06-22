@@ -1,5 +1,6 @@
 import logging
 import urllib2
+import urllib
 import json
 from datetime import datetime
 
@@ -87,7 +88,7 @@ def instagram_callback(request):
     raise GenericError('no access_token returned from Instagram when exchanging code for access_token')
 
   # get the author's instagram user id
-  url = '%s%s?%s' % (oauthConfig[FEATURE]['endpoint'],'users/self',urllib.urlencode({'access_token':afm.access_token}))
+  url = '%s%s?%s' % (oAuthConfig[FEATURE]['endpoint'], 'users/self', urllib.urlencode({'access_token': access_token}))
   req = urllib2.Request(url)
   res = urllib2.urlopen(req)
   rawJSON = json.loads(res.read())
@@ -96,7 +97,7 @@ def instagram_callback(request):
 
   json_payload = json.dumps({'access_token': access_token, 'service_author_id': instagram_author_id})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                                                     (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                                             'PUT',
                                             json_payload,

@@ -121,7 +121,7 @@ def twitter_callback(request):
 
   json_payload = json.dumps({'access_token':oauth_token,'access_token_secret':oauth_token_secret,'service_author_id': userInfoJSON['id']})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                             (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE),
                           'PUT',
                           json_payload,

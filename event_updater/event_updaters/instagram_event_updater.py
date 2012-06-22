@@ -17,10 +17,15 @@ class InstagramEventUpdater(EventUpdater):
 
     asm = self.get_author_service_map(service_author_id)
 
-    args = {'access_token': asm.access_token}
+    if asm.access_token:
+      access_token = asm.access_token
+    else:
+      access_token = self.oauth_config['user1_access_token']
+
+    args = {'access_token': access_token}
 
     # fetch latest version of event
-    url = '%s%s%s?%s' % (self.oauth_config['endpoint'], self.MEDIA_INFO, service_event_id, urllib.urlencode(args))
+    url = '{0}{1}{2}?{3}'.format(self.oauth_config['endpoint'], self.MEDIA_INFO, service_event_id, urllib.urlencode(args))
 
     raw_obj = json_serializer.load(urllib2.urlopen(url))
 

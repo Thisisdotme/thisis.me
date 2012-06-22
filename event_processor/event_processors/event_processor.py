@@ -147,9 +147,7 @@ class EventProcessor:
           db.Session().add(relationship)
           db.Session().flush()
         except IntegrityError:
-          logging.error("Relationship already exists")
-          print relationship.__repr__()
-          print unicode('Exists: {0}, updated: {1}').format(existing_event != None, event_updated)
+          logging.warning("Relationship already exists")
 
     update_time = interpreter.get_update_time()
     if update_time is None:

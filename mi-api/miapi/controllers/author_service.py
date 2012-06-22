@@ -151,11 +151,11 @@ class AuthorServiceController(object):
       self.request.response.status_int = 409
       return {'error': e.message}
 
-    # load events for this service
-    s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
-    awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
-    awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
-    serviceBuild(author_name, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
+#    # load events for this service
+#    s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
+#    awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
+#    awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
+#    serviceBuild(author_name, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
 
     response = {'author': author_name, 'service': serviceName}
 

@@ -125,7 +125,7 @@ def linkedin_callback(request):
 
   json_payload = json.dumps({'access_token': accessToken, 'access_token_secret': accessTokenSecret, 'service_author_id': linkedinId})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                             (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE),
                           'PUT',
                           json_payload,
