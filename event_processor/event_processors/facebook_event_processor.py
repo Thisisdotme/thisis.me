@@ -17,7 +17,9 @@ class FacebookEventProcessor(EventProcessor):
   def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
     event_type = service_event_json.get('type', None)
     if event_type == 'album':
-      return FacebookPhotoAlbumEventInterpreter(service_event_json, author_service_map, oauth_config)
+      return FacebookPhotoAlbumEventInterpreter(service_event_json,
+                                                author_service_map,
+                                                oauth_config)
     elif event_type == 'photo':
       return FacebookPhotoEventInterpreter(service_event_json, author_service_map, oauth_config)
     elif event_type == 'checkin':
