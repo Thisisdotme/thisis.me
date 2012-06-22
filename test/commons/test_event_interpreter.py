@@ -42,7 +42,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_facebook_photo_event(self):
     event = {"id": "138817806254935",
@@ -107,7 +107,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_facebook_checkin_event(self):
     event = {"id": "139187866217929",
@@ -145,7 +145,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_facebook_status_event(self):
     event = {"id": "155415011259998",
@@ -177,7 +177,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), 'https://graph.facebook.com/155415011259998')
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_twitter_event(self):
     event = {"created_at": "Thu Jun 21 15:58:01 +0000 2012",
@@ -256,7 +256,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), '\u003ca href=\"http:\/\/itunes.apple.com\/us\/app\/twitter\/id409789998?mt=12\" rel=\"nofollow\"\u003eTwitter for Mac\u003c\/a\u003e')
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_foursquare_event(self):
     event = {"comments": {"count": 0,
@@ -350,7 +350,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     # TODO: test this: self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), 'foursquare for iPhone#https://foursquare.com/download/#/iphone')
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_googleplus_event(self):
     # TODO: implement this
@@ -431,7 +431,7 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), None)
     # TODO: test this: self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_link(), None)
+    self.assertEqual(interpreted.original_content_uri(), None)
 
   def test_linkedin_event(self):
     # TODO: implement this

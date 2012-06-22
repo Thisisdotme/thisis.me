@@ -55,7 +55,14 @@ def create_event_link(service_id, service_event_id):
   return {'service_id': service_id, 'service_event_id': service_event_id}
 
 
-def create_event_message(service_name, tim_author_id, state, service_author_id, service_event_id, json_event_dict, links):
+def create_event_message(
+    service_name,
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links):
   ''' Raw service event message.
 
   Holds messages containing raw service events that need to be added or updated
@@ -73,28 +80,106 @@ def create_event_message(service_name, tim_author_id, state, service_author_id, 
   return json_dict
 
 
-def create_facebook_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('facebook', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_facebook_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'facebook',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
-def create_twitter_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('twitter', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_twitter_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'twitter',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
-def create_instagram_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('instagram', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_instagram_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'instagram',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
-def create_foursquare_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('foursquare', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_foursquare_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'foursquare',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
-def create_linkedin_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('linkedin', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_linkedin_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'linkedin',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
-def create_googleplus_event(tim_author_id, state, service_author_id, service_event_id, json_event_dict, links=None):
-  return create_event_message('googleplus', tim_author_id, state, service_author_id, service_event_id, json_event_dict, links)
+def create_googleplus_event(
+    tim_author_id,
+    state,
+    service_author_id,
+    service_event_id,
+    json_event_dict,
+    links=None):
+  return create_event_message(
+      'googleplus',
+      tim_author_id,
+      state,
+      service_author_id,
+      service_event_id,
+      json_event_dict,
+      links)
 
 
 def create_event_update_message(service_id, service_author_id, service_event_id):

@@ -167,7 +167,7 @@ class _ServiceEventInterpreter(object):
   '''
     get the URI to the original content.
   '''
-  def original_content_link(self):
+  def original_content_uri(self):
     return None
 
 
