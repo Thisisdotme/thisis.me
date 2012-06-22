@@ -102,16 +102,30 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	  var self = this;
 	  var selected = this.model.get('selected');
 	  console.log('rendering menu item');
+	  var templateContext = this.model.toJSON();
 	  
-	  var html = TIM.views.renderTemplate("featureNavItem", this.model.toJSON());
-    this.$el.html(html).removeClass('selected').addClass(selected ? 'selected' : '');
+	  //temporary hack to change 'timeline' to 'news'
+	  if(templateContext.feature_name === 'timeline') {
+	    templateContext.feature_name = 'news';
+	  }
+	  
+	  //temporary hack - don't show highlights or places features
+	  if(templateContext.feature_name === 'highlights' || templateContext.feature_name === 'places') {
+	    //return;
+	  }
+	  
+	  var html = TIM.views.renderTemplate("featureNavItem", templateContext);
+    this.$el.html(html)
+      .attr('id', 'nav-' + templateContext.feature_name)
+      .removeClass('selected')
+      .addClass(selected ? 'selected' : '');
     
 		return this;
 	},
 	
 	loadFeature : function() {
 	  if(this.$el.hasClass('selected')) {
-	    return;
+	    //return;
 	  }
 	  TIM.app.navigate(this.model.get('feature_name'), {trigger: true});
 	},

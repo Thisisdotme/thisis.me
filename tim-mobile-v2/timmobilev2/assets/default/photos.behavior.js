@@ -445,6 +445,7 @@ the behavior for the photo feature
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
+  			window.photos = album.photos.toJSON();
       },
       
       //add the flip events to the flip mixin
@@ -505,10 +506,8 @@ the behavior for the photo feature
       toggleMode: function(event) {
         var that = this;
         
-        //testing out the 'loading indicator thinngy'
-        
-        //this.flipSet.testLoadingFlip();
-        //return;
+        var photoObj = this.collection.at(this.pageNum);
+        //
   		  
   		  if (this.flipMode) {
   		    this.$el.toggleClass('flip-mode');
@@ -522,10 +521,11 @@ the behavior for the photo feature
   		    var clonedPage = $('.back .photo-page').eq(1).clone();
   		    //alert(img.css('background-image'));
   		    
-  		    overlay.append(clonedPage);
+  		    overlay.append(clonedPage).css("height", TIM.viewportHeight_);
   		    this.$el.addClass('hidden');
   		    var img = clonedPage.find('.image');
-  		    $('.scroll-overlay > div').css('width', img.width() + 'px');
+  		    //$('.scroll-overlay > div').css('width', photoObj.get('width') + 'px').css('height', photoObj.get('height') + 'px');
+  		    $('.scroll-overlay > div').css('width', TIM.viewportWidth_ + 'px').css('height', TIM.viewportHeight_ + 'px');
   		    //console.log('imgae: ', img);
   		    
   		    window.setTimeout(function() {
@@ -629,14 +629,12 @@ the behavior for the photo feature
     
     //keep grid/list views hanging around or just use one for each and swap out collections?
     
-    //feature.gridView =  feature.gridView || new TIM.views.PhotoGrid();
-    
     feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
     
     if(!feature.hasFetchedCollection) {
       
-      //this will eventually get the photo albums for the author
+      //this gets the photo albums for the author
       //it should be paged via (perhaps) infinite scroll
       
       //call fetch here
