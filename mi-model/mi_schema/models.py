@@ -157,10 +157,6 @@ class AuthorServiceMap(Base):
                     UniqueConstraint('service_id', 'service_author_id', name='uidx_author_service_map_2'),
                     {})
 
-  ALL_PHOTOS_ID = '_tim_album_all'
-  OFME_PHOTOS_ID = '_tim_album_ofme'
-  LIKED_PHOTOS_ID = '_tim_album_liked'
-
   id = Column(Integer, primary_key=True)
 
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
@@ -292,6 +288,10 @@ TABLE: service_event
 
 
 class ServiceEvent(Base):
+
+  ALL_PHOTOS_ID = '_tim_album_all'
+  OFME_PHOTOS_ID = '_tim_album_ofme'
+  LIKED_PHOTOS_ID = '_tim_album_liked'
 
   __tablename__ = 'service_event'
   __table_args__ = (UniqueConstraint('author_service_map_id',

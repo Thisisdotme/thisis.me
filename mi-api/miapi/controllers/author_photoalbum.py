@@ -60,23 +60,24 @@ class AuthorPhotoAlbumController(object):
 
       # create the base album obj
       album_obj = make_photo_album_obj(self.db_session, self.request, album, asm, author, service_name)
+      if album_obj:
 
-      # get the most recent photo for the cover photo
-      photo, asm, author, service_name = self.db_session.query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
-                                       join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                                                   ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-                                       join(Author, ServiceEvent.author_id == Author.id). \
-                                       join(Service, ServiceEvent.service_id == Service.id). \
-                                       filter(and_(ServiceEvent.author_id == author_id,
-                                                   ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-                                       order_by(ServiceEvent.create_time.desc()). \
-                                       first()
+        # get the most recent photo for the cover photo
+        photo, asm, author, service_name = self.db_session.query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+                                         join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
+                                                                     ServiceEvent.service_id == AuthorServiceMap.service_id)). \
+                                         join(Author, ServiceEvent.author_id == Author.id). \
+                                         join(Service, ServiceEvent.service_id == Service.id). \
+                                         filter(and_(ServiceEvent.author_id == author_id,
+                                                     ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
+                                         order_by(ServiceEvent.create_time.desc()). \
+                                         first()
 
-      cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
-      if cover_photo:
-        album_obj['cover_photo'] = cover_photo
+        cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
+        if cover_photo:
+          album_obj['cover_photo'] = cover_photo
 
-      albums.append(album_obj)
+        albums.append(album_obj)
 
     # get all other albums
     for album, asm, author, service_name in self.db_session. \
@@ -91,30 +92,32 @@ class AuthorPhotoAlbumController(object):
                             order_by(ServiceEvent.create_time.desc()):
 
       album_obj = make_photo_album_obj(self.db_session, self.request, album, asm, author, service_name)
+      if album_obj:
+        cover_photo = None
 
-      cover_photo = None
+        if album.service_id == Service.FACEBOOK_ID:
+          # get the cover photo
+          json_obj = load_string(album.json)
+          photo_id = json_obj.get('cover_photo')
+          if photo_id:
+            try:
+              photo, asm, author, service_name = db_session. \
+                                        query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+                                        join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
+                                                                    ServiceEvent.service_id == AuthorServiceMap.service_id)). \
+                                        join(Author, ServiceEvent.author_id == Author.id). \
+                                        join(Service, ServiceEvent.service_id == Service.id). \
+                                        filter(and_(ServiceEvent.service_id == Service.FACEBOOK_ID,
+                                                    ServiceEvent.event_id == photo_id)).one()
+              cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
+            except NoResultFound:
+              pass
 
-      if album.service_id == Service.FACEBOOK_ID:
-        # get the cover photo
-        json_obj = load_string(album.json)
-        photo_id = json_obj.get('cover_photo')
-        if photo_id:
-          try:
-            photo, asm, author, service_name = db_session. \
-                                      query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
-                                      join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                                                  ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-                                      join(Author, ServiceEvent.author_id == Author.id). \
-                                      join(Service, ServiceEvent.service_id == Service.id). \
-                                      filter(and_(ServiceEvent.service_id == Service.FACEBOOK_ID,
-                                                  ServiceEvent.event_id == photo_id)).one()
-            cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
-          except NoResultFound:
-            pass
+        if cover_photo:
+          album_obj['cover_photo'] = cover_photo
 
-      if cover_photo:
-        album_obj['cover_photo'] = cover_photo
+        albums.append(album_obj)
 
-      albums.append(album_obj)
+    db_session.commit()
 
     return {'author_name': author_name, 'photo_albums': albums}

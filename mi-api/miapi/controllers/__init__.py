@@ -2,6 +2,8 @@ import logging
 import sys
 import calendar
 
+from sqlalchemy import func, and_
+
 from tim_commons.json_serializer import load_string
 
 from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
@@ -35,25 +37,43 @@ def get_shared_services(db_session, request, se_id, service_name):
 
 def get_album_name(event):
 
-  well_known_albums = {AuthorServiceMap.ALL_PHOTOS_ID: 'All Photos',
-                       AuthorServiceMap.OFME_PHOTOS_ID: 'Photos of Me',
-                       AuthorServiceMap.LIKED_PHOTOS_ID: 'Photos I Like'}
+  well_known_albums = {ServiceEvent.ALL_PHOTOS_ID: 'All Photos',
+                       ServiceEvent.OFME_PHOTOS_ID: 'Photos of Me',
+                       ServiceEvent.LIKED_PHOTOS_ID: 'Photos I Like'}
 
   return well_known_albums[event.event_id[:event.event_id.index('@')]] if event.service_id == Service.ME_ID else event.caption
 
 
-def get_album_count(event):
-  return 25
+def get_album_count(db_session, se, author):
+  # check for the special well-known album "all photos"
+  if se.event_id.startswith(ServiceEvent.ALL_PHOTOS_ID):
+    count = db_session.query(func.count(ServiceEvent.id)). \
+                       filter(and_(ServiceEvent.author_id == author.id,
+                                   ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
+                       scalar()
+  else:
+    count = db_session.query(func.count(Relationship.child_service_event_id)). \
+                       filter(and_(Relationship.parent_author_id == author.id,
+                                   Relationship.parent_service_id == se.service_id, \
+                                   Relationship.parent_service_event_id == se.event_id)). \
+                       scalar()
+  return count
 
 
 def make_photo_album_obj(db_session, request, se, asm, author, service_name):
-  return {'type': service_object_type_dict[ServiceObjectType.PHOTO_ALBUM_TYPE],
-          'id': se.id,
-          'create_time': calendar.timegm(se.create_time.timetuple()),
-          'headline': get_album_name(se),
-          'author': get_author_info(request, asm, author),
-          'service_name': service_name,
-          'count': get_album_count(se)}
+  count = get_album_count(db_session, se, author)
+  if count > 0:
+    album = {'type': service_object_type_dict[ServiceObjectType.PHOTO_ALBUM_TYPE],
+              'id': se.id,
+              'create_time': calendar.timegm(se.create_time.timetuple()),
+              'headline': get_album_name(se),
+              'author': get_author_info(request, asm, author),
+              'service_name': service_name,
+              'count': count}
+  else:
+    album = None
+
+  return album
 
 
 def make_photo_obj(db_session, request, se, asm, author, service_name):
