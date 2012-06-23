@@ -28,14 +28,14 @@ def createServiceEvent(dbSession, request, se, asm, author, serviceName):
   if se.photo_url:
     content['photo_url'] = se.photo_url
 
-  author = get_author_info(request, asm, author)
+  author_info = get_author_info(request, asm, author)
 
   event = {'event_id': se.id,
            'service': serviceName,
            'create_time': calendar.timegm(se.create_time.timetuple()),
-           'link': request.route_url('author.query.events.eventId', author.author_name, eventID=se.id),
+           'link': request.route_url('author.query.events.eventId', authorname=author.author_name, eventID=se.id),
            'content': content,
-           'author': author,
+           'author': author_info,
            'sources': {'count': len(sourcesItems), 'items': sourcesItems}}
 
   return event

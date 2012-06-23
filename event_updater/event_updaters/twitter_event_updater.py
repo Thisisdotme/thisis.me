@@ -32,8 +32,12 @@ class TwitterEventUpdater(EventUpdater):
     if not asm.access_token:
       args['user_id'] = asm.service_author_id
 
-    url = TWEET_STATUS % (self.oauth_config['endpoint'],
-                          urllib.urlencode(args))
+    try:
+      url = TWEET_STATUS % (self.oauth_config['endpoint'],
+                            urllib.urlencode(args))
+    except:
+      print 'ERROR INFO: {0}'.format(url)
+      raise
 
     json_obj = json_serializer.load_string(make_request(client, url)) if asm.access_token \
                else json_serializer.load(urllib2.urlopen(url))

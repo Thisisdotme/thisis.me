@@ -66,7 +66,6 @@ class AuthorQueryController(object):
   # get all FeatureEvents for the author (constrained to query arg. filters)
   #
   @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-  @view_config(route_name='author.query.topstories', request_method='GET', renderer='jsonp', http_cache=0)
   def getEvents(self):
 
     authorName = self.request.matchdict['authorname']
@@ -123,7 +122,7 @@ class AuthorQueryController(object):
   #
   # get details for the service event
   #
-  #@view_config(route_name='author.query.topstories', request_method='GET', renderer='jsonp', http_cache=0)
+  @view_config(route_name='author.query.topstories', request_method='GET', renderer='jsonp', http_cache=0)
   def getAuthorTopStories(self):
 
     STORY_LIMIT = 5
@@ -132,34 +131,19 @@ class AuthorQueryController(object):
 
     # get author-id for authorName
     try:
-      authorId, = self.dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
 
-    # gather top 5 highlights
     events = []
-    for highlight, event, author, serviceName in self.dbSession.query(Highlight, ServiceEvent, Author, Service.service_name). \
-              join(ServiceEvent, Highlight.service_event_id == ServiceEvent.id). \
-              join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
-              join(Author, AuthorServiceMap.author_id == Author.id). \
-              join(Service, AuthorServiceMap.service_id == Service.id). \
-              filter(and_(AuthorServiceMap.author_id == authorId, Highlight.weight > 0)). \
-              order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
-              limit(STORY_LIMIT):
-      events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, serviceName, author))
-
-    # if fewer than 5 highlights exists backfill with most recent events
-    if len(events) < STORY_LIMIT:
-      for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
-            join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-            join(Service, AuthorServiceMap.service_id == Service.id). \
-            filter(AuthorServiceMap.author_id == author.id). \
-            filter(ServiceEvent.parent_id == None). \
-            order_by(ServiceEvent.create_time.desc()). \
-            limit(STORY_LIMIT):
-        events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
-        if len(events) == STORY_LIMIT:
-          break
+    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+          join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
+          join(Service, AuthorServiceMap.service_id == Service.id). \
+          filter(AuthorServiceMap.author_id == author.id). \
+          filter(ServiceEvent.parent_id == None). \
+          order_by(ServiceEvent.create_time.desc()). \
+          limit(STORY_LIMIT):
+      events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
 
     return {'events': events}
