@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from tim_commons import event_interpreter
+from tim_commons import event_interpreter, json_serializer
 from mi_schema import models
 
 
@@ -177,86 +177,30 @@ class EventInterpreterTest(unittest.TestCase):
     self.assertEqual(interpreted.url(), 'https://graph.facebook.com/155415011259998')
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), None)
-    self.assertEqual(interpreted.original_content_uri(), None)
+    self.assertEqual(interpreted.original_content_uri(), "http://www.nytimes.com/2012/06/21/us/obama-claims-executive-privilege-in-gun-case.html")
 
   def test_twitter_event(self):
-    event = {"created_at": "Thu Jun 21 15:58:01 +0000 2012",
-             "id": 215835974805102593,
-             "id_str": "215835974805102593",
-             "text": "Why Database Technology Matters: http:\/\/t.co\/cA8EXrXk",
-             "source": "\u003ca href=\"http:\/\/itunes.apple.com\/us\/app\/twitter\/id409789998?mt=12\" rel=\"nofollow\"\u003eTwitter for Mac\u003c\/a\u003e",
-             "truncated": False,
-             "in_reply_to_status_id": None,
-             "in_reply_to_status_id_str": None,
-             "in_reply_to_user_id": None,
-             "in_reply_to_user_id_str": None,
-             "in_reply_to_screen_name": None,
-             "user": {"id": 77827772,
-                      "id_str": "77827772",
-                      "name": "damien katz",
-                      "screen_name": "damienkatz",
-                      "location": "Piedmont",
-                      "description": "CTO of @Couchbase, Creator of @CouchDB",
-                      "url": "http:\/\/damienkatz.net",
-                      "protected": False,
-                      "followers_count": 3086,
-                      "friends_count": 33,
-                      "listed_count": 325,
-                      "created_at": "Sun Sep 27 20:47:18 +0000 2009",
-                      "favourites_count": 0,
-                      "utc_offset": -18000,
-                      "time_zone": "Quito",
-                      "geo_enabled": False,
-                      "verified": False,
-                      "statuses_count": 561,
-                      "lang": "en",
-                      "contributors_enabled": False,
-                      "is_translator": False,
-                      "profile_background_color": "C0DEED",
-                      "profile_background_image_url": "http:\/\/a0.twimg.com\/images\/themes\/theme1\/bg.png",
-                      "profile_background_image_url_https": "https:\/\/si0.twimg.com\/images\/themes\/theme1\/bg.png",
-                      "profile_background_tile": False,
-                      "profile_image_url": "http:\/\/a0.twimg.com\/profile_images\/439767627\/Photo_279_normal.jpg",
-                      "profile_image_url_https": "https:\/\/si0.twimg.com\/profile_images\/439767627\/Photo_279_normal.jpg",
-                      "profile_link_color": "0084B4",
-                      "profile_sidebar_border_color": "C0DEED",
-                      "profile_sidebar_fill_color": "DDEEF6",
-                      "profile_text_color": "333333",
-                      "profile_use_background_image": True,
-                      "show_all_inline_media": False,
-                      "default_profile": True,
-                      "default_profile_image": False,
-                      "following": None,
-                      "follow_request_sent": None,
-                      "notifications": None},
-             "geo": None,
-             "coordinates": None,
-             "place": None,
-             "contributors": None,
-             "retweet_count": 8,
-             "favorited": False,
-             "retweeted": False,
-             "possibly_sensitive": False}
-
+    event = '{"created_at":"Fri Jun 22 22:44:42 +0000 2012","id":216300709476433920,"id_str":"216300709476433920","text":"And a link: http:\/\/t.co\/6fgHbu70 http:\/\/t.co\/OVJDl4UA","source":"web","truncated":false,"in_reply_to_status_id":null,"in_reply_to_status_id_str":null,"in_reply_to_user_id":null,"in_reply_to_user_id_str":null,"in_reply_to_screen_name":null,"user":{"id":569626455,"id_str":"569626455","name":"Jos\u00e9 Garc\u00eda Sancio","screen_name":"jagsancio","location":"","description":"","url":null,"protected":false,"followers_count":1,"friends_count":8,"listed_count":0,"created_at":"Thu May 03 00:26:13 +0000 2012","favourites_count":0,"utc_offset":null,"time_zone":null,"geo_enabled":false,"verified":false,"statuses_count":5,"lang":"en","contributors_enabled":false,"is_translator":false,"profile_background_color":"C0DEED","profile_background_image_url":"http:\/\/a0.twimg.com\/images\/themes\/theme1\/bg.png","profile_background_image_url_https":"https:\/\/si0.twimg.com\/images\/themes\/theme1\/bg.png","profile_background_tile":false,"profile_image_url":"http:\/\/a0.twimg.com\/sticky\/default_profile_images\/default_profile_6_normal.png","profile_image_url_https":"https:\/\/si0.twimg.com\/sticky\/default_profile_images\/default_profile_6_normal.png","profile_link_color":"0084B4","profile_sidebar_border_color":"C0DEED","profile_sidebar_fill_color":"DDEEF6","profile_text_color":"333333","profile_use_background_image":true,"show_all_inline_media":false,"default_profile":true,"default_profile_image":true,"following":null,"follow_request_sent":null,"notifications":null},"geo":null,"coordinates":null,"place":null,"contributors":null,"retweet_count":0,"entities":{"hashtags":[],"urls":[{"url":"http:\/\/t.co\/6fgHbu70","expanded_url":"http:\/\/en.wikipedia.org\/wiki\/World","display_url":"en.wikipedia.org\/wiki\/World","indices":[12,32]}],"user_mentions":[],"media":[{"id":216300709480628224,"id_str":"216300709480628224","indices":[33,53],"media_url":"http:\/\/p.twimg.com\/AwB0WWlCAAAUkEj.jpg","media_url_https":"https:\/\/p.twimg.com\/AwB0WWlCAAAUkEj.jpg","url":"http:\/\/t.co\/OVJDl4UA","display_url":"pic.twitter.com\/OVJDl4UA","expanded_url":"http:\/\/twitter.com\/jagsancio\/status\/216300709476433920\/photo\/1","type":"photo","sizes":{"large":{"w":800,"h":450,"resize":"fit"},"small":{"w":340,"h":191,"resize":"fit"},"thumb":{"w":150,"h":150,"resize":"crop"},"medium":{"w":600,"h":337,"resize":"fit"}}}]},"favorited":false,"retweeted":false,"possibly_sensitive":false}'
+    event = json_serializer.load_string(event)
     interpreted = event_interpreter.create_event_interpreter('twitter',
                                                              event,
                                                              self.author_service_map,
                                                              self.oauth_config)
 
     self.assertEqual(interpreted.event_type(), models.ServiceObjectType.STATUS_TYPE)
-    self.assertEqual(interpreted.event_id(), '215835974805102593')
-    self.assertEqual(interpreted.created_time(), datetime.datetime(2012, 6, 21, 15, 58, 1))
+    self.assertEqual(interpreted.event_id(), '216300709476433920')
+    self.assertEqual(interpreted.created_time(), datetime.datetime(2012, 6, 22, 22, 44, 42))
     self.assertEqual(interpreted.updated_time(), None)
     self.assertEqual(interpreted.headline(), None)
     self.assertEqual(interpreted.tagline(),
-                     'Why Database Technology Matters: http:\\/\\/t.co\\/cA8EXrXk')
+                     'And a link: http://t.co/6fgHbu70 http://t.co/OVJDl4UA')
     self.assertEqual(interpreted.content(),
-                     'Why Database Technology Matters: http:\\/\\/t.co\\/cA8EXrXk')
+                     'And a link: http://t.co/6fgHbu70 http://t.co/OVJDl4UA')
     self.assertEqual(interpreted.photo(), None)
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
-    self.assertEqual(interpreted.origin(), '\u003ca href=\"http:\/\/itunes.apple.com\/us\/app\/twitter\/id409789998?mt=12\" rel=\"nofollow\"\u003eTwitter for Mac\u003c\/a\u003e')
-    self.assertEqual(interpreted.original_content_uri(), None)
+    self.assertEqual(interpreted.origin(), 'web')
+    self.assertEqual(interpreted.original_content_uri(), 'http://en.wikipedia.org/wiki/World')
 
   def test_foursquare_event(self):
     event = {"comments": {"count": 0,
@@ -436,3 +380,11 @@ class EventInterpreterTest(unittest.TestCase):
   def test_linkedin_event(self):
     # TODO: implement this
     self.assertTrue(True)
+
+  def test_normalized_uri(self):
+    normalized_uri = 'http://www.thisis.me/hello'
+    uri = normalized_uri + '?q=world'
+
+    result = event_interpreter.normalize_uri(uri)
+
+    self.assertEqual(result, normalized_uri)
