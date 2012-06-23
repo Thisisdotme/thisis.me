@@ -180,7 +180,7 @@ class FoursquareView(object):
     
     json_payload = json.dumps({'access_token': accessToken, 'service_author_id': userId})
     headers = {'Content-Type':'application/json; charset=utf-8'}
-    req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+    req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                                     (self.request.registry.settings['mi.api.endpoint'],authorName,self.featureName),
                             'PUT',
                             json_payload,

@@ -5,6 +5,7 @@ Created on Dec, 2011
 '''
 
 import logging
+from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -13,7 +14,8 @@ from pyramid.view import view_config
 
 from miapi.models import DBSession
 
-from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGroup, AuthorGroupMap, Service, AuthorServiceMap
+from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGroup, AuthorGroupMap, AuthorServiceMap
+from mi_schema.models import Service, ServiceObjectType, ServiceEvent
 
 from miapi.globals import ACCESS_GROUP_AUTHORS, DEFAULT_AUTHOR_GROUP
 
@@ -151,6 +153,32 @@ class AuthorController(object):
         # map the ME service to the new author
         asm = AuthorServiceMap(author.id, Service.ME_ID)
         self.dbSession.add(asm)
+        self.dbSession.flush()
+
+        # insert the all, of-me, and liked photo albums
+        all_photos = ServiceEvent(asm.id,
+                                  ServiceObjectType.PHOTO_ALBUM_TYPE,
+                                  author.id,
+                                  Service.ME_ID,
+                                  '{0}@{1}'.format(AuthorServiceMap.ALL_PHOTOS_ID, author.id),
+                                  datetime.now())
+        self.dbSession.add(all_photos)
+
+        ofme_photos = ServiceEvent(asm.id,
+                                   ServiceObjectType.PHOTO_ALBUM_TYPE,
+                                   author.id,
+                                   Service.ME_ID,
+                                   '{0}@{1}'.format(AuthorServiceMap.OFME_PHOTOS_ID, author.id),
+                                   datetime.now())
+        self.dbSession.add(ofme_photos)
+
+        liked_photos = ServiceEvent(asm.id,
+                                    ServiceObjectType.PHOTO_ALBUM_TYPE,
+                                    author.id,
+                                    Service.ME_ID,
+                                    '{0}@{1}'.format(AuthorServiceMap.LIKED_PHOTOS_ID, author.id),
+                                    datetime.now())
+        self.dbSession.add(liked_photos)
 
         ''' ??? this might only be temporary ???
             Create a default group (follow) and add the author to that group

@@ -79,14 +79,14 @@ class AuthorQueryController(object):
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for event, serviceName in self.dbSession.query(ServiceEvent, Service.service_name). \
+    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
           join(Service, AuthorServiceMap.service_id == Service.id). \
           filter(AuthorServiceMap.author_id == author.id). \
           filter(ServiceEvent.parent_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(LIMIT):
-      events.append(createServiceEvent(self.dbSession, self.request, event, serviceName, author))
+      events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
@@ -107,7 +107,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
     try:
-      event, serviceName = self.dbSession.query(ServiceEvent, Service.service_name). \
+      event, asm, serviceName = self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
             join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
             join(Service, AuthorServiceMap.service_id == Service.id). \
             filter(ServiceEvent.id == serviceEventID). \
@@ -117,7 +117,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown event id %d' % serviceEventID}
 
-    return {'event': createServiceEvent(self.dbSession, self.request, event, serviceName, author)}
+    return {'event': createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)}
 
   # GET /v1/authors/{authorname}/topstories
   #
@@ -151,14 +151,14 @@ class AuthorQueryController(object):
 
     # if fewer than 5 highlights exists backfill with most recent events
     if len(events) < STORY_LIMIT:
-      for event, serviceName in self.dbSession.query(ServiceEvent, Service.service_name). \
+      for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
             join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
             join(Service, AuthorServiceMap.service_id == Service.id). \
             filter(AuthorServiceMap.author_id == author.id). \
             filter(ServiceEvent.parent_id == None). \
             order_by(ServiceEvent.create_time.desc()). \
             limit(STORY_LIMIT):
-        events.append(createServiceEvent(self.dbSession, self.request, event, serviceName, author))
+        events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
         if len(events) == STORY_LIMIT:
           break
 

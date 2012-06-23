@@ -138,7 +138,6 @@ def main(global_config, **settings):
   #
   config.add_route('author.photoalbums.photos.CRUD', '/v1/authors/{authorname}/photoalbums/{albumID}/photos')
 
-
   #
   # SERVICE functionality
   #

@@ -65,9 +65,7 @@ class LinkedinEventCollector(EventCollector):
     while url:
 
       # request the user's updates
-      content = make_request(client, url, {'x-li-format': 'json'})
-
-      raw_json = json_serializer.load_string(content)
+      raw_json = json_serializer.load_string(make_request(client, url, {'x-li-format': 'json'}))
 
       if raw_json == None or raw_json.get('_total', 0) == 0:
         url = None

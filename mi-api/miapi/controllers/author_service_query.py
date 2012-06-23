@@ -23,8 +23,9 @@ log = logging.getLogger(__name__)
 # AUTHOR SERVICE QUERY: query for the highlights/details of the specified service and author
 #
 
+
 class AuthorServiceQueryController(object):
-  
+
   '''
   Constructor
   '''
@@ -38,10 +39,10 @@ class AuthorServiceQueryController(object):
   #
   @view_config(route_name='author.services.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   def getHighlights(self):
-    
+
     authorName = self.request.matchdict['authorname']
     serviceName = self.request.matchdict['servicename']
-    
+
     return {'error':'not implemented'}
   
 
@@ -68,9 +69,16 @@ class AuthorServiceQueryController(object):
     except:
       self.request.response.status_int = 404;
       return {'error':'unknown service %s' % authorName}  
-  
-    events = []  
-    for event,serviceName in self.dbSession.query(ServiceEvent,Service.service_name).join(AuthorServiceMap,AuthorServiceMap.id==ServiceEvent.author_service_map_id).join(Service,AuthorServiceMap.service_id==Service.id).filter(and_(AuthorServiceMap.service_id==serviceId,AuthorServiceMap.author_id==author.id)).filter(ServiceEvent.parent_id==None).order_by(ServiceEvent.create_time.desc()).limit(LIMIT):
-      events.append(createServiceEvent(self.dbSession,self.request,serviceName,author))
-  
-    return {'events':events,'paging':{'prev':None,'next':None}}
+
+    events = []
+    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+                    join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
+                    join(Service, AuthorServiceMap.service_id == Service.id). \
+                    filter(and_(AuthorServiceMap.service_id == serviceId,
+                                AuthorServiceMap.author_id == author.id)). \
+                    filter(ServiceEvent.parent_id == None). \
+                    order_by(ServiceEvent.create_time.desc()). \
+                    limit(LIMIT):
+      events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
+
+    return {'events': events, 'paging': {'prev': None, 'next': None}}

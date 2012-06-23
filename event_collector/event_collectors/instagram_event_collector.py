@@ -13,7 +13,7 @@ from event_collector import EventCollector
 
 class InstagramEventCollector(EventCollector):
 
-  USER_MEDIA = 'users/self/media/recent'
+  USER_MEDIA = 'users/{0}/media/recent'
 
   PAGE_SIZE = 200
 
@@ -27,7 +27,14 @@ class InstagramEventCollector(EventCollector):
 
     asm = state['asm']
 
-    args = {'access_token': asm.access_token,
+    if asm.access_token:
+      access_token = asm.access_token
+      user_media = self.USER_MEDIA.format('self')
+    else:
+      access_token = self.oauth_config['user1_access_token']
+      user_media = self.USER_MEDIA.format(asm.service_author_id)
+
+    args = {'access_token': access_token,
             'count': self.PAGE_SIZE}
 
     # get only events since last update or past year depending on if this
@@ -41,7 +48,7 @@ class InstagramEventCollector(EventCollector):
     args['min_timestamp'] = min_timestamp
 
     # setup the url for fetching a page of posts
-    url = '%s%s?%s' % (self.oauth_config['endpoint'], self.USER_MEDIA, urllib.urlencode(args))
+    url = '{0}{1}?{2}'.format(self.oauth_config['endpoint'], user_media, urllib.urlencode(args))
 
     total_accepted = 0
     while url and total_accepted < self.MAX_EVENTS:

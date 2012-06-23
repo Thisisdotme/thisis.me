@@ -122,7 +122,7 @@ def flickr_callback(request):
 
   json_payload = json.dumps({'access_token':flickr_access_token})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/features/%s' %
+  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
                                   (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
                           'PUT',
                           json_payload,

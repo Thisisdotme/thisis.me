@@ -176,6 +176,8 @@ class AuthorServiceMap(Base):
   most_recent_event_id = Column(String(255))
   most_recent_event_timestamp = Column(DateTime)
 
+  profile_image_url = Column(String(1024))
+
   def __init__(self, authorId, serviceId, accessToken=None, accessTokenSecret=None, service_author_id=None):
     self.author_id = authorId
     self.service_id = serviceId
@@ -334,7 +336,7 @@ class ServiceEvent(Base):
                service_id,
                event_id,
                create_time,
-               modify_time,
+               modify_time=None,
                url=None,
                caption=None,
                content=None,

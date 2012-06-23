@@ -132,7 +132,7 @@ body {
   background-size:cover;
   background-repeat:no-repeat;
   /* min-height:480px; /* need to make dynamic? */
-  background-size:100%,auto;
+  /* background-size:100%,auto; */
 }
 
 .photo-page {
@@ -268,6 +268,10 @@ body {
 
 .photo-page .caption .source-img.google {
   background: transparent url(/img/icons/google_plus_15.png) no-repeat center center;
+}
+
+#content-container .scroll-overlay .interaction-icons  {
+  display:none;
 }
 
 .photo-page .interaction-icons {
