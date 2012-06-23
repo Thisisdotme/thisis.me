@@ -11,7 +11,6 @@ from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
 from event_collector import EventCollector
 
 
-USER_INFO = 'account/verify_credentials.json'
 USER_TIMELINE = 'statuses/user_timeline.json'
 
 
@@ -27,19 +26,17 @@ class TwitterEventCollector(EventCollector):
 
     asm = state['asm']
 
-    # use authenticated access if we can
-    if asm.access_token:
-      consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
-      token = oauth.Token(asm.access_token, asm.access_token_secret)
-      client = oauth.Client(consumer, token)
-
     args = {'include_rts': 1,
             'include_entities': 1,
             'trim_user': 1,
             'count': 100}
 
-    # if not authenticated provide the user_id query arg
-    if not asm.access_token:
+    # use authenticated access if we can
+    if asm.access_token:
+      consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
+      token = oauth.Token(asm.access_token, asm.access_token_secret)
+      client = oauth.Client(consumer, token)
+    else:
       args['user_id'] = asm.service_author_id
 
     if asm.most_recent_event_id:

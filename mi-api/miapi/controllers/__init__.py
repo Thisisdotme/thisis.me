@@ -1,14 +1,24 @@
 import logging
 import sys
+import calendar
 
 from tim_commons.json_serializer import load_string
 
-from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship
+from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
 
 log = logging.getLogger(__name__)
 
 
-def get_services(db_session, request, se_id, service_name):
+def get_author_info(request, asm, author):
+
+  profile_image_url = asm.profile_image_url if asm.profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png')
+
+  author_obj = {'profile_image_url': profile_image_url, 'name': author.author_name, 'full_name': author.full_name}
+
+  return author_obj
+
+
+def get_shared_services(db_session, request, se_id, service_name):
 
   service_items = [{'service_name':service_name, 'service_image_url':request.static_url('miapi:img/l/services/color/%s.png' % service_name)}]
 
@@ -21,11 +31,40 @@ def get_services(db_session, request, se_id, service_name):
   return service_items
 
 
-def make_photo_obj(db_session, request, se, service_name):
+def get_album_name(event):
 
-  services = get_services(db_session, request, se.id, service_name)
+  well_known_albums = {AuthorServiceMap.ALL_PHOTOS_ID: 'All Photos',
+                       AuthorServiceMap.OFME_PHOTOS_ID: 'Photos of Me',
+                       AuthorServiceMap.LIKED_PHOTOS_ID: 'Photos I Like'}
 
-  photo = {'type': 'photo', 'id': se.id, 'sources': {'count': len(services), 'items': services}}
+  return well_known_albums[event.event_id[:event.event_id.index('@')]] if event.service_id == Service.ME_ID else event.caption
+
+
+def get_album_count(event):
+  return 25
+
+
+def make_photo_album_obj(db_session, request, se, asm, author, service_name):
+  return {'type': 'photo-album',
+          'id': se.id,
+          'create_time': calendar.timegm(se.create_time.timetuple()),
+          'headline': get_album_name(se),
+          'author': get_author_info(request, asm, author),
+          'service_name': service_name,
+          'count': get_album_count(se)}
+
+
+def make_photo_obj(db_session, request, se, asm, author, service_name):
+
+  services = get_shared_services(db_session, request, se.id, service_name)
+
+  photo = {'type': 'photo',
+           'id': se.id,
+           'create_time': calendar.timegm(se.create_time.timetuple()),
+           'author': get_author_info(request, asm, author),
+           'link': request.route_url('author.query.events.eventId', authorname=author.author_name, eventID=se.id),
+           'service': service_name,
+           'sources': {'count': len(services), 'items': services}}
 
   if se.caption:
     photo['tagline'] = se.caption
