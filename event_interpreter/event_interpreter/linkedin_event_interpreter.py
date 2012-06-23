@@ -95,7 +95,6 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     self.init_connection()
     connection = self.json['updateContent']['person']['connections']['values'][0]
     content = '%s is now connected to %s %s.' % (self.json['updateContent']['person']['firstName'], connection['firstName'], connection['lastName'])
-    if 'headline' in 
     if self.headline:
       content = '%s  %s' % (content, self.headline)
     return content
