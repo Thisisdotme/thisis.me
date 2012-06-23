@@ -1,5 +1,6 @@
 import fcntl
 import os
+import re
 
 
 def total_seconds(td):
@@ -42,3 +43,34 @@ class PidFileContext():
       if err.errno != 9:
         raise
     os.remove(self._path)
+
+
+def extract_uri_from_text(text):
+  """Given a text string, returns all the urls we can find in it."""
+  return url_re.findall(text)
+
+
+# Compile the regular expression
+urls = '(?: {0})'.format('|'.join("""http https""".split()))
+ltrs = r'\w'
+gunk = r'/#~:.?+=&%@!\-'
+punc = r'.:?\-'
+any_char = '{ltrs}{gunk}{punc}'.format(ltrs=ltrs, gunk=gunk, punc=punc)
+
+url = r"""
+    \b                           # start at word boundary
+        {urls}    :              # need resource and a colon
+        [{any_char}]  +?         # followed by one or more
+                                 #  of any valid character, but
+                                 #  be conservative and take only
+                                 #  what you need to....
+    (?=                          # look-ahead non-consumptive assertion
+            [{punc}]*            # either 0 or more punctuation
+            (?:   [^{any_char}]  #  followed by a non-url char
+                |                #   or end of the string
+                  $
+            )
+    )
+    """.format(urls=urls, any_char=any_char, punc=punc)
+
+url_re = re.compile(url, re.VERBOSE | re.MULTILINE)

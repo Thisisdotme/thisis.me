@@ -1,4 +1,5 @@
 import datetime
+import urlparse
 
 from mi_schema import models
 from tim_commons import json_serializer
@@ -223,6 +224,13 @@ class _FacebookStatusEventInterpreter(_FacebookEventInterpreter):
   def photo(self):
     return self.json['picture'] if 'picture' in self.json else None
 
+  def original_content_uri(self):
+    uri = self.json.get('link')
+    if uri:
+      return normalize_uri(uri)
+
+    return None
+
 
 class _FacebookPhotoAlbumEventInterpreter(_FacebookEventInterpreter):
   def event_type(self):
@@ -288,6 +296,15 @@ class _TwitterEventInterpreter(_ServiceEventInterpreter):
 
   def photo(self):
     # TODO: investigate how to implement this correctly
+    return None
+
+  def original_content_uri(self):
+    entities = self.json.get('entities')
+    if entities:
+      urls = entities.get('urls')
+      if urls:
+        return normalize_uri(urls[0].get('expanded_url'))
+
     return None
 
 
@@ -569,3 +586,14 @@ class _LinkedinEventInterpreter(_ServiceEventInterpreter):
       self.headline = json_obj.get('headline')
       self.summary = json_obj.get('summary')
       self.photo = json_obj.get('pictureUrl')
+
+
+def normalize_uri(uri):
+  parsed_url = urlparse.urlparse(uri)
+  return urlparse.urlunparse((
+        parsed_url[0],
+        parsed_url[1],
+        parsed_url[2],
+        parsed_url[3],
+        '',
+        parsed_url[5]))
