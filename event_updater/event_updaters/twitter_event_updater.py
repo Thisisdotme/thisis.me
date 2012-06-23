@@ -19,6 +19,11 @@ class TwitterEventUpdater(EventUpdater):
 
     asm = self.get_author_service_map(service_author_id)
 
+    # TODO - temporary until we figure out a better solution for
+    # not over-driving Twitter with un-authenticated events
+    if not asm.access_token:
+      return
+
     if asm.access_token:
       consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
       token = oauth.Token(asm.access_token, asm.access_token_secret)
@@ -34,12 +39,16 @@ class TwitterEventUpdater(EventUpdater):
 
     url = TWEET_STATUS % (self.oauth_config['endpoint'],
                           urllib.urlencode(args))
+
+    # TODO - remove the try/except once figure out a better solution for not
+    # exceeding Twitter's rate limits
     try:
       json_obj = json_serializer.load_string(make_request(client, url)) if asm.access_token \
                  else json_serializer.load(urllib2.urlopen(url))
-    except:
+    except urllib2.URLError, e:
       import logging
-      logging.error('ERROR INFO: {0}'.format(url))
+      logging.error('ERROR REQUEST URL: {0}'.format(url))
+      logging.error('ERROR REASON: {0}, {1}'.format(e.code, e.read()))
       raise
 
     interpreter = TwitterEventInterpreter(json_obj, asm, self.oauth_config)
