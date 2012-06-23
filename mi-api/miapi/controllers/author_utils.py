@@ -1,19 +1,22 @@
 import calendar
 
 from miapi.models import SimpleDBSession
-from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent, ServiceObjectType
-
-from miapi import oAuthConfig
+from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType
 
 from event_collectors.collector_factory import EventCollectorFactory
+
 from tim_commons import json_serializer
+
+from miapi import oAuthConfig, service_object_type_dict
 
 from . import get_author_info, get_shared_services
 
 
 def createServiceEvent(dbSession, request, se, asm, author, serviceName):
 
-  if se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and se.service_id == Service.ME_ID:
+  # filter well-known and instagram photo albums
+  if se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and  \
+     (se.service_id == Service.ME_ID or se.service_id == Service.INSTAGRAM_ID):
     return None
 
   sourcesItems = get_shared_services(dbSession, request, se.id, serviceName)
@@ -33,9 +36,12 @@ def createServiceEvent(dbSession, request, se, asm, author, serviceName):
 
   author_info = get_author_info(request, asm, author)
 
-  event = {'event_id': se.id,
+  event = {'id': se.id,
+           'event_id': se.id,   # TODO deprecated -- remove after eliminating from UI
+           'type': service_object_type_dict[se.type_id],
            'service': serviceName,
            'create_time': calendar.timegm(se.create_time.timetuple()),
+           'modify_time': calendar.timegm(se.modify_time.timetuple()),
            'link': request.route_url('author.query.events.eventId', authorname=author.author_name, eventID=se.id),
            'content': content,
            'author': author_info,
@@ -44,13 +50,9 @@ def createServiceEvent(dbSession, request, se, asm, author, serviceName):
   return event
 
 
-def createHighlightEvent(dbSession, request, highlight, se, serviceName, author):
+def createHighlightEvent(dbSession, request, highlight, se, asm, author, serviceName):
 
-  sourcesItems = [{'service_name': serviceName, 'service_image_url': request.static_url('miapi:img/l/services/color/%s.png' % serviceName)}]
-
-  # determine all the shared sources -- all service_event rows whose parent_id is this service_event
-  for sharedFeatureName in dbSession.query(Service.service_name).join(AuthorServiceMap, AuthorServiceMap.service_id == Service.id).join(ServiceEvent, AuthorServiceMap.id == ServiceEvent.author_service_map_id).filter(ServiceEvent.parent_id == se.id).all():
-    sourcesItems.append({'service_name': sharedFeatureName, 'service_image_url': request.static_url('miapi:img/l/services/color_by_fn/%s.png' % serviceName)})
+  sourcesItems = get_shared_services(dbSession, request, se.id, serviceName)
 
   # collect the pieces of available content
   content = {}
@@ -71,16 +73,17 @@ def createHighlightEvent(dbSession, request, highlight, se, serviceName, author)
   if se.photo_url:
     content['photo_url'] = se.photo_url
 
-  profileImageUrl = se.author_profile_image_url if se.author_profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png')
+  author_info = get_author_info(request, asm, author)
 
-  author = {'profile_image_url': profileImageUrl, 'name': author.author_name, 'full_name': author.full_name}
-
-  event = {'event_id': se.id,
+  event = {'id': se.id,
+           'event_id': se.id,
+           'type': service_object_type_dict[se.type_id],
            'service': serviceName,
            'create_time': calendar.timegm(se.create_time.timetuple()),
+           'modify_time': calendar.timegm(se.modify_time.timetuple()),
            'link': request.route_url('author.query.events.eventId', authorname=request.matchdict['authorname'], eventID=se.id),
            'content': content,
-           'author': author,
+           'author': author_info,
            'sources': {'count': len(sourcesItems), 'items': sourcesItems}}
 
   return event

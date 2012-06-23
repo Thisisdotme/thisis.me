@@ -5,10 +5,32 @@ from pyramid.renderers import JSONP
 
 from tim_commons.oauth import load_oauth_config
 
+from mi_schema.models import ServiceObjectType
+
 from miapi.models import initialize_sql
+from miapi.models import DBSession
+
 
 # object created from JSON file that stores oAuth configuration for social services
 oAuthConfig = {}
+
+# lookup dictionary of service_object_type id to it's associated label
+service_object_type_dict = {}
+
+
+# create and return a service_object_type dictionary
+def load_service_object_type_dict():
+
+  service_object_type_dict = {}
+
+  db_session = DBSession()
+
+  for row in db_session.query(ServiceObjectType):
+    service_object_type_dict[row.type_id] = row.label
+
+  db_session.commit()
+
+  return service_object_type_dict
 
 
 def main(global_config, **settings):
@@ -24,6 +46,10 @@ def main(global_config, **settings):
   # load the oauth configuration settings
   global oAuthConfig
   oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
+
+  # load the type_label_lookup dictionary
+  global service_object_type_dict
+  service_object_type_dict = load_service_object_type_dict()
 
   config = Configurator(settings=settings)
 

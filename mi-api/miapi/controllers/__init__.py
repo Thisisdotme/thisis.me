@@ -6,6 +6,8 @@ from tim_commons.json_serializer import load_string
 
 from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
 
+from miapi import service_object_type_dict
+
 log = logging.getLogger(__name__)
 
 
@@ -45,7 +47,7 @@ def get_album_count(event):
 
 
 def make_photo_album_obj(db_session, request, se, asm, author, service_name):
-  return {'type': 'photo-album',
+  return {'type': service_object_type_dict[ServiceObjectType.PHOTO_ALBUM_TYPE],
           'id': se.id,
           'create_time': calendar.timegm(se.create_time.timetuple()),
           'headline': get_album_name(se),
@@ -58,7 +60,7 @@ def make_photo_obj(db_session, request, se, asm, author, service_name):
 
   services = get_shared_services(db_session, request, se.id, service_name)
 
-  photo = {'type': 'photo',
+  photo = {'type': service_object_type_dict[ServiceObjectType.PHOTO_TYPE],
            'id': se.id,
            'create_time': calendar.timegm(se.create_time.timetuple()),
            'author': get_author_info(request, asm, author),

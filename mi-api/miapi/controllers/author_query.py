@@ -49,7 +49,7 @@ class AuthorQueryController(object):
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for highlight, event, author, serviceName in self.dbSession.query(Highlight, ServiceEvent, Author, Service.service_name). \
+    for highlight, event, asm, author, serviceName in self.dbSession.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
               join(ServiceEvent, Highlight.service_event_id == ServiceEvent.id). \
               join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
               join(Author, AuthorServiceMap.author_id == Author.id). \
@@ -57,7 +57,7 @@ class AuthorQueryController(object):
               filter(and_(AuthorServiceMap.author_id == authorId, Highlight.weight > 0)). \
               order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
               limit(LIMIT):
-      events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, serviceName, author))
+      events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, asm, author, serviceName))
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
