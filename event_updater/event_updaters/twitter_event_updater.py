@@ -38,7 +38,8 @@ class TwitterEventUpdater(EventUpdater):
       json_obj = json_serializer.load_string(make_request(client, url)) if asm.access_token \
                  else json_serializer.load(urllib2.urlopen(url))
     except:
-      print 'ERROR INFO: {0}'.format(url)
+      import logging
+      logging.error('ERROR INFO: {0}'.format(url))
       raise
 
     interpreter = TwitterEventInterpreter(json_obj, asm, self.oauth_config)
