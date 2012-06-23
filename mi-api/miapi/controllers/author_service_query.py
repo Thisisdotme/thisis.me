@@ -40,45 +40,45 @@ class AuthorServiceQueryController(object):
   @view_config(route_name='author.services.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   def getHighlights(self):
 
-    authorName = self.request.matchdict['authorname']
-    serviceName = self.request.matchdict['servicename']
+    author_name = self.request.matchdict['authorname']
+    service_name = self.request.matchdict['servicename']
 
-    return {'error':'not implemented'}
-  
+    return {'error': 'not implemented'}
 
   # GET /v1/authors/{authorname}/services/{servicename}/events'
   #
-  # get all the serviceEvents for the author and service  
+  # get all the serviceEvents for the author and service
   #
   @view_config(route_name='author.services.query.events', request_method='GET', renderer='jsonp', http_cache=0)
   def getEvents(self):
-  
-    authorName = self.request.matchdict['authorname']
-    serviceName = self.request.matchdict['servicename']
-    
-    # get author-id for authorName
+
+    author_name = self.request.matchdict['authorname']
+    service_name = self.request.matchdict['servicename']
+
+    # get author-id for author_name
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+      author = self.dbSession.query(Author).filter(Author.author_name == author_name).one()
     except:
-      self.request.response.status_int = 404;
-      return {'error':'unknown author %s' % authorName}  
-  
-    # get service-id for serviceName
+      self.request.response.status_int = 404
+      return {'error': 'unknown author {0}'.format(author_name)}
+
+    # get service-id for service_name
     try:
-      serviceId, = self.dbSession.query(Service.id).filter(Service.service_name == serviceName).one()
+      serviceId, = self.dbSession.query(Service.id).filter(Service.service_name == service_name).one()
     except:
-      self.request.response.status_int = 404;
-      return {'error':'unknown service %s' % authorName}  
+      self.request.response.status_int = 404
+      return {'error': 'unknown service {0}'.format(author_name)}
 
     events = []
-    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
                     join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-                    join(Service, AuthorServiceMap.service_id == Service.id). \
                     filter(and_(AuthorServiceMap.service_id == serviceId,
                                 AuthorServiceMap.author_id == author.id)). \
                     filter(ServiceEvent.parent_id == None). \
                     order_by(ServiceEvent.create_time.desc()). \
                     limit(LIMIT):
-      events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, service_name)
+      if event_obj:
+        events.append(event_obj)
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}

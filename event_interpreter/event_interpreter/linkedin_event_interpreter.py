@@ -95,6 +95,7 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     self.init_connection()
     connection = self.json['updateContent']['person']['connections']['values'][0]
     content = '%s is now connected to %s %s.' % (self.json['updateContent']['person']['firstName'], connection['firstName'], connection['lastName'])
+    if 'headline' in 
     if self.headline:
       content = '%s  %s' % (content, self.headline)
     return content
@@ -147,7 +148,6 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
     connection = self.json['updateContent']['person']['connections']['values'][0]
 
     if connection['id'] != 'private' and self._client is None:
-
       url = '%speople/id=%s:(headline,summary,picture-url)' % (self.oauth_config['endpoint'], connection['id'])
 
       # request the user's updates
@@ -157,3 +157,9 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
       self.headline = json_obj.get('headline')
       self.summary = json_obj.get('summary')
       self.photo = json_obj.get('pictureUrl')
+
+    else:
+      self.headline = None
+      self.summary = None
+      self.photo = None
+      

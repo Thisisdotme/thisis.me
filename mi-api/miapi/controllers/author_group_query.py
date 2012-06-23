@@ -108,6 +108,8 @@ class AuthorGroupQueryController(object):
             filter(ServiceEvent.parent_id == None). \
             order_by(ServiceEvent.create_time.desc()). \
             limit(LIMIT):
-      events.append(createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName))
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)
+      if event_obj:
+        events.append(event_obj)
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}

@@ -1,7 +1,7 @@
 import calendar
 
 from miapi.models import SimpleDBSession
-from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent
+from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent, ServiceObjectType
 
 from miapi import oAuthConfig
 
@@ -12,6 +12,9 @@ from . import get_author_info, get_shared_services
 
 
 def createServiceEvent(dbSession, request, se, asm, author, serviceName):
+
+  if se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and se.service_id == Service.ME_ID:
+    return None
 
   sourcesItems = get_shared_services(dbSession, request, se.id, serviceName)
 
