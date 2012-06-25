@@ -62,6 +62,8 @@ the behavior for the photo feature
     },
 
     initialize: function() {
+      this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
+      this.set("location", "");
     },
 	
     clear: function() {
@@ -453,9 +455,9 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			"vclick .detail-link" : "toggleMode",
+    			//"vclick .detail-link" : "toggleMode",
     			"vclick .grid-link" : "showGridView",
-    			"vclick .full-photo" : "toggleMode",
+    			//"vclick .full-photo" : "toggleMode",
     			"click .interaction-icons .comments" : "showComments",
     			"click .interaction-icons .location" : "showLocation",
     			"vclick .interaction-icons" : "interactionIconsClicked",

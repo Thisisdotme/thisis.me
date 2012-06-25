@@ -5,7 +5,12 @@
   	<div class="profile-img">
   	  <img src="{picture_url}"/>
   	</div>
-  	<div class="specialties"><strong>Specializing in: </strong>{specialties}</div>
-  	<div class="summary"><strong>Summary: </strong>{summary}</div>
+  	<div class="location"><strong>Location: </strong>{location}</div>
+  	{?specialties}
+  	  <div class="specialties"><strong>Specializing in: </strong>{specialties}</div>
+  	{/specialties}
+  	{?summary}
+  	  <div class="summary"><strong>Summary: </strong>{summary}</div>
+  	{/summary}
 	</div>
 </div>

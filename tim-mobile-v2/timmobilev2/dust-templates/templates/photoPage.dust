@@ -12,7 +12,7 @@
 		    <span class="source-img {source_name}"></span>
 		   {/sources}
 		   <!-- move this whole caption/bottom info bar thing to a partial! -->
-		    <div class="time-and-location">2 hrs ago, San Francisco</div>
+		    <div class="time-and-location">{time_ago} {location}</div>
 		  </div>
 		</footer>
 		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>

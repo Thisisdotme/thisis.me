@@ -20,8 +20,8 @@
 
     initialize: function() {
 			//not sure this would be the right place to do this...
-			//this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
-			this.set("time_ago", '1 day');
+			this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
+			//this.set("time_ago", '1 day');
     },
 	
     clear: function() {
@@ -100,7 +100,7 @@
       },
 
   		events: {
-  			"click .event" : "showDetailView"
+  			//"click .event" : "showDetailView"
   		},
 
       render: function() {
@@ -196,6 +196,9 @@
   };
   
   //maybe have methods to show detail view, show list view, show grid view?
+  //instead of drilling in, at this point...
+  //at the very least, go to the correct spot in the flipset
+  
   feature.showDetailView = function(resourceId) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?

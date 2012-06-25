@@ -3,7 +3,7 @@ Created on Apr 24, 2012
 
 @author: howard
 '''
-import logging, json
+import logging
 
 from pyramid.view import view_config
 
@@ -30,7 +30,7 @@ class AuthorFeatureController(object):
     Constructor
     '''
     self.request = request
-    self.dbSession = DBSession()
+    self.db_session = DBSession()
 
   # GET /v1/authors/{authorname}/features
   #
@@ -38,17 +38,19 @@ class AuthorFeatureController(object):
   @view_config(route_name='author.features', request_method='GET', renderer='jsonp', http_cache=0)
   def listAuthorFeatures(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
-    features = getAuthorFeatures(self.dbSession, authorId)
+    features = getAuthorFeatures(self.db_session, author_id)
 
-    return {'author_name': authorName, 'features': features}
+    self.db_session.commit()
+
+    return {'author_name': author_name, 'features': features}
 
   # PUT /v1/authors/{authorname}/services/{featurename}
   #
@@ -57,42 +59,40 @@ class AuthorFeatureController(object):
   @view_config(route_name='author.features.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def putAuthorFeature(self):
 
-    authorName = self.request.matchdict['authorname']
-    featureName = self.request.matchdict['featurename']
+    author_name = self.request.matchdict['authorname']
+    feature_name = self.request.matchdict['featurename']
 
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     try:
-      featureId, = self.dbSession.query(Feature.id).filter_by(name=featureName).one()
+      feature_id, = self.db_session.query(Feature.id).filter_by(name=feature_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown feature %s' % featureName}
+      return {'error': 'unknown feature %s' % feature_name}
 
     # get the max feature sequence for this author
-    maxSequence, = self.dbSession.query(func.max(AuthorFeatureMap.sequence)).filter(AuthorFeatureMap.author_id == authorId).one()
+    maxSequence, = self.db_session.query(func.max(AuthorFeatureMap.sequence)).filter(AuthorFeatureMap.author_id == author_id).one()
     if not maxSequence:
       maxSequence = 0
 
-    authorFeatureMap = AuthorFeatureMap(authorId, featureId, maxSequence + 1)
+    afm = AuthorFeatureMap(author_id, feature_id, maxSequence + 1)
 
     try:
-      self.dbSession.add(authorFeatureMap)
-      self.dbSession.flush()
-      self.dbSession.commit()
-      log.info("created author/feature link: %s -> %s" % (authorName, featureName))
+      self.db_session.add(afm)
+      self.db_session.flush()
+      self.db_session.commit()
+      log.info("created author/feature link: %s -> %s" % (author_name, feature_name))
 
     except IntegrityError, e:
-      self.dbSession.rollback()
+      self.db_session.rollback()
       self.request.response.status_int = 409
       return {'error': e.message}
 
-    response = {'author': authorName, 'feature': featureName}
-
-    self.dbSession.close()
+    response = {'author': author_name, 'feature': feature_name}
 
     return response
 
@@ -101,33 +101,33 @@ class AuthorFeatureController(object):
   @view_config(route_name='author.features.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
   def deleteAuthorService(self):
 
-    authorName = self.request.matchdict['authorname']
-    featureName = self.request.matchdict['featurename']
+    author_name = self.request.matchdict['authorname']
+    feature_name = self.request.matchdict['featurename']
 
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     try:
-      featureId, = self.dbSession.query(Feature.id).filter_by(name=featureName).one()
+      feature_id, = self.db_session.query(Feature.id).filter_by(name=feature_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown feature %s' % featureName}
+      return {'error': 'unknown feature %s' % feature_name}
 
     try:
-      authorFeatureMap = self.dbSession.query(AuthorFeatureMap).filter_by(author_id=authorId, feature_id=featureId).one()
+      afm = self.db_session.query(AuthorFeatureMap).filter_by(author_id=author_id, feature_id=feature_id).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown feature for author'}
 
     try:
-      self.dbSession.delete(authorFeatureMap)
-      self.dbSession.commit()
+      self.db_session.delete(afm)
+      self.db_session.commit()
 
     except Exception:
-      self.dbSession.rollback()
+      self.db_session.rollback()
       raise
 
     return {}
@@ -139,28 +139,30 @@ class AuthorFeatureController(object):
   @view_config(route_name='author.features.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
   def getAuthorServiceInfo(self):
 
-    authorName = self.request.matchdict['authorname']
-    featureName = self.request.matchdict['featurename']
+    author_name = self.request.matchdict['authorname']
+    feature_name = self.request.matchdict['featurename']
 
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     try:
-      serviceId, = self.dbSession.query(Feature.id).filter_by(name=featureName).one()
+      serviceId, = self.db_session.query(Feature.id).filter_by(name=feature_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown feature %s' % featureName}
+      return {'error': 'unknown feature %s' % feature_name}
 
     try:
-      afm = self.dbSession.query(AuthorFeatureMap).filter_by(author_id=authorId, feature_id=serviceId).one()
+      afm = self.db_session.query(AuthorFeatureMap).filter_by(author_id=author_id, feature_id=serviceId).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown feature for author'}
 
-    response = {'author': authorName, 'feature': featureName, 'sequence': afm.sequence}
+    self.db_session.commit()
+
+    response = {'author': author_name, 'feature': feature_name, 'sequence': afm.sequence}
 
     return response
 
@@ -169,55 +171,56 @@ class AuthorFeatureController(object):
   @view_config(route_name='author.features.default', request_method='GET', renderer='jsonp', http_cache=0)
   def getDefaultFeature(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     # it's OK for no default to exists.  The convention if no explicit default exists is to use the first feature
     try:
-      featureName, = self.dbSession.query(Feature.name). \
+      feature_name, = self.db_session.query(Feature.name). \
                                     join(AuthorFeatureDefault, Feature.id == AuthorFeatureDefault.feature_id). \
-                                    filter(AuthorFeatureDefault.author_id == authorId).one()
+                                    filter(AuthorFeatureDefault.author_id == author_id).one()
     except NoResultFound:
-      featureName = None
+      feature_name = None
 
-    result = {'author': authorName, 'default_feature': featureName}
+    self.db_session.commit()
+
+    result = {'author': author_name, 'default_feature': feature_name}
 
     return result
-
 
   @view_config(route_name='author.features.default.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def setDefaultFeature(self):
 
-    authorName = self.request.matchdict['authorname']
-    featureName = self.request.matchdict['featurename']
-  
+    author_name = self.request.matchdict['authorname']
+    feature_name = self.request.matchdict['featurename']
+
     try:
-      authorId, = self.dbSession.query(Author.id).filter_by(author_name=authorName).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown author %s' % authorName}
-  
+      return {'error': 'unknown author %s' % author_name}
+
     try:
-      featureId, = self.dbSession.query(Feature.id).filter_by(name=featureName).one()
+      feature_id, = self.db_session.query(Feature.id).filter_by(name=feature_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error':'unknown feature %s' % featureName}
+      return {'error': 'unknown feature %s' % feature_name}
 
     # if a default already exists then remove it
     try:
-      afd = self.dbSession.query(AuthorFeatureDefault).filter_by(author_id=authorId).one()
-      self.dbSession.delete(afd)
+      afd = self.db_session.query(AuthorFeatureDefault).filter_by(author_id=author_id).one()
+      self.db_session.delete(afd)
     except NoResultFound:
       pass
-    
-    afd = AuthorFeatureDefault(authorId,featureId)
-    self.dbSession.add(afd)
-    
-    self.dbSession.commit()
-    
-    return {'author':authorName,'default_feature':featureName}
+
+    afd = AuthorFeatureDefault(author_id, feature_id)
+    self.db_session.add(afd)
+
+    self.db_session.commit()
+
+    return {'author': author_name, 'default_feature': feature_name}
