@@ -1,8 +1,7 @@
 import datetime
-import urlparse
 
 from mi_schema import models
-from tim_commons import json_serializer
+from tim_commons import json_serializer, normalize_uri
 
 
 def create_event_interpreter(service_name, json_object, author_service_map, oauth_config):
@@ -586,14 +585,3 @@ class _LinkedinEventInterpreter(_ServiceEventInterpreter):
       self.headline = json_obj.get('headline')
       self.summary = json_obj.get('summary')
       self.photo = json_obj.get('pictureUrl')
-
-
-def normalize_uri(uri):
-  parsed_url = urlparse.urlparse(uri)
-  return urlparse.urlunparse((
-        parsed_url[0],
-        parsed_url[1],
-        parsed_url[2],
-        parsed_url[3],
-        '',
-        parsed_url[5]))
