@@ -3,11 +3,9 @@ import calendar
 from miapi.models import SimpleDBSession
 from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType
 
-from event_collectors.collector_factory import EventCollectorFactory
-
 from tim_commons import json_serializer
 
-from miapi import oAuthConfig, service_object_type_dict
+from miapi import service_object_type_dict
 
 from . import get_author_info, get_shared_services
 
@@ -103,8 +101,8 @@ def serviceBuild(authorName, serviceName, incremental, s3Bucket, aws_access_key,
 
   mapping = dbSession.query(AuthorServiceMap).filter_by(service_id=serviceId, author_id=authorId).one()
 
-  collector = EventCollectorFactory.get_collector_for(serviceName, s3Bucket, aws_access_key, aws_secret_key)
-  if collector:
-    collector.build_one(mapping, dbSession, oAuthConfig.get(serviceName), incremental)
+#  collector = EventCollectorFactory.get_collector_for(serviceName, s3Bucket, aws_access_key, aws_secret_key)
+#  if collector:
+#    collector.build_one(mapping, dbSession, oAuthConfig.get(serviceName), incremental)
 
   dbSession.close()

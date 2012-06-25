@@ -15,13 +15,15 @@
 							
 	"instagram": {"key":"6efe4252775c48b6850779a740da0fb2", 
 								"secret":"a1902ab128c248bc8accb9e955e819cd",
-								"endpoint":"https://api.instagram.com/v1/"},
+								"endpoint":"https://api.instagram.com/v1/",
+								"user1_access_token": "185059227.6efe425.4642c0285fe8456780dfe3b3ad1da6ad"},
 
 	"linkedin": {"key":"d41k4xfwqslf",
 							 "secret":"uUgXqibwylsYGU4R",
 							 "request_token_url": "https://api.linkedin.com/uas/oauth/requestToken",
 							 "access_token_url": "https://api.linkedin.com/uas/oauth/accessToken",
-							 "authorize_url": "https://www.linkedin.com/uas/oauth/authorize"},
+							 "authorize_url": "https://www.linkedin.com/uas/oauth/authorize",
+							 "endpoint": "http://api.linkedin.com/v1/"},
 
 	"googleplus": {"key":"924804117742-5bslusfu35m0vk7jv285vin2tl8dbcbq.apps.googleusercontent.com",
 						  "secret":"2KYr1pFdcZfslfTQjdhgJh9p",

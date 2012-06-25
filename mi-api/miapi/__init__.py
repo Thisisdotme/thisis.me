@@ -5,7 +5,7 @@ from pyramid.renderers import JSONP
 
 from tim_commons.oauth import load_oauth_config
 
-from mi_schema.models import ServiceObjectType
+from mi_schema.models import ServiceObjectType, Service
 
 from miapi.models import initialize_sql
 from miapi.models import DBSession
@@ -16,6 +16,9 @@ oAuthConfig = {}
 
 # lookup dictionary of service_object_type id to it's associated label
 service_object_type_dict = {}
+
+# lookup dictionary of service id to service name
+service_name_dict = {}
 
 
 # create and return a service_object_type dictionary
@@ -33,6 +36,21 @@ def load_service_object_type_dict():
   return service_object_type_dict
 
 
+# create and return a service_name dictionary
+def load_service_name_dict():
+
+  service_name_dict = {}
+
+  db_session = DBSession()
+
+  for row in db_session.query(Service):
+    service_name_dict[row.id] = row.service_name
+
+  db_session.commit()
+
+  return service_name_dict
+
+
 def main(global_config, **settings):
 
   """ This function returns a Pyramid WSGI application.
@@ -47,9 +65,13 @@ def main(global_config, **settings):
   global oAuthConfig
   oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
 
-  # load the type_label_lookup dictionary
+  # load the service_object_type_dict dictionary
   global service_object_type_dict
   service_object_type_dict = load_service_object_type_dict()
+
+  # load the service_name_dict dictionary
+  global service_name_dict
+  service_name_dict = load_service_name_dict()
 
   config = Configurator(settings=settings)
 
