@@ -1,3 +1,4 @@
 
+
 def about(request):
-    return {'project':'mi-api'}
+  return {'project': 'mi-api'}
