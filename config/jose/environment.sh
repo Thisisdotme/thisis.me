@@ -21,3 +21,4 @@ export PYTHONPATH=$TIM_HOME/mi-utils:$TIM_HOME/mi-model:$TIM_HOME/mi-db
 export PYTHONPATH=$TIM_HOME/mi-collectors:$TIM_HOME/mi-traversal:$PYTHONPATH
 export PYTHONPATH=$TIM_HOME/tools:$TIM_HOME/commons:$TIM_HOME/event_scanner:$PYTHONPATH
 export PYTHONPATH=$TIM_HOME/event_interpreter:$TIM_HOME/event_feed:$PYTHONPATH
+export PYTHONPATH=$TIM_HOME/event_processor:$PYTHONPATH

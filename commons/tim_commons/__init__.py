@@ -1,6 +1,7 @@
 import fcntl
 import os
 import re
+import urlparse
 
 
 def total_seconds(td):
@@ -74,3 +75,14 @@ url = r"""
     """.format(urls=urls, any_char=any_char, punc=punc)
 
 url_re = re.compile(url, re.VERBOSE | re.MULTILINE)
+
+
+def normalize_uri(uri):
+  parsed_url = urlparse.urlparse(uri)
+  return urlparse.urlunparse((
+        parsed_url[0],
+        parsed_url[1],
+        parsed_url[2],
+        parsed_url[3],
+        '',
+        parsed_url[5]))
