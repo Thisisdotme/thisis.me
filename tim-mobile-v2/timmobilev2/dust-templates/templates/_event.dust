@@ -31,10 +31,11 @@
 
 			  <div class="baseline">
 			    {#sources.items} 
-				{?feature_image_url}
-					<img src="{feature_image_url}" /> 
-				{/feature_image_url}
-			{/sources.items}
+				    {?service_image_url}
+    					<!-- <img class="{service_name}" src="{service_image_url}" /> -->
+    					<span class="{service_name}"></span>
+    				{/service_image_url}
+			    {/sources.items}
 
 	    <div class="fuzzy-time">
 	      {time_ago}

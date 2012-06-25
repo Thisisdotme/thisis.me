@@ -674,7 +674,7 @@ td { vertical-align: top; }
             font-weight:normal;
           }
    
-  .comment-list .toolbar {
+  .comment-list .toolbar, .app-page .toolbar {
     position:absolute;
     top:0px;
     height:36px;
@@ -690,7 +690,7 @@ td { vertical-align: top; }
     text-align:center;
   }
   
-  .comment-list .toolbar h1 {
+  .comment-list .toolbar h1, .app-page .toolbar h1 {
     font-size:18px;
     font-weight:normal;
     text-shadow:#333 1px 1px 2px;
@@ -1031,6 +1031,7 @@ td { vertical-align: top; }
    	padding: 10px 10px 10px 10px;
    	text-align: left;
    	margin: 0 auto;
+   	font-size:16px;
    }
 
    .flippage-container .event.full-page .content .inner-text {
@@ -1135,6 +1136,34 @@ td { vertical-align: top; }
    	height: 15px;
    	padding-top: 7px;
    }
+   
+   .flippage-container .event .baseline span {
+   	float: left;
+   	x-padding-left: 5px;
+   	height: 15px;
+   	width: 15px;
+   	background-size:cover;
+   }
+   
+   .flippage-container .event .baseline span.twitter {
+   	 background: url(http://api.thisis.me/img/l/services/color/Twitter.png) top left no-repeat;
+   }
+   
+   .flippage-container .event .baseline span.instagram {
+    	 background: url(http://api.thisis.me/img/l/services/color/Instagram.png) top left no-repeat;
+    }
+    
+    .flippage-container .event .baseline span.linkedin {
+     	 background: url(http://api.thisis.me/img/l/services/color/LinkedIn.png) top left no-repeat;
+     }
+  
+     .flippage-container .event .baseline span.facebook {
+       	 background: url(http://api.thisis.me/img/l/services/color/Facebook.png) top left no-repeat;
+       }
+       
+       .flippage-container .event .baseline span.foursquare {
+         	 background: url(http://api.thisis.me/img/l/services/color/Foursquare.png) top left no-repeat;
+         }
 
    .flippage-container .event .baseline img {
    	float: left;
