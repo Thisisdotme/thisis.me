@@ -1,4 +1,4 @@
-<div class="toolbar"><span class="grid-link" data-toolbar-item="gridLink"/><span class="detail-link" data-toolbar-item="detailLink"/><h1>{name}</h1></div>
+<div class="toolbar"><span class="grid-link" data-toolbar-item="gridLink"/><span class="detail-link" data-toolbar-item="detailLink"/><h1>{headline}</h1></div>
 <div class="photo-grid">
   <div id="photo-grid-scroll" class="clearfix">
     <div> 

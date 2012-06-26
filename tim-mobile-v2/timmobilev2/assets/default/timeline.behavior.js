@@ -166,7 +166,7 @@
   //this should follow the /authorname/feature/detail_id pattern?
   feature.activate = function(resourceId) {
 
-    if(resourceId) {
+    if(resourceId && false) { //turning off direct navigation to the 
       //go straight to detail view for this resource...
       //load collection first?
       feature.showDetails = true;

@@ -12,6 +12,8 @@
 		{/secondaryStory.content.data}
 	</div>
 	<div class="tertiary-story highlight" data-event_id="{tertiaryStory.event_id}">
-		{tertiaryStory.content.label}
+		{?tertiaryStory.content.label}
+		  {@truncate value="{tertiaryStory.content.label}" length="50"}{/truncate}
+		{/tertiaryStory.content.label}
 	</div>
 </div>

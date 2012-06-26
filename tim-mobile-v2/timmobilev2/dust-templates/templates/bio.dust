@@ -1,16 +1,16 @@
 <div class="bio">
   <div id="bio-wrapper">
   	<h1>{name}</h1>
-  	<div class="headline">{headline}</div>
+  	<section class="headline">{headline}</section>
   	<div class="profile-img">
   	  <img src="{picture_url}"/>
   	</div>
-  	<div class="location"><strong>Location: </strong>{location}</div>
+  	<section class="location"><strong>Location: </strong>{location}</section>
   	{?specialties}
-  	  <div class="specialties"><strong>Specializing in: </strong>{specialties}</div>
+  	  <section class="specialties"><strong>Specializing in: </strong>{specialties}</section>
   	{/specialties}
   	{?summary}
-  	  <div class="summary"><strong>Summary: </strong>{summary}</div>
+  	  <section class="summary"><strong>Summary: </strong>{summary}</section>
   	{/summary}
 	</div>
 </div>

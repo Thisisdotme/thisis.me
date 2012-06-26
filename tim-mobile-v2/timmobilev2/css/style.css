@@ -990,18 +990,21 @@ td { vertical-align: top; }
    	margin: 0;
    	padding: 0;
    	width: 100%;
+   	
+   	margin-top:40px;
 
    	background-color: #F9F7F7;
+    x-background-color: green;
    }
 
    .flippage-container .event {	
-       height: 100%; 
+       height: 90%; 
        margin: 0; /*Allow for footer height*/
       	position: relative;
    }
 
    .flippage-container .event.half-page {
-   	height: 50%;
+   	height: 45%;
    	position: relative;
    }
 

@@ -91,6 +91,8 @@ def make_photo_obj(db_session, request, se, asm, author, service_name):
   if se.caption:
     photo['tagline'] = se.caption
 
+  size_ordered_images = {}
+
   if se.service_id == Service.FACEBOOK_ID:
 
     json_obj = load_string(se.json)
@@ -101,30 +103,58 @@ def make_photo_obj(db_session, request, se, asm, author, service_name):
       log.warning('Skipping Facebook event with no images')
       return None
 
-    # default selection to first image
-    selection = json_obj['images'][0]
-
-    # find the minimum width photo above 640
-    min_resolution = sys.maxint
     for candidate in json_obj.get('images', []):
-      if candidate['width'] > 640:
-        selection = candidate if candidate['width'] < min_resolution else selection
 
-    if selection and 'source' in selection:
-      photo['url'] = selection['source']
-      photo['width'] = selection['width']
-      photo['height'] = selection['height']
+      size = candidate.get('width', 0) * candidate.get('height', 0)
+
+      image = {'url': candidate['source'],
+               'width': candidate['width'],
+               'height': candidate['height']}
+
+      size_ordered_images[size] = image
+
+# TODO remove
+#    # default selection to first image
+#    selection = json_obj['images'][0]
+#
+#    # find the minimum width photo above 640
+#    min_resolution = sys.maxint
+#    for candidate in json_obj.get('images', []):
+#      if candidate['width'] > 640:
+#        selection = candidate if candidate['width'] < min_resolution else selection
+#
+#    if selection and 'source' in selection:
+#      photo['url'] = selection['source']
+#      photo['width'] = selection['width']
+#      photo['height'] = selection['height']
 
   elif se.service_id == Service.INSTAGRAM_ID:
 
     json_obj = load_string(se.json)
 
-    selection = json_obj['images']['standard_resolution']
-    photo['url'] = selection['url']
-    photo['width'] = selection['width']
-    photo['height'] = selection['height']
+    for candidate in json_obj['images'].itervalues():
+
+      size = candidate.get('width', 0) * candidate.get('height', 0)
+
+      image = {'url': candidate['url'],
+              'width': candidate['width'],
+              'height': candidate['height']}
+
+      size_ordered_images[size] = image
+
+# TODO remove
+#    selection = json_obj['images']['standard_resolution']
+#    photo['url'] = selection['url']
+#    photo['width'] = selection['width']
+#    photo['height'] = selection['height']
 
     if 'location' in json_obj:
       photo['location'] = json_obj['location']
+
+  images = []
+  for size, image in sorted(size_ordered_images.iteritems(), key=lambda x: x[1]):
+    images.append(image)
+
+  photo['images'] = images
 
   return photo
