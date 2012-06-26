@@ -16,6 +16,7 @@ from profile_fetcher import ProfileFetcher
 class LinkedinProfileFetcher(ProfileFetcher):
 
   PROFILE_INFO = 'people/~:(first-name,last-name,headline,public-profile-url,picture-url,location:(name),industry,summary,specialties,associations,honors,interests,positions:(title,summary,company))'
+  PUBLIC_PROFILE_INFO = 'people/url={0}:(first-name,last-name,headline,public-profile-url,picture-url,location:(name),industry,summary,specialties,associations,honors,interests,positions:(title,summary,company))'
 
   def get_author_profile(self, service_author_id, asm):
 
@@ -23,14 +24,16 @@ class LinkedinProfileFetcher(ProfileFetcher):
 
     # setup what we need for oauth
     consumer = oauth.Consumer(self.oauth_config['key'], self.oauth_config['secret'])
-    token = oauth.Token(key=asm.access_token, secret=asm.access_token_secret)
+    if asm.access_token:
+      token = oauth.Token(key=asm.access_token, secret=asm.access_token_secret)
+    else:
+      token = oauth.Token(self.oauth_config['user1_access_token'], self.oauth_config['user1_access_token_secret'])
     client = oauth.Client(consumer, token)
 
-    args = {}
+    url_path = self.PROFILE_INFO if asm.access_token \
+                       else self.PUBLIC_PROFILE_INFO.format(urllib.quote(asm.service_author_id, ''))
 
-    url = '%s%s?%s' % (self.oauth_config['endpoint'],
-                       self.PROFILE_INFO,
-                       urllib.urlencode(args, True))
+    url = '%s%s' % (self.oauth_config['endpoint'], url_path)
 
     # request the user's profile
     json_obj = json_serializer.load_string(make_request(client, url, {'x-li-format': 'json'}))

@@ -153,8 +153,11 @@ class AuthorServiceController(object):
                                         ServiceObjectType.PHOTO_ALBUM_TYPE,
                                         author_id,
                                         service_id,
-                                        '{0}@{1}'.format(service_name, author_id),
-                                        datetime.now())
+                                        '_{0}@{1}'.format(service_name, author_id),
+                                        datetime.now(),
+                                        None,
+                                        None,
+                                        'Photos from Instagram')
         self.db_session.add(instagram__album)
         self.db_session.flush()
 

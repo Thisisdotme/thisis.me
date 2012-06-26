@@ -59,6 +59,8 @@ class AuthorQueryController(object):
               limit(LIMIT):
       events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, asm, author, serviceName))
 
+    self.dbSession.commit()
+
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
   # GET /v1/authors/{authorname}/events
@@ -89,6 +91,8 @@ class AuthorQueryController(object):
       if event_obj:
         events.append(event_obj)
 
+    self.dbSession.commit()
+
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
   # GET /v1/authors/{authorname}/events/{eventID}
@@ -117,6 +121,8 @@ class AuthorQueryController(object):
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown event id %d' % serviceEventID}
+
+    self.dbSession.commit()
 
     return {'event': createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)}
 
@@ -149,5 +155,7 @@ class AuthorQueryController(object):
       event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)
       if event_obj:
         events.append(event_obj)
+
+    self.dbSession.commit()
 
     return {'events': events}

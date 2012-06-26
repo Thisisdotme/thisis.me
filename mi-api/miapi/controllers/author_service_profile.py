@@ -38,6 +38,7 @@ class ServiceProfileController(object):
     try:
       author_id, = self.db_session.query(Author.id).filter(Author.author_name == author_name).one()
     except:
+      self.db_session.rollback()
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
 
