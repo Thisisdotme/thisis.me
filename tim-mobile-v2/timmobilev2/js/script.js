@@ -389,7 +389,6 @@ $(function() {
 	  //
 	  
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
-	  alert('link click!');
 	  TIM.app.navigate(url, {trigger: true});
 	}
 	

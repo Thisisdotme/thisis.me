@@ -85,7 +85,7 @@
 
   TIM.views.EventList = Backbone.View.extend( {
       id: "timeline",
-      className: "flippage flippage-container app-page",   
+      className: "flippage flippage-container app-page light",   
       pageTemplate: "event",
       
       initialize: function() {
