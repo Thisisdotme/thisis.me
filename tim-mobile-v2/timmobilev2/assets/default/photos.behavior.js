@@ -48,7 +48,13 @@ the behavior for the photo feature
   		
   		
   		parse: function(resp) {
-  		  //return (resp.photos.photo);
+       //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
+  		  //this will be more intelligent in the future
+  		  _.each(resp.photo_albums, function(album) {
+  		    console.log('album: ', album)
+  		    album.cover_photo.thumb_image = album.cover_photo.images[0];
+  		    album.cover_photo.main_image = album.cover_photo.images[album.cover_photo.images.length-1];
+  		  });
   		  return (resp.photo_albums);
   		}
 
@@ -105,7 +111,14 @@ the behavior for the photo feature
   		
   		
   		parse: function(resp) {
+  		  //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
+  		  //this will be more intelligent in the future
+  		  _.each(resp.photos, function(photo) {
+  		    photo.thumb_image = photo.images[0];
+  		    photo.main_image = photo.images[photo.images.length-1];
+  		  });
   		  return (resp.photos);
+  		  
   		},
   		
   		//trying to make this so it doesn't get photos past teh album's 'count'
@@ -262,7 +275,7 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			//render container with no photos initially
-  			var templateContext = {photos:[], name: this.album.get('name')};
+  			var templateContext = {photos:[], headline: this.album.get('headline')};
   			
   			var html = TIM.views.renderTemplate(this.template, templateContext);
     		this.$el.append(html);
@@ -589,7 +602,7 @@ the behavior for the photo feature
       showLocation: function(event) {
         //event.stopPropagation();
         event.preventDefault();
-        alert('hey!  showing location!!!!!');
+        alert('show location overlay!');
       },
       
       //if the user clicks near the 'interaction icons (comments, location)', prevent from going into 'detail mode'

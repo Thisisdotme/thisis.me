@@ -45,7 +45,17 @@
       render: function(){
         var that = this;
         if(!this.hasRendered) {
-          var html = TIM.views.renderTemplate("bio", this.model.toJSON());
+          var templateContext =  this.model.toJSON();
+          
+          if (TIM.pageInfo.authorName === "mchammer") {
+            if(!templateContext.summary) {
+              templateContext.summary = "Stanley Kirk Burrell, better known by his stage name MC Hammer, is an American rapper, entrepreneur, and actor. " +
+                                        "He had his greatest commercial success and popularity from the late 1980s until the mid-1990s. " +
+                                        "MC Hammer was born in Oakland, California. He was raised by his mother, along with his eight brothers and sisters, He would spend much of his childhood dancing in the Oakland Coliseum parking lot, to a beatbox, or selling stray baseballs.";
+            }
+          }
+          
+          var html = TIM.views.renderTemplate("bio", templateContext);
           this.$el.append(html);
           this.hasRendered = true;
         }
@@ -54,6 +64,7 @@
   			  TIM.appContainerElem.append(this.$el);
   			}
   			var containerEl = this.$el.find('.bio')[0];
+  			containerEl.style.height = TIM.viewportHeight_ - 10 + "px";
   			this.iScrollElem = new iScroll(containerEl, { hScroll: false });
   		  TIM.transitionPage (this.$el, {
   		      callback: function() {
@@ -70,7 +81,7 @@
       feature.bioView.model.fetch ({
         dataType: "jsonp",
   	  	//add this timeout in case call fails...
-    		timeout : 5000,
+    		timeout :10000,
     		success: function(resp) {
     		  //
     		  console.log('fetched bio');

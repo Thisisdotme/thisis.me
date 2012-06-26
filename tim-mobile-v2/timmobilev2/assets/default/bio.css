@@ -49,3 +49,7 @@ body {
 #bio-page .specialties  {
   margin:8px 0;
 }
+
+#bio-page section {
+  margin-bottom:12px;
+}

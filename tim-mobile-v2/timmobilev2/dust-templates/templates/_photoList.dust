@@ -1,3 +1,5 @@
 {#photos}
- <div class="thumb" style="background-image:url({url})" data-photo_id="{id}"></div>
+  {#thumb_image}
+    <div class="thumb" style="background-image:url({url})" data-photo_id="{id}"></div>
+  {/thumb_image}
 {/photos}
