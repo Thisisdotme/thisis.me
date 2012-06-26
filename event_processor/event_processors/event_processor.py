@@ -59,7 +59,14 @@ class EventProcessor:
   def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
     pass
 
-  def process(self, tim_author_id, service_author_id, service_event_id, state, service_event_json, links):
+  def process(
+      self,
+      tim_author_id,
+      service_author_id,
+      service_event_id,
+      state,
+      service_event_json,
+      links):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
     query = db.Session().query(AuthorServiceMap)
@@ -112,6 +119,8 @@ class EventProcessor:
         else:
           existing_event.modify_time = datetime.datetime.utcnow()
 
+        correlate_and_update_event(interpreter, existing_event, self.me_service_id)
+
       else:
         # skip event
         logging.debug('Skipping unchanged known event')
@@ -149,6 +158,7 @@ class EventProcessor:
                                    auxiliary_content,
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
+      correlate_and_update_event(interpreter, service_event, self.me_service_id)
       db.Session().add(service_event)
       db.Session().flush()
 
@@ -218,10 +228,16 @@ def update_scanner(event_updated,
     db.Session().add(scanner_event)
 
 
-def correlate_and_update_event(event_json, service_event, author_service_map_id, me_service_id):
+def correlate_and_update_event(event_json, service_event, me_service_id):
   service_event.correlation_id, url = event_correlator.correlate_event(event_json)
 
   if service_event.correlation_id:
+    # Get the ASM for this user
+    query = db.Session().query(AuthorServiceMap)
+    query = query.filter(and_(AuthorServiceMap.author_id == service_event.author_id,
+                              AuthorServiceMap.service_id == me_service_id))
+    asm = query.one()
+
     # We have a correlation
     correlation_event = query_correlation_event(me_service_id,
                                                 service_event.correlation_id,
@@ -231,7 +247,7 @@ def correlate_and_update_event(event_json, service_event, author_service_map_id,
     else:
       # create a new row with this id
       correlation_event = ServiceEvent(
-          author_service_map_id,
+          asm.id,
           ServiceObjectType.CORRELATION_TYPE,
           service_event.author_id,
           me_service_id,
