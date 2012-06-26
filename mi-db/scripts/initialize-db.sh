@@ -154,3 +154,17 @@ curl -X PUT api.thisis.me/v1/authors/om/features/default/cover
 curl -i -X PUT -d '{"service_author_id":989}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om/services/twitter
 curl -i -X PUT -d '{"service_author_id":2637}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om/services/instagram
 
+# Ran Tao
+curl -i -X PUT -d '{"password":"mi","fullname":"Ran Tao","email":"rantao"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/ran
+curl -X PUT api.thisis.me/v1/authors/ran/features/timeline
+curl -X PUT api.thisis.me/v1/authors/ran/features/photos
+curl -X PUT api.thisis.me/v1/authors/ran/features/bio
+curl -X PUT api.thisis.me/v1/authors/ran/features/cover
+
+curl -X PUT api.thisis.me/v1/authors/ran/features/default/cover
+
+curl -i -X PUT -d '{"service_author_id":782393}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/ran/services/twitter
+curl -i -X PUT -d '{"service_author_id":703135}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/ran/services/instagram
+curl -i -X PUT -d '{"service_author_id":"http://www.linkedin.com/in/rantao"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/ran/services/linkedin
+
+

@@ -113,6 +113,7 @@ def make_photo_obj(db_session, request, se, asm, author, service_name):
 
       size_ordered_images[size] = image
 
+# TODO remove
 #    # default selection to first image
 #    selection = json_obj['images'][0]
 #
@@ -141,6 +142,7 @@ def make_photo_obj(db_session, request, se, asm, author, service_name):
 
       size_ordered_images[size] = image
 
+# TODO remove
 #    selection = json_obj['images']['standard_resolution']
 #    photo['url'] = selection['url']
 #    photo['width'] = selection['width']

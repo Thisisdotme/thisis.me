@@ -135,4 +135,9 @@ class AuthorPhotoAlbumController(object):
 
     db_session.commit()
 
+    # if only 2 albums exist and they contain the same number of photos remove the
+    # first (which is the 'all photos' album)
+    if len(albums) == 2 and (albums[0]['count'] == albums[1]['count']):
+      albums.pop(0)
+
     return {'author_name': author_name, 'photo_albums': albums}
