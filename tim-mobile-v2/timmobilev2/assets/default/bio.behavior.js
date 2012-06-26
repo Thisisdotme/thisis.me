@@ -8,7 +8,7 @@
     
   TIM.models.Bio = Backbone.Model.extend({
     
-    url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/services/linkedin/profile',
+    url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/profile',
     
     parse: function(resp) {
 		  return (resp);

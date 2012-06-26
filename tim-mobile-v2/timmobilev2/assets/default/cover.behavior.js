@@ -117,7 +117,7 @@
       //TODO - global json fetch method with error handling
       coverView.collection.fetch({
   			dataType: "jsonp",
-  			timeout : 5000,
+  			timeout : 10000,
   			success: function(resp) {
   			  feature.collectionLoaded = true;
   			},
