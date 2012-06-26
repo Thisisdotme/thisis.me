@@ -125,6 +125,8 @@ curl -X PUT api.thisis.me/v1/authors/timoreilly/features/cover
 curl -X PUT api.thisis.me/v1/authors/timoreilly/features/default/cover
 
 curl -i -X PUT -d '{"service_author_id":2384071}' -H "Content-Type: application/json; charset=utf-8" localhost:6543/v1/authors/timoreilly/services/twitter
+curl -i -X PUT -d '{"service_author_id":"http://www.linkedin.com/pub/tim-o-reilly/0/9/6b5"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/timoreilly/services/linkedin
+
 
 # Bryce Roberts
 curl -i -X PUT -d '{"password":"mi","fullname":"Bryce Roberts","email":"bryceroberts"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce
@@ -137,6 +139,8 @@ curl -X PUT api.thisis.me/v1/authors/bryce/features/default/cover
 
 curl -i -X PUT -d '{"service_author_id":6160742}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce/services/twitter
 curl -i -X PUT -d '{"service_author_id":84}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce/services/instagram
+curl -i -X PUT -d '{"service_author_id":"http://www.linkedin.com/pub/bryce-roberts/0/60/180"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/bryce/services/linkedin
+
 
 # Om Malik
 curl -i -X PUT -d '{"password":"mi","fullname":"Om Malik","email":"ommalik"}' -H "Content-Type: application/json; charset=utf-8" api.thisis.me/v1/authors/om

@@ -93,6 +93,7 @@ class AuthorPhotoAlbumController(object):
 
       album_obj = make_photo_album_obj(self.db_session, self.request, album, asm, author, service_name)
       if album_obj:
+
         cover_photo = None
 
         if album.service_id == Service.FACEBOOK_ID:
@@ -112,6 +113,20 @@ class AuthorPhotoAlbumController(object):
               cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
             except NoResultFound:
               pass
+
+        else:
+          # get the most recent photo for the cover photo
+          photo, asm, author, service_name = self.db_session.query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+                                           join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
+                                                                       ServiceEvent.service_id == AuthorServiceMap.service_id)). \
+                                           join(Author, ServiceEvent.author_id == Author.id). \
+                                           join(Service, ServiceEvent.service_id == Service.id). \
+                                           filter(and_(ServiceEvent.author_id == author_id,
+                                                       ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
+                                           order_by(ServiceEvent.create_time.desc()). \
+                                           first()
+
+          cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author, service_name)
 
         if cover_photo:
           album_obj['cover_photo'] = cover_photo
