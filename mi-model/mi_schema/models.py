@@ -272,6 +272,7 @@ class ServiceObjectType(Base):
   FOLLOW_TYPE = 6
   VIDEO_TYPE = 7
   VIDEO_ALBUM_TYPE = 8
+  CORRELATION_TYPE = 9
 
   def __init__(self, type_id, label):
     self.type_id = type_id
@@ -298,16 +299,15 @@ class ServiceEvent(Base):
                                      'event_id',
                                      name='uidx_service_event_1'),
                     Index('idx_service_event_2', "author_service_map_id", "create_time"),
-                    Index('idx_service_event_3', "parent_id", "create_time"),
                     {})
 
   id = Column(Integer, primary_key=True)
 
-  type_id = Column(Integer, ForeignKey('service_object_type.type_id', ondelete='CASCADE'), nullable=False)
+  type_id = Column(Integer,
+                   ForeignKey('service_object_type.type_id', ondelete='CASCADE'),
+                   nullable=False)
   author_id = Column(Integer, ForeignKey('author.id', ondelete='CASCADE'), nullable=False)
   service_id = Column(Integer, ForeignKey('service.id', ondelete='CASCADE'), nullable=False)
-
-  parent_id = Column(Integer, ForeignKey('service_event.id', ondelete='CASCADE'), nullable=True)
 
   author_service_map_id = Column(Integer,
                                  ForeignKey('author_service_map.id', ondelete='CASCADE'),
@@ -316,6 +316,8 @@ class ServiceEvent(Base):
   event_id = Column(String(255), nullable=False)
   create_time = Column(DateTime, nullable=False)
   modify_time = Column(DateTime, nullable=False)
+
+  correlation_id = Column(String(64), nullable=True)
 
   url = Column(String(1024))
 
@@ -343,7 +345,8 @@ class ServiceEvent(Base):
                photoURL=None,
                auxillaryContent=None,
                authorProfileImageUrl=None,
-               json=None):
+               json=None,
+               correlation_id=None):
     self.author_service_map_id = author_service_map_id
     self.type_id = type_id
     self.author_id = author_id
@@ -358,6 +361,7 @@ class ServiceEvent(Base):
     self.auxillary_content = auxillaryContent
     self.author_profile_image_url = authorProfileImageUrl
     self.json = json
+    self.correltation_id = correlation_id
 
   def __repr__(self):
     # not including the JSON
@@ -452,10 +456,6 @@ TABLE: highlight
 class Highlight(Base):
 
   __tablename__ = 'highlight'
-#  __table_args__ = (UniqueConstraint('author_service_map_id', 'event_id', name='uidx_service_event_1'),
-#                    Index('idx_service_event_2', "author_service_map_id", "create_time"),
-#                    Index('idx_service_event_3', "parent_id", "create_time"),
-#                    {})
 
   id = Column(Integer, primary_key=True)
 

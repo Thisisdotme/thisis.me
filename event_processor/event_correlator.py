@@ -8,10 +8,14 @@ from tim_commons import normalize_uri
 def correlate_event(event_json):
   # Extract the origin url
   uri = event_json.original_content_uri()
-  # Normalize the URL: follow redirect
-  normalized_uri = _normalize_uri(uri)
-  # Generate id for this
-  return _generate_id(normalized_uri)
+
+  if uri:
+    # Normalize the URL: follow redirect
+    normalized_uri = _normalize_uri(uri)
+    # Generate id for this
+    return (_generate_id(normalized_uri), normalized_uri)
+
+  return (None, None)
 
 
 def _normalize_uri(uri):

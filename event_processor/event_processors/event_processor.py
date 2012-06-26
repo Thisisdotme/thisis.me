@@ -9,10 +9,16 @@ from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
-from mi_schema.models import (ServiceEvent, AuthorServiceMap, Service, EventScannerPriority, Relationship)
+from mi_schema.models import (ServiceEvent,
+                              AuthorServiceMap,
+                              Service,
+                              EventScannerPriority,
+                              Relationship,
+                              ServiceObjectType)
 from tim_commons import json_serializer
 from tim_commons import db
 from tim_commons import total_seconds
+import event_correlator
 
 
 def from_service_name(service_name, max_priority, min_duration, oauth_config):
@@ -44,6 +50,10 @@ class EventProcessor:
     query = db.Session().query(Service.id)
     query = query.filter(Service.service_name == self.service_name)
     self.service_id, = query.one()
+
+    query = db.Session().query(Service.id)
+    query = query.filter(Service.service_name == 'me')
+    self.me_service_id, = query.one()
 
   @abstractmethod
   def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
@@ -140,11 +150,17 @@ class EventProcessor:
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
       db.Session().add(service_event)
+      db.Session().flush()
 
     # process any links for this event
     if links:
       for link in links:
-        relationship = Relationship(tim_author_id, link['service_id'], link['service_event_id'], tim_author_id, asm.service_id, interpreter.get_id())
+        relationship = Relationship(tim_author_id,
+                                    link['service_id'],
+                                    link['service_event_id'],
+                                    tim_author_id,
+                                    asm.service_id,
+                                    interpreter.get_id())
         try:
           db.Session().add(relationship)
           db.Session().flush()
@@ -200,3 +216,35 @@ def update_scanner(event_updated,
 
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
     db.Session().add(scanner_event)
+
+
+def correlate_and_update_event(event_json, service_event, author_service_map_id, me_service_id):
+  service_event.correlation_id, url = event_correlator.correlate_event(event_json)
+
+  if service_event.correlation_id:
+    # We have a correlation
+    correlation_event = query_correlation_event(me_service_id,
+                                                service_event.correlation_id,
+                                                service_event.author_id)
+    if correlation_event:
+      correlation_event.modify_time = max(correlation_event.modify_time, service_event.modify_time)
+    else:
+      # create a new row with this id
+      correlation_event = ServiceEvent(
+          author_service_map_id,
+          ServiceObjectType.CORRELATION_TYPE,
+          service_event.author_id,
+          me_service_id,
+          service_event.correlation_id,
+          service_event.create_time,
+          service_event.modify_time,
+          url=url)
+      db.Session().add(correlation_event)
+
+
+def query_correlation_event(me_service_id, correlation_id, author_id):
+  query = db.Session().query(ServiceEvent)
+  query = query.filter_by(event_id=correlation_id,
+                          service_id=me_service_id,
+                          author_id=author_id)
+  return query.first()

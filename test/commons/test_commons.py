@@ -1,7 +1,7 @@
 import unittest
 import datetime
 
-from tim_commons import total_seconds, prune_dictionary, extract_uri_from_text
+from tim_commons import total_seconds, prune_dictionary, extract_uri_from_text, normalize_uri
 
 
 class CommonTestCase(unittest.TestCase):
@@ -37,3 +37,11 @@ class CommonTestCase(unittest.TestCase):
 
     self.assertEqual(urls[0], 'http://www.thisis.me')
     self.assertEqual(urls[1], 'https://www.example.com/hello?q=world')
+
+  def test_normalized_uri(self):
+    normalized_uri = 'http://www.thisis.me/hello'
+    uri = normalized_uri + '?q=world'
+
+    result = normalize_uri(uri)
+
+    self.assertEqual(result, normalized_uri)

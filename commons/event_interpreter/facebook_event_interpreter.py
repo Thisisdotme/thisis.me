@@ -1,14 +1,9 @@
-'''
-Created on May 9, 2012
-
-@author: howard
-'''
-
 from abc import ABCMeta
 
 from datetime import datetime
 from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
+from tim_commons import normalize_uri
 
 
 class FacebookEventInterpreter(ServiceEventInterpreter):
@@ -25,7 +20,11 @@ class FacebookEventInterpreter(ServiceEventInterpreter):
     return datetime.strptime(self.json['created_time'], self.DATETIME_FORMAT)
 
   def get_update_time(self):
-    return datetime.strptime(self.json['updated_time'], self.DATETIME_FORMAT)
+    date = self.json.get('updated_time')
+    if date:
+      return datetime.strptime(date, self.DATETIME_FORMAT)
+
+    return None
 
   def get_type(self):
     return self.json.get('type', None)
@@ -56,6 +55,13 @@ class FacebookStatusEventInterpreter(FacebookEventInterpreter):
 
   def get_photo(self):
     return self.json['picture'] if 'picture' in self.json else None
+
+  def original_content_uri(self):
+    uri = self.json.get('link')
+    if uri:
+      return normalize_uri(uri)
+
+    return None
 
 
 class FacebookPhotoAlbumEventInterpreter(FacebookEventInterpreter):

@@ -31,3 +31,6 @@ class DummyDBSession:
 
   def query(self, clazz):
     return DummyDBSession._Query()
+
+  def add(self, table_object):
+    pass

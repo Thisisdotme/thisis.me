@@ -1,7 +1,8 @@
 import unittest
 import datetime
 
-from tim_commons import event_interpreter, json_serializer
+import event_interpreter
+from tim_commons import json_serializer
 from mi_schema import models
 
 
@@ -196,7 +197,7 @@ class EventInterpreterTest(unittest.TestCase):
                      'And a link: http://t.co/6fgHbu70 http://t.co/OVJDl4UA')
     self.assertEqual(interpreted.content(),
                      'And a link: http://t.co/6fgHbu70 http://t.co/OVJDl4UA')
-    self.assertEqual(interpreted.photo(), None)
+    self.assertEqual(interpreted.photo(), 'http://p.twimg.com/AwB0WWlCAAAUkEj.jpg')
     self.assertEqual(interpreted.url(), None)
     self.assertEqual(interpreted.auxiliary_content(), None)
     self.assertEqual(interpreted.origin(), 'web')
@@ -380,11 +381,3 @@ class EventInterpreterTest(unittest.TestCase):
   def test_linkedin_event(self):
     # TODO: implement this
     self.assertTrue(True)
-
-  def test_normalized_uri(self):
-    normalized_uri = 'http://www.thisis.me/hello'
-    uri = normalized_uri + '?q=world'
-
-    result = event_interpreter.normalize_uri(uri)
-
-    self.assertEqual(result, normalized_uri)

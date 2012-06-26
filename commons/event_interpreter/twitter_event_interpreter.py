@@ -1,12 +1,7 @@
-'''
-Created on May 9, 2012
-
-@author: howard
-'''
-
 from datetime import datetime
 from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
+from tim_commons import normalize_uri
 
 
 class TwitterEventInterpreter(ServiceEventInterpreter):
@@ -36,3 +31,12 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
     for media in self.json['entities'].get('media', []):
       if media.get('type') == "photo":
         return media.get('media_url')
+
+  def original_content_uri(self):
+    entities = self.json.get('entities')
+    if entities:
+      urls = entities.get('urls')
+      if urls:
+        return normalize_uri(urls[0].get('expanded_url'))
+
+    return None
