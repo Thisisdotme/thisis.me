@@ -54,6 +54,7 @@ body {
   margin-bottom:0;
   width:300px;
   background-size:cover;
+  background-position:0 30%;
 }
 
 #photo-detail-container {

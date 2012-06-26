@@ -126,6 +126,8 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	loadFeature : function() {
 	  if(this.$el.hasClass('selected')) {
 	    //return;
+	    TIM.navigateHandler("route:" + this.model.get('feature_name')); //kinda hack way of navigateing to same feature
+	    return;
 	  }
 	  TIM.app.navigate(this.model.get('feature_name'), {trigger: true});
 	},

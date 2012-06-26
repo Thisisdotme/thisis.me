@@ -270,6 +270,10 @@ $(function() {
 	//make sure menu item is selected
 	
 	TIM.app.bind('all', function(route, path) {
+	    TIM.navigateHandler(route, path);  //move the handler fn outside of here so we can explicitly call it elsewhere
+  });
+  
+  TIM.navigateHandler = function(route, path) {
 	    
 	    // the 'route' argument will be in the form "route:featurename"
 	    
@@ -312,7 +316,7 @@ $(function() {
           TIM.features.setSelectedFeature(feature);
         }
       }
-  });
+  };
   
   TIM.showErrorMessage = function (options) {
     TIM.setLoading(false);
@@ -327,7 +331,7 @@ $(function() {
   //this is going to have to evolve to be something much more like what jquery mobile does with 'changePage'
   //for now this simply handles the DOM page transition
   //
-  //should keep a history stack & use that to determine whether to do a forward or revers transition
+  //should keep a history stack & use that to determine whether to do a forward or reverse transition
   
 	TIM.transitionPage = function (toPage, options) {
 	  //TIM.setErrorShowing(false);
@@ -339,7 +343,7 @@ $(function() {
 	  
 	  console.log('transitioning (fromPage, toPage, fromPage==toPage:) ', toPage, fromPage, toPage.is(fromPage));
 	  
-	  if(toPage.is(fromPage) && !options.transitionSamePage) {
+	  if(toPage.is(fromPage) && !options.transitionSamePage) { //always transitioning for now...
 	    return;
 	  }
 	 
@@ -385,7 +389,7 @@ $(function() {
 	  //
 	  
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
-	  console.log(url);
+	  alert('link click!');
 	  TIM.app.navigate(url, {trigger: true});
 	}
 	
