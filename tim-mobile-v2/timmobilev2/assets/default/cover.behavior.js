@@ -82,6 +82,7 @@
   				  secondaryStory: [], //this.collection.at(1) ? this.collection.at(1).toJSON() : [],
   				  tertiaryStory: [], //this.collection.at(2) ? this.collection.at(2).toJSON() : [],
   				}
+  				console.log ("cover story:", context.primaryStory);
   				//this pattern could probably be generalized to a basic TIM view
   				if(!this.hasRendered) {
             var html = TIM.views.renderTemplate("coverpage", context);
