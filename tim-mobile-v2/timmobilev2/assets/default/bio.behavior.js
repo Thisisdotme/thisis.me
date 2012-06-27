@@ -28,7 +28,7 @@
   TIM.views.Bio = Backbone.View.extend( {
       id: "bio-page",
       
-      className: "app-page",
+      className: "app-page toolbar-top",
       
       hasRendered: false,
       

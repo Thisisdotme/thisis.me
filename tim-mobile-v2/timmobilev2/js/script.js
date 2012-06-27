@@ -371,6 +371,9 @@ $(function() {
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
       $(this).removeClass("slide fade flip");
       $('#app').removeClass('transitioning');
+      setTimeout(function(){
+          window.scrollTo(0, 0);
+      }, 0);
     });
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;

@@ -1,5 +1,3 @@
-@import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
-
 @font-face
 {
 	font-family:Chunkfive;
@@ -15,7 +13,6 @@
   width:100%;
   height:100%;
   color:#fff;
-  font-family: 'PT Sans Narrow', sans-serif;
   font-weight: bold;
 }
 
@@ -87,7 +84,7 @@
 /* cameron's styles */
 
 
-.cover-page header
+.cover-page .header
 {
 	display:block;
 	left:0;
@@ -98,7 +95,7 @@
 	width:80%;
 }
 
-.cover-page header span
+.cover-page .header span
 {
 	display:block;
 	font-family:Chunkfive;
@@ -106,10 +103,10 @@
 	white-space:nowrap;
 }
 
-.cover-page header #first-name
+.cover-page #first-name
 {
 	-webkit-text-fill-color:#FF0;
-	-webkit-text-stroke:2px #000;
+	-webkit-text-stroke:1px #000;
 	line-height:30%;
 	margin-top:15%;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
@@ -117,10 +114,10 @@
 	font-size:80px;
 }
 
-.cover-page header #last-name
+.cover-page #last-name
 {
 	-webkit-text-fill-color:#FFF;
-	-webkit-text-stroke:2px #000;
+	-webkit-text-stroke:1px #000;
 	margin-left:15%;
 	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
 	z-index:3;

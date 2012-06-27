@@ -13,7 +13,11 @@ body {
   height:320px;
 }
 
-#bio-page h1 {
+#bio-page {
+  padding-top:30px;
+}
+
+.bio h1 {
   text-transform:capitalize;
   font-size:24px;
   font-weight: normal;

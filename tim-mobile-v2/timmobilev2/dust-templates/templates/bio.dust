@@ -1,3 +1,4 @@
+<div class="toolbar"><h1>Bio</h1></div>
 <div class="bio">
   <div id="bio-wrapper">
   	<h1>{name}</h1>

@@ -90,8 +90,11 @@
           }
           TIM.transitionPage(that.$el, {animationName:"fade"});
           //TIM.setLoading(true);
-          $("#first-name").fitText(.3);
-      		$("#last-name").fitText(.5);
+          if(name.length === 2) {
+            $("#first-name").fitText(.3);
+        		$("#last-name").fitText(.5);
+          }
+          
 
       },
       
