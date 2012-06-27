@@ -5,7 +5,7 @@
 }
 
 #cover-container {
-  background:#333 url(/mchammer/asset/cover_bg.jpg) no-repeat left top;
+  background:#333 url(/mchammer/asset/cover_bg_2.jpg) no-repeat left top;
   background-size:cover;
 }
 
@@ -38,7 +38,7 @@
 }
 
 
-.cover-page .primary-story {
+.x-cover-page .primary-story {
   font-size:16px;
   font-weight:bold;
   color:#fff200;
@@ -103,25 +103,25 @@
 	white-space:nowrap;
 }
 
-.cover-page #first-name
+
+.cover-page  #first-name
 {
 	-webkit-text-fill-color:#FF0;
 	-webkit-text-stroke:1px #000;
 	line-height:30%;
-	margin-top:15%;
+	margin-left:0px;
+	margin-top:10px;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:2;
-	font-size:80px;
 }
 
-.cover-page #last-name
+.cover-page  #last-name
 {
 	-webkit-text-fill-color:#FFF;
 	-webkit-text-stroke:1px #000;
-	margin-left:15%;
+	padding-left:10%;
 	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
 	z-index:3;
-	font-size:50px;
 }
 
 .cover-page section
@@ -132,20 +132,63 @@
 	width:100%;
 }
 
-.pullquote
+.cover-page p {
+  margin:0;
+  padding:0;
+}
+
+.pullquote,#links
+{
+	padding:10px 20px;
+}
+
+.cover-page .pullquote
 {
 	display:block;
 	font-family:'Helvetica Neue';
-	font-size:22px;
-	font-weight:700;
+	font-size:16px;
 	line-height:1.2;
-	margin-bottom:30px;
-	text-shadow:0 1px 3px rgba(0,0,0,0.5);
-	width:66%;
+	margin-bottom:20px;
+	margin-left:4%;
+	text-align:left;
+	text-shadow:8px 8px 12px #000;
+	width:75%;
 }
 
-.pullquote a
+.cover-page .pullquote a
 {
-	color:#FFCE78;
+	color:#FF0;
+	font-size:22px;
+	font-weight:700;
 	text-decoration:none;
 }
+
+@keyframes kenburns {
+  /* line 142, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 143, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+
+@-moz-keyframes kenburns {
+  /* Firefox */
+  /* line 146, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 147, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+
+@-webkit-keyframes kenburns {
+  /* Safari and Chrome */
+  /* line 150, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 151, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+

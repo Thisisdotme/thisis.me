@@ -455,7 +455,7 @@ td { vertical-align: top; }
 		/*test*/
 		position: absolute;
 		top:3px;
-		right:3px;
+		right:5px;
 		z-index:3;
 
 		/*more performant approach to hiding text?*/
@@ -514,8 +514,8 @@ td { vertical-align: top; }
   		vertical-align:text-bottom;
   		line-height:74px;
   		width:46px;
-  		margin-left:2px;
-  		margin-right:2px;	
+  		margin-left:0px;
+  		margin-right:4px;	
   		border-radius:6px;	
   	}
 
@@ -525,7 +525,7 @@ td { vertical-align: top; }
   	}
 
   	#feature-nav li:first-child {
-  		margin-top:70px;
+  		margin-top:56px;
   	}
     
     #nav-highlights {
@@ -1132,6 +1132,7 @@ td { vertical-align: top; }
 
 
    .flippage-container .event .footer .info .caption {
+    display:none;
    	height: 18px;
 
    	font-size: 14px;

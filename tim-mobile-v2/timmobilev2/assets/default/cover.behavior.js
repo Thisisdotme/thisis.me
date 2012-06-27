@@ -91,7 +91,7 @@
           }
           TIM.transitionPage(that.$el, {animationName:"fade"});
           //TIM.setLoading(true);
-          if(name.length === 2) {
+          if(name === "MC Hammer") {
             $("#first-name").fitText(.3);
         		$("#last-name").fitText(.5);
           }
