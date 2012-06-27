@@ -448,14 +448,14 @@ td { vertical-align: top; }
 		background:url(/img/nav/logo.svg) no-repeat, url(/img/nav/logo-active.svg) no-repeat;
 		background-size:contain;
 		display: block;
-		width:50px;
-		height:50px;
+		width:30px;
+		height:30px;
 		box-shadow: 0 0 8px rgba(0,0,0,.5);
 
 		/*test*/
 		position: absolute;
-		top:5px;
-		right:5px;
+		top:3px;
+		right:3px;
 		z-index:3;
 
 		/*more performant approach to hiding text?*/
@@ -497,7 +497,7 @@ td { vertical-align: top; }
   	}
 
   	.nav-open #feature-nav {
-  		width:62px;
+  		width:44px;
   	}
 
   	#feature-nav li {
@@ -514,8 +514,8 @@ td { vertical-align: top; }
   		vertical-align:text-bottom;
   		line-height:74px;
   		width:46px;
-  		margin-left:8px;
-  		margin-right:8px;	
+  		margin-left:2px;
+  		margin-right:2px;	
   		border-radius:6px;	
   	}
 
