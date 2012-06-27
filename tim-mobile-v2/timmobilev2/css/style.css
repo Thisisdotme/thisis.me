@@ -707,6 +707,40 @@ td { vertical-align: top; }
     background: transparent url(/img/back_arrow.png) no-repeat center center;
   }
   
+  
+  .app-page.light .toolbar {
+    position:absolute;
+    top:0px;
+    height:36px;
+    color:#333;
+    background:rgba(230,230,230,.8);
+    width:100%;
+    z-index:9000;
+    overflow:hidden;
+
+    -moz-box-shadow:    0 0px 7px 2px #999;
+    -webkit-box-shadow: 0 0px 7px 2px #999;
+    box-shadow:         0 0px 7px 2px #999;
+    text-align:center;
+  }
+  
+  .app-page.light .toolbar h1 {
+    font-size:20px;
+    font-weight:normal;
+    text-shadow:#ccc 1px 1px 2px;
+    line-height:40px;
+    text-align:center;
+  }
+  
+  .app-page.light .toolbar .back-link  {
+    position:absolute;
+    left:8px;
+    top:2px;
+    height:36px;
+    width:24px;
+    background: transparent url(/img/back_arrow.png) no-repeat center center;
+  }
+  
    
    .mi-header { }
    
@@ -1138,9 +1172,10 @@ td { vertical-align: top; }
    .flippage-container .event .baseline {
    	height: 15px;
    	padding-top: 7px;
+   	padding-left:5px;
    }
    
-   .flippage-container .event .baseline span {
+   .flippage-container .event .baseline span, footer span.service-icon {
    	float: left;
    	x-padding-left: 5px;
    	height: 15px;
@@ -1148,23 +1183,23 @@ td { vertical-align: top; }
    	background-size:cover;
    }
    
-   .flippage-container .event .baseline span.twitter {
+   .flippage-container .event .baseline span.twitter, footer span.twitter {
    	 background: url(http://api.thisis.me/img/l/services/color/Twitter.png) top left no-repeat;
    }
    
-   .flippage-container .event .baseline span.instagram {
+   .flippage-container .event .baseline span.instagram, footer span.instagram {
     	 background: url(http://api.thisis.me/img/l/services/color/Instagram.png) top left no-repeat;
     }
     
-    .flippage-container .event .baseline span.linkedin {
+    .flippage-container .event .baseline span.linkedin, footer span.linkedin {
      	 background: url(http://api.thisis.me/img/l/services/color/LinkedIn.png) top left no-repeat;
      }
   
-     .flippage-container .event .baseline span.facebook {
+     .flippage-container .event .baseline span.facebook, footer span.facebook {
        	 background: url(http://api.thisis.me/img/l/services/color/Facebook.png) top left no-repeat;
        }
        
-       .flippage-container .event .baseline span.foursquare {
+       .flippage-container .event .baseline span.foursquare, footer span.foursquare {
          	 background: url(http://api.thisis.me/img/l/services/color/Foursquare.png) top left no-repeat;
          }
 

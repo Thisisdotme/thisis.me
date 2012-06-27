@@ -5,18 +5,7 @@
 	    <div class="full-photo" style="background-image:url({url})" data-photo_id="{id}"/>
 	  {/main_image}
 		<!-- img class="image" src="{url}" data-photo_id="{id}" / -->
-		<footer class="caption">
-		  <div class="profile-thumb"></div>		  
-		  <div class="main-text">{?tagline}{@truncate value="{tagline}" length="35"}{/truncate}{/tagline}</div>
-		  <div>
-		   <!-- loop through sources -->
-		   {#sources}
-		    <span class="source-img {source_name}"></span>
-		   {/sources}
-		   <!-- move this whole caption/bottom info bar thing to a partial! -->
-		    <span class="time-and-location">{time_ago} {location}</span>
-		  </div>
-		</footer>
-		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
+		{>_eventFooter/}
+		<!-- <div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div> -->
 	{/events}
 </div>

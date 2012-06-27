@@ -1,5 +1,11 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
+@font-face
+{
+	font-family:Chunkfive;
+	src:url(/mchammer/asset/chunkfive.otf) format(opentype);
+}
+
 #cover-container {
   background:#333 url(/mchammer/asset/cover_bg.jpg) no-repeat left top;
   background-size:cover;
@@ -22,7 +28,7 @@
   position:absolute;
   top:62px;
   left:12px;
-  font-family: 'Holtwood One SC',serif;
+  font-family: 'chunkfive',serif;
   line-height:1.1;
   text-transform:uppercase;
 }
@@ -76,4 +82,73 @@
    text-shadow:1px 1px #333;
    text-overflow:ellipsis;
   
+}
+
+/* cameron's styles */
+
+
+.cover-page header
+{
+	display:block;
+	left:0;
+	margin:10%;
+	padding:0;
+	position:absolute;
+	top:0;
+	width:80%;
+}
+
+.cover-page header span
+{
+	display:block;
+	font-family:Chunkfive;
+	text-align:left;
+	white-space:nowrap;
+}
+
+.cover-page header #first-name
+{
+	-webkit-text-fill-color:#FF0;
+	-webkit-text-stroke:2px #000;
+	line-height:30%;
+	margin-top:15%;
+	text-shadow:0 2px 4px rgba(0,0,0,0.5);
+	z-index:2;
+	font-size:80px;
+}
+
+.cover-page header #last-name
+{
+	-webkit-text-fill-color:#FFF;
+	-webkit-text-stroke:2px #000;
+	margin-left:15%;
+	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
+	z-index:3;
+	font-size:50px;
+}
+
+.cover-page section
+{
+	bottom:0;
+	left:0;
+	position:absolute;
+	width:100%;
+}
+
+.pullquote
+{
+	display:block;
+	font-family:'Helvetica Neue';
+	font-size:22px;
+	font-weight:700;
+	line-height:1.2;
+	margin-bottom:30px;
+	text-shadow:0 1px 3px rgba(0,0,0,0.5);
+	width:66%;
+}
+
+.pullquote a
+{
+	color:#FFCE78;
+	text-decoration:none;
 }
