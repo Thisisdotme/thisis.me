@@ -5,7 +5,6 @@ Created on May 9, 2012
 '''
 
 from datetime import datetime
-from tim_commons import json_serializer
 from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
