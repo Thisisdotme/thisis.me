@@ -165,9 +165,11 @@
   
   //this should follow the /authorname/feature/detail_id pattern?
   feature.activate = function(resourceId) {
-
-    if(resourceId && false) { //turning off direct navigation to the 
+    if(resourceId) { 
+      
+      //turning off direct navigation to the 
       //go straight to detail view for this resource...
+      //actually we want to just go to the proper location in the timeline
       //load collection first?
       feature.showDetails = true;
       feature.showDetailId = resourceId;
@@ -203,6 +205,7 @@
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
     resourceId = resourceId || feature.showDetailId;
+    
     console.log('showing detail view for timeline: ', resourceId, feature.mainCollection);
     
     feature.detailView = feature.detailView || new TIM.views.EventDetail({
@@ -217,7 +220,10 @@
 	    console.log('have a model for the detail');
 	    feature.detailView.model = model;
 		  feature.detailView.render();
-		  TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+		  //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+		  
+		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+		  
 		  feature.showDetailsId = 0;
 		  feature.showDetails = false;
 		} else {
@@ -229,7 +235,24 @@
 		    success: function(model, response) {
           console.log('fetched model: ', model);
           feature.detailView.render();
-          TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+          //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+          
+          TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+          
+          //figure out which page the event is on!
+          var pageNum = 1;
+          for(var i = 0; i < feature.timelineView.pages.length; i++) {
+            var page = feature.timelineView.pages[i];
+            for(var j = 0; j < page.events.length; j++) {
+              console.log(page.events[j], resourceId);
+              if (page.events[j].id == resourceId) {
+                pageNum = i + 1;
+              }
+            }
+          }
+          
+          feature.timelineView.goToPage(pageNum);
+          
           feature.detailCache['' + resourceId] = model; //so we don't have to get the same details twice
 		    }
 		  });
