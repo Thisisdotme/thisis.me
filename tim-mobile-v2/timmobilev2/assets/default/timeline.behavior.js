@@ -204,6 +204,7 @@
   feature.showDetailView = function(resourceId) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
+    var pageNum = 1;
     resourceId = resourceId || feature.showDetailId;
     
     console.log('showing detail view for timeline: ', resourceId, feature.mainCollection);
@@ -223,6 +224,9 @@
 		  //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
 		  
 		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+		  //figure out which page the event is on!
+      pageNum = feature.findPageForEvent(resourceId);          
+      feature.timelineView.goToPage(pageNum);
 		  
 		  feature.showDetailsId = 0;
 		  feature.showDetails = false;
@@ -240,23 +244,27 @@
           TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
           
           //figure out which page the event is on!
-          var pageNum = 1;
-          for(var i = 0; i < feature.timelineView.pages.length; i++) {
-            var page = feature.timelineView.pages[i];
-            for(var j = 0; j < page.events.length; j++) {
-              console.log(page.events[j], resourceId);
-              if (page.events[j].id == resourceId) {
-                pageNum = i + 1;
-              }
-            }
-          }
-          
+          pageNum = feature.findPageForEvent(resourceId);          
           feature.timelineView.goToPage(pageNum);
           
           feature.detailCache['' + resourceId] = model; //so we don't have to get the same details twice
 		    }
 		  });
 		}
+  }
+  
+  feature.findPageForEvent = function(eventId) {
+    var pageNum = 1;
+    for(var i = 0; i < feature.timelineView.pages.length; i++) {
+      var page = feature.timelineView.pages[i];
+      for(var j = 0; j < page.events.length; j++) {
+        console.log(page.events[j], eventId);
+        if (page.events[j].id == eventId) {
+          pageNum = i + 1;
+        }
+      }
+    }
+    return pageNum;
   }
   
   //add to feature?
