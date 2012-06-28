@@ -102,6 +102,12 @@ class ServiceEventInterpreter(object):
     return self.get_url()
 
   '''
+    get the geo coordinates for this event
+  '''
+  def get_location(self):
+    return None
+
+  '''
     get any auxiliary content for the event
   '''
   def get_auxiliary_content(self):

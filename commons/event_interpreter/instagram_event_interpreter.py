@@ -5,7 +5,6 @@ Created on May 9, 2012
 '''
 
 from datetime import datetime
-from tim_commons import json_serializer
 from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 
@@ -27,10 +26,8 @@ class InstagramEventInterpreter(ServiceEventInterpreter):
   def get_photo(self):
     return self.json['images']['low_resolution']['url']
 
-  def get_auxiliary_content(self):
-    auxData = {}
+  def get_location(self):
+    location = None
     if 'location' in self.json:
-      auxData['location'] = self.json['location']
-    if 'images' in self.json:
-      auxData['images'] = self.json['images']
-    return json_serializer.dump_string(auxData)
+      location = (self.json['location']['latitude'], self.json['location']['longitude'])
+    return location

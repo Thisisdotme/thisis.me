@@ -71,12 +71,18 @@
   				  -should we truncate, etc. here or in the template?
   				  -this is a good place for the jquery text sizer thingy?
   				*/
+  				var name = this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName;
+  				//alert(name);
+  				window.n = name;
   				var context = {
-  				  name: this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName,
+  				  name: name,
+  				  first_name: name.split(' ')[0],
+  				  last_name: name.split(' ')[1] || '',
   				  primaryStory: this.collection.at(0) ? this.collection.at(0).toJSON() : [],
-  				  secondaryStory: this.collection.at(1) ? this.collection.at(1).toJSON() : [],
-  				  tertiaryStory: this.collection.at(2) ? this.collection.at(2).toJSON() : [],
+  				  secondaryStory: [], //this.collection.at(1) ? this.collection.at(1).toJSON() : [],
+  				  tertiaryStory: [], //this.collection.at(2) ? this.collection.at(2).toJSON() : [],
   				}
+  				console.log ("cover story:", context.primaryStory);
   				//this pattern could probably be generalized to a basic TIM view
   				if(!this.hasRendered) {
             var html = TIM.views.renderTemplate("coverpage", context);
@@ -84,6 +90,12 @@
             this.hasRendered = true;
           }
           TIM.transitionPage(that.$el, {animationName:"fade"});
+          //TIM.setLoading(true);
+          if(name === "MC Hammer") {
+            $("#first-name").fitText(.3);
+        		$("#last-name").fitText(.5);
+          }
+          
 
       },
       
@@ -101,6 +113,7 @@
       },
       
       linkClicked: function(event) {
+        $(window).off('resize');
         event.preventDefault();
         event.stopPropagation(); //let the global handler for link clicks take care of it!
         TIM.handleLinkClick(event);

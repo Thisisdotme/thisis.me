@@ -77,3 +77,29 @@
    text-overflow:ellipsis;
   
 }
+
+.cover-page section
+{
+	bottom:0;
+	left:0;
+	position:absolute;
+	width:100%;
+}
+
+.pullquote
+{
+	display:block;
+	font-family:'Helvetica Neue';
+	font-size:22px;
+	font-weight:700;
+	line-height:1.2;
+	margin-bottom:30px;
+	text-shadow:0 1px 3px rgba(0,0,0,0.5);
+	width:66%;
+}
+
+.pullquote a
+{
+	color:#FFCE78;
+	text-decoration:none;
+}

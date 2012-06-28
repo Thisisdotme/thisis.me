@@ -394,12 +394,15 @@ TIM.mixins.flipset = {
 		renderPage: function(pages){
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({pages: pages});
-	    var tmpl = this.pageTemplate;
+	    var tmpl = pages[0].template ? pages[0].template : this.pageTemplate;
 	    var that = this;
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
 	    //seems wasteful
+	    console.log("page template: ", tmpl);
 	    
+	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
+	    //seems wasteful
       pageView.render(tmpl, function(pageHtml){
         if (!that.flipSetInitialized) {
 					
@@ -498,7 +501,9 @@ TIM.mixins.flipset = {
 			  //shouldn't skip too many non-one-page events...
 			  
 				if(item.get('title') !== undefined || item.get("type") === "photo" || item.get("content").photo_url !== undefined) {
-					self.pages.push({num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
+				  //var template = item.get("type") === "photo" ? "photoPage" : self.pageTemplate;
+				  var template = self.pageTemplate;
+					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
 					page.push(item);
 					if(page.length == 2) {

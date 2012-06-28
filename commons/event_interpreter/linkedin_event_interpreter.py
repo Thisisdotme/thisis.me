@@ -161,4 +161,3 @@ class LinkedinEventInterpreter(ServiceEventInterpreter):
       self.headline = None
       self.summary = None
       self.photo = None
-      

@@ -85,7 +85,7 @@
 
   TIM.views.EventList = Backbone.View.extend( {
       id: "timeline",
-      className: "flippage flippage-container app-page",   
+      className: "flippage flippage-container app-page light",   
       pageTemplate: "event",
       
       initialize: function() {
@@ -165,9 +165,11 @@
   
   //this should follow the /authorname/feature/detail_id pattern?
   feature.activate = function(resourceId) {
-
-    if(resourceId && false) { //turning off direct navigation to the 
+    if(resourceId) { 
+      
+      //turning off direct navigation to the 
       //go straight to detail view for this resource...
+      //actually we want to just go to the proper location in the timeline
       //load collection first?
       feature.showDetails = true;
       feature.showDetailId = resourceId;
@@ -202,7 +204,9 @@
   feature.showDetailView = function(resourceId) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
+    var pageNum = 1;
     resourceId = resourceId || feature.showDetailId;
+    
     console.log('showing detail view for timeline: ', resourceId, feature.mainCollection);
     
     feature.detailView = feature.detailView || new TIM.views.EventDetail({
@@ -217,7 +221,13 @@
 	    console.log('have a model for the detail');
 	    feature.detailView.model = model;
 		  feature.detailView.render();
-		  TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+		  //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+		  
+		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+		  //figure out which page the event is on!
+      pageNum = feature.findPageForEvent(resourceId);          
+      feature.timelineView.goToPage(pageNum);
+		  
 		  feature.showDetailsId = 0;
 		  feature.showDetails = false;
 		} else {
@@ -229,11 +239,32 @@
 		    success: function(model, response) {
           console.log('fetched model: ', model);
           feature.detailView.render();
-          TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+          //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
+          
+          TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+          
+          //figure out which page the event is on!
+          pageNum = feature.findPageForEvent(resourceId);          
+          feature.timelineView.goToPage(pageNum);
+          
           feature.detailCache['' + resourceId] = model; //so we don't have to get the same details twice
 		    }
 		  });
 		}
+  }
+  
+  feature.findPageForEvent = function(eventId) {
+    var pageNum = 1;
+    for(var i = 0; i < feature.timelineView.pages.length; i++) {
+      var page = feature.timelineView.pages[i];
+      for(var j = 0; j < page.events.length; j++) {
+        console.log(page.events[j], eventId);
+        if (page.events[j].id == eventId) {
+          pageNum = i + 1;
+        }
+      }
+    }
+    return pageNum;
   }
   
   //add to feature?

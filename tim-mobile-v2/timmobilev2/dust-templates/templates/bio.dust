@@ -1,3 +1,4 @@
+<div class="toolbar"><h1>Bio</h1></div>
 <div class="bio">
   <div id="bio-wrapper">
   	<h1>{name}</h1>
@@ -12,5 +13,12 @@
   	{?summary}
   	  <section class="summary"><strong>Summary: </strong>{summary}</section>
   	{/summary}
+  	{?bio}
+  	  {#bio}
+    	  <section>
+    	    <p class="bio-paragraph">{text}</p>
+    	  </section>
+    	{/bio}
+  	{/bio}
 	</div>
 </div>

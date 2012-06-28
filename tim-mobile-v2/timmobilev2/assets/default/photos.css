@@ -54,7 +54,7 @@ body {
   margin-bottom:0;
   width:300px;
   background-size:cover;
-  background-position:0 30%;
+  background-position:0 50%;
 }
 
 #photo-detail-container {
@@ -132,6 +132,8 @@ body {
   width:100%;
   background-size:cover;
   background-repeat:no-repeat;
+  
+  background-position:10%,15%;
   /* min-height:480px; /* need to make dynamic? */
   /* background-size:100%,auto; */
 }
@@ -176,9 +178,10 @@ body {
   color:#fff;
   background:rgba(60,60,60,1);
   width:100%;
-  height:50px;
+  min-height:50px;
   overflow:hidden;
   -webkit-transition: all .3s linear;
+  opacity:0.8;
 }
 
 .flip-mode .photo-page .caption, .scroll-overlay .caption {
@@ -203,106 +206,6 @@ body {
 }
 
 
-.photo-page .caption > .main-text, .scroll-overlay .caption .main-text {
-  padding:8px 16px;
-}
-
-
-.photo-page .caption .grid-link, .photo-detail .caption .grid-link {
-  position:absolute;
-  right:34px;
-  bottom:4px;
-  height:24px;
-  width:24px;
-  background: transparent url(/img/back_arrow.png) no-repeat center center;
-}
-
-.photo-detail .caption .list-link {
-  position:absolute;
-  right:4px;
-  bottom:4px;
-  height:25px;
-  width:20px;
-  background: transparent url(/img/listIcon.png) no-repeat center center;
-}
-
-/* let's do some god-dam caption styling here */
-
-.photo-page .caption .profile-thumb {
-  float:left;
-  height:25px;
-  width:25px;
-  border:1px solid #ccc;
-  margin:8px;
-  background: transparent url(/img/profile_thumb.png) no-repeat center center;
-}
-
-
-.photo-page .caption .source-img {
-  float:left;
-  height:15px;
-  width:15px;
-  margin-right:4px;
-}
-
-/* make these sprites.... or inline base 64? */
-
-.photo-page .caption .source-img.linkedIn {
-  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center;
-}
-
-.photo-page .caption .source-img.facebook {
-  background: transparent url(/img/icons/facebook_15.png) no-repeat center center;
-}
-
-.photo-page .caption .source-img.instagram {
-  background: transparent url(/img/icons/instagram_15.png) no-repeat center center;
-}
-
-.photo-page .caption .source-img.flickr {
-  background: transparent url(/img/icons/flickr_15.png) no-repeat center center;
-}
-
-.photo-page .caption .source-img.twitter {
-  background: transparent url(/img/icons/twitter_15.png) no-repeat center center;
-}
-
-.photo-page .caption .source-img.google {
-  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center;
-}
-
-#content-container .scroll-overlay .interaction-icons  {
-  display:none;
-}
-
-.photo-page .interaction-icons {
-  position:absolute;
-  left:2px;
-  bottom:60px;
-  height:100px;
-  width:50px;
-  x-border:1px solid yellow;
-  /* background:rgba(60,60,60,.1); */
-}
-
-.photo-page .interaction-icons .comments {
-  position:absolute;
-  height:35px;
-  width:35px;
-  left:0px;
-  x-border:1px solid green;
-  background: transparent url(/img/comments_icon.png) no-repeat center center;
-}
-
-.photo-page .interaction-icons .location {
-  position:absolute;
-  top:55px;
-  left:0px;
-  height:35px;
-  width:35px;
-  x-border:1px solid red;
-  background: transparent url(/img/location_pin_icon.png) no-repeat center center;
-}
 
 
 #photo-grid-scroll {
@@ -348,4 +251,8 @@ body {
   text-shadow:#333 1px 1px 2px;
   line-height:40px;
   text-align:center;
+}
+
+.time-and-location {
+  padding-left:6px;
 }
