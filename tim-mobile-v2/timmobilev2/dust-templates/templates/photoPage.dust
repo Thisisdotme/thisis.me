@@ -6,6 +6,6 @@
 	  {/main_image}
 		<!-- img class="image" src="{url}" data-photo_id="{id}" / -->
 		{>_eventFooter/}
-		<!-- <div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div> -->
+		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
 	{/events}
 </div>

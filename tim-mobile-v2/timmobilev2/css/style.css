@@ -889,6 +889,111 @@ td { vertical-align: top; }
      display:none;
    }
    
+   /* moved photo page css up to global so it's accessible from other features */
+   
+   .photo-page .caption > .main-text, .scroll-overlay .caption .main-text {
+     padding:8px 16px;
+   }
+
+
+   .photo-page .caption .grid-link, .photo-detail .caption .grid-link {
+     position:absolute;
+     right:34px;
+     bottom:4px;
+     height:24px;
+     width:24px;
+     background: transparent url(/img/back_arrow.png) no-repeat center center;
+   }
+
+   .photo-detail .caption .list-link {
+     position:absolute;
+     right:4px;
+     bottom:4px;
+     height:25px;
+     width:20px;
+     background: transparent url(/img/listIcon.png) no-repeat center center;
+   }
+
+   /* let's do some god-dam caption styling here */
+
+   .photo-page .caption .profile-thumb {
+     float:left;
+     height:25px;
+     width:25px;
+     border:1px solid #ccc;
+     margin:8px;
+     margin-bottom:16px;
+     background: transparent url(/img/profile_thumb.png) no-repeat center center;
+   }
+
+
+   .photo-page .caption .source-img {
+     float:left;
+     height:15px;
+     width:15px;
+     margin-right:4px;
+   }
+
+   /* make these sprites.... or inline base 64? */
+
+   .photo-page .caption .source-img.linkedIn {
+     background: transparent url(/img/icons/linked_in_15.png) no-repeat center center;
+   }
+
+   .photo-page .caption .source-img.facebook {
+     background: transparent url(/img/icons/facebook_15.png) no-repeat center center;
+   }
+
+   .photo-page .caption .source-img.instagram {
+     background: transparent url(/img/icons/instagram_15.png) no-repeat center center;
+   }
+
+   .photo-page .caption .source-img.flickr {
+     background: transparent url(/img/icons/flickr_15.png) no-repeat center center;
+   }
+
+   .photo-page .caption .source-img.twitter {
+     background: transparent url(/img/icons/twitter_15.png) no-repeat center center;
+   }
+
+   .photo-page .caption .source-img.google {
+     background: transparent url(/img/icons/google_plus_15.png) no-repeat center center;
+   }
+
+   #content-container .scroll-overlay .interaction-icons  {
+     display:none;
+   }
+
+   .photo-page .interaction-icons {
+     position:absolute;
+     left:2px;
+     bottom:60px;
+     height:100px;
+     width:50px;
+     x-border:1px solid yellow;
+     /* background:rgba(60,60,60,.1); */
+   }
+
+   .photo-page .interaction-icons .comments {
+     position:absolute;
+     height:35px;
+     width:35px;
+     left:0px;
+     x-border:1px solid green;
+     background: transparent url(/img/comments_icon.png) no-repeat center center;
+   }
+
+   .photo-page .interaction-icons .location {
+     position:absolute;
+     top:55px;
+     left:0px;
+     height:35px;
+     width:35px;
+     x-border:1px solid red;
+     background: transparent url(/img/location_pin_icon.png) no-repeat center center;
+   }
+   
+   
    /* Newsfeed */
 
    /*.flippage-container .event .content { position: absolute; top: 50%; }*/
@@ -1063,16 +1168,8 @@ td { vertical-align: top; }
    	float: left; 
    }
   
-   .flippage-container .event .content .inner-text {
-   	float: left;
-   	padding: 14px;
-   	padding-top:22px;
-   	text-align: left;
-   	margin: 0 auto;
-   	font-size:24px;
-   }
+
    
-   @media screen and (max-height: 380px) {
      .flippage-container .event .content .inner-text {
      	float: left;
      	padding: 14px;
@@ -1081,7 +1178,17 @@ td { vertical-align: top; }
      	margin: 0 auto;
      	font-size:16px;
      }
-   }
+     
+      @media screen and (height: 460px) {
+      .flippage-container .event .content .inner-text {
+      	float: left;
+      	padding: 14px;
+      	padding-top:22px;
+      	text-align: left;
+      	margin: 0 auto;
+      	font-size:24px;
+      }
+     }
 
    .flippage-container .event.full-page .content .inner-text {
    	padding-bottom: 0;
