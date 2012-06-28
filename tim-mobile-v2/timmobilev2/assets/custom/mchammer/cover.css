@@ -4,9 +4,21 @@
 	src:url(/mchammer/asset/chunkfive.otf) format(opentype);
 }
 
-#cover-container {
+#cover {
   background:#333 url(/mchammer/asset/cover_bg_2.jpg) no-repeat left top;
   background-size:cover;
+  -moz-animation:kenburns 2s linear 0 alternate;
+	-webkit-animation:kenburns 2s linear 0 alternate;
+	-webkit-transform:translate3d(0,0,0);
+	animation:kenburns 2s linear 0 alternate;
+	background-color:#000;
+	background-size:cover;
+	box-shadow:10px 0 10px rgba(0,0,0,0.3);
+	height:100%;
+	position:absolute;
+	transform:translate3d(0,0,0);
+	width:100%;
+	z-index:0;
 }
 
 .cover-page {
