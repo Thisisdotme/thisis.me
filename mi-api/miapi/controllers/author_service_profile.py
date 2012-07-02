@@ -51,7 +51,7 @@ class ServiceProfileController(object):
 
     profile_json = None
 
-    for service_id in [Service.LINKEDID_ID,
+    for service_id in [Service.LINKEDIN_ID,
                        Service.FACEBOOK_ID,
                        Service.GOOGLEPLUS_ID,
                        Service.TWITTER_ID,

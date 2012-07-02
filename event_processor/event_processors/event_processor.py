@@ -13,8 +13,7 @@ from mi_schema.models import (ServiceEvent,
                               AuthorServiceMap,
                               Service,
                               EventScannerPriority,
-                              Relationship,
-                              ServiceObjectType)
+                              Relationship)
 from tim_commons import json_serializer
 from tim_commons import db
 from tim_commons import total_seconds
@@ -119,7 +118,9 @@ class EventProcessor:
         else:
           existing_event.modify_time = datetime.datetime.utcnow()
 
-        correlate_and_update_event(interpreter, existing_event, self.me_service_id)
+        event_correlator.correlate_and_update_event(interpreter,
+                                                    existing_event,
+                                                    self.me_service_id)
 
       else:
         # skip event
@@ -158,7 +159,7 @@ class EventProcessor:
                                    auxiliary_content,
                                    profile_image,
                                    json_serializer.dump_string(service_event_json))
-      correlate_and_update_event(interpreter, service_event, self.me_service_id)
+      event_correlator.correlate_and_update_event(interpreter, service_event, self.me_service_id)
       db.Session().add(service_event)
       db.Session().flush()
 
@@ -226,41 +227,3 @@ def update_scanner(event_updated,
 
     scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
     db.Session().add(scanner_event)
-
-
-def correlate_and_update_event(event_json, service_event, me_service_id):
-  service_event.correlation_id, url = event_correlator.correlate_event(event_json)
-
-  if service_event.correlation_id:
-    # Get the ASM for this user
-    query = db.Session().query(AuthorServiceMap)
-    query = query.filter(and_(AuthorServiceMap.author_id == service_event.author_id,
-                              AuthorServiceMap.service_id == me_service_id))
-    asm = query.one()
-
-    # We have a correlation
-    correlation_event = query_correlation_event(me_service_id,
-                                                service_event.correlation_id,
-                                                service_event.author_id)
-    if correlation_event:
-      correlation_event.modify_time = max(correlation_event.modify_time, service_event.modify_time)
-    else:
-      # create a new row with this id
-      correlation_event = ServiceEvent(
-          asm.id,
-          ServiceObjectType.CORRELATION_TYPE,
-          service_event.author_id,
-          me_service_id,
-          service_event.correlation_id,
-          service_event.create_time,
-          service_event.modify_time,
-          url=url)
-      db.Session().add(correlation_event)
-
-
-def query_correlation_event(me_service_id, correlation_id, author_id):
-  query = db.Session().query(ServiceEvent)
-  query = query.filter_by(event_id=correlation_id,
-                          service_id=me_service_id,
-                          author_id=author_id)
-  return query.first()

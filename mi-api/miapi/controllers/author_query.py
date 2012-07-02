@@ -80,14 +80,14 @@ class AuthorQueryController(object):
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
           join(Service, AuthorServiceMap.service_id == Service.id). \
           filter(AuthorServiceMap.author_id == author.id). \
-          filter(ServiceEvent.parent_id == None). \
+          filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 
@@ -112,9 +112,8 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
     try:
-      event, asm, serviceName = self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+      event, asm = self.dbSession.query(ServiceEvent, AuthorServiceMap). \
             join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-            join(Service, AuthorServiceMap.service_id == Service.id). \
             filter(ServiceEvent.id == serviceEventID). \
             filter(AuthorServiceMap.author_id == author.id). \
             one()
@@ -124,7 +123,7 @@ class AuthorQueryController(object):
 
     self.dbSession.commit()
 
-    return {'event': createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)}
+    return {'event': createServiceEvent(self.dbSession, self.request, event, asm, author)}
 
   # GET /v1/authors/{authorname}/topstories
   #
@@ -145,14 +144,13 @@ class AuthorQueryController(object):
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for event, asm, serviceName in self.dbSession.query(ServiceEvent, AuthorServiceMap, Service.service_name). \
+    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-          join(Service, AuthorServiceMap.service_id == Service.id). \
           filter(AuthorServiceMap.author_id == author.id). \
-          filter(ServiceEvent.parent_id == None). \
+          filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(STORY_LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 

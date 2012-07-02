@@ -105,11 +105,33 @@ class Service(Base):
   FACEBOOK_ID = 3
   WORDPRESS_ID = 4
   YOUTUBE_ID = 5
-  LINKEDID_ID = 6
+  LINKEDIN_ID = 6
   GOOGLEPLUS_ID = 7
   FOURSQUARE_ID = 8
   INSTAGRAM_ID = 9
   FLICKR_ID = 10
+
+  name_to_id = {'me': 1,
+                'twitter': 2,
+                'facebook': 3,
+                'wordpress': 4,
+                'youtube': 5,
+                'linkedin': 6,
+                'googleplus': 7,
+                'foursquare': 8,
+                'instagram': 9,
+                'flickr': 10}
+
+  id_to_name = {1: 'me',
+                2: 'twitter',
+                3: 'facebook',
+                4: 'wordpress',
+                5: 'youtube',
+                6: 'linkedin',
+                7: 'googleplus',
+                8: 'foursquare',
+                9: 'instagram',
+                10: 'flickr'}
 
   id = Column(Integer, primary_key=True)
 
@@ -273,6 +295,16 @@ class ServiceObjectType(Base):
   VIDEO_TYPE = 7
   VIDEO_ALBUM_TYPE = 8
   CORRELATION_TYPE = 9
+
+  id_to_name = {1: 'highlight',
+                2: 'photo-album',
+                3: 'photo',
+                4: 'checkin',
+                5: 'status',
+                6: 'follow',
+                7: 'video',
+                8: 'video-album',
+                9: 'correlation'}
 
   def __init__(self, type_id, label):
     self.type_id = type_id

@@ -40,9 +40,6 @@ class AuthorServiceQueryController(object):
   @view_config(route_name='author.services.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   def getHighlights(self):
 
-    author_name = self.request.matchdict['authorname']
-    service_name = self.request.matchdict['servicename']
-
     return {'error': 'not implemented'}
 
   # GET /v1/authors/{authorname}/services/{servicename}/events'
@@ -74,10 +71,10 @@ class AuthorServiceQueryController(object):
                     join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
                     filter(and_(AuthorServiceMap.service_id == serviceId,
                                 AuthorServiceMap.author_id == author.id)). \
-                    filter(ServiceEvent.parent_id == None). \
+                    filter(ServiceEvent.correlation_id == None). \
                     order_by(ServiceEvent.create_time.desc()). \
                     limit(LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, service_name)
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 

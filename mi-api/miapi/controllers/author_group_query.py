@@ -98,17 +98,16 @@ class AuthorGroupQueryController(object):
       return {'error': 'unknown service %s' % authorName}
 
     events = []
-    for event, asm, author, serviceName in self.dbSession. \
-            query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+    for event, asm, author in self.dbSession. \
+            query(ServiceEvent, AuthorServiceMap, Author). \
             join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
             join(AuthorGroupMap, AuthorServiceMap.author_id == AuthorGroupMap.author_id). \
             join(Author, AuthorServiceMap.author_id == Author.id). \
-            join(Service, AuthorServiceMap.service_id == Service.id). \
             filter(AuthorGroupMap.author_group_id == authorGroup.id). \
-            filter(ServiceEvent.parent_id == None). \
+            filter(ServiceEvent.correlation_id == None). \
             order_by(ServiceEvent.create_time.desc()). \
             limit(LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author, serviceName)
+      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 

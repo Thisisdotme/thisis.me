@@ -1,12 +1,15 @@
 import logging
-import sys
 import calendar
 
 from sqlalchemy import func, and_
 
 from tim_commons.json_serializer import load_string
 
-from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
+from mi_schema.models import (
+    ServiceObjectType,
+    ServiceEvent,
+    Service,
+    Relationship)
 
 from miapi import service_object_type_dict
 
@@ -15,24 +18,15 @@ log = logging.getLogger(__name__)
 
 def get_author_info(request, asm, author):
 
-  profile_image_url = asm.profile_image_url if asm.profile_image_url else request.static_url('miapi:%s' % 'img/profile_placeholder.png')
+  profile_image_url = asm.profile_image_url
+  if profile_image_url is None:
+    profile_image_url = request.static_url('miapi:%s' % 'img/profile_placeholder.png')
 
-  author_obj = {'profile_image_url': profile_image_url, 'name': author.author_name, 'full_name': author.full_name}
+  author_obj = {'profile_image_url': profile_image_url,
+                'name': author.author_name,
+                'full_name': author.full_name}
 
   return author_obj
-
-
-def get_shared_services(db_session, request, se_id, service_name):
-
-  service_items = [{'service_name':service_name, 'service_image_url':request.static_url('miapi:img/l/services/color/%s.png' % service_name)}]
-
-  # determine all the shared sources -- all service_event rows whose parent_id is this service_event
-  for shared_service_name in db_session.query(Service.service_name). \
-                                        join(ServiceEvent, ServiceEvent.service_id == ServiceEvent.id). \
-                                        filter(ServiceEvent.parent_id == se_id).all():
-    service_items.append({'service_name': shared_service_name, 'service_image_url': request.static_url('miapi:img/l/services/color_by_fn/%s.png' % shared_service_name)})
-
-  return service_items
 
 
 def get_album_name(event):
@@ -76,85 +70,75 @@ def make_photo_album_obj(db_session, request, se, asm, author, service_name):
   return album
 
 
-def make_photo_obj(db_session, request, se, asm, author, service_name):
+def make_photo_obj(db_session, request, se, asm, author):
+  link = request.route_url('author.query.events.eventId',
+                           authorname=author.author_name,
+                           eventID=se.id)
 
-  services = get_shared_services(db_session, request, se.id, service_name)
+  if Service.ME_ID == se.service_id:
+    # we just want to return the json after adding the links to it
+    event = load_string(se.json)
+    event['link'] = link
+    event['id'] = se.id
+    event['event_id'] = se.id
+    for source in event['sources']['items']:
+      link = 'miapi:img/l/services/color/{0}.png'.format(source['service_name'])
+      source['link'] = request.static_url(link)
 
-  photo = {'type': service_object_type_dict[ServiceObjectType.PHOTO_TYPE],
-           'id': se.id,
-           'create_time': calendar.timegm(se.create_time.timetuple()),
-           'author': get_author_info(request, asm, author),
-           'link': request.route_url('author.query.events.eventId', authorname=author.author_name, eventID=se.id),
-           'service': service_name,
-           'sources': {'count': len(services), 'items': services}}
+    return event
+  else:
+    photo = {'type': service_object_type_dict[ServiceObjectType.PHOTO_TYPE],
+             'id': se.id,
+             'create_time': calendar.timegm(se.create_time.timetuple()),
+             'author': get_author_info(request, asm, author),
+             'link': link,
+             'service': Service.id_to_name[se.service_id],
+             'sources': {'count': 0, 'items': []}}
 
-  if se.caption:
-    photo['tagline'] = se.caption
+    if se.caption:
+      photo['label'] = se.caption
 
-  size_ordered_images = {}
+    size_ordered_images = {}
+    if se.service_id == Service.FACEBOOK_ID:
+      json_obj = load_string(se.json)
 
-  if se.service_id == Service.FACEBOOK_ID:
+      # for some reason not all facebook photo events have an image property; if
+      # it doesn't skip it
+      if 'images' not in json_obj:
+        log.warning('Skipping Facebook event with no images')
+        return None
 
-    json_obj = load_string(se.json)
+      for candidate in json_obj.get('images', []):
 
-    # for some reason not all facebook photo events have an image property; if
-    # it doesn't skip it
-    if 'images' not in json_obj:
-      log.warning('Skipping Facebook event with no images')
-      return None
+        size = candidate.get('width', 0) * candidate.get('height', 0)
 
-    for candidate in json_obj.get('images', []):
+        image = {'url': candidate['source'],
+                 'width': candidate['width'],
+                 'height': candidate['height']}
 
-      size = candidate.get('width', 0) * candidate.get('height', 0)
+        size_ordered_images[size] = image
 
-      image = {'url': candidate['source'],
-               'width': candidate['width'],
-               'height': candidate['height']}
+    elif se.service_id == Service.INSTAGRAM_ID:
 
-      size_ordered_images[size] = image
+      json_obj = load_string(se.json)
 
-# TODO remove
-#    # default selection to first image
-#    selection = json_obj['images'][0]
-#
-#    # find the minimum width photo above 640
-#    min_resolution = sys.maxint
-#    for candidate in json_obj.get('images', []):
-#      if candidate['width'] > 640:
-#        selection = candidate if candidate['width'] < min_resolution else selection
-#
-#    if selection and 'source' in selection:
-#      photo['url'] = selection['source']
-#      photo['width'] = selection['width']
-#      photo['height'] = selection['height']
+      for candidate in json_obj['images'].itervalues():
 
-  elif se.service_id == Service.INSTAGRAM_ID:
+        size = candidate.get('width', 0) * candidate.get('height', 0)
 
-    json_obj = load_string(se.json)
+        image = {'url': candidate['url'],
+                 'width': candidate['width'],
+                 'height': candidate['height']}
 
-    for candidate in json_obj['images'].itervalues():
+        size_ordered_images[size] = image
 
-      size = candidate.get('width', 0) * candidate.get('height', 0)
+      if 'location' in json_obj:
+        photo['location'] = json_obj['location']
 
-      image = {'url': candidate['url'],
-              'width': candidate['width'],
-              'height': candidate['height']}
+    images = []
+    for size, image in sorted(size_ordered_images.iteritems(), key=lambda x: x[1]):
+      images.append(image)
 
-      size_ordered_images[size] = image
+    photo['images'] = images
 
-# TODO remove
-#    selection = json_obj['images']['standard_resolution']
-#    photo['url'] = selection['url']
-#    photo['width'] = selection['width']
-#    photo['height'] = selection['height']
-
-    if 'location' in json_obj:
-      photo['location'] = json_obj['location']
-
-  images = []
-  for size, image in sorted(size_ordered_images.iteritems(), key=lambda x: x[1]):
-    images.append(image)
-
-  photo['images'] = images
-
-  return photo
+    return photo
