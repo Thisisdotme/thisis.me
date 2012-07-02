@@ -49,10 +49,7 @@
           
           if (TIM.pageInfo.authorName === "mchammer") {
             if(!templateContext.summary) {
-              /*templateContext.summary = "Stanley Kirk Burrell, better known by his stage name MC Hammer, is an American rapper, entrepreneur, and actor. " +
-                                        "He had his greatest commercial success and popularity from the late 1980s until the mid-1990s. " +
-                                        "MC Hammer was born in Oakland, California. He was raised by his mother, along with his eight brothers and sisters, He would spend much of his childhood dancing in the Oakland Coliseum parking lot, to a beatbox, or selling stray baseballs."; */
-             templateContext.bio =[];
+              templateContext.bio =[];
              templateContext.picture_url = "/img/hammer_thumb.jpg";
              templateContext.name = "MC Hammer";
              templateContext.location = "Bay Area, California";
