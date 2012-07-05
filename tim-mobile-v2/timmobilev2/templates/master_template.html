@@ -28,6 +28,9 @@
 	
   <!-- fav and touch icons -->
 	<link rel="shortcut icon" href="/img/favicon.ico" />
+	
+	<!-- iPhone startup icon -->
+  <link rel="apple-touch-startup-image" href="/img/m/apple-touch-icon-72x72-precomposed.png">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -47,7 +50,7 @@
  
 </head> 
 
-<body tal:define="fragments load: fragments.html" class="mobile-viewport" style="background-color:#cd212b;">
+<body tal:define="fragments load: fragments.html" class="mobile-viewport" style="x-background-color:#cd212b;">
 
 	<div id="container" data-role="page" metal:define-slot="page_content" > 
 		<div data-role="header"><h1>thisis.me</h1></div> 

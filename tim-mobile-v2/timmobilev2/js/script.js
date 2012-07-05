@@ -62,6 +62,14 @@ $(function() {
   window.setTimeout(reorient, 0);
   window.onresize = TIM.setViewportSize;
   
+  //
+  // thinking of themes as 'light' or 'dark', etc.
+  // they should probably be specially-named, eg "theme-dark" and/or kept in a well-known list to make removing the previous theme easy
+  //
+  TIM.setPageTheme = function(theme) {
+     $("#app").addClass(theme);
+  }
+  
   TIM.getViewportSize = function() {
     return {height: TIM.viewportHeight_, width: TIM.viewportWidth_ }
   }
@@ -351,16 +359,17 @@ $(function() {
 	
 	  var inClasses = "active in " + animationName;
 	  var outClasses = "active out " + animationName;
+	  var transitions =  + TIM.getAvailableTransitions();
 	  if(options.reverse) {
-	    inClasses += " reverse";
-	    outClasses += " reverse";
+	    inClasses += " reverse ";
+	    outClasses += " reverse ";
 	  } 
 	  $('#app').addClass('transitioning'); //make this a TIM method?
 	  if (fromPage) {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
 	    //should have an 'official' list of transitions to remove rather than hardcoding here
-	    fromPage.removeClass('in reverse slide fade flip').addClass(outClasses).animationComplete(function() {
-	      $(this).removeClass(outClasses + " slide fade flip");
+	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).animationComplete(function() {
+	      $(this).removeClass(outClasses + transitions);
 	      $('#app').removeClass('transitioning');
 	      if(options.callback) {
 	        options.callback();
@@ -369,7 +378,7 @@ $(function() {
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
-      $(this).removeClass("slide fade flip");
+      $(this).removeClass(transitions);
       $('#app').removeClass('transitioning');
       setTimeout(function(){
           window.scrollTo(0, 0);
@@ -378,6 +387,11 @@ $(function() {
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;
 	};
+	
+	TIM.availableTransitions = ["fade","slide","flip"];
+	TIM.getAvailableTransitions = function() {
+	  return TIM.availableTransitions.join(" ");
+	}
 	
 	//this is where we are sending all click/tap events for <a> tags
 	//normalize the URL to trigger the proper hash change?

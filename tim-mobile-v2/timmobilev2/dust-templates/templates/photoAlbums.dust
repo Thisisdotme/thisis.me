@@ -8,7 +8,7 @@
 	    {#cover_photo album_id=id}
 	      {#main_image}
 	        <!-- img class="thumb" src="{url}" data-id="{id}" data-album_id="{album_id}"/ -->
-  	      <div class="thumb" style="background-image:url(http://distilleryimage11.s3.amazonaws.com/177d99cebf3d11e1a9f71231382044a1_7.jpg);" data-id="{id}" data-album_id="{album_id}"></div>
+  	      <div class="thumb" style="background-image:url({url});" data-id="{id}" data-album_id="{album_id}"></div>
   	    {/main_image}
 	    {/cover_photo}
 	  </div>

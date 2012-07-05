@@ -363,9 +363,6 @@ TIM.views.Page = Backbone.View.extend( {
     }
 } );
 
-//should probably have some sort of general function that does the template rendering 
-//to prevent lots of code copying and pasting
-
 //an attempt to define the flipset functionality as a mixin
 
 //key is the 'pages' array... it's different than underlying event/photo/etc collection in that there can be multiple items on a page
@@ -397,8 +394,6 @@ TIM.mixins.flipset = {
 	    var tmpl = pages[0].template ? pages[0].template : this.pageTemplate;
 	    var that = this;
 	    
-	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
-	    //seems wasteful
 	    console.log("page template: ", tmpl);
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
@@ -472,19 +467,6 @@ TIM.mixins.flipset = {
 			  //move this to a 'services' model/collection
 			  //
 			  
-			  /*
-			  
-			  var sourceList = [{source_name: "linkedIn"}, 
-			                    {source_name: "facebook"}, 
-			                    {source_name: "instagram"}, 
-			                    {source_name: "twitter"}, 
-			                    {source_name: "flickr"}, 
-			                    {source_name: "google"}],
-			                     sources = [];
-			  
-			  for(var i = 0; i < sourceList.length; i++) {
-			    sources.push(sourceList[Math.floor(Math.random()*sourceList.length)]);
-			  } */
 			  
 			  if(!itemJSON.sources) {
 			    itemJSON.sources = []; //_.uniq(sources);
