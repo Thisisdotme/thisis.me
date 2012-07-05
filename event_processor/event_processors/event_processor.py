@@ -193,12 +193,12 @@ class EventProcessor:
 def update_scanner(event_updated,
                    service_event_id,
                    service_user_id,
-                   service_id,
+                   service_name,
                    update_time,
                    max_priority,
                    min_duration):
   # Get the scanner state from the database
-  event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_id)
+  event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_name)
   scanner_event = db.Session().query(EventScannerPriority).get(event_id)
 
   if scanner_event is not None:
@@ -225,5 +225,5 @@ def update_scanner(event_updated,
     elif priority > max_priority:
       priority = max_priority
 
-    scanner_event = EventScannerPriority(service_event_id, service_user_id, service_id, priority)
+    scanner_event = EventScannerPriority(service_event_id, service_user_id, service_name, priority)
     db.Session().add(scanner_event)

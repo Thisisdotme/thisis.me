@@ -25,12 +25,12 @@ class LoadScannerTableApplication(AppBase):
     logging.info("Adding %s events to the scanner", options.events)
     with db.Context():
       for ignore in xrange(options.events):
-        service_id = random.choice(services)
+        service_name = random.choice(services)
         priority = random.randint(0, maximum_priority)
         user_id = _random_string(32)
         event_id = _random_string(64)
 
-        scanner_event = EventScannerPriority(event_id, user_id, service_id, priority)
+        scanner_event = EventScannerPriority(event_id, user_id, service_name, priority)
         db.Session().add(scanner_event)
         sys.stdout.write('.')
 

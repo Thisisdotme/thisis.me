@@ -617,28 +617,28 @@ class EventScannerPriority(Base):
   priority = Column(Integer)
   service_event_id = Column(String(255))
   service_user_id = Column(String(255))
-  service_id = Column(String(255))
+  service_name = Column(String(255))
 
   @classmethod
-  def generate_id(cls, service_event_id, service_user_id, service_id):
+  def generate_id(cls, service_event_id, service_user_id, service_name):
     import hashlib
     import base64
 
     encrypt = hashlib.sha256()
-    encrypt.update(service_id + '_' + service_user_id + '_' + service_event_id)
+    encrypt.update(service_name + '_' + service_user_id + '_' + service_event_id)
     return base64.urlsafe_b64encode(encrypt.digest())
 
-  def __init__(self, service_event_id, service_user_id, service_id, priority):
+  def __init__(self, service_event_id, service_user_id, service_name, priority):
 
     self.priority = priority
     self.service_event_id = service_event_id
     self.service_user_id = service_user_id
-    self.service_id = service_id
+    self.service_name = service_name
 
-    self.hash_id = self.generate_id(service_event_id, service_user_id, service_id)
+    self.hash_id = self.generate_id(service_event_id, service_user_id, service_name)
 
   def __repr__(self):
     return "<EventScannerPriority('{0}', '{1}', '{2}', '{3}')>".format(self.service_event_id,
                                                                        self.service_user_id,
-                                                                       self.service_id,
+                                                                       self.service_name,
                                                                        self.priority)

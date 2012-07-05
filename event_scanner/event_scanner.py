@@ -37,7 +37,7 @@ def _send_update_message_from_event(message_client, event):
   current_id = ""
   if event is not None:
     message = messages.create_event_update_message(
-      event.service_id,
+      event.service_name,
       event.service_user_id,
       event.service_event_id)
     message_queue.send_messages(message_client, [message])

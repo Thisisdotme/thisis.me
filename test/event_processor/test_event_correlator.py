@@ -41,6 +41,7 @@ class EventCorrelatorTestCase(unittest.TestCase):
     self.assertEqual(uri, 'http://www.nytimes.com/2012/06/25/us/politics/second-time-around-hope-for-gay-marriage-in-maine.html')
 
   def test_create_json_from_correlation(self):
+    event = '{"attribution":null,"caption":{"created_time":"1341018305","from":{"full_name":"Howard Burrows","id":"12937196","profile_picture":"http://images.instagram.com/profiles/profile_12937196_75sq_1328302146.jpg","username":"howardburrows"},"id":"224800288201136046","text":"For you Mary"},"comments":{"count":0,"data":[]},"created_time":"1341018259","filter":"Lo-fi","id":"224799914102772918_12937196","images":{"low_resolution":{"height":306,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_6.jpg","width":306},"standard_resolution":{"height":612,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_7.jpg","width":612},"thumbnail":{"height":150,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_5.jpg","width":150}},"likes":{"count":1,"data":[{"full_name":"Sara OKeefe","id":"25262451","profile_picture":"http://images.instagram.com/profiles/profile_25262451_75sq_1335025822.jpg","username":"sarabokeefe"}]},"link":"http://instagr.am/p/MeplSxolS2/","location":{"id":3615483,"latitude":42.416169875000001,"longitude":-83.910226821999998,"name":"Portage Lake"},"tags":[],"type":"image","user":{"bio":"","full_name":"Howard Burrows","id":"12937196","profile_picture":"http://images.instagram.com/profiles/profile_12937196_75sq_1328302146.jpg","username":"howardburrows","website":""},"user_has_liked":false}'
     uri = 'http://instagram.com/p/MMmhbCQw1Y/'
     photo_url = 'http://distilleryimage4.s3.amazonaws.com/895a67ecbccd11e19894123138140d8c_7.jpg'
     create_time = datetime.datetime.utcnow()
@@ -57,7 +58,8 @@ class EventCorrelatorTestCase(unittest.TestCase):
         caption='caption',
         content='content',
         url=uri,
-        photoURL=photo_url)]
+        photoURL=photo_url,
+        json=event)]
     author = models.Author('jose', 'jose@thisis.me', 'Jose Garcia', 'password', 'template')
 
     api_json = event_correlator._create_json_from_correlations(uri, correlated_events, author)
