@@ -94,7 +94,9 @@ def createHighlightEvent(db_session, request, highlight, se, asm, author, servic
            'service': serviceName,
            'create_time': calendar.timegm(se.create_time.timetuple()),
            'modify_time': calendar.timegm(se.modify_time.timetuple()),
-           'link': request.route_url('author.query.events.eventId', authorname=request.matchdict['authorname'], eventID=se.id),
+           'link': request.route_url('author.query.events.eventId',
+                                     authorname=request.matchdict['authorname'],
+                                     eventID=se.id),
            'content': content,
            'author': author_info}
   # TODO: fix this: 'sources': {'count': len(sourcesItems), 'items': sourcesItems}}

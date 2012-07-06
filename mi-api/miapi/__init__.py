@@ -131,7 +131,7 @@ def main(global_config, **settings):
   #
   config.add_route('author.query.highlights', '/v1/authors/{authorname}/highlights')
   config.add_route('author.query.events', '/v1/authors/{authorname}/events')
-  config.add_route('author.query.events.eventId', '  ')
+  config.add_route('author.query.events.eventId', '/v1/authors/{authorname}/events/{eventID}')
   config.add_route('author.query.topstories', '/v1/authors/{authorname}/topstories')
 
   # --
