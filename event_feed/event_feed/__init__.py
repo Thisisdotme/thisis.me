@@ -16,7 +16,7 @@ def create_feed_queue(event):
   environment = event.app.registry.settings[ENVIRONMENT_KEY]
 
   client = get_current_message_client(environment['broker']['url'])
-  create_queues_from_config(client, environment['queue'])
+  create_queues_from_config(client, environment['queues'])
 
 
 def main(global_config, **settings):
