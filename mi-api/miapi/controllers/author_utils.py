@@ -14,15 +14,15 @@ from . import get_author_info
 def createServiceEvent(db_session, request, se, asm, author):
 
   # filter well-known and instagram photo albums
-  if se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and  \
-     (se.service_id == Service.ME_ID or se.service_id == Service.INSTAGRAM_ID):
+  if (se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
+      (se.service_id == Service.ME_ID or se.service_id == Service.INSTAGRAM_ID)):
     return None
 
   link = request.route_url('author.query.events.eventId',
                            authorname=author.author_name,
                            eventID=se.id)
 
-  if se.service_id == Service.ME_ID:
+  if se.service_id == Service.ME_ID and se.json != 'null':
     # we just want to return the json after adding the links to it
     event = json_serializer.load_string(se.json)
     event['link'] = link
