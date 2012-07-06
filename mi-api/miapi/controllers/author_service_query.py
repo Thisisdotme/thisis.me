@@ -9,7 +9,7 @@ from sqlalchemy import (and_)
 
 from pyramid.view import view_config
 
-from miapi.models import DBSession
+from tim_commons import db
 
 from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent
 
@@ -31,7 +31,7 @@ class AuthorServiceQueryController(object):
   '''
   def __init__(self, request):
       self.request = request
-      self.dbSession = DBSession()
+      self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/services/{servicename}/highlights
   #
@@ -54,27 +54,27 @@ class AuthorServiceQueryController(object):
 
     # get author-id for author_name
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == author_name).one()
+      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author {0}'.format(author_name)}
 
     # get service-id for service_name
     try:
-      serviceId, = self.dbSession.query(Service.id).filter(Service.service_name == service_name).one()
+      serviceId, = self.db_session.query(Service.id).filter(Service.service_name == service_name).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown service {0}'.format(author_name)}
 
     events = []
-    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
+    for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
                     join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
                     filter(and_(AuthorServiceMap.service_id == serviceId,
                                 AuthorServiceMap.author_id == author.id)). \
                     filter(ServiceEvent.correlation_id == None). \
                     order_by(ServiceEvent.create_time.desc()). \
                     limit(LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
+      event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 

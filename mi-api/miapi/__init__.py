@@ -3,16 +3,17 @@ from sqlalchemy import engine_from_config
 
 from pyramid.renderers import JSONP
 
-from tim_commons.oauth import load_oauth_config
+from tim_commons.config import load_configuration
+from tim_commons import db
 
 from mi_schema.models import ServiceObjectType, Service
 
-from miapi.models import initialize_sql
-from miapi.models import DBSession
 
+# dictionary that holds all configuration merged from multple sources
+tim_config = {}
 
 # object created from JSON file that stores oAuth configuration for social services
-oAuthConfig = {}
+oauth_config = {}
 
 # lookup dictionary of service_object_type id to it's associated label
 service_object_type_dict = {}
@@ -26,12 +27,10 @@ def load_service_object_type_dict():
 
   service_object_type_dict = {}
 
-  db_session = DBSession()
+  db_session = db.Session()
 
   for row in db_session.query(ServiceObjectType):
     service_object_type_dict[row.type_id] = row.label
-
-  db_session.commit()
 
   return service_object_type_dict
 
@@ -41,12 +40,10 @@ def load_service_name_dict():
 
   service_name_dict = {}
 
-  db_session = DBSession()
+  db_session = db.Session()
 
   for row in db_session.query(Service):
     service_name_dict[row.id] = row.service_name
-
-  db_session.commit()
 
   return service_name_dict
 
@@ -56,14 +53,19 @@ def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.
   """
 
+  """ Setup the config
+  """
+  global tim_config
+  tim_config = load_configuration('{TIM_CONFIG}/config.ini')
+
   """ Setup the database
   """
-  engine = engine_from_config(settings, 'sqlalchemy.')
-  initialize_sql(engine)
+  db_url = tim_config['db']['sqlalchemy.url']
+  db.configure_session(db_url)
 
   # load the oauth configuration settings
-  global oAuthConfig
-  oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
+  global oauth_config
+  oauth_config = tim_config['oauth']
 
   # load the service_object_type_dict dictionary
   global service_object_type_dict
@@ -129,7 +131,7 @@ def main(global_config, **settings):
   #
   config.add_route('author.query.highlights', '/v1/authors/{authorname}/highlights')
   config.add_route('author.query.events', '/v1/authors/{authorname}/events')
-  config.add_route('author.query.events.eventId', '/v1/authors/{authorname}/events/{eventID}')
+  config.add_route('author.query.events.eventId', '  ')
   config.add_route('author.query.topstories', '/v1/authors/{authorname}/topstories')
 
   # --

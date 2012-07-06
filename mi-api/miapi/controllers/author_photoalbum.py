@@ -13,7 +13,7 @@ from pyramid.view import view_config
 
 from tim_commons.json_serializer import load_string
 
-from miapi.models import DBSession
+from tim_commons import db
 
 from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, AuthorServiceMap
 
@@ -26,7 +26,7 @@ class AuthorPhotoAlbumController(object):
 
   def __init__(self, request):
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/photoalbums
   #
@@ -36,10 +36,8 @@ class AuthorPhotoAlbumController(object):
 
     author_name = self.request.matchdict['authorname']
 
-    db_session = DBSession()
-
     try:
-      author_id, = db_session.query(Author.id).filter_by(author_name=author_name).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
@@ -101,7 +99,7 @@ class AuthorPhotoAlbumController(object):
           photo_id = json_obj.get('cover_photo')
           if photo_id:
             try:
-              photo, asm, author = db_session. \
+              photo, asm, author = self.db_session. \
                   query(ServiceEvent, AuthorServiceMap, Author). \
                   join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
                         ServiceEvent.service_id == AuthorServiceMap.service_id)). \
@@ -130,8 +128,6 @@ class AuthorPhotoAlbumController(object):
           album_obj['cover_photo'] = cover_photo
 
         albums.append(album_obj)
-
-    db_session.commit()
 
     # if only 2 albums exist and they contain the same number of photos remove the
     # first (which is the 'all photos' album)

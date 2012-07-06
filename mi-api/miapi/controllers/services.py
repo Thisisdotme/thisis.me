@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 
 from mi_schema.models import Service
 
-from miapi.models import DBSession
+from tim_commons import db
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class ServicesController(object):
   '''
   def __init__(self, request):
     self.request = request
-    self.dbSession = DBSession()
+    self.db_session = db.Session()
 
   # GET /v1/accounts
   #
@@ -33,7 +33,7 @@ class ServicesController(object):
   def list_accounts(self):
 
     serviceList = []
-    for service in self.dbSession.query(Service).order_by(Service.service_name):
+    for service in self.db_session.query(Service).order_by(Service.service_name):
       serviceList.append({'service_id': service.id,
                           'name': service.service_name,
                           'color_icon_high_res': self.request.static_url('miapi:%s' % service.color_icon_high_res),
@@ -51,7 +51,7 @@ class ServicesController(object):
 
     serviceName = self.request.matchdict['servicename']
 
-    service = self.dbSession.query(Service).filter_by(service_name=serviceName).one()
+    service = self.db_session.query(Service).filter_by(service_name=serviceName).one()
 
     return {'service_id': service.id,
             'name': service.service_name,
@@ -80,16 +80,16 @@ class ServicesController(object):
     service = Service(serviceName, colorHighRes, colorMedRes, colorLowRes, monoHighRes, monoMedRes, monoLowRes)
 
     try:
-      self.dbSession.add(service)
-      self.dbSession.commit()
+      self.db_session.add(service)
+      self.db_session.flush()
+
       log.info("create service: %(servicename)s" % {'servicename': serviceName})
 
     except IntegrityError, e:
-      self.dbSession.rollback()
       self.request.response.status_int = 409
       return {'error': e.message}
 
-    service = self.dbSession.query(Service).filter_by(service_name=serviceName).first()
+    service = self.db_session.query(Service).filter_by(service_name=serviceName).first()
 
     return {'service': service.toJSONObject()}
 

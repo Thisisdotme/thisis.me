@@ -12,7 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from pyramid.view import view_config
 
-from miapi.models import DBSession
+from tim_commons import db
 
 from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGroup, AuthorGroupMap, AuthorServiceMap
 from mi_schema.models import Service, ServiceObjectType, ServiceEvent
@@ -31,7 +31,7 @@ class AuthorController(object):
   '''
   def __init__(self, request):
     self.request = request
-    self.dbSession = DBSession()
+    self.db_session = db.Session()
 
   ##
   ## authors
@@ -44,7 +44,7 @@ class AuthorController(object):
   def authorsList(self):
 
     authorlist = []
-    for author in self.dbSession.query(Author).order_by(Author.author_name):
+    for author in self.db_session.query(Author).order_by(Author.author_name):
       authorJSON = author.toJSONObject()
       authorlist.append(authorJSON)
 
@@ -59,13 +59,13 @@ class AuthorController(object):
     authorName = self.request.matchdict['authorname']
 
     try:
-      author = self.dbSession.query(Author).filter_by(author_name=authorName).one()
+      author = self.db_session.query(Author).filter_by(author_name=authorName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
 
     authorJSONObj = author.toJSONObject()
-    authorJSONObj['features'] = getAuthorFeatures(self.dbSession, author.id)
+    authorJSONObj['features'] = getAuthorFeatures(self.db_session, author.id)
 
     return {'author': authorJSONObj}
 
@@ -85,7 +85,7 @@ class AuthorController(object):
     # get record for authorName.  There must be at most only 1 authorName.  No result found indicates
     # we're to perform an add; multiple results found is an internal error;
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
     except NoResultFound:
       author = None
     except MultipleResultsFound:
@@ -113,12 +113,12 @@ class AuthorController(object):
         author.template = template
 
       try:
-        self.dbSession.flush()
+
+        self.db_session.flush()
+
         authorJSON = author.toJSONObject()
-        self.dbSession.commit()
 
       except Exception, e:
-        self.dbSession.rollback()
         log.error(e.message)
         self.request.response.status_int = 500
         return {'error': e.message}
@@ -147,13 +147,13 @@ class AuthorController(object):
         template = authorInfo.get('template')
 
         author = Author(authorName, email, fullname, password, template)
-        self.dbSession.add(author)
-        self.dbSession.flush()
+        self.db_session.add(author)
+        self.db_session.flush()
 
         # map the ME service to the new author
         asm = AuthorServiceMap(author.id, Service.ME_ID)
-        self.dbSession.add(asm)
-        self.dbSession.flush()
+        self.db_session.add(asm)
+        self.db_session.flush()
 
         # insert the all, of-me, and liked photo albums
         all_photos = ServiceEvent(asm.id,
@@ -162,7 +162,7 @@ class AuthorController(object):
                                   Service.ME_ID,
                                   '{0}@{1}'.format(ServiceEvent.ALL_PHOTOS_ID, author.id),
                                   datetime.now())
-        self.dbSession.add(all_photos)
+        self.db_session.add(all_photos)
 
         ofme_photos = ServiceEvent(asm.id,
                                    ServiceObjectType.PHOTO_ALBUM_TYPE,
@@ -170,7 +170,7 @@ class AuthorController(object):
                                    Service.ME_ID,
                                    '{0}@{1}'.format(ServiceEvent.OFME_PHOTOS_ID, author.id),
                                    datetime.now())
-        self.dbSession.add(ofme_photos)
+        self.db_session.add(ofme_photos)
 
         liked_photos = ServiceEvent(asm.id,
                                     ServiceObjectType.PHOTO_ALBUM_TYPE,
@@ -178,7 +178,7 @@ class AuthorController(object):
                                     Service.ME_ID,
                                     '{0}@{1}'.format(ServiceEvent.LIKED_PHOTOS_ID, author.id),
                                     datetime.now())
-        self.dbSession.add(liked_photos)
+        self.db_session.add(liked_photos)
 
         ''' ??? this might only be temporary ???
             Create a default group (follow) and add the author to that group
@@ -186,33 +186,29 @@ class AuthorController(object):
         '''
 
         authorGroup = AuthorGroup(author.id, DEFAULT_AUTHOR_GROUP)
-        self.dbSession.add(authorGroup)
-        self.dbSession.flush()
+        self.db_session.add(authorGroup)
+        self.db_session.flush()
 
         mapping = AuthorGroupMap(authorGroup.id, author.id)
-        self.dbSession.add(mapping)
-        self.dbSession.flush()
+        self.db_session.add(mapping)
+        self.db_session.flush()
 
         ''' Add the new author to the authors access group '''
-        groupId, = self.dbSession.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
+        groupId, = self.db_session.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
         authorAccessGroupMap = AuthorAccessGroupMap(author.id, groupId)
-        self.dbSession.add(authorAccessGroupMap)
-        self.dbSession.flush()
+        self.db_session.add(authorAccessGroupMap)
+        self.db_session.flush()
 
         authorJSON = author.toJSONObject()
-
-        self.dbSession.commit()
 
         log.info("create author %s and added to group %s" % (authorName, ACCESS_GROUP_AUTHORS))
 
       except IntegrityError, e:
-        self.dbSession.rollback()
         log.error(e.message)
         self.request.response.status_int = 409
         return {'error': e.message}
 
       except NoResultFound, e:
-        self.dbSession.rollback()
         log.error(e.message)
         self.request.response.status_int = 409
         return {'error': e.message}
@@ -227,14 +223,12 @@ class AuthorController(object):
 
     authorName = self.request.matchdict['authorname']
 
-    author = self.dbSession.query(Author).filter(Author.author_name == authorName).first()
+    author = self.db_session.query(Author).filter(Author.author_name == authorName).first()
     if not author:
       self.request.response.status_int = 404
       return {'error': 'unknown author: %s' % authorName}
 
-    self.dbSession.delete(author)
-
-    self.dbSession.commit()
+    self.db_session.delete(author)
 
     log.info("deleted author: %s" % authorName)
 
@@ -251,7 +245,7 @@ class AuthorController(object):
     authorname = self.request.matchdict['authorname']
     userid = self.request.matchdict['userID']
 
-    author = self.dbSession.query(Author).filter_by(author_name=authorname).first()
+    author = self.db_session.query(Author).filter_by(author_name=authorname).first()
     if author == None:
       self.request.response.status_int = 404
       return {'error': 'unknown authorname'}
@@ -264,7 +258,7 @@ class AuthorController(object):
     authorname = self.request.matchdict['authorname']
     userid = self.request.matchdict['userID']
 
-    author = self.dbSession.query(Author).filter_by(author_name=authorname).first()
+    author = self.db_session.query(Author).filter_by(author_name=authorname).first()
     if author == None:
       self.request.response.status_int = 404
       return {'error': 'unknown authorname'}
