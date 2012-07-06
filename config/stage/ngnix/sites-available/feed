@@ -1,0 +1,27 @@
+server {
+  listen              443 ssl;
+  ssl_certificate     /etc/pki/tls/certs/feed.crt;
+  ssl_certificate_key /etc/pki/tls/certs/feed.key;
+  access_log          on;
+  error_log           /var/log/nginx/feed.error.log;
+
+  charset             utf-8;
+  location / {
+      uwsgi_pass      unix:///tmp/event-feed.sock;
+      include         uwsgi_params;
+      uwsgi_param     SCRIPT_NAME /;
+  }
+}
+
+server {
+  listen              80;
+  access_log          on;
+  error_log           /var/log/nginx/feed.error.log;
+
+  charset             utf-8;
+  location / {
+      uwsgi_pass      unix:///tmp/event-feed.sock;
+      include         uwsgi_params;
+      uwsgi_param     SCRIPT_NAME /;
+  }
+}
