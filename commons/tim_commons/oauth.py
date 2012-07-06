@@ -1,5 +1,4 @@
 import BaseHTTPServer
-from json import load
 
 http_status_print = BaseHTTPServer.BaseHTTPRequestHandler.responses
 
@@ -13,16 +12,6 @@ class OAuthError(Exception):
 
   def toString(self):
     return '%s#%s' % (self.code, self.msg)
-
-
-# load the oauth config
-def load_oauth_config(path):
-
-  oauthfd = open(path)
-  config = load(oauthfd)
-  oauthfd.close()
-
-  return config
 
 
 # Simple oauth request wrapper to handle responses and exceptions

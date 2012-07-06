@@ -9,7 +9,8 @@ import logging
 from pyramid.view import view_config
 from sqlalchemy import (and_)
 
-from miapi.models import DBSession
+from tim_commons import db
+
 from mi_schema.models import (Author, Service, ServiceEvent, AuthorServiceMap, Highlight)
 
 from miapi.globals import LIMIT
@@ -30,7 +31,7 @@ class AuthorQueryController(object):
 
   def __init__(self, request):
       self.request = request
-      self.dbSession = DBSession()
+      self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/highlights
   #
@@ -43,13 +44,13 @@ class AuthorQueryController(object):
 
     # get author-id for authorName
     try:
-      authorId, = self.dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+      authorId, = self.db_session.query(Author.id).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for highlight, event, asm, author, serviceName in self.dbSession.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+    for highlight, event, asm, author, serviceName in self.db_session.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
               join(ServiceEvent, Highlight.service_event_id == ServiceEvent.id). \
               join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
               join(Author, AuthorServiceMap.author_id == Author.id). \
@@ -57,9 +58,7 @@ class AuthorQueryController(object):
               filter(and_(AuthorServiceMap.author_id == authorId, Highlight.weight > 0)). \
               order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
               limit(LIMIT):
-      events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, asm, author, serviceName))
-
-    self.dbSession.commit()
+      events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
@@ -74,24 +73,22 @@ class AuthorQueryController(object):
 
     # get author-id for authorName
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
+    for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
           join(Service, AuthorServiceMap.service_id == Service.id). \
           filter(AuthorServiceMap.author_id == author.id). \
           filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
+      event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
-
-    self.dbSession.commit()
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}
 
@@ -107,12 +104,12 @@ class AuthorQueryController(object):
 
     # get author-id for authorName
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
     try:
-      event, asm = self.dbSession.query(ServiceEvent, AuthorServiceMap). \
+      event, asm = self.db_session.query(ServiceEvent, AuthorServiceMap). \
             join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
             filter(ServiceEvent.id == serviceEventID). \
             filter(AuthorServiceMap.author_id == author.id). \
@@ -121,9 +118,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown event id %d' % serviceEventID}
 
-    self.dbSession.commit()
-
-    return {'event': createServiceEvent(self.dbSession, self.request, event, asm, author)}
+    return {'event': createServiceEvent(self.db_session, self.request, event, asm, author)}
 
   # GET /v1/authors/{authorname}/topstories
   #
@@ -138,22 +133,20 @@ class AuthorQueryController(object):
 
     # get author-id for authorName
     try:
-      author = self.dbSession.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % authorName}
 
     events = []
-    for event, asm in self.dbSession.query(ServiceEvent, AuthorServiceMap). \
+    for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
           filter(AuthorServiceMap.author_id == author.id). \
           filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(STORY_LIMIT):
-      event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
+      event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
-
-    self.dbSession.commit()
 
     return {'events': events}

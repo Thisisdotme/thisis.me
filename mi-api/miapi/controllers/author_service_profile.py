@@ -11,9 +11,9 @@ from mi_schema.models import Service, Author, AuthorServiceMap
 
 from profile_fetchers import profile_fetcher
 
-from miapi.models import DBSession
+from tim_commons import db
 
-from miapi import oAuthConfig, service_name_dict
+from miapi import oauth_config, service_name_dict
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ServiceProfileController(object):
   '''
   def __init__(self, request):
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   # get the author's profile from the first available service of highest
   # precedence
@@ -38,7 +38,6 @@ class ServiceProfileController(object):
     try:
       author_id, = self.db_session.query(Author.id).filter(Author.author_name == author_name).one()
     except:
-      self.db_session.rollback()
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
 
@@ -60,11 +59,9 @@ class ServiceProfileController(object):
       asm = mappings.get(service_id)
       if asm:
         service_name = service_name_dict[service_id]
-        fetcher = profile_fetcher.from_service_name(service_name, oAuthConfig[service_name])
+        fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
         profile_json = fetcher.get_author_profile(asm.service_author_id, asm)
         break
-
-    self.db_session.commit()
 
     return profile_json
 
@@ -89,7 +86,7 @@ class ServiceProfileController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown service %s' % author_name}
 
-    fetcher = profile_fetcher.from_service_name(service_name, oAuthConfig[service_name])
+    fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
     if not fetcher:
       self.request.response.status_int = 404
       return {'error': 'profile information is not available for service %s' % service_name}
@@ -101,7 +98,5 @@ class ServiceProfileController(object):
       return {'error': 'unknown service for author'}
 
     profile_json = fetcher.get_author_profile(mapping.service_author_id, mapping)
-
-    self.db_session.commit()
 
     return profile_json

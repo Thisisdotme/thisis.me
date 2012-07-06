@@ -11,7 +11,7 @@ from sqlalchemy import and_
 
 from pyramid.view import view_config
 
-from miapi.models import DBSession
+from tim_commons import db
 
 from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
 
@@ -24,7 +24,7 @@ class AuthorPhotoController(object):
 
   def __init__(self, request):
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/photoalbums/{albumname}/photos
   #
@@ -35,16 +35,14 @@ class AuthorPhotoController(object):
     author_name = self.request.matchdict['authorname']
     album_id = self.request.matchdict['albumID']
 
-    db_session = DBSession()
-
     try:
-      author_id, = db_session.query(Author.id).filter_by(author_name=author_name).one()
+      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
 
     try:
-      album = db_session.query(ServiceEvent).filter_by(id=album_id, type_id=ServiceObjectType.PHOTO_ALBUM_TYPE).one()
+      album = self.db_session.query(ServiceEvent).filter_by(id=album_id, type_id=ServiceObjectType.PHOTO_ALBUM_TYPE).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown album %s' % album_id}
@@ -52,7 +50,7 @@ class AuthorPhotoController(object):
     photos = []
     if album.service_id == Service.ME_ID:
       # handle photos for well-known albums
-      for event, asm, author in db_session. \
+      for event, asm, author in self.db_session. \
           query(ServiceEvent, AuthorServiceMap, Author). \
           join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
                                       ServiceEvent.service_id == AuthorServiceMap.service_id)). \
@@ -66,7 +64,7 @@ class AuthorPhotoController(object):
           photos.append(photo)
     else:
       # handle photos for other albums
-      for event, asm, author in db_session. \
+      for event, asm, author in self.db_session. \
           query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
           join(Relationship, and_(Relationship.child_author_id == ServiceEvent.author_id,
                                   Relationship.child_service_id == ServiceEvent.service_id,

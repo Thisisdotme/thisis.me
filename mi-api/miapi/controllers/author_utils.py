@@ -1,6 +1,7 @@
 import calendar
 
-from miapi.models import SimpleDBSession
+from tim_commons import db
+
 from mi_schema.models import Author, Service, ServiceObjectType
 
 from tim_commons import json_serializer
@@ -10,7 +11,7 @@ from miapi import service_object_type_dict
 from . import get_author_info
 
 
-def createServiceEvent(dbSession, request, se, asm, author):
+def createServiceEvent(db_session, request, se, asm, author):
 
   # filter well-known and instagram photo albums
   if se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and  \
@@ -62,9 +63,9 @@ def createServiceEvent(dbSession, request, se, asm, author):
   return event
 
 
-def createHighlightEvent(dbSession, request, highlight, se, asm, author, serviceName):
+def createHighlightEvent(db_session, request, highlight, se, asm, author, serviceName):
 
-  # TODO: fix this: sourcesItems = get_shared_services(dbSession, request, se.id, serviceName)
+  # TODO: fix this: sourcesItems = get_shared_services(db_session, request, se.id, serviceName)
 
   # collect the pieces of available content
   content = {}
@@ -105,12 +106,12 @@ def serviceBuild(authorName, serviceName, incremental, s3Bucket, aws_access_key,
 
   print("refresh %s serviceEvents for %s" % (authorName, serviceName))
 
-  dbSession = SimpleDBSession()
+  db_session = db.Session()
 
   # get the service-id for serviceName
-  serviceId, = dbSession.query(Service.id).filter(Service.service_name == serviceName).one()
+  serviceId, = db_session.query(Service.id).filter(Service.service_name == serviceName).one()
 
   # get author-id for authorName
-  authorId, = dbSession.query(Author.id).filter(Author.author_name == authorName).one()
+  authorId, = db_session.query(Author.id).filter(Author.author_name == authorName).one()
 
-  dbSession.close()
+  db_session.close()

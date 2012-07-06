@@ -11,13 +11,15 @@ This keeps bound objects from accumulating and more importantly being stale
 from pyramid.events import NewRequest
 from pyramid.events import subscriber
 
-from miapi.models import DBSession
+from tim_commons import db
 
 
 @subscriber(NewRequest)
 def request_listener(event):
-  event.request.add_finished_callback(session_remove_callback)
+#  event.request.add_finished_callback(session_remove_callback)
+  pass
 
 
 def session_remove_callback(request):
-  DBSession.remove()
+#  db.Session().remove()
+  pass

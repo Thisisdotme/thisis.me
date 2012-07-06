@@ -10,7 +10,7 @@ from pyramid.view import view_config
 
 from sqlalchemy import (and_)
 
-from miapi.models import DBSession
+from tim_commons import db
 
 from mi_schema.models import Author, AuthorGroup, AuthorGroupMap, ServiceEvent, Service, AuthorServiceMap, Highlight
 
@@ -32,7 +32,7 @@ class AuthorGroupQueryController(object):
   '''
   def __init__(self, request):
       self.request = request
-      self.dbSession = DBSession()
+      self.dbSession = db.Session()
 
   # GET /v1/authors/{authorname}/groups/{groupname}/highlights
   #

@@ -13,9 +13,9 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType, ServiceEvent
+from tim_commons import db
 
-from miapi.models import DBSession
+from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType, ServiceEvent
 
 from author_utils import serviceBuild
 
@@ -33,7 +33,7 @@ class AuthorServiceController(object):
   '''
   def __init__(self, request):
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/services
   #
@@ -42,8 +42,6 @@ class AuthorServiceController(object):
   def listAuthorServices(self):
 
     author_name = self.request.matchdict['authorname']
-
-    self.db_session = DBSession()
 
     try:
       author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
@@ -66,8 +64,6 @@ class AuthorServiceController(object):
                        'mono_icon_medium_res': self.request.static_url('miapi:%s' % service.mono_icon_medium_res),
                        'mono_icon_low_res': self.request.static_url('miapi:%s' % service.mono_icon_low_res)})
 
-    self.db_session.commit()
-
     return {'author_name': author_name, 'services': services}
 
   # GET /v1/authors/{authorname}/services/{servicename}
@@ -79,8 +75,6 @@ class AuthorServiceController(object):
 
     author_name = self.request.matchdict['authorname']
     serviceName = self.request.matchdict['servicename']
-
-    self.db_session = DBSession()
 
     try:
       author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
@@ -99,8 +93,6 @@ class AuthorServiceController(object):
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown service for author'}
-
-    self.db_session.commit()
 
     response = {'author': author_name,
                 'service': serviceName,
@@ -161,12 +153,9 @@ class AuthorServiceController(object):
         self.db_session.add(instagram__album)
         self.db_session.flush()
 
-      self.db_session.commit()
-
       log.info("created author/service link: %s -> %s" % (author_name, service_name))
 
     except IntegrityError, e:
-      self.db_session.rollback()
       self.request.response.status_int = 409
       return {'error': e.message}
 
@@ -212,12 +201,6 @@ class AuthorServiceController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown service for author'}
 
-    try:
-      self.db_session.delete(authorServiceMap)
-      self.db_session.commit()
-
-    except Exception:
-      self.db_session.rollback()
-      raise
+    self.db_session.delete(authorServiceMap)
 
     return {}

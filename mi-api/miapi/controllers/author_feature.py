@@ -11,9 +11,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import func
 
-from mi_schema.models import Author, Feature, AuthorFeatureMap, AuthorFeatureDefault
+from tim_commons import db
 
-from miapi.models import DBSession
+from mi_schema.models import Author, Feature, AuthorFeatureMap, AuthorFeatureDefault
 
 from .feature_utils import getAuthorFeatures
 
@@ -30,7 +30,7 @@ class AuthorFeatureController(object):
     Constructor
     '''
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   # GET /v1/authors/{authorname}/features
   #
@@ -47,8 +47,6 @@ class AuthorFeatureController(object):
       return {'error': 'unknown author %s' % author_name}
 
     features = getAuthorFeatures(self.db_session, author_id)
-
-    self.db_session.commit()
 
     return {'author_name': author_name, 'features': features}
 
@@ -84,11 +82,9 @@ class AuthorFeatureController(object):
     try:
       self.db_session.add(afm)
       self.db_session.flush()
-      self.db_session.commit()
       log.info("created author/feature link: %s -> %s" % (author_name, feature_name))
 
     except IntegrityError, e:
-      self.db_session.rollback()
       self.request.response.status_int = 409
       return {'error': e.message}
 
@@ -122,13 +118,7 @@ class AuthorFeatureController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown feature for author'}
 
-    try:
-      self.db_session.delete(afm)
-      self.db_session.commit()
-
-    except Exception:
-      self.db_session.rollback()
-      raise
+    self.db_session.delete(afm)
 
     return {}
 
@@ -160,8 +150,6 @@ class AuthorFeatureController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown feature for author'}
 
-    self.db_session.commit()
-
     response = {'author': author_name, 'feature': feature_name, 'sequence': afm.sequence}
 
     return response
@@ -186,8 +174,6 @@ class AuthorFeatureController(object):
                                     filter(AuthorFeatureDefault.author_id == author_id).one()
     except NoResultFound:
       feature_name = None
-
-    self.db_session.commit()
 
     result = {'author': author_name, 'default_feature': feature_name}
 
@@ -220,7 +206,6 @@ class AuthorFeatureController(object):
 
     afd = AuthorFeatureDefault(author_id, feature_id)
     self.db_session.add(afd)
-
-    self.db_session.commit()
+    self.db_session.flush()
 
     return {'author': author_name, 'default_feature': feature_name}

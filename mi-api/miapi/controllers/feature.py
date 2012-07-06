@@ -13,7 +13,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from mi_schema.models import Feature
 
-from miapi.models import DBSession
+from tim_commons import db
 
 log = logging.getLogger(__name__)
 
@@ -25,13 +25,13 @@ class FeatureController(object):
     Constructor
     '''
     self.request = request
-    self.dbSession = DBSession()
+    self.db_session = db.Session()
 
   @view_config(route_name='features', request_method='GET', renderer='jsonp', http_cache=0)
   def listFeatures(self):
 
     featureList = []
-    for feature in self.dbSession.query(Feature).order_by(Feature.name):
+    for feature in self.db_session.query(Feature).order_by(Feature.name):
       featureList.append(feature.toJSONObject())
 
     return {'features': featureList}
@@ -44,13 +44,12 @@ class FeatureController(object):
     feature = Feature(featureName)
 
     try:
-      self.dbSession.add(feature)
-      self.dbSession.flush()
-      self.dbSession.commit()
+      self.db_session.add(feature)
+      self.db_session.flush()
+
       log.info("create feature: %(featurename)s" % {'featurename': featureName})
 
     except IntegrityError, e:
-      self.dbSession.rollback()
       self.request.response.status_int = 409
       return {'error': e.message}
 
@@ -62,18 +61,12 @@ class FeatureController(object):
     featureName = self.request.matchdict['featurename']
 
     try:
-      feature = self.dbSession.query(Feature).filter_by(name=featureName).one()
+      feature = self.db_session.query(Feature).filter_by(name=featureName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'feature "%s" does not exist' % featureName}
 
-    try:
-      self.dbSession.delete(feature)
-      self.dbSession.commit()
-
-    except Exception:
-      self.dbSession.rollback()
-      raise
+    self.db_session.delete(feature)
 
     return {}
 
@@ -83,7 +76,7 @@ class FeatureController(object):
     featureName = self.request.matchdict['featurename']
 
     try:
-      feature = self.dbSession.query(Feature).filter_by(name=featureName).one()
+      feature = self.db_session.query(Feature).filter_by(name=featureName).one()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'feature "%s" does not exist' % featureName}
