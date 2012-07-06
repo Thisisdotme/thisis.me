@@ -60,6 +60,45 @@ TIM.collections.Services = Backbone.Collection.extend({
 		
 });
 
+
+//
+// collection holding all types of posts the ui has to support
+//  -e.g. photo, photo-slbum, 
+//
+/*
+
+  +---------+-------------+
+  | type_id | label       |
+  +---------+-------------+
+  |       1 | highlight   |
+  |       2 | photo-album |
+  |       3 | photo       |
+  |       4 | checkin     |
+  |       5 | status      |
+  |       6 | follow      |
+  |       7 | video       |
+  |       8 | video-album |
+  |       9 | correlation |
+  |      10 | correlation |
+  +---------+-------------+
+
+
+*/
+
+
+TIM.collections.PostTypes = Backbone.Collection.extend({
+	 	model: TIM.models.PostTypes,
+		url: TIM.apiUrl + "/types",
+		
+		initialize: function(options) {
+		  options = options || {};
+		},
+		parse: function(resp) {
+		  return (resp.types);
+		},
+		
+});
+
 //paging for collection as a mixin
 //
 //have some sort of variable that says whether there's a maximum/total count - after reaching this count, don't try to get the next page?

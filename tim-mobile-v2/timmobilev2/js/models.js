@@ -1,5 +1,7 @@
 (function ( TIM ) {
   
+  //this was a sort of experimental 'model' to use for a feature's behavior...
+  //for now I think it was a case of 'object-oriented overkill', but I'm keeping it here for the moment but not using it
   TIM.models.FeatureBehavior = Backbone.Model.extend({
     navigate: function() {
       console.log("hey!  I'm coming from the behavior superclass! my name is " + this.get('name'));
@@ -115,6 +117,31 @@
   
   //model for services, e.g. facebook, twitter, etc.
   TIM.models.Service  = Backbone.Model.extend({
+    
+  });
+  
+  //model for event/post types, e.g. .
+  /*
+  
+  +---------+-------------+
+  | type_id | label       |
+  +---------+-------------+
+  |       1 | highlight   |
+  |       2 | photo-album |
+  |       3 | photo       |
+  |       4 | checkin     |
+  |       5 | status      |
+  |       6 | follow      |
+  |       7 | video       |
+  |       8 | video-album |
+  |       9 | correlation |
+  |      10 | correlation |
+  +---------+-------------+
+  
+  
+  */
+  
+  TIM.models.PostType  = Backbone.Model.extend({
     
   });
 	
