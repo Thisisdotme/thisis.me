@@ -11,7 +11,7 @@ This keeps bound objects from accumulating and more importantly being stale
 from pyramid.events import NewRequest
 from pyramid.events import subscriber
 
-from tim_commons import db
+#from tim_commons import db
 
 
 @subscriber(NewRequest)
