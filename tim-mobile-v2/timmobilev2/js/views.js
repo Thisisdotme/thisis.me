@@ -296,6 +296,8 @@ TIM.views.Comments = Backbone.View.extend( {
 
 //a stab at a 'toolbar view'  that other views could theoretically add & customize & respond to
 //toolbar triggers events on its parent view?
+//
+//this isn't being used at the moment and is maybe overkill, but we may want to use it later?
 
 TIM.views.Toolbar = Backbone.View.extend( {
         
@@ -338,6 +340,7 @@ TIM.views.Toolbar = Backbone.View.extend( {
 
 //this view is used by the flipset mixin
 //do we need to have a view object for this at all?
+//this might be the ideal place to create different views for event types (photo, short-form, etc.)
 
 TIM.views.Page = Backbone.View.extend( {
     
@@ -388,7 +391,7 @@ TIM.mixins.flipset = {
 		//send pages to the flips script one at a time as strings?
 		//maybe have the flips script render the pages instead?
 		
-		renderPage: function(pages){
+		renderPage: function(pages){  //'pages' could just be 'page'
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({pages: pages});
 	    var tmpl = pages[0].template ? pages[0].template : this.pageTemplate;

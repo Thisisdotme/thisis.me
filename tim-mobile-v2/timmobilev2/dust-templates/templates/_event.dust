@@ -8,7 +8,12 @@
 			{:else}
 			{/photo_url}
 			   <div class="inner-text">
-			     <p>{data}</p>
+  			    {?label}
+  			     <p>{label}</p>
+  			    {/label}
+  			    {?data}
+  			     <p>{data}</p>
+  			    {/label}
 			   </div>
 			 </div>
 			{/content}

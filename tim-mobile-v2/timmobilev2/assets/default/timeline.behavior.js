@@ -57,6 +57,7 @@
 
   TIM.collections.Events = Backbone.Collection.extend({
   		//setting which subclass the model is here?  not sure if this is necessary....
+  		//actually, subclassing the model might not be the way to go - the view though, could probably be subclassed
   	 	model: function(attrs) {
   			switch(attrs.feature) {
            case "linkedin":
@@ -236,6 +237,7 @@
 		  feature.detailView.model = new TIM.models.EventDetail({id: resourceId});
 		  feature.detailView.model.fetch({
 		    dataType: "jsonp",
+		    timeout : 3000,
 		    success: function(model, response) {
           console.log('fetched model: ', model);
           feature.detailView.render();
@@ -248,6 +250,10 @@
           feature.timelineView.goToPage(pageNum);
           
           feature.detailCache['' + resourceId] = model; //so we don't have to get the same details twice
+		    },
+		    error: function(model, response) {
+		      console.log("couldn't find event: ", resourceId);
+		      TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
 		    }
 		  });
 		}
