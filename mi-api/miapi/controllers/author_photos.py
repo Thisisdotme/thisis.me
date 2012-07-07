@@ -65,7 +65,7 @@ class AuthorPhotoController(object):
     else:
       # handle photos for other albums
       for event, asm, author in self.db_session. \
-          query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+          query(ServiceEvent, AuthorServiceMap, Author). \
           join(Relationship, and_(Relationship.child_author_id == ServiceEvent.author_id,
                                   Relationship.child_service_id == ServiceEvent.service_id,
                                   Relationship.child_service_event_id == ServiceEvent.event_id)). \
