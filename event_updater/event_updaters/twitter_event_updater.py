@@ -1,6 +1,7 @@
 import urllib
 import urllib2
 import oauth2 as oauth
+import logging
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event, CURRENT_STATE
@@ -46,7 +47,6 @@ class TwitterEventUpdater(EventUpdater):
       json_obj = json_serializer.load_string(make_request(client, url)) if asm.access_token \
                  else json_serializer.load(urllib2.urlopen(url))
     except urllib2.URLError, e:
-      import logging
       logging.error('ERROR REQUEST URL: {0}'.format(url))
       logging.error('ERROR REASON: {0}, {1}'.format(e.code, e.read()))
       raise

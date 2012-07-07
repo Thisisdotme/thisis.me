@@ -4,6 +4,7 @@ Created on Jan 16, 2012
 @author: howard
 '''
 
+import logging
 import urllib
 import urllib2
 import re
@@ -26,8 +27,13 @@ class GoogleplusProfileFetcher(ProfileFetcher):
                                    ('client_secret', self.oauth_config['secret']),
                                    ('refresh_token', asm.access_token),
                                    ('grant_type', 'refresh_token')])
-    raw_obj = json_serializer.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'],
-                                                   query_args))
+
+    try:
+      raw_obj = json_serializer.load(urllib2.urlopen(self.oauth_config['oauth_exchange_url'],
+                                                     query_args))
+    except urllib2.URLError, e:
+      logging.error('ERROR REASON: {0}, {1}'.format(e.code, e.read()))
+      raise
 
     access_token = raw_obj['access_token']
 
