@@ -84,6 +84,7 @@ class EventCollector(object):
        state['most_recent_event_timestamp'] != state['asm'].most_recent_event_timestamp:
       state['asm'].most_recent_event_id = state['most_recent_event_id']
       state['asm'].most_recent_event_timestamp = state['most_recent_event_timestamp']
+      db.Session().flush()
 
   '''
     fetch_log - utility for logging author event fetches in a consistent manner

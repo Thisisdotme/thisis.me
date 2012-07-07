@@ -32,6 +32,11 @@ class LinkedinEventCollector(EventCollector):
 
     asm = state['asm']
 
+    # if this author has no access_token they are unauthorized and we
+    # don't collect LinkedIn events for them
+    if not asm.access_token:
+      return
+
     service_author_id = asm.service_author_id
 
     min_age = datetime.utcnow() - self.NEW_LOOKBACK_WINDOW
