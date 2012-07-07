@@ -6,6 +6,7 @@ Created on Jan 16, 2012
 
 from abc import abstractmethod
 import sys
+import logging
 
 from sqlalchemy import (and_)
 
@@ -66,5 +67,7 @@ class ProfileFetcher(object):
                          filter(and_(AuthorServiceMap.service_id == self.service_id,
                                      AuthorServiceMap.service_author_id == service_author_id)). \
                          one()
+
+    logging.debug('Fetching profile information for author_id={0}, service_id={1}'.format(asm.author_id, asm.service_id))
 
     return asm
