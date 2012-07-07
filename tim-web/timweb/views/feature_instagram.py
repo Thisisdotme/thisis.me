@@ -9,7 +9,7 @@ from pyramid.security import authenticated_userid
 
 from instagram import client
 
-from mi_url.RequestWithMethod import RequestWithMethod
+from tim_commons.request_with_method import RequestWithMethod
 
 from timweb.exceptions import GenericError
 from timweb.exceptions import UnexpectedAPIResponse

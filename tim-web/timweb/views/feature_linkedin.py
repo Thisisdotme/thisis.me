@@ -10,8 +10,8 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 
-from mi_url.RequestWithMethod import RequestWithMethod
-from mi_utils.oauth import make_request
+from tim_commons.request_with_method import RequestWithMethod
+from tim_commons.oauth import make_request
 
 from timweb.exceptions import UnexpectedAPIResponse
 from timweb import oAuthConfig

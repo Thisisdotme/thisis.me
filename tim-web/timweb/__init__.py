@@ -7,7 +7,7 @@ import pyramid_beaker
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from mi_utils.oauth import load_oauth_config
+from tim_commons.config import load_configuration
 
 from timweb.models import initialize_sql
 from timweb.security import groupfinder
@@ -20,13 +20,18 @@ def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.
   """
   
+  """ Setup the config
+  """
+  global tim_config
+  tim_config = load_configuration('{TIM_CONFIG}/config.ini')
+
   # initial db setup and connection
   engine = engine_from_config(settings, 'sqlalchemy.')
   initialize_sql(engine)
 
   # load the oauth configuration settings
   global oAuthConfig
-  oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
+  oAuthConfig = tim_config['oauth']
 
   authn_policy = AuthTktAuthenticationPolicy('tim_secret', callback=groupfinder, timeout=1800, reissue_time=180, max_age=1800, debug=True)
   authz_policy = ACLAuthorizationPolicy()
