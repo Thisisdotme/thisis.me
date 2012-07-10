@@ -1,5 +1,0 @@
-      [paste.app_factory]
-      main = timmobilev2:main
-      [console_scripts]
-      populate_tim-mobile-v2 = timmobilev2.scripts.populate:main
-      
