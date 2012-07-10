@@ -8,6 +8,93 @@ Backbone.View.prototype.close = function(){
   }
 }
 
+/*
+  // - have a base 'event view'
+  // - extend this if necessary to handle different post types
+  // - the different post types could have different templates, probably 'master classes' to allow css namespacing
+  //
+*/
+
+TIM.views.EventView = Backbone.View.extend( {
+   className: "event",
+   template:"_event",
+   render: function() {
+     var html = '';
+     
+     
+   }
+});
+
+TIM.views.Highlight = TIM.views.EventView.extend( {
+   className: "event highlight",
+   template:"_event"
+});
+
+TIM.views.PhotoAlbum = TIM.views.EventView.extend( {
+  className: "event photo-album",
+  template:"_event"  
+});
+
+TIM.views.Photo = TIM.views.EventView.extend( {
+  className: "event photo",
+  template:"_event"  
+});
+
+TIM.views.Checkin = TIM.views.EventView.extend( {
+  className: "event checkin",
+  template:"_event"   
+});
+
+TIM.views.Status = TIM.views.EventView.extend( {
+  className: "event status",
+  template:"_event"   
+});
+
+TIM.views.Follow = TIM.views.EventView.extend( {
+  className: "event follow",
+  template:"_follow"  
+});
+
+TIM.views.Video = TIM.views.EventView.extend( {
+  className: "event video",
+  template:"_event"   
+});
+
+TIM.views.VideoAlbum = TIM.views.EventView.extend( {
+  className: "event video-album",
+  template:"_event"   
+});
+
+TIM.views.Correlation = TIM.views.EventView.extend( {
+  className: "event correlation",
+  template:"_event"   
+});
+
+TIM.views.getEventView = function (event) {
+  var view;
+  switch(event.type) {
+    case "follow":
+      view = new TIM.views.Follow({event: event});
+      break;
+    default: 
+      view = new TIM.views.EventView({event: event});
+  }
+  return view;
+}
+
+//is this named improperly?  maybe 'render evvent page'?
+TIM.views.renderEvent = function(event, template) {
+  template = template || "timelinePage";
+  
+  event.event_template = event.event_template || "_event";
+  for(var i = 0; i < event.events.length; i++) {
+    var ev = event.events[i];
+    var view = TIM.views.getEventView(ev);
+    ev.event_template = view.template; //this is horseshit - do those really need to be views?
+  }
+  return TIM.views.renderTemplate(template, event);
+}
+
 //template is the name of the dust template
 //context is the JSON we use to drive the template
 //
@@ -17,7 +104,6 @@ Backbone.View.prototype.close = function(){
 TIM.views.renderTemplate = function(template, context) {
   
   var html = "";
-  //console.log('rendering menu item');
   dust.render(template, context, function(err, out) {
 	  if(err != null) {
 			TIM.eventAggregator.trigger("error", {exception: "template error: " + err});
@@ -350,16 +436,18 @@ TIM.views.Page = Backbone.View.extend( {
     
     initialize: function(spec) {
         _.bindAll(this, "render");
-				this.pages = spec.pages;
+				this.page = spec.page;
     },
 
     render: function( tmpl, callback ) {
-      console.log('rendering page: ', this.pages[0]);
+      
+      console.log('rendering page: ', this.page);
 			var that = this;
 			//console.log("pages: ", this.pages);
-			tmpl = tmpl || "event";//(this.page.events.length === 1 ? "event" : "page");
+			tmpl = tmpl || "timelinePage";//(this.page.events.length === 1 ? "event" : "page");
 			
-			var html = TIM.views.renderTemplate(tmpl, this.pages[0]);
+			var html = TIM.views.renderEvent(this.page, tmpl);
+			///var html = TIM.views.renderTemplate(tmpl, this.page);
       //this.$el.append(html);
       callback(html);
       this.hasRendered = true;
@@ -391,10 +479,10 @@ TIM.mixins.flipset = {
 		//send pages to the flips script one at a time as strings?
 		//maybe have the flips script render the pages instead?
 		
-		renderPage: function(pages){  //'pages' could just be 'page'
+		renderPage: function(page){  //'pages' could just be 'page'
 			//make a Page View out of 1-3 events
-	    var pageView = new TIM.views.Page({pages: pages});
-	    var tmpl = pages[0].template ? pages[0].template : this.pageTemplate;
+	    var pageView = new TIM.views.Page({page:page});
+	    var tmpl = page.template ? page.template : this.pageTemplate;
 	    var that = this;
 	    
 	    console.log("page template: ", tmpl);
@@ -514,7 +602,7 @@ TIM.mixins.flipset = {
 				end = this.pages.length;
 			}
 			for (var i = start; i < end; i++) {
-			  this.renderPage([this.pages[i]]);
+			  this.renderPage(this.pages[i]);
   			this.renderedIndex++;
 			}
 			

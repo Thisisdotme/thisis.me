@@ -155,15 +155,6 @@ body {
   width:1000px; */
 }
 
-.photo-page .caption .grid-link, .photo-detail .caption .grid-link {
-  position:absolute;
-  right:34px;
-  bottom:4px;
-  height:24px;
-  width:24px;
-  background: transparent url(/img/back_arrow.png) no-repeat center center;
-}
-
 .photo-detail {
   min-height:100%;
 }
@@ -172,24 +163,23 @@ body {
   /* -webkit-transform:translate3d(0,0,0)  */
 }
 
-.photo-detail .caption, .photo-page .caption, .scroll-overlay .caption {
+.photo-detail footer, .photo-page footer, .scroll-overlay footer {
   position:absolute;
   bottom:-50px;
   color:#fff;
   background:rgba(60,60,60,1);
   width:100%;
-  min-height:50px;
   overflow:hidden;
   -webkit-transition: all .3s linear;
   opacity:0.8;
 }
 
-.flip-mode .photo-page .caption, .scroll-overlay .caption {
+.flip-mode .photo-page footer, .scroll-overlay footer {
   -webkit-transition: all .3s linear;
   bottom:0px;
 }
 
-.scroll-overlay.no-toolbars .caption {
+.scroll-overlay.no-toolbars footer {
   -webkit-animation-name: slideDownAndDisappear;
   -webkit-animation-timing-function: linear;
 	-webkit-animation-duration: 500ms;

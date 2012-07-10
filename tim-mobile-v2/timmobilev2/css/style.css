@@ -103,6 +103,8 @@ ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
 dd { margin: 0 0 0 40px; }
 nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
 
+h1 {  margin: 0 }
+
 
 /* =============================================================================
    Embedded content
@@ -221,6 +223,7 @@ body {
   background-color: #cd212b;
   height: 100%;
 }
+
 #loading-img {
   display: none;
   background: transparent url(/img/loading.gif) center center no-repeat;
@@ -347,62 +350,10 @@ body {
   background-color: #cd212b;
   background: #cd212b url(/img/thisisme_logo.png) center 30% no-repeat;
 }
-h1 {  margin: 0 }
-/*   #nav-toggle {
-      position:absolute;
-       right:0px;
-      display:block;
-      height:36px;
-      width:36px;
-      background:url(/img/nav-toggle.png);
-      float:right;
-      z-index:10000;
-   }
 
-
-
-   .nav-open #feature-nav {
-     right:0px;
-    }
-
-  */
 .initializing #feature-nav,
 .initializing #nav-toggle {  display: none }
-/*
 
-    #feature-nav {
-       position:absolute;
-       right:-80px;
-       top:0px;
-       bottom:0px;
-       width:80px;
-      -webkit-transition: .3s cubic-bezier(.54, .16, .57, .88);
-      z-index:30;
-    }
-
-  #feature-nav ul {
-    background-color:#cd212b;
-    x-display:none;
-    color:#fff;
-    height:100%;
-    padding-top:45px;
-  }
-
-  #feature-nav.active ul {
-    display:block;
-  }
-
-   #feature-nav li {
-     list-style:none;
-     padding:12px 4px;
-     font-size:14px;
-   }
-
-   #feature-nav .selected {
-      font-weight:bold;
-    }
-
-  */
 #nav-toggle {
   background: url(/img/nav/logo.svg) no-repeat, url(/img/nav/logo-active.svg) no-repeat;
   background-size: contain;
@@ -644,7 +595,7 @@ h1 {  margin: 0 }
 
 /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
     Built by David Kaneda and maintained by Jonathan Stark.
-    */
+*/
     
 .in,
 .out {
@@ -715,7 +666,6 @@ h1 {  margin: 0 }
     to {  opacity: 0 }
 }
 
-
 .flip {
   -webkit-animation-duration: .65s;
   -webkit-backface-visibility: hidden;
@@ -761,7 +711,7 @@ h1 {  margin: 0 }
 
 
 /* moved photo page css up to global so it's accessible from other features */
-.photo-page .caption > .main-text,
+.photo-page footer > .main-text,
 .scroll-overlay .caption .main-text {  padding: 8px 16px }
 .photo-page .caption .grid-link,
 .photo-detail .caption .grid-link {
@@ -781,7 +731,7 @@ h1 {  margin: 0 }
   background: transparent url(/img/listIcon.png) no-repeat center center;
 }
 /* let's do some god-dam caption styling here */
-.photo-page .caption .profile-thumb {
+.photo-page footer .profile-thumb {
   float: left;
   height: 25px;
   width: 25px;
@@ -790,20 +740,21 @@ h1 {  margin: 0 }
   margin-bottom: 16px;
   background: transparent url(/img/profile_thumb.png) no-repeat center center;
 }
-.photo-page .caption .source-img {
+.photo-page footer .source-img {
   float: left;
   height: 15px;
   width: 15px;
   margin-right: 4px;
 }
 /* make these sprites.... or inline base 64? */
-.photo-page .caption .source-img.linkedIn {  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center }
-.photo-page .caption .source-img.facebook {  background: transparent url(/img/icons/facebook_15.png) no-repeat center center }
-.photo-page .caption .source-img.instagram {  background: transparent url(/img/icons/instagram_15.png) no-repeat center center }
-.photo-page .caption .source-img.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
-.photo-page .caption .source-img.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
-.photo-page .caption .source-img.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
+.photo-page footer .source-img.linkedIn {  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center }
+.photo-page footer .source-img.facebook {  background: transparent url(/img/icons/facebook_15.png) no-repeat center center }
+.photo-page footer .source-img.instagram {  background: transparent url(/img/icons/instagram_15.png) no-repeat center center }
+.photo-page footer .source-img.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
+.photo-page footer .source-img.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
+.photo-page footer .source-img.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
 #content-container .scroll-overlay .interaction-icons {  display: none }
+
 .photo-page .interaction-icons {
   position: absolute;
   left: 2px;
@@ -830,6 +781,8 @@ h1 {  margin: 0 }
   x-border: 1px solid red;
   background: transparent url(/img/location_pin_icon.png) no-repeat center center;
 }
+
+
 /* Newsfeed */
 .flippage-container .mi-content {
   margin: 0;
@@ -901,14 +854,13 @@ h1 {  margin: 0 }
   min-height: 50%;
   min-width: 50%;
 }
-.flippage-container .event .footer {
+footer {
   padding: 5px 5px 5px 5px;
   margin: 0;
   bottom: 0;
   position: absolute;
 }
-.flippage-container .event.half-page:first-child .footer {  /*    bottom: 50%;_NO__DOTCOMMA__AFTER__*/ }
-.flippage-container .event .footer .info {
+footer .info {
   float: none;
   display: table-cell;
   vertical-align: middle;
@@ -916,12 +868,12 @@ h1 {  margin: 0 }
   padding-left: 5px;
   padding-right: 10px;
 }
-.flippage-container .event .footer .info .author a {
+footer .info .author a {
   font-weight: bold;
   color: #000;
   text-decoration: none;
 }
-.flippage-container .event .footer .info .caption {
+footer .info .caption {
   display: none;
   height: 18px;
   font-size: 14px;
@@ -931,9 +883,9 @@ h1 {  margin: 0 }
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.flippage-container .event .footer > div {  float: left }
-.flippage-container .event .footer .avatar {  height: 40px }
-.flippage-container .event .footer .avatar .frame {
+footer > div {  float: left }
+footer .avatar {  x-height: 40px }
+footer .avatar .frame {
   height: 33px;
   width: 33px;
   margin-left: 4px;
@@ -943,7 +895,7 @@ h1 {  margin: 0 }
   -webkit-box-shadow: 0px 0px 2px .1px #555;
   -moz-box-shadow: 0px 0px 2px .1px #000;
 }
-.flippage-container .event .footer .avatar img {
+footer .avatar img {
   max-height: 100%;
   max-width: 100%;
 }
@@ -952,7 +904,6 @@ h1 {  margin: 0 }
   padding-top: 7px;
   padding-left: 5px;
 }
-.flippage-container .event .baseline span,
 footer span.service-icon {
   float: left;
   x-padding-left: 5px;
@@ -960,23 +911,29 @@ footer span.service-icon {
   width: 15px;
   background-size: cover;
 }
-.flippage-container .event .baseline span.twitter, footer span.twitter {  background: url(http://api.thisis.me/img/l/services/color/Twitter.png) top left no-repeat }
-.flippage-container .event .baseline span.instagram, footer span.instagram {  background: url(http://api.thisis.me/img/l/services/color/Instagram.png) top left no-repeat }
-.flippage-container .event .baseline span.linkedin, footer span.linkedin {  background: url(http://api.thisis.me/img/l/services/color/LinkedIn.png) top left no-repeat }
-.flippage-container .event .baseline span.facebook, footer span.facebook {  background: url(http://api.thisis.me/img/l/services/color/Facebook.png) top left no-repeat }
-.flippage-container .event .baseline span.foursquare, footer span.foursquare {  background: url(http://api.thisis.me/img/l/services/color/Foursquare.png) top left no-repeat }
-.flippage-container .event .baseline img {
+footer span.twitter {  background: url(http://api.thisis.me/img/l/services/color/Twitter.png) top left no-repeat }
+footer span.instagram {  background: url(http://api.thisis.me/img/l/services/color/Instagram.png) top left no-repeat }
+footer span.linkedin {  background: url(http://api.thisis.me/img/l/services/color/LinkedIn.png) top left no-repeat }
+footer span.facebook {  background: url(http://api.thisis.me/img/l/services/color/Facebook.png) top left no-repeat }
+footer span.foursquare {  background: url(http://api.thisis.me/img/l/services/color/Foursquare.png) top left no-repeat }
+footer x-img {
   float: left;
   padding-left: 5px;
   height: 15px;
   width: 15px;
 }
-.flippage-container .event .baseline .fuzzy-time {
+footer .fuzzy-time {
   float: left;
   padding-left: 5px;
   padding-top: 2px;
   color: gray;
   font-size: 12px;
+}
+
+/* classes for the various event types that can appear in a timeline - actually they're called 'post types' at the moment */
+
+.event {
+  x-background-color:orange;
 }
 
 
