@@ -6,7 +6,7 @@ import pyramid_beaker
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from mi_utils.oauth import load_oauth_config
+from tim_commons.config import load_configuration
 
 from models import initialize_sql
 from security import groupfinder
@@ -14,16 +14,22 @@ from security import groupfinder
 # object created from JSON file that stores oAuth configuration for social features
 oAuthConfig = None
 
+
 def main(global_config, **settings):
+
+  """ Setup the config
+  """
+  global tim_config
+  tim_config = load_configuration('{TIM_CONFIG}/config.ini')
+
+  # load the oauth configuration settings
+  global oAuthConfig
+  oAuthConfig = tim_config['oauth']
 
   """ This function returns a Pyramid WSGI application.
   """
   engine = engine_from_config(settings, 'sqlalchemy.')
   initialize_sql(engine)
-
-  # load the oauth configuration settings
-  global oAuthConfig
-  oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
 
   authn_policy = AuthTktAuthenticationPolicy('tim_secret', callback=groupfinder, timeout=1800, reissue_time=180, max_age=1800, debug=True)
   authz_policy = ACLAuthorizationPolicy()
