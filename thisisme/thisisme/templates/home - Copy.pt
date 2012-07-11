@@ -1,0 +1,11 @@
+<metal:index use-macro="load: main_structure.html">
+	<section metal:fill-slot="home_content">
+		<p>thisis.me home page</p>
+		Offset:<span class="res"></span>
+		<div class="btn">click</div>
+		<div class="temp"><img src="img/Social_icons/Facebook.png" /></div>
+		<div class="window"><img src="img/Comp_Photos/83077314.jpg" /></div>
+		<div class="window"><img src="img/Comp_Photos/119677329.jpg" /></div>
+		<div class="window"><img src="img/Comp_Photos/102411667.jpg" /></div>
+	</section>
+</metal:index>
