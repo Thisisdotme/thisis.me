@@ -1356,7 +1356,12 @@
     }
 
     // Make the request, allowing the user to override any Ajax options.
-    return $.ajax(_.extend(params, options));
+    // KL - use the jsonp plugin with error handling if available
+    if(options.dataType === "jsonp" && $.jsonp) {
+      return $.jsonp(_.extend(params, options));
+    } else {
+      return $.ajax(_.extend(params, options));
+    }
   };
 
   // Wrap an optional error callback with a fallback error event.
