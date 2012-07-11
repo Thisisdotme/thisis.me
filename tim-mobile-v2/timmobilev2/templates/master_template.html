@@ -18,7 +18,8 @@
 
   <!-- Home screen icon  Mathias Bynens http://goo.gl/6nVq0 -->
   <!-- For iPhone 4 with high-resolution Retina display: -->
-  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/${author_name}/asset/apple-touch-icon-114x114-precomposed.png">
+  <!-- link rel="apple-touch-icon-precomposed" sizes="114x114" href="/${author_name}/asset/apple-touch-icon-114x114-precomposed.png" -->
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/h/new-logo.png">
   <!-- For first-generation iPad: -->
   <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/m/apple-touch-icon-72x72-precomposed.png">
   <!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
@@ -50,7 +51,7 @@
  
 </head> 
 
-<body tal:define="fragments load: fragments.html" class="mobile-viewport" style="x-background-color:#cd212b;">
+<body tal:define="fragments load: fragments.html" class="mobile-viewport splash">
 
 	<div id="container" data-role="page" metal:define-slot="page_content" > 
 		<div data-role="header"><h1>thisis.me</h1></div> 
@@ -85,6 +86,7 @@
 	<script src="/js/libs/iscroll.js"></script>
 	<script src="/js/libs/jquery.timeago.js"></script>
 	<script src="/js/libs/jquery.fittext.js"></script>
+	<script src="/js/libs/jquery.jsonp-2.3.1.js"></script>
   <!-- end concatenated and minified scripts-->
 
   <script>

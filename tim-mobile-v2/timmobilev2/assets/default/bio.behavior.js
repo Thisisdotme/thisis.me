@@ -42,7 +42,8 @@
   		events: {
   		},
   		
-      render: function(){
+      render: function(options){
+        options = options || {};
         var that = this;
         if(!this.hasRendered) {
           var templateContext =  this.model.toJSON();
@@ -58,8 +59,8 @@
                       + "one of the all-time greatest fighters, Evander Holyfield, to the world heavyweight boxing championship. ";
 
               templateContext.bio[0] =  {text:"Hammer has represented a number of other top professional athletes during their careers. Recently, Hammer became one of the most influential figures on the social media platform Twitter" 
-                       + "with over 2.7 million followers. He has been a featured speaker covering social media and business at top colleges and universities such as the business schools at Stanford University" 
-                       + "and at Harvard University. He is CEO of Alchemist Management, Founder and Chief Strategy Officer of DanceJam.com, and Co-Founder of WireDoo"
+                       + " with over 2.7 million followers. He has been a featured speaker covering social media and business at top colleges and universities such as the business schools at Stanford University" 
+                       + " and at Harvard University. He is CEO of Alchemist Management, Founder and Chief Strategy Officer of DanceJam.com, and Co-Founder of WireDoo"
                        + "- a \"deep search\" engine that is planned to compete with major search engines including Google and Bing."};
 
               templateContext.bio[1] = {text:"Hammer is a native of Oakland California. He and his wife Stephanie have been married for 24 years and they have 6 children."};
@@ -81,6 +82,10 @@
   		  TIM.transitionPage (this.$el, {
   		      callback: function() {
               that.iScrollElem.refresh();
+              if(options.error) {
+                //alert(options);
+                TIM.eventAggregator.trigger("error", {exception:"couldn't find profile for " + TIM.pageInfo.authorName});
+              }
             }
         });
       }
@@ -92,20 +97,19 @@
     if(!feature.hasFetchedModel) {
       feature.bioView.model.fetch ({
         dataType: "jsonp",
+        callbackParameter: "callback",
   	  	//add this timeout in case call fails...
     		timeout :TIM.pageInfo.authorName === "mchammer" ? 20 : 4000,
     		success: function(resp) {
     		  //
     		  console.log('fetched bio');
     		},
-    		error: function(resp) {
+    		error: function(model, resp) {
     		  if (TIM.pageInfo.authorName === "mchammer") {
     		    feature.bioView.render(); 
     		  } else {
-    		    feature.bioView.render();
+    		    feature.bioView.render({error: resp});
     		  }
-    			//TIM.eventAggregator.trigger("error", {exception:"couldn't find profile for " + TIM.pageInfo.authorName});
-    			 //just render a fake bio for now for hammer
     		}
     	});
     	feature.hasFetchedModel = true;

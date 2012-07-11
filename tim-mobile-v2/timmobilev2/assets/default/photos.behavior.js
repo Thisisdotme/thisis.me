@@ -37,13 +37,10 @@ the behavior for the photo feature
   TIM.collections.PhotoAlbums = Backbone.Collection.extend({
   	 	model: TIM.models.PhotoAlbum,
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums?callback=?',
-  		
-  		//let's fake this with flickr
 			  		
   		initialize: function(options) {
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
   		  this.initializePaging();
-  		  //alert(this.url);
   		},
   		
   		
@@ -83,7 +80,6 @@ the behavior for the photo feature
   	 	model: TIM.models.Photo,
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
   		
-  		//let's fake this with flickr
   		max: 0,
   		albumId:0,
 			  		
@@ -99,11 +95,6 @@ the behavior for the photo feature
   		  this.initializePaging({pageSize:pageSize});
   		  
   		  var authorName = TIM.pageInfo.authorFirstName;
-  		  /*
-  			this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
-  			            + authorName 
-  			            + "&per_page=" + this.pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8";
-  			*/
   			
   			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.albumId + '/photos?callback=';
   			
@@ -112,7 +103,7 @@ the behavior for the photo feature
   		
   		parse: function(resp) {
   		  //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
-  		  //this will be more intelligent in the future
+  		  //this will be more intelligent in the future - making decisions based on image size metadata
   		  _.each(resp.photos, function(photo) {
   		    photo.thumb_image = photo.images[0];
   		    photo.main_image = photo.images[photo.images.length-1];
@@ -123,30 +114,10 @@ the behavior for the photo feature
   		
   		//trying to make this so it doesn't get photos past teh album's 'count'
   		//
-  		//
+  		//was more relevant when I was using the flickr api
   		
   		setURL: function(searchTerm, pageSize) {
   		  
-  		  searchTerm = searchTerm || this.searchTerm;
-  		  this.searchTerm = searchTerm;
-  		  
-  		  pageSize = pageSize || this.max;
-  		  console.log("setting url for photo collection: ", this);
-  		  
-  		  /*
-  		  
-  		  if(this.max && (this.pageSize > this.max)) {
-  		    this.pageSize = this.max;
-  		  }
-  		  
-  		  */
-  		  
-  		  searchTerm = searchTerm || TIM.pageInfo.authorFirstName;
-  		  //this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.id + '/photos';
-  		  /*
-  		  this.url = "http://api.flickr.com/services/rest/?format=json&jsoncallback=?&method=flickr.photos.search&text="
-  			            + searchTerm 
-  			            + "&per_page=" + pageSize + "&api_key=8662e376985445d92a07c79ff7d12ff8"; */
   		}
 
   });
@@ -397,7 +368,6 @@ the behavior for the photo feature
           var templateContext = {"photos": photos};
           
           var html = TIM.views.renderTemplate("_photoList", templateContext);
-    				//that.iScrollElem.destroy();
     			$('#photo-grid-scroll .grid-container').append(html);
   			  that.resetScrollElem();
   			  that.numRendered += photos.length;
@@ -653,8 +623,10 @@ the behavior for the photo feature
       //it should be paged via (perhaps) infinite scroll
       
       //call fetch here
+      //let's try the jsonp plugin here...
       feature.albumCollection.fetch({
   			dataType: "jsonp",
+  			timeout: 5000,
   			success: function(resp) {
   		    //alert('got photos for album!');
   		    feature.hasFetchedCollection = true;
@@ -662,8 +634,7 @@ the behavior for the photo feature
   			},
   			error: function(resp) {
           console.log("error: ", resp);
-          feature.hasFetchedCollection = true;
-      		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
+          TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   			}
   		});
     
@@ -792,8 +763,8 @@ the behavior for the photo feature
       album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
   			dataType: "jsonp",
+  			timeout: 5000,
   			success: function(resp) {
-  		    //alert('got photos for album!');
           album.hasFetchedPhotos = true;
           showView();
   			},
@@ -821,7 +792,7 @@ the behavior for the photo feature
   feature.showCommentsView = function (options) {
     options = options || {};
     var resourceId = options.photoId || options.albumId;
-    //if ()
+  
     feature.commentsView = feature.commentsView || 
       new TIM.views.Comments({
           resourceId:resourceId,
