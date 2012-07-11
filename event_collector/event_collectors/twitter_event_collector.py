@@ -1,7 +1,8 @@
 import urllib
+import urllib2
 import oauth2 as oauth
 from datetime import datetime
-import urllib2
+import logging
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_twitter_event, CURRENT_STATE
@@ -51,8 +52,13 @@ class TwitterEventCollector(EventCollector):
     last_id = None
     while True:
 
-      raw_json = json_serializer.load_string(make_request(client, url)) if asm.access_token \
-                 else json_serializer.load(urllib2.urlopen(url))
+      try:
+        raw_json = json_serializer.load_string(make_request(client, url)) if asm.access_token \
+                   else json_serializer.load(urllib2.urlopen(url))
+      except urllib2.URLError, e:
+        logging.error('ERROR REQUEST URL: {0}'.format(url))
+        logging.error('ERROR REASON: {0}, {1}'.format(e.code, e.read()))
+        raise
 
       # check if nothing returned and terminate loop if so
       if len(raw_json) == 0:
