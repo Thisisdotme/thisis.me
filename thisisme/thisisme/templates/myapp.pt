@@ -1,0 +1,9 @@
+<metal:index use-macro="load: main_structure.html">
+	<section metal:fill-slot="main_content">
+		<section>
+			<div class="innerContent">
+			</div>
+		</section>
+	</section>
+</metal:index>
+

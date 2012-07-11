@@ -1,0 +1,27 @@
+.home_content .column
+{
+	float: left;
+	width: 250px;
+	text-align: left;
+	margin: 0 1.5em;
+}
+.home_content .column:first-child
+{
+	width: 215px;
+	margin-top: 50px;
+	text-align: right;
+}
+.home_content .home_nav_ie
+{
+	width: 175px;
+	position:relative;
+	top: 150px;
+}
+#cNavigation 
+{
+	padding-top: 130px;
+}	
+.innerContent article h3
+{
+	font-size: 17px;
+}
