@@ -1,21 +1,10 @@
-'''
-Created on Jan 16, 2012
-
-@author: howard
-'''
-import logging
-
 from pyramid.view import view_config
 
 from mi_schema.models import Service, Author, AuthorServiceMap
-
 from profile_fetchers import profile_fetcher
-
 from tim_commons import db
-
-from miapi import oauth_config, service_name_dict
-
-log = logging.getLogger(__name__)
+from miapi import oauth_config
+import data_access.service
 
 
 class ServiceProfileController(object):
@@ -50,15 +39,10 @@ class ServiceProfileController(object):
 
     profile_json = None
 
-    for service_id in [Service.LINKEDIN_ID,
-                       Service.FACEBOOK_ID,
-                       Service.GOOGLEPLUS_ID,
-                       Service.TWITTER_ID,
-                       Service.INSTAGRAM_ID,
-                       Service.FOURSQUARE_ID]:
+    for service_id in data_access.service.id_to_service.iterkeys():
       asm = mappings.get(service_id)
       if asm:
-        service_name = service_name_dict[service_id]
+        service_name = data_access.service.id_to_service[service_id].service_name
         fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
         profile_json = fetcher.get_author_profile(asm.service_author_id, asm)
         break
