@@ -1,27 +1,25 @@
-'''
-Created on Dec, 2011
-
-@author: howard
-'''
-
 import logging
 from datetime import datetime
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-
 from pyramid.view import view_config
 
 from tim_commons import db
-
-from mi_schema.models import Author, AccessGroup, AuthorAccessGroupMap, AuthorGroup, AuthorGroupMap, AuthorServiceMap
-from mi_schema.models import Service, ServiceObjectType, ServiceEvent
+from mi_schema.models import (
+    Author,
+    AccessGroup,
+    AuthorAccessGroupMap,
+    AuthorGroup,
+    AuthorGroupMap,
+    AuthorServiceMap,
+    ServiceObjectType,
+    ServiceEvent)
+import data_access.service
 
 from miapi.globals import ACCESS_GROUP_AUTHORS, DEFAULT_AUTHOR_GROUP
 
 from .feature_utils import getAuthorFeatures
-
-log = logging.getLogger(__name__)
 
 
 class AuthorController(object):
@@ -119,7 +117,7 @@ class AuthorController(object):
         authorJSON = author.toJSONObject()
 
       except Exception, e:
-        log.error(e.message)
+        logging.error(e.message)
         self.request.response.status_int = 500
         return {'error': e.message}
 
@@ -151,7 +149,7 @@ class AuthorController(object):
         self.db_session.flush()
 
         # map the ME service to the new author
-        asm = AuthorServiceMap(author.id, Service.ME_ID)
+        asm = AuthorServiceMap(author.id, data_access.service.name_to_id('me'))
         self.db_session.add(asm)
         self.db_session.flush()
 
@@ -159,7 +157,7 @@ class AuthorController(object):
         all_photos = ServiceEvent(asm.id,
                                   ServiceObjectType.PHOTO_ALBUM_TYPE,
                                   author.id,
-                                  Service.ME_ID,
+                                  data_access.service.name_to_id('me'),
                                   '{0}@{1}'.format(ServiceEvent.ALL_PHOTOS_ID, author.id),
                                   datetime.now())
         self.db_session.add(all_photos)
@@ -167,7 +165,7 @@ class AuthorController(object):
         ofme_photos = ServiceEvent(asm.id,
                                    ServiceObjectType.PHOTO_ALBUM_TYPE,
                                    author.id,
-                                   Service.ME_ID,
+                                   data_access.service.name_to_id('me'),
                                    '{0}@{1}'.format(ServiceEvent.OFME_PHOTOS_ID, author.id),
                                    datetime.now())
         self.db_session.add(ofme_photos)
@@ -175,7 +173,8 @@ class AuthorController(object):
         liked_photos = ServiceEvent(asm.id,
                                     ServiceObjectType.PHOTO_ALBUM_TYPE,
                                     author.id,
-                                    Service.ME_ID,
+                                    data_access.service.name_to_id('me'),
+                                    '{0}@{1}'.format(ServiceEvent.OFME_PHOTOS_ID, author.id),
                                     '{0}@{1}'.format(ServiceEvent.LIKED_PHOTOS_ID, author.id),
                                     datetime.now())
         self.db_session.add(liked_photos)
@@ -201,15 +200,15 @@ class AuthorController(object):
 
         authorJSON = author.toJSONObject()
 
-        log.info("create author %s and added to group %s" % (authorName, ACCESS_GROUP_AUTHORS))
+        logging.info("create author %s and added to group %s" % (authorName, ACCESS_GROUP_AUTHORS))
 
       except IntegrityError, e:
-        log.error(e.message)
+        logging.error(e.message)
         self.request.response.status_int = 409
         return {'error': e.message}
 
       except NoResultFound, e:
-        log.error(e.message)
+        logging.error(e.message)
         self.request.response.status_int = 409
         return {'error': e.message}
 
@@ -230,7 +229,7 @@ class AuthorController(object):
 
     self.db_session.delete(author)
 
-    log.info("deleted author: %s" % authorName)
+    logging.info("deleted author: %s" % authorName)
 
     return {}
 

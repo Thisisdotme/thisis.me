@@ -8,6 +8,7 @@ from tim_commons.app_base import AppBase
 from tim_commons import message_queue
 from tim_commons import db
 from event_processors import event_processor
+import data_access.service
 
 
 class EventProcessorDriver(AppBase):
@@ -32,6 +33,7 @@ class EventProcessorDriver(AppBase):
 
     # initialize the db engine & session
     db.configure_session(db_url)
+    data_access.service.initialize()
 
     services = services_configuration(options.services, config)
 

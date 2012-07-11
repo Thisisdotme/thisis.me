@@ -211,17 +211,20 @@ td { vertical-align: top; }
 
 
 
-   /* ==|== primary styles =====================================================
-      Author:
-      ========================================================================== */
+/* ==|== primary styles =====================================================
+    Author:
+    ========================================================================== */
 
 
 body {
   font-family: arial, sans-serif;
   -webkit-tap-highlight-color: rgba(0,0,0,0); /* remove highlight color for tap events */
   -webkit-backface-visibility: hidden; /* helps with flickering? */
-  background-color: #cd212b;
   height: 100%;
+}
+
+body.splash {
+  background-color: #c01e28;
 }
 
 #loading-img {
@@ -280,16 +283,14 @@ body {
   padding: 12px;
 }
 #app {
-  /* gotta get rid of these explicit pixel sizes */
   width: 100%;
   position: relative;
   min-height: 100%;
   overflow: hidden;
 }
-.nav-open #content-container {  /* left: -80px; _NO__DOTCOMMA__AFTER__*/ }
 @media screen and (min-width: 420px) { 
     #app {
-      /* gotta get rid of these explicit pixel sizes */
+      /* gotta get rid of these explicit pixel sizes- just doing this so it doesn't look obnoxious on a desktop when developing */
       width: 320px;
       min-height: 370px;
     }
@@ -344,11 +345,10 @@ body {
   min-height: 100%;
   width: 100%;
   z-index: 1;
-  /* background-color: #666; */
 }
 #splash-screen {
-  background-color: #cd212b;
-  background: #cd212b url(/img/thisisme_logo.png) center 30% no-repeat;
+  background: #c01e28 url(/img/thisisme_logo.png) center 30% no-repeat;
+  z-index:4;
 }
 
 .initializing #feature-nav,
@@ -403,7 +403,6 @@ body {
   font-family: Helvetica, sans-serif;
   font-weight: bold;
   padding: 0;
-  /*padding-top: 28px;*/
   height: 46px;
   vertical-align: text-bottom;
   line-height: 74px;
@@ -545,6 +544,9 @@ body {
   width: 24px;
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
+
+/* end comments styles */
+
 .app-page.light .toolbar {
   position: absolute;
   top: 0px;
@@ -574,7 +576,7 @@ body {
   width: 24px;
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
-.mi-header { }
+
 #feature .event {
   clear: both;
   border-bottom: 1px dotted black;
@@ -584,14 +586,11 @@ body {
   float: left;
   margin-right: 1em;
 }
-/*.event { min-height: 5em; }
-   .event em { font-size:75%; }
-   .event p { margin-top:.33em; }*/
+
 #author-features .ui-content a {
   margin: 1em;
   display: inline-block;
 }
-
 
 /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
     Built by David Kaneda and maintained by Jonathan Stark.
@@ -709,8 +708,7 @@ body {
 #detail-container {  background-color: #fff }
 .hidden {  display: none }
 
-
-/* moved photo page css up to global so it's accessible from other features */
+/* moved photo page css up to global file so it's accessible from other features */
 .photo-page footer > .main-text,
 .scroll-overlay .caption .main-text {  padding: 8px 16px }
 .photo-page .caption .grid-link,
@@ -746,6 +744,7 @@ body {
   width: 15px;
   margin-right: 4px;
 }
+
 /* make these sprites.... or inline base 64? */
 .photo-page footer .source-img.linkedIn {  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center }
 .photo-page footer .source-img.facebook {  background: transparent url(/img/icons/facebook_15.png) no-repeat center center }
@@ -761,8 +760,6 @@ body {
   bottom: 60px;
   height: 100px;
   width: 50px;
-  x-border: 1px solid yellow;
-  /* background: rgba(60,60,60,.1); */
 }
 .photo-page .interaction-icons .comments {
   position: absolute;
@@ -782,15 +779,13 @@ body {
   background: transparent url(/img/location_pin_icon.png) no-repeat center center;
 }
 
-
-/* Newsfeed */
+/* Newsfeed/flipboard styles */
 .flippage-container .mi-content {
   margin: 0;
   padding: 0;
   width: 100%;
   margin-top: 40px;
   background-color: #F9F7F7;
-  x-background-color: green;
 }
 .flippage-container .event {
   height: 90%;
@@ -906,7 +901,6 @@ footer .avatar img {
 }
 footer span.service-icon {
   float: left;
-  x-padding-left: 5px;
   height: 15px;
   width: 15px;
   background-size: cover;
@@ -932,9 +926,8 @@ footer .fuzzy-time {
 
 /* classes for the various event types that can appear in a timeline - actually they're called 'post types' at the moment */
 
-.event {
-  x-background-color:orange;
-}
+
+/* end post-type things */
 
 
    /*

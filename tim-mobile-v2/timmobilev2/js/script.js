@@ -112,6 +112,15 @@ $(function() {
 	  return TIM._loading;
 	}
 	
+	TIM.setSplashScreen = function (splash) {
+	  TIM._splash = splash;
+	  if(splash) {
+	    $('body').addClass('splash');
+	  } else {
+	    $('body').removeClass('splash');
+	  }
+	}
+	
 	TIM.setTransitioning = function (transitioning) {
 	  TIM._transitioning = transitioning;
 	  if(transitioning) {
@@ -135,7 +144,7 @@ $(function() {
 	  }
 	}
 	
-	TIM.setLoading(true);
+	//TIM.setLoading(true);  //don't show 'loading' message by default!
 	
 	//collection of features for this author
 	TIM.features = new TIM.collections.Features();
@@ -158,6 +167,7 @@ $(function() {
 		dataType: "jsonp",
 		//add this timeout in case call fails...
 		timeout : 5000,
+		callbackParameter: "callback",
 		success: function(resp) {
 		  console.log('fetched features');
 		},
@@ -172,6 +182,7 @@ $(function() {
 		dataType: "jsonp",
 		//add this timeout in case call fails...
 		timeout : 5000,
+		callbackParameter: "callback",
 		success: function(resp) {
 		  console.log('fetched services');
 		},
@@ -371,10 +382,12 @@ $(function() {
 	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).animationComplete(function() {
 	      $(this).removeClass(outClasses + transitions);
 	      $('#app').removeClass('transitioning');
+	      TIM.setErrorShowing(false);
+  	    TIM.setSplashScreen(false);
 	      if(options.callback) {
 	        options.callback();
 	      }
-	      TIM.setErrorShowing(false);
+	     
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
@@ -389,6 +402,7 @@ $(function() {
 	};
 	
 	TIM.availableTransitions = ["fade","slide","flip"];
+	
 	TIM.getAvailableTransitions = function() {
 	  return TIM.availableTransitions.join(" ");
 	}

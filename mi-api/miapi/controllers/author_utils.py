@@ -1,28 +1,25 @@
 import calendar
 
-from tim_commons import db
-
+from tim_commons import db, json_serializer
 from mi_schema.models import Author, Service, ServiceObjectType
-
-from tim_commons import json_serializer
-
 from miapi import service_object_type_dict
-
 from . import get_author_info
+import data_access.service
 
 
 def createServiceEvent(db_session, request, se, asm, author):
 
   # filter well-known and instagram photo albums
   if (se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-      (se.service_id == Service.ME_ID or se.service_id == Service.INSTAGRAM_ID)):
+      (se.service_id == data_access.service.name_to_id('me') or
+       se.service_id == data_access.service.name_to_id('instagram'))):
     return None
 
   link = request.route_url('author.query.events.eventId',
                            authorname=author.author_name,
                            eventID=se.id)
 
-  if se.service_id == Service.ME_ID and se.json != 'null':
+  if se.service_id == data_access.service.name_to_id('me') and se.json != 'null':
     # we just want to return the json after adding the links to it
     event = json_serializer.load_string(se.json)
     event['link'] = link
@@ -52,7 +49,7 @@ def createServiceEvent(db_session, request, se, asm, author):
     event = {'id': se.id,
              'event_id': se.id,   # TODO deprecated -- remove after eliminating from UI
              'type': service_object_type_dict[se.type_id],
-             'service': Service.id_to_name[se.service_id],
+             'service': data_access.service.id_to_service[se.service_id].service_name,
              'create_time': calendar.timegm(se.create_time.timetuple()),
              'modify_time': calendar.timegm(se.modify_time.timetuple()),
              'link': link,

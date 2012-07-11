@@ -6,11 +6,9 @@ import calendar
 from tim_commons.messages import create_instagram_event, CURRENT_STATE, create_event_link
 from tim_commons import json_serializer
 
-from mi_schema.models import Service
-
 from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
-
 from event_collector import EventCollector
+import data_access.service
 
 
 class InstagramEventCollector(EventCollector):
@@ -64,12 +62,14 @@ class InstagramEventCollector(EventCollector):
 
         if self.screen_event(interpreter, state):
           total_accepted = total_accepted + 1
-          callback(create_instagram_event(asm.author_id,
-                                          CURRENT_STATE,
-                                          service_author_id,
-                                          interpreter.get_id(),
-                                          post,
-                                          [create_event_link(Service.INSTAGRAM_ID, '_{0}@{1}'.format(self.service_name, asm.author_id))]))
+          callback(create_instagram_event(
+                asm.author_id,
+                CURRENT_STATE,
+                service_author_id,
+                interpreter.get_id(),
+                post,
+                [create_event_link(data_access.service.name_to_id('instagram'),
+                                   '_{0}@{1}'.format(self.service_name, asm.author_id))]))
 
         # if
       # for

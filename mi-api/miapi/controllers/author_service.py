@@ -1,25 +1,14 @@
-'''
-Created on Jan 5, 2012
-
-@author: howard
-'''
 import logging
-
 from datetime import datetime
 
 from pyramid.view import view_config
-
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 from tim_commons import db
-
 from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType, ServiceEvent
-
-from author_utils import serviceBuild
-
-log = logging.getLogger(__name__)
+import data_access.service
 
 
 ##
@@ -140,7 +129,7 @@ class AuthorServiceController(object):
       self.db_session.flush()
 
       # if this is instagram add an instagram photo album
-      if service_id == Service.INSTAGRAM_ID:
+      if service_id == data_access.service.name_to_id('instagram'):
         instagram__album = ServiceEvent(authorServiceMap.id,
                                         ServiceObjectType.PHOTO_ALBUM_TYPE,
                                         author_id,
@@ -153,7 +142,7 @@ class AuthorServiceController(object):
         self.db_session.add(instagram__album)
         self.db_session.flush()
 
-      log.info("created author/service link: %s -> %s" % (author_name, service_name))
+      logging.info("created author/service link: %s -> %s" % (author_name, service_name))
 
     except IntegrityError, e:
       self.request.response.status_int = 409
