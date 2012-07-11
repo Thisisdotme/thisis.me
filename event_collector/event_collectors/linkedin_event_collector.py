@@ -3,6 +3,7 @@ import oauth2 as oauth
 from datetime import datetime
 import calendar
 import copy
+import logging
 
 from tim_commons.oauth import make_request
 from tim_commons.messages import create_linkedin_event, CURRENT_STATE
@@ -177,7 +178,7 @@ class LinkedinEventCollector(EventCollector):
 
         else:
           if not update_type in self.IGNORED_TYPES:
-            self.log.warning('???? skipping linkedIn event: %s' % update_type)
+            logging.warning('???? skipping linkedIn event: %s' % update_type)
 
         # if the url is None stop
         if not url:
