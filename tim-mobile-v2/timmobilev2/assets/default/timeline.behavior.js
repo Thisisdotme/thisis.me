@@ -55,7 +55,7 @@
 
   });
 
-  TIM.collections.Events = Backbone.Collection.extend({
+  TIM.collections.Events = TIM.collections.BaseCollection.extend({
   		//setting which subclass the model is here?  not sure if this is necessary....
   		//actually, subclassing the model might not be the way to go - the view though, could probably be subclassed
   	 	model: function(attrs) {
@@ -68,7 +68,7 @@
          }
   		},
   		
-  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/events?callback=?',
+  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/events',
   		
   		initialize: function() {
   		   _.extend(this, TIM.mixins.paging);  //give this collection the ability to page
@@ -184,9 +184,6 @@
   			dataType: "jsonp",
   			success: function(resp) {
 			    feature.collectionInitialized = true;
-  			},
-  			error: function(resp) {
-				
   			}
   		});
   	} else {
@@ -222,7 +219,6 @@
 	    console.log('have a model for the detail');
 	    feature.detailView.model = model;
 		  feature.detailView.render();
-		  //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
 		  
 		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
 		  //figure out which page the event is on!

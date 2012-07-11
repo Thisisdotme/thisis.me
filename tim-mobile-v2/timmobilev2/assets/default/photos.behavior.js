@@ -34,15 +34,14 @@ the behavior for the photo feature
 
   });
   
-  TIM.collections.PhotoAlbums = Backbone.Collection.extend({
+  TIM.collections.PhotoAlbums = TIM.collections.BaseCollection.extend({
   	 	model: TIM.models.PhotoAlbum,
-  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums?callback=?',
+  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums',
 			  		
   		initialize: function(options) {
   		  _.extend(this, TIM.mixins.paging);  //give this collection the ability to page  //+ 
   		  this.initializePaging();
   		},
-  		
   		
   		parse: function(resp) {
        //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
@@ -76,10 +75,9 @@ the behavior for the photo feature
 
   });
   
-  TIM.collections.Photos = Backbone.Collection.extend({
+  TIM.collections.Photos = TIM.collections.BaseCollection.extend({
   	 	model: TIM.models.Photo,
-  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos?callback=?',
-  		
+  		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos',
   		max: 0,
   		albumId:0,
 			  		
@@ -96,7 +94,7 @@ the behavior for the photo feature
   		  
   		  var authorName = TIM.pageInfo.authorFirstName;
   			
-  			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.albumId + '/photos?callback=';
+  			this.url = TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photoalbums/' + this.albumId + '/photos';
   			
   		},
   		
@@ -625,14 +623,12 @@ the behavior for the photo feature
       //call fetch here
       //let's try the jsonp plugin here...
       feature.albumCollection.fetch({
-  			dataType: "jsonp",
-  			timeout: 5000,
-  			success: function(resp) {
+  			success: function(model, resp) {
   		    //alert('got photos for album!');
   		    feature.hasFetchedCollection = true;
       		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   			},
-  			error: function(resp) {
+  			error: function(model, resp) {
           console.log("error: ", resp);
           TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   			}
@@ -712,14 +708,9 @@ the behavior for the photo feature
       album.photos.max = album.get("count");
       album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
-  			dataType: "jsonp",
   			success: function(resp) {
-  		    //alert('got photos for album!');
   		    album.hasFetchedPhotos = true;
   		    showView(album);
-  			},
-  			error: function(resp) {
-          console.log("error: ", resp);
   			}
   		});
     } else {
@@ -762,13 +753,11 @@ the behavior for the photo feature
       album.photos.max = album.get("count");
       album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
-  			dataType: "jsonp",
-  			timeout: 5000,
   			success: function(resp) {
           album.hasFetchedPhotos = true;
           showView();
   			},
-  			error: function(resp) {
+  		  error: function(resp) {
           console.log("error: ", resp);
   			}
   		});

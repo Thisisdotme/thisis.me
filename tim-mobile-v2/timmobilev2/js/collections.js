@@ -1,4 +1,21 @@
-TIM.collections.Features = Backbone.Collection.extend({
+TIM.collections.BaseCollection = Backbone.Collection.extend( {
+   //override 'fetch' globally here
+   fetch: function(options) {
+     //set some global defaults for fetching
+     options = options || {};
+     options.dataType = options.dataType || "jsonp";
+     options.callbackParameter = options.callbackParameter || "callback";
+     options.timeout = options.timeout || 5000;
+     
+     options.error = options.error || function(model, resp) {
+       TIM.eventAggregator.trigger("error", {exception: "API call failed"});
+     }
+     
+     return Backbone.Collection.prototype.fetch.call(this, options);
+   }
+});
+
+TIM.collections.Features = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Feature,
 		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName,
 		parse: function(resp) {
@@ -29,7 +46,7 @@ TIM.collections.Features = Backbone.Collection.extend({
 // base collections for all comments in teh system
 //
 
-TIM.collections.Comments = Backbone.Collection.extend({
+TIM.collections.Comments = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Comment,
 		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName, //obviously this isnt' right... maybe will go to our API, maybe directly to the API of the service, i.e. facebook, twitter, etc.
 		
@@ -47,7 +64,7 @@ TIM.collections.Comments = Backbone.Collection.extend({
 // base collections for all services, eg. facebook, twitter, instagram
 //
 
-TIM.collections.Services = Backbone.Collection.extend({
+TIM.collections.Services = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Service,
 		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
 		
@@ -86,7 +103,7 @@ TIM.collections.Services = Backbone.Collection.extend({
 */
 
 
-TIM.collections.PostTypes = Backbone.Collection.extend({
+TIM.collections.PostTypes = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.PostTypes,
 		url: TIM.apiUrl + "/types",
 		
