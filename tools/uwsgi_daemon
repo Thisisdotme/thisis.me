@@ -25,7 +25,7 @@ prog=$(basename "$uwsgi")
 UWSGI_CONF_DIR="/etc/uwsgi"
 UWSGI_LOG_DIR="/var/log/uwsgi"
 PIDFILE_DIR="/var/run/uwsgi"
-UWSGI_ARGS="--master --die-on-term -H $TIM_HOME/env"
+UWSGI_ARGS="--uid $TIM_USER --gid $TIM_USER --master --die-on-term -H $TIM_HOME/env"
 
 each_action() {
     action=$1

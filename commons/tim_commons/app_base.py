@@ -64,7 +64,7 @@ class AppBase:
     try:
       config = _load_config(self._config_file)
       if is_daemon:
-        pwd_database = pwd.getpwnam(config['common']['username'])
+        pwd_database = pwd.getpwnam(os.environ['TIM_USER'])
         with daemon.DaemonContext(
             working_directory='/',
             pidfile=PidFileContext('/var/run/tim/{0}.pid'.format(self._program_name)),

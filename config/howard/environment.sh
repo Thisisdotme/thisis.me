@@ -1,4 +1,8 @@
 environment=howard
+export TIM_USER=howard
+
+# Define the python egg cache. Let just use the user's home directory
+export PYTHON_EGG_CACHE=$(getent passwd $TIM_USER | cut -d: -f6)/.python-eggs
 
 # Define the root location for all mobile identity scripts, sourcec code, config
 # files, etc.

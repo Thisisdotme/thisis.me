@@ -1,8 +1,12 @@
 environment=ken
+export TIM_USER=ken
+
+# Define the python egg cache. Let just use the user's home directory
+export PYTHON_EGG_CACHE=$(getent passwd $TIM_USER | cut -d: -f6)/.python-eggs
 
 # Define the root location for all mobile identity scripts, sourcec code, config
 # files, etc.
-export TIM_HOME=~/Projects/thisisme/thisis.me-MVP
+export TIM_HOME=/Users/ken/Projects/thisisme/thisis.me-MVP
 
 # Soure the python virtual environment
 . $TIM_HOME/env/bin/activate
