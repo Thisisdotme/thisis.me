@@ -6,9 +6,13 @@ import event_correlator
 import event_interpreter
 from tim_commons import json_serializer
 from mi_schema import models
+import data_access.service
 
 
 class EventCorrelatorTestCase(unittest.TestCase):
+  def setUp(self):
+    data_access.service.mock_initialize()
+
   def test_normalize_uri(self):
     uri = 'http://t.co/YFT32DLX'
     normalized_uri = event_correlator._normalize_uri(uri)
@@ -44,6 +48,7 @@ class EventCorrelatorTestCase(unittest.TestCase):
     event = '{"attribution":null,"caption":{"created_time":"1341018305","from":{"full_name":"Howard Burrows","id":"12937196","profile_picture":"http://images.instagram.com/profiles/profile_12937196_75sq_1328302146.jpg","username":"howardburrows"},"id":"224800288201136046","text":"For you Mary"},"comments":{"count":0,"data":[]},"created_time":"1341018259","filter":"Lo-fi","id":"224799914102772918_12937196","images":{"low_resolution":{"height":306,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_6.jpg","width":306},"standard_resolution":{"height":612,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_7.jpg","width":612},"thumbnail":{"height":150,"url":"http://distilleryimage6.s3.amazonaws.com/85935c5ec24f11e1af7612313813f8e8_5.jpg","width":150}},"likes":{"count":1,"data":[{"full_name":"Sara OKeefe","id":"25262451","profile_picture":"http://images.instagram.com/profiles/profile_25262451_75sq_1335025822.jpg","username":"sarabokeefe"}]},"link":"http://instagr.am/p/MeplSxolS2/","location":{"id":3615483,"latitude":42.416169875000001,"longitude":-83.910226821999998,"name":"Portage Lake"},"tags":[],"type":"image","user":{"bio":"","full_name":"Howard Burrows","id":"12937196","profile_picture":"http://images.instagram.com/profiles/profile_12937196_75sq_1328302146.jpg","username":"howardburrows","website":""},"user_has_liked":false}'
     uri = 'http://instagram.com/p/MMmhbCQw1Y/'
     photo_url = 'http://distilleryimage4.s3.amazonaws.com/895a67ecbccd11e19894123138140d8c_7.jpg'
+    instagram_id = 3
     create_time = datetime.datetime.utcnow()
     modify_time = datetime.datetime.utcnow()
 
@@ -51,7 +56,7 @@ class EventCorrelatorTestCase(unittest.TestCase):
         1,
         models.ServiceObjectType.PHOTO_TYPE,
         1,
-        models.Service.INSTAGRAM_ID,
+        instagram_id,
         '123456789',
         create_time,
         modify_time=modify_time,
@@ -76,11 +81,13 @@ class EventCorrelatorTestCase(unittest.TestCase):
     self.assertEqual(api_json['sources']['count'], len(correlated_events))
 
   def test_create_shared_services(self):
+    instagram_id = 3
+
     correlated_events = [models.ServiceEvent(
         1,
         models.ServiceObjectType.PHOTO_TYPE,
         1,
-        models.Service.INSTAGRAM_ID,
+        instagram_id,
         '123456789',
         datetime.datetime.utcnow())]
 

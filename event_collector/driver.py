@@ -6,6 +6,7 @@ import logging
 from tim_commons.app_base import AppBase
 from event_collectors import event_collector
 from tim_commons import message_queue, db
+import data_access.service
 
 
 class EventCollectorDriver(AppBase):
@@ -39,6 +40,7 @@ class EventCollectorDriver(AppBase):
 
     # initialize the db engine & session
     db.configure_session(db_url)
+    data_access.service.initialize()
 
     services = services_configuration(options.services, config)
 

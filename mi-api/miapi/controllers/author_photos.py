@@ -1,23 +1,18 @@
-'''
-Created on Jun 14, 2012
-
-@author: howard
-'''
-
-import logging
-
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_
 
 from pyramid.view import view_config
-
 from tim_commons import db
-
-from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, Relationship, AuthorServiceMap
+from mi_schema.models import (
+    Author,
+    ServiceObjectType,
+    ServiceEvent,
+    Service,
+    Relationship,
+    AuthorServiceMap)
+import data_access.service
 
 from . import make_photo_obj, get_album_name
-
-log = logging.getLogger(__name__)
 
 
 class AuthorPhotoController(object):
@@ -48,7 +43,7 @@ class AuthorPhotoController(object):
       return {'error': 'unknown album %s' % album_id}
 
     photos = []
-    if album.service_id == Service.ME_ID:
+    if album.service_id == data_access.service.name_to_id('me'):
       # handle photos for well-known albums
       for event, asm, author in self.db_session. \
           query(ServiceEvent, AuthorServiceMap, Author). \

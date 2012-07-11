@@ -1,12 +1,12 @@
 from pyramid.config import Configurator
-from sqlalchemy import engine_from_config
 
 from pyramid.renderers import JSONP
 
 from tim_commons.config import load_configuration
 from tim_commons import db
 
-from mi_schema.models import ServiceObjectType, Service
+from mi_schema import models
+import data_access.service
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -18,9 +18,6 @@ oauth_config = {}
 # lookup dictionary of service_object_type id to it's associated label
 service_object_type_dict = {}
 
-# lookup dictionary of service id to service name
-service_name_dict = {}
-
 
 # create and return a service_object_type dictionary
 def load_service_object_type_dict():
@@ -29,23 +26,10 @@ def load_service_object_type_dict():
 
   db_session = db.Session()
 
-  for row in db_session.query(ServiceObjectType):
+  for row in db_session.query(models.ServiceObjectType):
     service_object_type_dict[row.type_id] = row.label
 
   return service_object_type_dict
-
-
-# create and return a service_name dictionary
-def load_service_name_dict():
-
-  service_name_dict = {}
-
-  db_session = db.Session()
-
-  for row in db_session.query(Service):
-    service_name_dict[row.id] = row.service_name
-
-  return service_name_dict
 
 
 def main(global_config, **settings):
@@ -71,9 +55,7 @@ def main(global_config, **settings):
   global service_object_type_dict
   service_object_type_dict = load_service_object_type_dict()
 
-  # load the service_name_dict dictionary
-  global service_name_dict
-  service_name_dict = load_service_name_dict()
+  data_access.service.initialize()
 
   config = Configurator(settings=settings)
 

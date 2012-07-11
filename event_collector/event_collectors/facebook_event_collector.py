@@ -2,15 +2,14 @@ import urllib
 import urllib2
 from datetime import datetime
 import calendar
+import logging
 
 from tim_commons.messages import create_facebook_event, CURRENT_STATE, create_event_link
 from tim_commons import json_serializer
 
-from mi_schema.models import Service
-
 from event_interpreter.facebook_event_interpreter import FacebookEventInterpreter
-
 from event_collector import EventCollector
+import data_access.service
 
 
 class FacebookEventCollector(EventCollector):
@@ -50,6 +49,7 @@ class FacebookEventCollector(EventCollector):
     total_accepted = 0
     while posts_url and total_accepted < self.MAX_EVENTS:
 
+      logging.debug('requesting: "%s"', posts_url)
       posts_obj = json_serializer.load(urllib2.urlopen(posts_url))
 
       # process the item
@@ -156,12 +156,13 @@ class FacebookEventCollector(EventCollector):
             interpreter = FacebookEventInterpreter(post, asm, self.oauth_config)
 
             # event message
-            callback(create_facebook_event(asm.author_id,
-                                           CURRENT_STATE,
-                                           service_author_id,
-                                           interpreter.get_id(),
-                                           photo,
-                                           [create_event_link(Service.FACEBOOK_ID, album_id)]))
+            callback(create_facebook_event(
+                  asm.author_id,
+                  CURRENT_STATE,
+                  service_author_id,
+                  interpreter.get_id(),
+                  photo,
+                  [create_event_link(data_access.service.name_to_id('facebook'), album_id)]))
 
           # setup for the next page (if any).  Check that we're not looping ?? do we even need to check ??
           next_url = photos_obj['paging']['next'] if 'paging' in photos_obj and 'next' in photos_obj['paging'] else None

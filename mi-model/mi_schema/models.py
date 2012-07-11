@@ -3,10 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-'''
-TABLE: author
-'''
-
 
 class Author(Base):
 
@@ -39,11 +35,6 @@ class Author(Base):
             'email': self.email,
             'full_name': self.full_name,
             'template': self.template}
-
-
-'''
-TABLE: access_group
-'''
 
 
 class AccessGroup(Base):
@@ -99,39 +90,6 @@ TABLE: service
 class Service(Base):
 
   __tablename__ = 'service'
-
-  ME_ID = 1
-  TWITTER_ID = 2
-  FACEBOOK_ID = 3
-  WORDPRESS_ID = 4
-  YOUTUBE_ID = 5
-  LINKEDIN_ID = 6
-  GOOGLEPLUS_ID = 7
-  FOURSQUARE_ID = 8
-  INSTAGRAM_ID = 9
-  FLICKR_ID = 10
-
-  name_to_id = {'me': 1,
-                'twitter': 2,
-                'facebook': 3,
-                'wordpress': 4,
-                'youtube': 5,
-                'linkedin': 6,
-                'googleplus': 7,
-                'foursquare': 8,
-                'instagram': 9,
-                'flickr': 10}
-
-  id_to_name = {1: 'me',
-                2: 'twitter',
-                3: 'facebook',
-                4: 'wordpress',
-                5: 'youtube',
-                6: 'linkedin',
-                7: 'googleplus',
-                8: 'foursquare',
-                9: 'instagram',
-                10: 'flickr'}
 
   id = Column(Integer, primary_key=True)
 
