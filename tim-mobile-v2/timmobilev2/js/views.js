@@ -82,7 +82,7 @@ TIM.views.getEventView = function (event) {
   return view;
 }
 
-//is this named improperly?  maybe 'render evvent page'?
+//is this named improperly?  maybe 'render event page'?
 TIM.views.renderEvent = function(event, template) {
   template = template || "timelinePage";
   
@@ -95,10 +95,9 @@ TIM.views.renderEvent = function(event, template) {
   return TIM.views.renderTemplate(template, event);
 }
 
+//
 //template is the name of the dust template
 //context is the JSON we use to drive the template
-//
-//should move all dust calls to use this method
 //
 
 TIM.views.renderTemplate = function(template, context) {
@@ -151,7 +150,12 @@ TIM.views.FeatureNav = Backbone.View.extend( {
 		
   addOne : function ( item ) {
   	var view = new TIM.views.FeatureNavItem({model:item});
-  	$( "#feature-nav-items" ).append(view.render().el);
+  	
+  	view.render();
+  	
+  	if(!view.hidden) {  
+  	  $( "#feature-nav-items" ).append(view.render().el);
+  	}
   },
 
   render: function() {
@@ -173,7 +177,9 @@ TIM.views.FeatureNav = Backbone.View.extend( {
 
 TIM.views.FeatureNavItem = Backbone.View.extend({
 	tagName : 'li',
-
+  
+  hidden: false,
+  
 	initialize: function() {
 		this.model.bind('change', this.render, this);
 		this.model.bind('destroy', this.remove, this);
@@ -205,6 +211,11 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
       .attr('id', 'nav-' + templateContext.feature_name)
       .removeClass('selected')
       .addClass(selected ? 'selected' : '');
+      
+    //temporary hack - don't show highlights or places features
+	  if(templateContext.feature_name === 'highlights' || templateContext.feature_name === 'places') {
+	    this.hidden = true;
+	  }
     
 		return this;
 	},
@@ -424,9 +435,13 @@ TIM.views.Toolbar = Backbone.View.extend( {
     
 } );
 
+//
 //this view is used by the flipset mixin
 //do we need to have a view object for this at all?
 //this might be the ideal place to create different views for event types (photo, short-form, etc.)
+//
+//except there are potentially many events on a page
+//
 
 TIM.views.Page = Backbone.View.extend( {
     
@@ -476,8 +491,10 @@ TIM.mixins.flipset = {
   		this.flipMode = true;
 		},
 		
-		//send pages to the flips script one at a time as strings?
-		//maybe have the flips script render the pages instead?
+		//
+		// send pages to the flips script one at a time as strings?
+		// maybe have the flips script render the pages instead?
+		//
 		
 		renderPage: function(page){  //'pages' could just be 'page'
 			//make a Page View out of 1-3 events
@@ -535,6 +552,7 @@ TIM.mixins.flipset = {
 			return this;
     },
     
+    //
     //this function turns raw events into 'pages' that are ready to be rendered as one 'flip page'
     //this allows more than one event to appear on a page
     //
@@ -553,24 +571,11 @@ TIM.mixins.flipset = {
 			  if(index < start || index >= end) return; //return if out of range
 			  
 			  itemJSON = item.toJSON();
-			  
-			  //faking adding 'sources' to photos
-			  //move this to a 'services' model/collection
-			  //
-			  
-			  
-			  if(!itemJSON.sources) {
-			    itemJSON.sources = []; //_.uniq(sources);
-			  }
-			  
-			  if(options.pageMetaData) {
-			    
-			  }
-			  
+			  		   
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
 			  //possibly different templates for different event types?
-			  
+			  //
 			  //shouldn't skip too many non-one-page events...
 			  
 				if(item.get('title') !== undefined || item.get("type") === "photo" || item.get("content").photo_url !== undefined) {
