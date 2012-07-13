@@ -213,7 +213,8 @@ class AuthorGroupController(object):
   @view_config(route_name='author.groups.members.CRUD', request_method='OPTIONS', renderer='jsonp', http_cache=0)
   def preflightGroupMemberHndlr(self):
     self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT, DELETE'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT'
+    self.request.response.headers['Access-Control-Max-Age'] = 1209600   # valid for 14 days
 
   # PUT /v1/authors/{authorname}/groups/{groupname}/members/{member}
   #

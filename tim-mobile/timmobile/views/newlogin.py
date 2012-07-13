@@ -4,7 +4,7 @@ Created on Feb 23, 2012
 @author: howard
 '''
 from mi_schema.models import Author
-from mi_url.RequestWithMethod import RequestWithMethod
+from tim_commons.request_with_method import RequestWithMethod
 from pprint import PrettyPrinter
 from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 from pyramid.security import authenticated_userid, remember, forget
@@ -19,6 +19,7 @@ import urllib2
 
 log = logging.getLogger(__name__)
 
+
 @view_config(route_name='newlogin', renderer='timmobile:templates/newlogin.pt')
 def newuser(request):
   fullname = ''
@@ -26,7 +27,7 @@ def newuser(request):
   login = ''
   password = ''
   message = ''
-  
+
   forward = request.params.get('forward') or request.route_url('accounts')
 
   if 'form.submitted' in request.POST:

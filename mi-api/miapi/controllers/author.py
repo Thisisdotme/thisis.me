@@ -8,6 +8,7 @@ from pyramid.view import view_config
 from tim_commons import db
 from mi_schema.models import (
     Author,
+    AuthorReservation,
     AccessGroup,
     AuthorAccessGroupMap,
     AuthorGroup,
@@ -54,13 +55,13 @@ class AuthorController(object):
   @view_config(route_name='author.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
   def authorGet(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
     try:
-      author = self.db_session.query(Author).filter_by(author_name=authorName).one()
+      author = self.db_session.query(Author).filter_by(author_name=author_name).one()
     except NoResultFound:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     authorJSONObj = author.toJSONObject()
     authorJSONObj['features'] = getAuthorFeatures(self.db_session, author.id)
@@ -76,19 +77,19 @@ class AuthorController(object):
   @view_config(route_name='author.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
   def authorPut(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
     authorInfo = self.request.json_body
 
-    # get record for authorName.  There must be at most only 1 authorName.  No result found indicates
+    # get record for author_name.  There must be at most only 1 author_name.  No result found indicates
     # we're to perform an add; multiple results found is an internal error;
     try:
-      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
     except NoResultFound:
       author = None
     except MultipleResultsFound:
       self.request.response.status_int = 500
-      return {'error': 'multiple results found for author name: %s' % authorName}
+      return {'error': 'multiple results found for author name: %s' % author_name}
 
     if author:
       '''
@@ -144,8 +145,14 @@ class AuthorController(object):
 
         template = authorInfo.get('template')
 
-        author = Author(authorName, email, fullname, password, template)
+        # create and insert new author
+        author = Author(author_name, email, fullname, password, template)
         self.db_session.add(author)
+        self.db_session.flush()
+
+        # create and insert new author reservation
+        reservation = AuthorReservation(author_name, email)
+        self.db_session.add(reservation)
         self.db_session.flush()
 
         # map the ME service to the new author
@@ -200,7 +207,7 @@ class AuthorController(object):
 
         authorJSON = author.toJSONObject()
 
-        logging.info("create author %s and added to group %s" % (authorName, ACCESS_GROUP_AUTHORS))
+        logging.info("create author %s and added to group %s" % (author_name, ACCESS_GROUP_AUTHORS))
 
       except IntegrityError, e:
         logging.error(e.message)
@@ -220,16 +227,16 @@ class AuthorController(object):
   @view_config(route_name='author.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
   def authorDelete(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
-    author = self.db_session.query(Author).filter(Author.author_name == authorName).first()
+    author = self.db_session.query(Author).filter(Author.author_name == author_name).first()
     if not author:
       self.request.response.status_int = 404
-      return {'error': 'unknown author: %s' % authorName}
+      return {'error': 'unknown author: %s' % author_name}
 
     self.db_session.delete(author)
 
-    logging.info("deleted author: %s" % authorName)
+    logging.info("deleted author: %s" % author_name)
 
     return {}
 

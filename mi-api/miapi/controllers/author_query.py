@@ -40,14 +40,14 @@ class AuthorQueryController(object):
   @view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
   def getHighlights(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
-    # get author-id for authorName
+    # get author-id for author_name
     try:
-      authorId, = self.db_session.query(Author.id).filter(Author.author_name == authorName).one()
+      author_id = self.db_session.query(Author.id).filter(Author.author_name == author_name).scalar()
     except:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     events = []
     for highlight, event, asm, author, serviceName in self.db_session.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
@@ -55,7 +55,7 @@ class AuthorQueryController(object):
               join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
               join(Author, AuthorServiceMap.author_id == Author.id). \
               join(Service, AuthorServiceMap.service_id == Service.id). \
-              filter(and_(AuthorServiceMap.author_id == authorId, Highlight.weight > 0)). \
+              filter(and_(AuthorServiceMap.author_id == author_id, Highlight.weight > 0)). \
               order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
               limit(LIMIT):
       events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
@@ -69,14 +69,14 @@ class AuthorQueryController(object):
   @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
   def getEvents(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
-    # get author-id for authorName
+    # get author-id for author_name
     try:
-      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
     except:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     events = []
     for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
@@ -99,15 +99,15 @@ class AuthorQueryController(object):
   @view_config(route_name='author.query.events.eventId', request_method='GET', renderer='jsonp', http_cache=0)
   def getEventDetail(self):
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
     serviceEventID = int(self.request.matchdict['eventID'])
 
-    # get author-id for authorName
+    # get author-id for author_name
     try:
-      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
     except:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
     try:
       event, asm = self.db_session.query(ServiceEvent, AuthorServiceMap). \
             join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
@@ -129,14 +129,14 @@ class AuthorQueryController(object):
 
     STORY_LIMIT = 5
 
-    authorName = self.request.matchdict['authorname']
+    author_name = self.request.matchdict['authorname']
 
-    # get author-id for authorName
+    # get author-id for author_name
     try:
-      author = self.db_session.query(Author).filter(Author.author_name == authorName).one()
+      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
     except:
       self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+      return {'error': 'unknown author %s' % author_name}
 
     events = []
     for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \

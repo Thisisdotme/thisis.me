@@ -86,6 +86,11 @@ def main(global_config, **settings):
   config.add_route('authors', '/v1/authors')
 
   # --
+  # Author reservation functionality
+  #
+  config.add_route('author.reservation', '/v1/reservation/{authorname}')
+
+  # --
   # AUTHOR BASIC functionality
   #
   #  GET info, PUT new, PUT existing, DELETE existing
