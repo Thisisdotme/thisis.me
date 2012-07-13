@@ -1,5 +1,5 @@
 {#content}
- <div class="content">
+ <div class="content follow">
 		{?photo_url}
 		  <div class="inner-image">
 				<img src='{photo_url}' />
