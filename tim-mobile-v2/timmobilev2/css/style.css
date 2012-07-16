@@ -577,19 +577,11 @@ body.splash {
   background: transparent url(/img/back_arrow.png) no-repeat center center;
 }
 
-#feature .event {
-  clear: both;
-  border-bottom: 1px dotted black;
-  margin-bottom: 1em;
-}
-.feature-icon {
-  float: left;
-  margin-right: 1em;
-}
+/* classes for different post-types */
+/* this is where we can really make an author's timeline have much more variety in appearance */
 
-#author-features .ui-content a {
-  margin: 1em;
-  display: inline-block;
+.app-page .follow {
+  
 }
 
 /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
@@ -766,7 +758,6 @@ body.splash {
   height: 35px;
   width: 35px;
   left: 0px;
-  x-border: 1px solid green;
   background: transparent url(/img/comments_icon.png) no-repeat center center;
 }
 .photo-page .interaction-icons .location {

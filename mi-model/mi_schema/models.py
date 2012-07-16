@@ -37,6 +37,27 @@ class Author(Base):
             'template': self.template}
 
 
+'''
+  Table for reserving author-names and passwords prelaunch
+'''
+
+
+class AuthorReservation(Base):
+
+  __tablename__ = 'author_reservation'
+
+  author_name = Column(String(255), primary_key=True, nullable=False)
+  email = Column(String(255), unique=True, nullable=False)
+
+  def __init__(self, authorname, email):
+    self.author_name = authorname
+    self.email = email
+
+  def __repr__(self):
+    return '<AuthorReservation(\'{0}\',\'{1}\')>'.format(self.author_name,
+                                                         self.email)
+
+
 class AccessGroup(Base):
 
   __tablename__ = 'access_group'

@@ -21,7 +21,6 @@
     initialize: function() {
 			//not sure this would be the right place to do this...
 			this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
-			//this.set("time_ago", '1 day');
     },
 	
     clear: function() {
@@ -181,7 +180,6 @@
   
     if(!feature.collectionInitialized) {
       feature.mainCollection.fetch({
-  			dataType: "jsonp",
   			success: function(resp) {
 			    feature.collectionInitialized = true;
   			}
@@ -232,8 +230,6 @@
 		  	  
 		  feature.detailView.model = new TIM.models.EventDetail({id: resourceId});
 		  feature.detailView.model.fetch({
-		    dataType: "jsonp",
-		    timeout : 3000,
 		    success: function(model, response) {
           console.log('fetched model: ', model);
           feature.detailView.render();
