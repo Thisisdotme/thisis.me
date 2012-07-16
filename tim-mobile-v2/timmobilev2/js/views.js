@@ -548,6 +548,12 @@ TIM.mixins.flipset = {
 			if(TIM.appContainerElem.find(this.el).length == 0)  {
 			  TIM.appContainerElem.append(this.$el);
 			}
+			
+			//replace this with this.$el.hammer() ???
+			
+			this.flipSet.initializeHammer();
+			
+			window.VIEW = this;
 	
 			return this;
     },

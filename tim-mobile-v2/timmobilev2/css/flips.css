@@ -40,12 +40,7 @@
 	-moz-backface-visibility: hidden;
 }
 .page .front {
-}
-.page .front-cover {
-  top: -100%;
-  height: 200%;
-  -webkit-transform-style: none;
-}
+} 
 .page .back {	
 	-webkit-transform: rotateX(-180deg);
 	-moz-transform: rotateX(-180deg);
