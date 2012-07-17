@@ -213,19 +213,19 @@ $(function() {
     	TIM.eventAggregator.bind('error', this.handleError, this);
     	
     	//move these to backbone views?
-    	//make sure we have vclick event
+    	//make sure we have tap event
     	
-    	$('#nav-toggle').on('vclick', (function(event){
+    	$('#nav-toggle').on('click', (function(event){
     	  event.preventDefault();
     	  event.stopPropagation();
     	  $('#app').toggleClass('nav-open');
     	}));
     	
-    	$('#app').on('vclick', (function(event){
+    	$('#app').on('click', (function(event){
     	  event.preventDefault();
     	}))
     	
-    	$('#app').on('vclick', 'a', function(event) {
+    	$('#app').on('click', 'a', function(event) {
     	  event.preventDefault();
     	  TIM.handleLinkClick(event);
     	})

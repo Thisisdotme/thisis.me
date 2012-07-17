@@ -25,6 +25,8 @@ TIM.views.EventView = Backbone.View.extend( {
    }
 });
 
+TIM.tapEvent = "tap";
+
 TIM.views.Highlight = TIM.views.EventView.extend( {
    className: "event highlight",
    template:"_event"
@@ -187,7 +189,7 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	},
 	
 	events: {
-		"vclick" : "loadFeature"
+		"tap" : "loadFeature"
 	},
 
 	render : function () {
@@ -259,8 +261,8 @@ TIM.views.Comments = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "swiperight" : "hideComments",
-      "vclick .back-link" : "hideComments",
-      "vclick .service-tabs li" : "switchService"
+      "tap .back-link" : "hideComments",
+      "tap .service-tabs li" : "switchService"
     },
     
     initialize: function(options) {
