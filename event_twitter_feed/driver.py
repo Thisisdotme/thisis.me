@@ -69,7 +69,9 @@ class EventTwitterFeedDriver(app_base.AppBase):
       self._handle_user(asm)
 
   def _handle_user(self, asm):
-    if asm.service_author_id not in self.user_ids:
+    if (asm.service_author_id not in self.user_ids and
+        asm.access_token and
+        asm.access_token_secret):
       self.user_ids.add(asm.service_author_id)
       handler = TwitterHandler(asm, self)
 
