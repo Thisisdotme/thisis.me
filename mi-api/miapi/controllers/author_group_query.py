@@ -12,7 +12,9 @@ from sqlalchemy import (and_)
 
 from tim_commons import db
 
-from mi_schema.models import Author, AuthorGroup, AuthorGroupMap, ServiceEvent, Service, AuthorServiceMap, Highlight
+from data_access import service
+
+from mi_schema.models import Author, AuthorGroup, AuthorGroupMap, ServiceEvent, Service, AuthorServiceMap, Highlight, ServiceObjectType
 
 from miapi.globals import LIMIT
 
@@ -39,7 +41,7 @@ class AuthorGroupQueryController(object):
   # get the highlights for the author's group
   #
   @view_config(route_name='author.groups.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-  def getHighlights(self):
+  def get_highlights(self):
 
     authorName = self.request.matchdict['authorname']
     groupName = self.request.matchdict['groupname']
@@ -78,7 +80,7 @@ class AuthorGroupQueryController(object):
   # get all events for the author's group
   #
   @view_config(route_name='author.groups.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-  def getEvents(self):
+  def get_events(self):
 
     authorName = self.request.matchdict['authorname']
     groupName = self.request.matchdict['groupname']
@@ -107,6 +109,15 @@ class AuthorGroupQueryController(object):
             filter(ServiceEvent.correlation_id == None). \
             order_by(ServiceEvent.create_time.desc()). \
             limit(LIMIT):
+
+      ''' filter well-known and instagram photo albums so they
+          don't appear in the timeline
+      '''
+      if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
+          (event.service_id == service.name_to_id('me') or
+           event.service_id == service.name_to_id('instagram'))):
+        continue
+
       event_obj = createServiceEvent(self.dbSession, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)

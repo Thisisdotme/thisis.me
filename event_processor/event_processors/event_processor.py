@@ -142,9 +142,6 @@ class EventProcessor:
       photo = interpreter.get_photo()
       auxiliary_content = interpreter.get_auxiliary_content()
 
-      # TODO: Deal with profile image
-      profile_image = None
-
       service_event = ServiceEvent(asm.id,
                                    interpreter.get_type(),
                                    asm.author_id,
@@ -157,7 +154,6 @@ class EventProcessor:
                                    content,
                                    photo,
                                    auxiliary_content,
-                                   profile_image,
                                    json_serializer.dump_string(service_event_json))
       event_correlator.correlate_and_update_event(interpreter, service_event, self.me_service_id)
       db.Session().add(service_event)

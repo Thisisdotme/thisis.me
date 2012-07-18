@@ -5,6 +5,7 @@ Created on Jul 13, 2012
 '''
 
 import logging
+from datetime import datetime
 
 from pyramid.view import view_config
 
@@ -31,8 +32,8 @@ class AuthorReservationController(object):
   def preflight_crossdomain_access_control(self):
 
     self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT'
-    self.request.response.headers['Access-Control-Max-Age'] = 1209600   # valid for 14 days
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
   # GET /v1/reservation/{authorname}
   #
@@ -53,6 +54,10 @@ class AuthorReservationController(object):
     except Exception, e:
       self.request.response.status_int = 500
       return {'error': e.message}
+
+    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
     return {'author_name': reservation.author_name}
 
@@ -78,7 +83,7 @@ class AuthorReservationController(object):
 
     # get author-id for author_name
     try:
-      reservation = AuthorReservation(author_name, email)
+      reservation = AuthorReservation(author_name, email, datetime.now())
       self.db_session.add(reservation)
       self.db_session.flush()
 
@@ -86,5 +91,9 @@ class AuthorReservationController(object):
       logging.error(e.message)
       self.request.response.status_int = 409
       return {'error': e.message}
+
+    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
+    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
     return {'author_name': author_name, 'email': email}

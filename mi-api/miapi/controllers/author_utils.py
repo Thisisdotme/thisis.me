@@ -1,61 +1,77 @@
 import calendar
 
-from tim_commons import db, json_serializer
-from mi_schema.models import Author, Service, ServiceObjectType
-from miapi import service_object_type_dict
-from . import get_author_info
-import data_access.service
+from tim_commons import json_serializer
+
+from mi_schema.models import ServiceObjectType
+
+from . import (
+  get_service_author_fragment,
+  get_location_fragment,
+  get_post_type_detail_fragment,
+  get_tim_author_fragment)
+
+from data_access import post_type
 
 
 def createServiceEvent(db_session, request, se, asm, author):
-
-  # filter well-known and instagram photo albums
-  if (se.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-      (se.service_id == data_access.service.name_to_id('me') or
-       se.service_id == data_access.service.name_to_id('instagram'))):
-    return None
 
   link = request.route_url('author.query.events.eventId',
                            authorname=author.author_name,
                            eventID=se.id)
 
-  if se.service_id == data_access.service.name_to_id('me') and se.json != 'null':
-    # we just want to return the json after adding the links to it
-    event = json_serializer.load_string(se.json)
-    event['link'] = link
-    event['id'] = se.id
-    event['event_id'] = se.id
-    for source in event['sources']['items']:
-      link = 'miapi:img/l/services/color/{0}.png'.format(source['service_name'])
-      source['link'] = request.static_url(link)
+  # TODO uncomment after correlation event JSON is updated -- for now return None
+  # TODO checking for correlation event handling ???
+  if se.type_id == ServiceObjectType.CORRELATION_TYPE:
+    return None
+#    # we just want to return the json after adding the links to it
+#    event = json_serializer.load_string(se.json)
+#    event['link'] = link
+#    event['id'] = se.id
+#    event['event_id'] = se.id
+#    for source in event['sources']['items']:
+#      link = 'miapi:img/l/services/color/{0}.png'.format(source['service_name'])
+#      source['link'] = request.static_url(link)
 
   else:
-    # construct the json
-    # collect the pieces of available content
-    content = {}
-    if se.caption:
-      content['label'] = se.caption
-    if se.content:
-      content['data'] = se.content
-    if se.auxillary_content:
-      content['auxillary_data'] = json_serializer.load_string(se.auxillary_content)
-    if se.url:
-      content['url'] = se.url
-    if se.photo_url:
-      content['photo_url'] = se.photo_url
-
-    author_info = get_author_info(request, asm, author)
 
     event = {'id': se.id,
-             'event_id': se.id,   # TODO deprecated -- remove after eliminating from UI
-             'type': service_object_type_dict[se.type_id],
-             'service': data_access.service.id_to_service[se.service_id].service_name,
-             'create_time': calendar.timegm(se.create_time.timetuple()),
-             'modify_time': calendar.timegm(se.modify_time.timetuple()),
+             'type': post_type.id_to_label(se.type_id),
              'link': link,
-             'content': content,
-             'author': author_info,
-             'sources': {'count': 0, 'items': []}}
+             'truncated': False,
+             'create_time': calendar.timegm(se.create_time.timetuple()),
+             'modify_time': calendar.timegm(se.modify_time.timetuple())}
+
+    if se.headline:
+      event['headline'] = se.headline
+    else:
+      # TODO remove when caption goes away
+      if se.caption:
+        event['headline'] = se.caption
+    if se.tagline:
+      event['tagline'] = se.tagline
+    if se.content:
+      event['content'] = se.content
+
+    if se.photo_url:
+      event['photo'] = {'image_url': se.photo_url}
+      if se.photo_width:
+        event['photo']['width'] = se.photo_width
+      if se.photo_height:
+        event['photo']['height'] = se.photo_height
+
+    event['author'] = get_tim_author_fragment(request, author.author_name)
+
+    event['origin'] = {}
+    event['origin']['known'] = get_service_author_fragment(request, asm, author)
+
+  location = get_location_fragment(se)
+  if location:
+    event['location'] = location
+
+  post_detail = get_post_type_detail_fragment(db_session, se, author)
+  if post_detail:
+    event['post_type_detail'] = {}
+    event['post_type_detail'][post_type.id_to_label(se.type_id)] = post_detail
 
   return event
 
@@ -83,11 +99,11 @@ def createHighlightEvent(db_session, request, highlight, se, asm, author, servic
   if se.photo_url:
     content['photo_url'] = se.photo_url
 
-  author_info = get_author_info(request, asm, author)
+  author_info = get_service_author_fragment(request, asm, author)
 
   event = {'id': se.id,
            'event_id': se.id,
-           'type': service_object_type_dict[se.type_id],
+           'type': post_type.id_to_label(se.type_id),
            'service': serviceName,
            'create_time': calendar.timegm(se.create_time.timetuple()),
            'modify_time': calendar.timegm(se.modify_time.timetuple()),
@@ -105,12 +121,10 @@ def serviceBuild(authorName, serviceName, incremental, s3Bucket, aws_access_key,
 
   print("refresh %s serviceEvents for %s" % (authorName, serviceName))
 
-  db_session = db.Session()
-
-  # get the service-id for serviceName
-  serviceId, = db_session.query(Service.id).filter(Service.service_name == serviceName).one()
-
-  # get author-id for authorName
-  authorId, = db_session.query(Author.id).filter(Author.author_name == authorName).one()
-
-  db_session.close()
+#  db_session = db.Session()
+#
+#  # get the service-id for serviceName
+#  service_id = db_session.query(Service.id).filter(Service.service_name == serviceName).scalar()
+#
+#  # get author-id for authorName
+#  author_id = db_session.query(Author.id).filter(Author.author_name == authorName).scalar()

@@ -48,14 +48,17 @@ class AuthorReservation(Base):
 
   author_name = Column(String(255), primary_key=True, nullable=False)
   email = Column(String(255), unique=True, nullable=False)
+  create_time = Column(DateTime, nullable=False)
 
-  def __init__(self, authorname, email):
+  def __init__(self, authorname, email, create_time):
     self.author_name = authorname
     self.email = email
+    self.create_time = create_time
 
   def __repr__(self):
-    return '<AuthorReservation(\'{0}\',\'{1}\')>'.format(self.author_name,
-                                                         self.email)
+    return '<AuthorReservation(\'{0}\',\'{1}\',\'{2}\')>'.format(self.author_name,
+                                                                 self.email,
+                                                                 self.create_time)
 
 
 class AccessGroup(Base):
@@ -332,13 +335,16 @@ class ServiceEvent(Base):
 
   url = Column(String(1024))
 
-  caption = Column(String(4096))
+  headline = Column(String(1024))
+  tagline = Column(String(2048))
+  caption = Column(String(4096))  # deprecated
   content = Column(String(4096))
+
   photo_url = Column(String(4096))
+  photo_width = Column(Integer)
+  photo_height = Column(Integer)
 
-  auxillary_content = Column(Text(65565))
-
-  author_profile_image_url = Column(String(1024))
+  auxillary_content = Column(Text(65565)) # deprecated
 
   json = Column(Text(65535))
 
@@ -355,7 +361,6 @@ class ServiceEvent(Base):
                content=None,
                photoURL=None,
                auxillaryContent=None,
-               authorProfileImageUrl=None,
                json=None,
                correlation_id=None):
     self.author_service_map_id = author_service_map_id
@@ -370,7 +375,6 @@ class ServiceEvent(Base):
     self.content = content
     self.photo_url = photoURL
     self.auxillary_content = auxillaryContent
-    self.author_profile_image_url = authorProfileImageUrl
     self.json = json
     self.correltation_id = correlation_id
 
@@ -388,6 +392,9 @@ class ServiceEvent(Base):
                                                           self.photo_url,
                                                           self.auxillary_content)
 
+  @staticmethod
+  def make_well_known_service_event_id(well_known_id, author_id):
+    return '{0}@{1}'.format(well_known_id, author_id)
 
 '''
 TABLE: relationship
