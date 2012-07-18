@@ -18,7 +18,8 @@
 
 	var Flipset 			= function(options) {
 	
-		this.$el	= options.containerEl;
+		this.$el	= options.containerEl;  //should probably just pas in the id of the container dom element
+		this.containerElemId = this.$el.attr('id');
 		this.$el.html(''); //clear out the container
 		console.log("el: " , this.$el);
 		this._init(options);
@@ -56,7 +57,7 @@
 			this.$currentPage = undefined;
 			this.$nextPage = undefined;
 			this.$loadingNext = undefined; //use for 'loading' message?
-			this.$loadingPrevious = undefined; //use for 'loading' message?
+			this.$loadingPrevious = undefined; //use for 'loading' message?`
 			
 			this.canGoNext = false;
 			this.canGoPrev = false;
@@ -72,7 +73,6 @@
 			this.currentPage	= this.options.current || 1; //this keeps track of what page number we're on... 1-based, not 0-based
 			
 			this._getContainerSize();
-			this._initTouchSwipe(); //this is ok - it's just on the container el
 			
 		},
 		
@@ -382,257 +382,291 @@
 		//possibly eventually move to our own touch event handling code
 		//
 		
-		_initTouchSwipe		: function() {
+		initializeHammer: function() {
+		  var _self = this;
+		  //return;
+		  var startY = 0;
+		  var endY = 0;
+		  var distance = 0;
+		  
+		  this.flipHammer = new Hammer(document.getElementById("timeline"));
+		  
+		  //get container size if it hasn't been set...
+			if (_self.containerDimensions.height == 0) {
+			  _self._getContainerSize();
+			}
 			
-			var _self = this;
-			
-			this.$el.swipe({
-				threshold			: 0,
-				allowPageScroll: "none",
-				swipeStatus			: function(event, phase, start, end, direction, distance) {
-				  //if view is not in flip mode, return
-				  if(_self.parentView && !_self.parentView.flipMode) {
-				    return;
+			var dragDefaultAction = function (ev) {
+			  
+			  var direction = ev.direction;
+			  startY =	ev.position ? ev.position.y - ev.distanceY : startY;
+				endY =	 ev.position ?	ev.position.y : endY;
+			  var oob = false;
+			  var noflip = false;
+			  distance = ev.distanceY || distance;
+			  
+			  distance = Math.abs(distance);
+			  
+			  _self.swipeDirection = ev.direction;
+			  if(_self.parentView && !_self.parentView.flipMode) {
+			    return;
+			  }
+			  console.log('hammer drag event: position Y, distance, startY, endY ' + ev.type, ev.position ? ev.position.y : 'no position', distance, startY, endY);
+			  
+			  // note - this isn't how flipboard does it - they use the initial direction of the swipe
+				if(!_self._isAnimating() && !_self.loading) {
+					(startY < _self.containerDimensions.height / 2) ? _self.flipDirection = 'prev' : _self.flipDirection = 'next';
+				}
+				
+				//console.log("flip direction:", _self.flipDirection);
+				
+				if(direction === 'left' || direction === 'right') {
+					if(_self.angle === undefined || _self.angle === 0 || true) {	
+						_self._removeOverlays();
+						return false;	
+					}
+					else {			
+						//(_self.angle < 90) ? direction = 'up' : direction = 'down';							
+					}
+				};
+				
+				_self.swipeDirection = direction;
+				
+				// on the first & last page neighbors we don't flip
+				// KL -we'll have a 'special' first page and last page that's never reachable!
+				if(_self.flipDirection == 'prev' && !_self.$twoPagesPrevious) {
+				  console.log("trying to go back too far!");
+					return false;
+				}
+				
+				if(_self.flipDirection == 'next' && !_self.$nextPage) {
+				  console.log("no next page - try to queue it up");
+				  var $newNext = _self.$pageElements[_self.currentPage + 1];
+				  
+				  if ($newNext) {
+				    $newNext.appendTo(_self.$el).css('z-index', 0);
+				    _self.$nextPage = $newNext;
+				  } else {
+				    //try the 'fake flip' here...
+				    console.log("no new next: ", _self.currentPage);
+				    _self.testLoadingFlip();
+				    console.log("trying to go forward too far!");
+				    return false;
 				  }
-					//get container size if it hasn't been set...
-					if (_self.containerDimensions.height == 0) {
-					  _self._getContainerSize();
+				}
+				
+				
+				
+				// save ending point (symetric point):
+				// if we touch / start dragging on, say [x=10], then
+				// we need to drag until [window's width - 10] in order to flip the page 100%.
+				// if the symetric point is too close we are giving some margin:
+				// if we would start dragging right next to [window's width / 2] then
+				// the symmetric point would be very close to the starting point. A very short swipe
+				// would be enough to flip the page..
+				sym	= _self.containerDimensions.height - startY;
+				
+				var symMargin = 0.9 * (_self.containerDimensions.height / 2);
+				if(Math.abs(startY - sym) < symMargin) {
+					(_self.flipDirection === 'next') ? sym -= symMargin / 2 : sym += symMargin / 2;
+				}
+				
+				// some special cases:
+				// Page is on the right side, 
+				// and we drag/swipe to the same direction
+				// ending on a point > than the starting point
+
+				if(endY > startY && _self.flipDirection === 'next') {
+					angle		= 0;
+					oob 		= true;
+					noflip		= true;
+				}
+				// Page is on the right side, 
+				// and we drag/swipe to the opposite direction
+				// ending on a point < than the symmetric point
+
+				else if(endY < sym && _self.flipDirection === 'next') {
+					angle		= 180;
+					oob 		= true;
+				}
+				// Page is on the left side, 
+				// and we drag/swipe to the opposite direction
+				// ending on a point > than the symmetric point
+
+				else if(endY > sym && _self.flipDirection === 'prev') {
+					angle		= 0;
+					oob 		= true;
+				}
+				// Page is on the left side, 
+				// and we drag/swipe to the same direction
+				// ending on a point < than the starting point
+
+				else if(endY < startY && _self.flipDirection === 'prev') {
+					angle		= 180;
+					oob 		= true;
+					noflip		= true;
+				}
+				// we drag/swipe to a point between 
+				// the starting point and symetric point
+
+				else {
+					var s, e, val;
+					
+					(_self.flipDirection === 'next') ?
+						(s = startY, e = sym, val = startY - distance) : 
+						(s = sym, e = startY , val = startY + distance);
+					
+					angle = _self._calcAngle(val, s, e);
+					
+					if((direction === 'up' && _self.flipDirection === 'prev') || (direction === 'down' && _self.flipDirection === 'next')) {
+						noflip	= true;
 					}
-					
-					var startY		= start.y,
-						endY		= end.y,
-						sym, angle,
-						oob			= false,
-						noflip		= false;
-					
-					// check the "page direction" to flip:
-					// check only if not animating
-					
-					// note - this isn't how flipboard does it - they use the initial direction of the swipe
-					if(!_self._isAnimating() && !_self.loading) {
-						(startY < _self.containerDimensions.height / 2) ? _self.flipDirection = 'prev' : _self.flipDirection = 'next';
-					}
-					
-					if(direction === 'left' || direction === 'right') {
-						if(_self.angle === undefined || _self.angle === 0 || true) {	
-							_self._removeOverlays();
-							return false;	
-						}
-						else {			
-							(_self.angle < 90) ? direction = 'up' : direction = 'down';							
-						}
-					};
-					
-					_self.swipeDirection = direction;
-					
-					// on the first & last page neighbors we don't flip
-					// KL -we'll have a 'special' first page and last page that's never reachable!
-					if(_self.flipDirection == 'prev' && !_self.$twoPagesPrevious) {
-					  console.log("trying to go back too far!");
+				}
+			  
+			  
+			  ev.info = {
+			      startY:	startY,
+  					endY:	 endY,
+  					sym: Math.abs(sym),
+  					angle: Math.abs(angle),
+  					oob:		 oob,
+  					noflip:	noflip
+			  }
+			  
+			  return ev;
+			  
+			}
+			
+			this.flipHammer.ondragstart = function(ev) { 
+			  ev = dragDefaultAction(ev); 
+			  //return;
+			  //now we have 'ev' with augmented info...
+			  
+			  if(_self._isAnimating()) {
+					//return false;
+					// the user can still grab a page while one is flipping (in this case not being able to move)
+					// and once the page is flipped the move/touchmove events are triggered..
+					_self.start = true;
+					return false;
+				} 
+				else {
+					_self.start = false;
+				
+				}
+				
+				// check which page is clicked/touched
+				_self._setFlippingPage();
+				
+				// check which page comes before & after the one we are clicking
+				// use our vars instead of jquery prev and next?
+				_self.$beforePage 	= _self.currentPage > 1 ? _self.$flippingPage.prev() : $('#noelementonthepage');
+				_self.$afterPage 	= _self.$flippingPage.next();
+			};
+			
+			this.flipHammer.ondrag = function(ev) { 
+			  ev = dragDefaultAction(ev);
+			  //return;
+			  if(Math.abs(ev.distance) > 0) {
+					if(_self._isAnimating() || _self.start) {	
 						return false;
 					}
 					
-					if(_self.flipDirection == 'next' && !_self.$nextPage) {
-					  console.log("no next page - try to queue it up");
-					  var $newNext = _self.$pageElements[_self.currentPage + 1];
-					  
-					  if ($newNext) {
-					    $newNext.appendTo(_self.$el).css('z-index', 0);
-					    _self.$nextPage = $newNext;
-					  } else {
-					    //try the 'fake flip' here...
-					    console.log("no new next: ", _self.currentPage);
-					    _self.testLoadingFlip();
-					    console.log("trying to go forward too far!");
-					    return false;
-					  }
+					// adds overlays: shows shadows while flipping
+					if(!_self.hasOverlays) {
+						_self._addOverlays();	
 					}
-					
-					// save ending point (symetric point):
-					// if we touch / start dragging on, say [x=10], then
-					// we need to drag until [window's width - 10] in order to flip the page 100%.
-					// if the symetric point is too close we are giving some margin:
-					// if we would start dragging right next to [window's width / 2] then
-					// the symmetric point would be very close to the starting point. A very short swipe
-					// would be enough to flip the page..
-					sym	= _self.containerDimensions.height - startY;
-					
-					var symMargin = 0.9 * (_self.containerDimensions.height / 2);
-					if(Math.abs(startY - sym) < symMargin) {
-						(_self.flipDirection === 'next') ? sym -= symMargin / 2 : sym += symMargin / 2;
-					}
-					
-					// some special cases:
-					// Page is on the right side, 
-					// and we drag/swipe to the same direction
-					// ending on a point > than the starting point
-					// -----------------------
-					// |          |          |
-					// |          |          |
-					// |   sym    |     s    |
-					// |          |      e   |
-					// |          |          |
-					// -----------------------
-					if(endY > startY && _self.flipDirection === 'next') {
-						angle		= 0;
-						oob 		= true;
-						noflip		= true;
-					}
-					// Page is on the right side, 
-					// and we drag/swipe to the opposite direction
-					// ending on a point < than the symmetric point
-					// -----------------------
-					// |          |          |
-					// |          |          |
-					// |   sym    |     s    |
-					// |  e       |          |
-					// |          |          |
-					// -----------------------
-					else if(endY < sym && _self.flipDirection === 'next') {
-						angle		= 180;
-						oob 		= true;
-					}
-					// Page is on the left side, 
-					// and we drag/swipe to the opposite direction
-					// ending on a point > than the symmetric point
-					// -----------------------
-					// |          |          |
-					// |          |          |
-					// |    s     |   sym    |
-					// |          |      e   |
-					// |          |          |
-					// -----------------------
-					else if(endY > sym && _self.flipDirection === 'prev') {
-						angle		= 0;
-						oob 		= true;
-					}
-					// Page is on the left side, 
-					// and we drag/swipe to the same direction
-					// ending on a point < than the starting point
-					// -----------------------
-					// |          |          |
-					// |          |          |
-					// |    s     |   sym    |
-					// |   e      |          |
-					// |          |          |
-					// -----------------------
-					else if(endY < startY && _self.flipDirection === 'prev') {
-						angle		= 180;
-						oob 		= true;
-						noflip		= true;
-					}
-					// we drag/swipe to a point between 
-					// the starting point and symetric point
-					// -----------------------
-					// |          |          |
-					// |    s     |   sym    |
-					// |   sym    |    s     |
-					// |         e|          |
-					// |          |          |
-					// -----------------------
-					else {
-						var s, e, val;
-						
-						(_self.flipDirection === 'next') ?
-							(s = startY, e = sym, val = startY - distance) : 
-							(s = sym, e = startY , val = startY + distance);
-						
-						angle = _self._calcAngle(val, s, e);
-						
-						if((direction === 'up' && _self.flipDirection === 'prev') || (direction === 'down' && _self.flipDirection === 'next')) {
-							noflip	= true;
-						}
-					}
-					
-					switch(phase) {
-					
-						case 'start' :
-							
-							if(_self._isAnimating()) {
-								//return false;
-								// the user can still grab a page while one is flipping (in this case not being able to move)
-								// and once the page is flipped the move/touchmove events are triggered..
-								_self.start = true;
-								return false;
-							} 
-							else {
-								_self.start = false;
-							
-							}
-							
-							// check which page is clicked/touched
-							_self._setFlippingPage();
-							
-							// check which page comes before & after the one we are clicking
-							// use our vars instead of jquery prev and next?
-							_self.$beforePage 	= _self.currentPage > 1 ? _self.$flippingPage.prev() : $('#noelementonthepage');
-							_self.$afterPage 	= _self.$flippingPage.next();
-							
-							break;
-							
-						case 'move' :
-							
-							if(distance > 0) {
-								if(_self._isAnimating() || _self.start) {	
-									return false;
-								}
-								
-								// adds overlays: shows shadows while flipping
-								if(!_self.hasOverlays) {
-									_self._addOverlays();	
-								}
-								// save last angle
-								_self.angle = angle;
-								// we will update the rotation value of the page while we move it
-								_self._turnPage(angle , true);
-							}
-							break;
-							
-						case 'end' :
-							
-							if(distance > 0) {
-								if(_self._isAnimating() || _self.start) return false;
-								
-								console.log('setting animating to true');
-								_self.isAnimating = true;
-								
-								// keep track if the page was actually flipped or not
-								// the data flip will be used later on the transitionend event
-								_self.$flippingPage.data('flip', !noflip);
-								
-								// if out of bounds we will "manually" flip the page,
-								// meaning there will be no transition set
-								if(oob) {
-									if(!noflip) {
-										// the page gets flipped (user dragged from the starting point until the symmetric point)
-										// update current page
-										_self._updatePage();
-									}
-                  console.log('oob!');
-									_self._onEndFlip(_self.$flippingPage);
-								}
-								else {
-									//return;
-									// save last angle
-									_self.angle = angle;
-									// calculate the speed to flip the page:
-									// the speed will depend on the current angle.
-									_self._calculateSpeed();
-									//alert (direction);
-									_self._turnPage(direction == "up" ? 179.99 : 0.01);  //safari bug? - if 180 the first flip flickers!
-									if(!noflip) {
-									  _self._updatePage();
-									}
-									
-								}
-							}
-							break;
-					};
+					// save last angle
+					_self.angle = Math.abs(ev.info.angle);
+					// we will update the rotation value of the page while we move it
+					_self._turnPage(_self.angle, true);
 				}
-			});
-		
+			};
+			
+			this.flipHammer.ondragend = function(ev) { 
+			  ev = dragDefaultAction(ev);
+			  //return;
+			  console.log('DRAG END!', ev);
+			  if(ev.distance > 0) {
+					if(_self._isAnimating() || _self.start) return false;
+					
+					console.log('setting animating to true');
+					_self.isAnimating = true;
+					
+					// keep track if the page was actually flipped or not
+					// the data flip will be used later on the transitionend event
+					_self.$flippingPage.data('flip', !ev.info.noflip);
+					
+					// if out of bounds we will "manually" flip the page,
+					// meaning there will be no transition set
+					if(ev.info.oob) {
+						if(!ev.info.noflip) {
+							// the page gets flipped (user dragged from the starting point until the symmetric point)
+							// update current page
+							_self._updatePage();
+						}
+            console.log('oob!');
+						_self._onEndFlip(_self.$flippingPage);
+					}
+					else {
+						//return;
+						// save last angle
+						_self.angle = ev.info.angle;
+						// calculate the speed to flip the page:
+						// the speed will depend on the current angle.
+						_self._calculateSpeed();
+						//alert (direction);
+						_self._turnPage(ev.direction == "up" ? 179.99 : 0.01);  //safari bug? - if 180 the first flip flickers!
+						if(!ev.info.noflip) {
+						  _self._updatePage();
+						}
+						
+					}
+				}
+			
+			};
+			
 		},
 		
+		//hammer gives this info:
+		
+		/*
+		        'dragstart' event:
+		        
+    		        angle: -90
+                direction: "up"
+                distance: 21
+                distanceX: 0
+                distanceY: -21
+                originalEvent: MouseEvent
+                position: Object
+                touches: Array[1]
+                type: "drag"
+		        
+		
+            'drag' event:
+            
+                angle: -90
+                direction: "up"
+                distance: 108
+                distanceX: 0
+                distanceY: -108
+                originalEvent: MouseEvent
+                position: Object
+                touches: Array[1]
+                type: "drag"
+            
+            'dragend' event:
+            
+                angle: -88.47247455778707
+                direction: "up"
+                distance: 150.05332385522155
+                originalEvent: MouseEvent
+                touches: Array[1]
+                type: "dragend"
+		
+		*/
+		
+
 		//setFlippingPage is where the transition end handler is attached to the 
 		
 		_setFlippingPage	: function(page) {

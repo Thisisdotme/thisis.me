@@ -44,8 +44,8 @@
       className: "app-page",
       
       events: {
-        "vclick .highlight" : "showHighlight",
-        "vclick a" : "linkClicked"
+        "tap .highlight" : "showHighlight",
+        "tap a" : "linkClicked"
         
       },
       
