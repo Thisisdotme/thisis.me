@@ -1,15 +1,12 @@
-#!/usr/bin/env python
-
 import sys
 import logging
 
-from tim_commons.app_base import AppBase
 from event_collectors import event_collector
-from tim_commons import message_queue, db
+from tim_commons import message_queue, db, app_base
 import data_access.service
 
 
-class EventCollectorDriver(AppBase):
+class EventCollectorDriver(app_base.AppBase):
   def init_args(self, option_parser):
     option_parser.add_option('--service',
                               dest='services',
@@ -34,9 +31,9 @@ class EventCollectorDriver(AppBase):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
+    db_url = db.create_url_from_config(config['db'])
     # get the broker and queue config
-    broker_url = config['broker']['url']
+    broker_url = message_queue.create_url_from_config(config['broker'])
 
     # initialize the db engine & session
     db.configure_session(db_url)

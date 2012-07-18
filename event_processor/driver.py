@@ -4,14 +4,12 @@ import sys
 import datetime
 import logging
 
-from tim_commons.app_base import AppBase
-from tim_commons import message_queue
-from tim_commons import db
+from tim_commons import message_queue, db, app_base
 from event_processors import event_processor
 import data_access.service
 
 
-class EventProcessorDriver(AppBase):
+class EventProcessorDriver(app_base.AppBase):
   def init_args(self, option_parser):
     option_parser.add_option('--service',
                              dest='services',
@@ -23,9 +21,9 @@ class EventProcessorDriver(AppBase):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
+    db_url = db.create_url_from_config(config['db'])
     # get the broker and queue config
-    broker_url = config['broker']['url']
+    broker_url = message_queue.create_url_from_config(config['broker'])
     # get the maximum priority
     max_priority = int(config['scanner']['maximum_priority'])
     min_duration = float(config['scanner']['iteration_minimum_duration'])

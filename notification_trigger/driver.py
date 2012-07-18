@@ -23,7 +23,7 @@ class NotificationDriver(AppBase):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
+    db_url = db.create_url_from_config(config['db'])
 
     # initialize the db engine & session
     db.configure_session(db_url)
@@ -38,7 +38,7 @@ class NotificationDriver(AppBase):
       service_names = options.services
 
     # get the broker and queue config
-    broker_url = config['broker']['url']
+    broker_url = message_queue.create_url_from_config(config['broker'])
 
     # get message broker client and store in instance
     client = message_queue.create_message_client(broker_url)

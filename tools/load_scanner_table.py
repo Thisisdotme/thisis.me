@@ -18,7 +18,7 @@ class LoadScannerTableApplication(AppBase):
                              help='Number of random events to load into the database')
 
   def app_main(self, config, options, args):
-    db.configure_session(url=config['db']['sqlalchemy.url'])
+    db.configure_session(url=db.create_url_from_config(config['db']))
     services = _lookup_services_with_event_queue(config)
     maximum_priority = int(config['scanner']['maximum_priority'])
 

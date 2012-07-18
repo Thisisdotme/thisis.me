@@ -5,7 +5,6 @@ from tim_commons import normalize_uri
 
 
 class TwitterEventInterpreter(ServiceEventInterpreter):
-
   DATETIME_STRING_FORMAT = '%a %b %d %H:%M:%S +0000 %Y'
 
   def get_type(self):

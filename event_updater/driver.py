@@ -3,13 +3,11 @@
 import sys
 import logging
 
-from tim_commons.app_base import AppBase
-from tim_commons import message_queue
-from tim_commons import db
+from tim_commons import message_queue, db, app_base
 from event_updaters import event_updater
 
 
-class EventUpdaterDriver(AppBase):
+class EventUpdaterDriver(app_base.AppBase):
   def init_args(self, option_parser):
     option_parser.add_option('--service',
                              dest='services',
@@ -21,9 +19,9 @@ class EventUpdaterDriver(AppBase):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
+    db_url = db.create_url_from_config(config['db'])
     # get the broker and queue config
-    broker_url = config['broker']['url']
+    broker_url = message_queue.create_url_from_config(config['broker'])
 
     # initialize the db engine & session
     db.configure_session(db_url)

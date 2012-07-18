@@ -134,7 +134,7 @@ the behavior for the photo feature
       },
 
   		events: {
-  		  "vclick .album": "showGridView"
+  		  "tap .album": "showGridView"
   		},
 
 
@@ -216,8 +216,8 @@ the behavior for the photo feature
       },
 
   		events: {
-  		  "vclick .thumb": "showFlipView",
-  		  "vclick .grid-link": "showAlbumView",
+  		  "tap .thumb": "showFlipView",
+  		  "tap .grid-link": "showAlbumView",
   			"swiperight" : "showAlbumView"
   		},
   		
@@ -436,12 +436,12 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			//"vclick .detail-link" : "toggleMode",
-    			"vclick .grid-link" : "showGridView",
-    			//"vclick .full-photo" : "toggleMode",
+    			//"tap .detail-link" : "toggleMode",
+    			"tap .grid-link" : "showGridView",
+    			//"tap .full-photo" : "toggleMode",
     			"click .interaction-icons .comments" : "showComments",
     			"click .interaction-icons .location" : "showLocation",
-    			"vclick .interaction-icons" : "interactionIconsClicked",
+    			"tap .interaction-icons" : "interactionIconsClicked",
     			"swiperight" : "showGridView",
     			
   		},
@@ -515,7 +515,7 @@ the behavior for the photo feature
   		      overlay.addClass('no-toolbars');
   		    }, 10);
   		    
-  		    overlay.on('vclick', function(event){
+  		    overlay.on('tap', function(event){
   		      that.toggleMode();
   		    })
   		    var containerEl = overlay.get(0);
