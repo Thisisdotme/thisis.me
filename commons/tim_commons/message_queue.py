@@ -1,6 +1,7 @@
 import threading
 import puka
 import logging
+import os
 
 from tim_commons import json_serializer
 
@@ -133,3 +134,11 @@ def join(client, queues):
 
   promise = client.close()
   client.wait(promise)
+
+
+def create_url_from_config(config):
+  return 'amqp://{0}:{1}'.format(config['host'], config['port'])
+
+
+def create_spec_path(base_name):
+  return os.path.join(os.environ['TIM_CONFIG'], base_name)

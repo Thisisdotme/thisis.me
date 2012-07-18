@@ -24,7 +24,7 @@ class ProfileImageRefreshDriver(AppBase):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
+    db_url = db.create_url_from_config(config['db'])
 
     # initialize the db engine & session
     db.configure_session(db_url)

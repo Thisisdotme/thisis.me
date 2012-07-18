@@ -2,11 +2,12 @@ import sys
 import oauth2 as oauth
 import time
 import urllib
+import datetime
+import logging
 
 
-from pprint import pformat
 from StringIO import StringIO
-from twisted.python.log import err
+from twisted.python.log import err, PythonLoggingObserver
 from twisted.internet import reactor
 from twisted.internet.ssl import ClientContextFactory
 from twisted.protocols.basic import LineReceiver
@@ -15,17 +16,9 @@ from twisted.web.http_headers import Headers
 from twisted.enterprise import adbapi
 from twisted_amqp import AmqpFactory
 
-from tim_commons import app_base, json_serializer, messages
-
-# TODO: remove this when confortable
-#method = 'POST'
-#url = 'http://requestb.in/13stbfk1'
-#url = 'https://stream.twitter.com/1/statuses/filter.json'
-#data = {'follow': 563165708}
-#consumer_key = '2Ey4mYesvLGXEmhXgaWQpw'
-#consumer_secret = '1coL8wYHbTc7PRNTuvkJblRF1vRgCb8U7x1jYg'
-#token_key = '563165708-Vuhr6aILmWNyyyXxaVbTsbEP7bmvUTSt6aCrFdpc'
-#token_secret = 'H3DVvEnvCHWF7PffZpVA9j0Xd5UNEmL0g81ZbARE'
+from tim_commons import app_base, json_serializer, messages, message_queue
+from mi_schema import models
+import event_interpreter
 
 
 class EventTwitterFeedDriver(app_base.AppBase):
@@ -34,149 +27,209 @@ class EventTwitterFeedDriver(app_base.AppBase):
   def app_main(self, config, options, args):
     # TODO: deal with new user registrations by listening to amqp and schedule the rest
 
+    observer = PythonLoggingObserver()
+    observer.start()
+
+    # Grab twitter consumer keys
+    self.consumer_key = config['oauth']['twitter']['key']
+    self.consumer_secret = config['oauth']['twitter']['secret']
+
+    # Grab feed configuration
+    self.wait_on_collector_query_delay = float(config['feed']['wait_on_collector_query_delay'])
+
     # Configure amqp
-    # TODO: grab this form the configuration file
-    amqp_host = 'localhost'
-    amqp_port = 5672
-    amqp_spec = 'amqp0-9-1.xml'
+    amqp_host = config['broker']['host']
+    amqp_port = int(config['broker']['port'])
+    amqp_spec = message_queue.create_spec_path(config['broker']['spec'])
 
     self.amqp = AmqpFactory(host=amqp_host, port=amqp_port, spec_file=amqp_spec)
 
-    # TODO: grab this from the configuration file
-    db_host = 'localhost'
-    db_user = 'mi'
-    db_passwd = 'mi'
-    db_name = 'mi'
+    db_host = config['db']['host']
+    db_user = config['db']['user']
+    db_passwd = config['db']['password']
+    db_database = config['db']['database']
+    db_unicode = bool(config['db']['unicode'])
 
-    db_pool = adbapi.ConnectionPool(
+    self.db_pool = adbapi.ConnectionPool(
         'MySQLdb',
         host=db_host,
         user=db_user,
         passwd=db_passwd,
-        db=db_name,
-        use_unicode=True,
+        db=db_database,
+        use_unicode=db_unicode,
         cp_noisy=True)
-    self.process_twitter_users(db_pool)
+    self._process_twitter_users()
 
     reactor.run()
 
-  def handle_twitter_query_result(self, result_set):
-    print 'Result:', result_set
-
+  def _handle_twitter_query_result(self, result_set):
     for twitter_user in result_set:
       # start a connection to twitter
-      method = 'POST'
-      url = 'https://stream.twitter.com/1/statuses/filter.json'
-      user_id = twitter_user[2]
-      tim_author_id = twitter_user[3]
-      consumer_key = '2Ey4mYesvLGXEmhXgaWQpw'  # TODO: get this from config
-      consumer_secret = '1coL8wYHbTc7PRNTuvkJblRF1vRgCb8U7x1jYg'  # TODO: get this from config
-      token_key = twitter_user[0]
-      token_secret = twitter_user[1]
+      asm = _create_author_service_map(twitter_user)
+      self._handle_user(asm)
 
-      self.listen_to_twitter(
-          method,
-          url,
-          user_id,
-          tim_author_id,
-          token_key,
-          token_secret,
-          consumer_key,
-          consumer_secret)
+  def _handle_user(self, asm):
+    if asm.service_author_id not in self.user_ids:
+      self.user_ids.add(asm.service_author_id)
+      handler = TwitterHandler(asm, self)
 
-  def listen_to_twitter(
+      self._listen_to_twitter(asm, handler)
+
+      self._notify_event_collector(asm)
+
+      handler.schedule_collector_done()
+
+  def _notify_event_collector(self, asm):
+    notification = messages.create_notification_message('twitter', asm.service_author_id)
+    queue = notification['header']['type']
+    body = json_serializer.dump_string(notification)
+    self.amqp.send_message(exchange='', routing_key=queue, msg=body)
+
+  def _listen_to_twitter(
       self,
-      method,
-      url,
-      user_id,
-      tim_author_id,
-      token_key,
-      token_secret,
-      consumer_key,
-      consumer_secret):
+      asm,
+      handler):
 
-    if user_id not in self.user_ids:
-      self.user_ids.add(user_id)
+    method = 'POST'
+    url = 'https://stream.twitter.com/1/statuses/filter.json'
+    data = {'follow': asm.service_author_id}
 
-      data = {'follow': user_id}
+    headers = _sign_request(
+        method=method,
+        url=url,
+        data=data,
+        consumer_key=self.consumer_key,
+        consumer_secret=self.consumer_secret,
+        token_key=asm.access_token,
+        token_secret=asm.access_token_secret)
+    headers['Authorization'] = [headers['Authorization'].encode('ascii')]
+    headers['Content-Type'] = ['application/x-www-form-urlencoded']
 
-      headers = sign_request(
-          method=method,
-          url=url,
-          data=data,
-          consumer_key=consumer_key,
-          consumer_secret=consumer_secret,
-          token_key=token_key,
-          token_secret=token_secret)
-      headers['Authorization'] = [headers['Authorization'].encode('ascii')]
-      headers['Content-Type'] = ['application/x-www-form-urlencoded']
+    body = FileBodyProducer(StringIO(urllib.urlencode(data)))
 
-      body = FileBodyProducer(StringIO(urllib.urlencode(data)))
+    contextFactory = WebClientContextFactory()
+    agent = Agent(reactor, contextFactory)
+    d = agent.request(
+        method,
+        url,
+        Headers(headers),
+        body)
 
-      contextFactory = WebClientContextFactory()
-      agent = Agent(reactor, contextFactory)
-      d = agent.request(
-          method,
-          url,
-          Headers(headers),
-          body)
+    def handle_response(response):
+      logging.info("Started Twitter stream for %s", data)
+      response.deliverBody(
+          TwitterStreamProtocol(handler))
 
-      def handle_response(response):
-        print 'Response version:', response.version
-        print 'Response code:', response.code
-        print 'Response phrase:', response.phrase
-        print 'Response headers:'
-        print pformat(list(response.headers.getAllRawHeaders()))
+    d.addCallback(handle_response)
+    d.addErrback(err)
 
-        response.deliverBody(TwitterStreamProtocol(tim_author_id, user_id, self))
-
-      d.addCallback(handle_response)
-      d.addErrback(err)
-
-  def process_twitter_users(self, db_pool):
+  def _process_twitter_users(self):
     twitter_service_id = 2  # TODO: would be nice to remove this
-    deferred = db_pool.runQuery(
-        '''SELECT access_token, access_token_secret, service_author_id, author_id
+    deferred = self.db_pool.runQuery(
+        '''SELECT author_id, service_id, access_token, access_token_secret, service_author_id,
+                  id, last_update_time, most_recent_event_id, most_recent_event_timestamp
            FROM author_service_map
-           WHERE service_id = %s''',
+           WHERE service_id = %s;''',
         (twitter_service_id,))
-    deferred.addCallback(self.handle_twitter_query_result)
+    deferred.addCallback(self._handle_twitter_query_result)
+    deferred.addErrback(err)
+
+
+class TwitterHandler:
+  def __init__(self, author_service_map, factory):
+    self.author_service_map = author_service_map
+    self.factory = factory
+    self.write_date = False
+    self.last_update_time = author_service_map.last_update_time
+    self.most_recent_event_id = None
+    self.most_recent_event_timestamp = None
+
+  def handle(self, tweet):
+    interpreter = event_interpreter.create_event_interpreter(
+        'twitter',
+        tweet,
+        None,
+        None)
+
+    event_message = messages.create_event_message(
+        'twitter',
+        self.author_service_map.author_id,
+        messages.CURRENT_STATE,
+        self.author_service_map.service_author_id,
+        interpreter.event_id(),
+        tweet,
+        [])
+    self._send_message(event_message)
+
+    if self.write_date:
+      self._update_database(
+          self.author_service_map.id,
+          datetime.datetime.utcnow(),
+          interpreter.event_id(),
+          interpreter.created_time())
+    else:
+      self.last_update_time = datetime.datetime.utcnow()
+      self.most_recent_event_id = interpreter.event_id()
+      self.most_recent_event_timestamp = interpreter.created_time()
+
+  def _send_message(self, message):
+    queue = message['header']['type']
+    body = json_serializer.dump_string(message)
+    self.factory.amqp.send_message(exchange='', routing_key=queue, msg=body)
+
+  def schedule_collector_done(self):
+    def query_service_event_map_by_id():
+      deferred = self.factory.db_pool.runQuery(
+          '''SELECT author_id, service_id, access_token, access_token_secret, service_author_id,
+                    id, last_update_time, most_recent_event_id, most_recent_event_timestamp
+             FROM author_service_map
+             WHERE id = %s''',
+          (self.author_service_map.id,))
+      deferred.addCallback(self._check_date_status)
+      deferred.addErrback(err)
+
+    reactor.callLater(self.factory.wait_on_collector_query_delay, query_service_event_map_by_id)
+
+  def _check_date_status(self, result):
+    # TODO: assert that there is at least one row
+    asm = _create_author_service_map(result[0])
+    if asm.last_update_time != self.author_service_map.last_update_time:
+      self.write_date = True
+      if (self.last_update_time and
+          self.last_update_time > asm.last_update_time):
+        self._update_database(
+            asm.id,
+            self.last_update_time,
+            self.most_recent_event_id,
+            self.most_recent_event_timestamp)
+    else:
+      self.schedule_collector_done()
+
+  def _update_database(
+      self,
+      id,
+      last_update_time,
+      most_recent_event_id,
+      most_recent_event_timestamp):
+    deferred = self.factory.db_pool.runOperation(
+        '''UPDATE author_service_map
+           SET last_update_time=%s, most_recent_event_id=%s, most_recent_event_timestamp=%s
+           WHERE id = %s''',
+        (last_update_time, most_recent_event_id, most_recent_event_timestamp, id))
     deferred.addErrback(err)
 
 
 class TwitterStreamProtocol(LineReceiver):
-  def __init__(self, tim_author_id, service_author_id, factory):
-    self.tim_author_id = tim_author_id
-    self.service_author_id = service_author_id
-    self.factory = factory
+  def __init__(self, handler):
+    self.handler = handler
 
   def lineReceived(self, line):
     if line:
-      json_dict = json_serializer.load_string(line)
-      event_message = messages.create_event_message(
-          'twitter',
-          self.tim_author_id,
-          messages.CURRENT_STATE,
-          self.service_author_id,
-          '00',  # TODO: service_event_id: interpret the raw event
-          json_dict,
-          [])
-      self._send_message(event_message)
-    else:
-      print "Heartbeat!"
+      self.handler.handle(json_serializer.load_string(line))
 
   def connectionLost(self, reason):
     # TODO: restart connection on error
-    print 'Finished receiving body:', reason.getErrorMessage()
-
-  def _send_message(self, message):
-    try:  # TODO: remove this crap
-      queue = message['header']['type']
-      body = json_serializer.dump_string(message)
-      self.factory.amqp.send_message(exchange='', routing_key=queue, msg=body)
-    except:
-      from twisted.python import log
-      log.err()
+    logging.info('Finished receiving body: %s', reason.getErrorMessage())
 
 
 class WebClientContextFactory(ClientContextFactory):
@@ -184,7 +237,7 @@ class WebClientContextFactory(ClientContextFactory):
     return ClientContextFactory.getContext(self)
 
 
-def sign_request(method, url, consumer_key, consumer_secret, token_key, token_secret, data):
+def _sign_request(method, url, consumer_key, consumer_secret, token_key, token_secret, data):
   token = oauth.Token(key=token_key, secret=token_secret)
   consumer = oauth.Consumer(key=consumer_key, secret=consumer_secret)
   params = dict(
@@ -199,31 +252,22 @@ def sign_request(method, url, consumer_key, consumer_secret, token_key, token_se
   header = req.to_header()
   return header
 
-'''
-def listen_to_twitter():
-  header = sign_request(
-      method=method,
-      url=url,
-      data=data,
-      consumer_key=consumer_key,
-      consumer_secret=consumer_secret,
-      token_key=token_key,
-      token_secret=token_secret)
 
-  response = requests.post(url,
-                           data=data,
-                           headers=header)
-  print response.request.headers
+def _create_author_service_map(twitter_user):
+  asm = models.AuthorServiceMap(
+      twitter_user[0],
+      twitter_user[1],
+      twitter_user[2],
+      twitter_user[3],
+      twitter_user[4])
+  asm.id = twitter_user[5]
+  asm.last_update_time = twitter_user[6]
+  asm.most_recent_event_id = twitter_user[7]
+  asm.most_recent_event_timestamp = twitter_user[8]
 
-  print response.status_code
-  for line in response.iter_lines(chunk_size=1):
-    if line:
-      print json_serializer.load_string(line)
-    else:
-      print 'Heartbeat!'
-'''
+  return asm
 
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes
-  sys.exit(EventTwitterFeedDriver('event_collector', daemon_able=True).main())
+  sys.exit(EventTwitterFeedDriver('event_twitter_feed', daemon_able=True).main())

@@ -21,3 +21,12 @@ def configure_mock_session():
   from tim_commons import mock
   global Session
   Session = mock.DummyDBSession
+
+
+def create_url_from_config(config):
+  url = '{protocol}://{user}:{password}@{host}/{database}{encoding}'
+  encoding = '?charset=utf8' if bool(config['unicode']) else ''
+  return url.format(
+      protocol='mysql',
+      encoding=encoding,
+      **config)

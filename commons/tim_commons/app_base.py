@@ -69,6 +69,7 @@ class AppBase:
             working_directory='/',
             pidfile=PidFileContext('/var/run/tim/{0}.pid'.format(self._program_name)),
             umask=0o022,
+            files_preserve=list(reversed(range(2048))),
             uid=pwd_database.pw_uid,
             gid=pwd_database.pw_gid,
             detach_process=True):

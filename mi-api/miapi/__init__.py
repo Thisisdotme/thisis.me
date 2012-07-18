@@ -44,7 +44,7 @@ def main(global_config, **settings):
 
   """ Setup the database
   """
-  db_url = tim_config['db']['sqlalchemy.url']
+  db_url = db.create_url_from_config(tim_config['db'])
   db.configure_session(db_url)
 
   # load the oauth configuration settings

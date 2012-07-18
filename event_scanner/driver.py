@@ -8,8 +8,8 @@ from event_scanner import scan_events
 
 class ScannerApplication(app_base.AppBase):
   def app_main(self, config, options, args):
-    db_url = config['db']['sqlalchemy.url']
-    message_url = config['broker']['url']
+    db_url = db.create_url_from_config(config['db'])
+    message_url = message_queue.create_url_from_config(config['broker'])
 
     maximum_priority = int(config['scanner']['maximum_priority'])
     iteration_minimum_duration = float(config['scanner']['iteration_minimum_duration'])
