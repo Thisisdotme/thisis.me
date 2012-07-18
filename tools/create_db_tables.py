@@ -15,11 +15,8 @@ class CreateDBTables(AppBase):
 
     logging.info("Beginning...")
 
-    # read the db url from the config
-    db_url = config['db']['sqlalchemy.url']
-
     # initialize the db engine & session
-    db.configure_session(db_url)
+    db.configure_session(url=db.create_url_from_config(config['db']))
 
     # get the engine, bind it to the metadata base, and create
     # the tables
