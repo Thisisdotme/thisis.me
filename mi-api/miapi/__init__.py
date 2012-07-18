@@ -6,7 +6,7 @@ from tim_commons.config import load_configuration
 from tim_commons import db
 
 from mi_schema import models
-import data_access.service
+from data_access import service, post_type
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -14,22 +14,6 @@ tim_config = {}
 
 # object created from JSON file that stores oAuth configuration for social services
 oauth_config = {}
-
-# lookup dictionary of service_object_type id to it's associated label
-service_object_type_dict = {}
-
-
-# create and return a service_object_type dictionary
-def load_service_object_type_dict():
-
-  service_object_type_dict = {}
-
-  db_session = db.Session()
-
-  for row in db_session.query(models.ServiceObjectType):
-    service_object_type_dict[row.type_id] = row.label
-
-  return service_object_type_dict
 
 
 def main(global_config, **settings):
@@ -51,11 +35,8 @@ def main(global_config, **settings):
   global oauth_config
   oauth_config = tim_config['oauth']
 
-  # load the service_object_type_dict dictionary
-  global service_object_type_dict
-  service_object_type_dict = load_service_object_type_dict()
-
-  data_access.service.initialize()
+  service.initialize()
+  post_type.initialize()
 
   config = Configurator(settings=settings)
 

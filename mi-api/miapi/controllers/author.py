@@ -165,7 +165,7 @@ class AuthorController(object):
                                   ServiceObjectType.PHOTO_ALBUM_TYPE,
                                   author.id,
                                   data_access.service.name_to_id('me'),
-                                  '{0}@{1}'.format(ServiceEvent.ALL_PHOTOS_ID, author.id),
+                                  ServiceEvent.make_well_known_service_event_id(ServiceEvent.ALL_PHOTOS_ID, author.id),
                                   datetime.now())
         self.db_session.add(all_photos)
 
@@ -173,7 +173,7 @@ class AuthorController(object):
                                    ServiceObjectType.PHOTO_ALBUM_TYPE,
                                    author.id,
                                    data_access.service.name_to_id('me'),
-                                   '{0}@{1}'.format(ServiceEvent.OFME_PHOTOS_ID, author.id),
+                                   ServiceEvent.make_well_known_service_event_id(ServiceEvent.OFME_PHOTOS_ID, author.id),
                                    datetime.now())
         self.db_session.add(ofme_photos)
 
@@ -181,8 +181,7 @@ class AuthorController(object):
                                     ServiceObjectType.PHOTO_ALBUM_TYPE,
                                     author.id,
                                     data_access.service.name_to_id('me'),
-                                    '{0}@{1}'.format(ServiceEvent.OFME_PHOTOS_ID, author.id),
-                                    '{0}@{1}'.format(ServiceEvent.LIKED_PHOTOS_ID, author.id),
+                                    ServiceEvent.make_well_known_service_event_id(ServiceEvent.LIKED_PHOTOS_ID, author.id),
                                     datetime.now())
         self.db_session.add(liked_photos)
 

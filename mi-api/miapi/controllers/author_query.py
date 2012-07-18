@@ -11,9 +11,13 @@ from sqlalchemy import (and_)
 
 from tim_commons import db
 
-from mi_schema.models import (Author, Service, ServiceEvent, AuthorServiceMap, Highlight)
+from data_access import service
+
+from mi_schema.models import (Author, Service, ServiceEvent, AuthorServiceMap, Highlight, ServiceObjectType)
 
 from miapi.globals import LIMIT
+
+from . import get_tim_author_fragment
 
 from author_utils import createServiceEvent, createHighlightEvent
 
@@ -38,7 +42,7 @@ class AuthorQueryController(object):
   # get the event highlights for the author
   #
   @view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-  def getHighlights(self):
+  def get_highlights(self):
 
     author_name = self.request.matchdict['authorname']
 
@@ -48,6 +52,8 @@ class AuthorQueryController(object):
     except:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
+
+    author_obj = get_tim_author_fragment(self.request, author_name)
 
     events = []
     for highlight, event, asm, author, serviceName in self.db_session.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
@@ -60,14 +66,16 @@ class AuthorQueryController(object):
               limit(LIMIT):
       events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
 
-    return {'events': events, 'paging': {'prev': None, 'next': None}}
+    return {'author': author_obj,
+            'events': events,
+            'paging': {'prev': None, 'next': None}}
 
   # GET /v1/authors/{authorname}/events
   #
   # get all FeatureEvents for the author (constrained to query arg. filters)
   #
   @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-  def getEvents(self):
+  def get_events(self):
 
     author_name = self.request.matchdict['authorname']
 
@@ -78,26 +86,38 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
 
+    author_obj = get_tim_author_fragment(self.request, author_name)
+
     events = []
     for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-          join(Service, AuthorServiceMap.service_id == Service.id). \
           filter(AuthorServiceMap.author_id == author.id). \
           filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(LIMIT):
+
+      ''' filter well-known and instagram photo albums so they
+          don't appear in the timeline
+      '''
+      if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
+          (event.service_id == service.name_to_id('me') or
+           event.service_id == service.name_to_id('instagram'))):
+        continue
+
       event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 
-    return {'events': events, 'paging': {'prev': None, 'next': None}}
+    return {'author': author_obj,
+            'events': events,
+            'paging': {'prev': None, 'next': None}}
 
   # GET /v1/authors/{authorname}/events/{eventID}
   #
   # get details for the service event
   #
   @view_config(route_name='author.query.events.eventId', request_method='GET', renderer='jsonp', http_cache=0)
-  def getEventDetail(self):
+  def get_event_detail(self):
 
     author_name = self.request.matchdict['authorname']
     serviceEventID = int(self.request.matchdict['eventID'])
@@ -125,7 +145,7 @@ class AuthorQueryController(object):
   # get details for the service event
   #
   @view_config(route_name='author.query.topstories', request_method='GET', renderer='jsonp', http_cache=0)
-  def getAuthorTopStories(self):
+  def get_author_top_stories(self):
 
     STORY_LIMIT = 5
 
@@ -138,6 +158,8 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
 
+    author_obj = get_tim_author_fragment(self.request, author_name)
+
     events = []
     for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
@@ -145,8 +167,19 @@ class AuthorQueryController(object):
           filter(ServiceEvent.correlation_id == None). \
           order_by(ServiceEvent.create_time.desc()). \
           limit(STORY_LIMIT):
+
+      ''' filter well-known and instagram photo albums so they
+          don't appear in the timeline
+      '''
+      if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
+          (event.service_id == service.name_to_id('me') or
+           event.service_id == service.name_to_id('instagram'))):
+        continue
+
       event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
       if event_obj:
         events.append(event_obj)
 
-    return {'events': events}
+    return {'author': author_obj,
+            'events': events,
+            'paging': {'prev': None, 'next': None}}

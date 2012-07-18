@@ -2,10 +2,11 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_
 from pyramid.view import view_config
 
-from tim_commons.json_serializer import load_string
 from tim_commons import db
-from mi_schema.models import Author, ServiceObjectType, ServiceEvent, Service, AuthorServiceMap
-from . import make_photo_obj, make_photo_album_obj
+from mi_schema.models import Author, ServiceObjectType, ServiceEvent, AuthorServiceMap
+from author_utils import createServiceEvent
+from . import get_tim_author_fragment
+
 import data_access.service
 
 
@@ -24,7 +25,7 @@ class AuthorPhotoAlbumController(object):
     author_name = self.request.matchdict['authorname']
 
     try:
-      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
+      author_id = self.db_session.query(Author.id).filter_by(author_name=author_name).scalar()
     except NoResultFound:
       self.request.response.status_int = 404
       return {'error': 'unknown author %s' % author_name}
@@ -32,94 +33,40 @@ class AuthorPhotoAlbumController(object):
     albums = []
 
     # get all well know albums first
-    for album, asm, author, service_name in self.db_session. \
-      query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+    for album, asm, author in self.db_session. \
+      query(ServiceEvent, AuthorServiceMap, Author). \
       join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
                                   ServiceEvent.service_id == AuthorServiceMap.service_id)). \
       join(Author, ServiceEvent.author_id == Author.id). \
-      join(Service, ServiceEvent.service_id == Service.id). \
       filter(and_(ServiceEvent.author_id == author_id,
                   ServiceEvent.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE,
                   ServiceEvent.service_id == data_access.service.name_to_id('me'))). \
       order_by(ServiceEvent.id):
 
-      # create the base album obj
-      album_obj = make_photo_album_obj(self.db_session, self.request, album, asm, author, service_name)
-      if album_obj:
-
-        # get the most recent photo for the cover photo
-        photo, asm, author = self.db_session.query(ServiceEvent, AuthorServiceMap, Author). \
-            join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                        ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-            join(Author, ServiceEvent.author_id == Author.id). \
-            filter(and_(ServiceEvent.author_id == author_id,
-                        ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-            order_by(ServiceEvent.create_time.desc()). \
-            first()
-
-        cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author)
-        if cover_photo:
-          album_obj['cover_photo'] = cover_photo
-
+      album_obj = createServiceEvent(self.db_session, self.request, album, asm, author)
+      if album_obj['post_type_detail']['photo-album']['photo_count'] > 0:
         albums.append(album_obj)
 
     # get all other albums
-    for album, asm, author, service_name in self.db_session. \
-      query(ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+    for album, asm, author in self.db_session. \
+      query(ServiceEvent, AuthorServiceMap, Author). \
       join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
                                   ServiceEvent.service_id == AuthorServiceMap.service_id)). \
       join(Author, ServiceEvent.author_id == Author.id). \
-      join(Service, ServiceEvent.service_id == Service.id). \
       filter(and_(ServiceEvent.author_id == author_id,
                   ServiceEvent.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE,
                   ServiceEvent.service_id != data_access.service.name_to_id('me'))). \
       order_by(ServiceEvent.create_time.desc()):
 
-      album_obj = make_photo_album_obj(self.db_session, self.request, album, asm, author, service_name)
-      if album_obj:
-
-        cover_photo = None
-
-        if album.service_id == data_access.service.name_to_id('facebook'):
-          # get the cover photo
-          json_obj = load_string(album.json)
-          photo_id = json_obj.get('cover_photo')
-          if photo_id:
-            try:
-              photo, asm, author = self.db_session.query(ServiceEvent, AuthorServiceMap, Author). \
-                  join(AuthorServiceMap,
-                       and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                            ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-                  join(Author, ServiceEvent.author_id == Author.id). \
-                  join(Service, ServiceEvent.service_id == Service.id). \
-                  filter(and_(ServiceEvent.service_id ==
-                              data_access.service.name_to_id('facebook'),
-                              ServiceEvent.event_id == photo_id)).one()
-              cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author)
-            except NoResultFound:
-              pass
-
-        else:
-          # get the most recent photo for the cover photo
-          photo, asm, author = self.db_session.query(ServiceEvent, AuthorServiceMap, Author). \
-              join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                          ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-              join(Author, ServiceEvent.author_id == Author.id). \
-              filter(and_(ServiceEvent.author_id == author_id,
-                          ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-              order_by(ServiceEvent.create_time.desc()). \
-              first()
-
-          cover_photo = make_photo_obj(self.db_session, self.request, photo, asm, author)
-
-        if cover_photo:
-          album_obj['cover_photo'] = cover_photo
-
+      album_obj = createServiceEvent(self.db_session, self.request, album, asm, author)
+      if album_obj['post_type_detail']['photo-album']['photo_count'] > 0:
         albums.append(album_obj)
 
     # if only 2 albums exist and they contain the same number of photos remove the
     # first (which is the 'all photos' album)
-    if len(albums) == 2 and (albums[0]['count'] == albums[1]['count']):
+    if len(albums) == 2 and (albums[0]['post_type_detail']['photo-album']['photo_count'] == albums[1]['post_type_detail']['photo-album']['photo_count']):
       albums.pop(0)
 
-    return {'author_name': author_name, 'photo_albums': albums}
+    return {'author': get_tim_author_fragment(self.request, author_name),
+            'photo_albums': albums,
+            'paging': {'prev': None, 'next': None}}
