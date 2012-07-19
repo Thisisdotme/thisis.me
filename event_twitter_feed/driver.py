@@ -127,9 +127,15 @@ class EventTwitterFeedDriver(app_base.AppBase):
         body)
 
     def handle_response(response):
-      logging.info("Started Twitter stream for %s", data)
-      response.deliverBody(
-          TwitterStreamProtocol(handler))
+      if response.code == 200:
+        logging.info('Starting to listen for stream from: %s', data)
+        response.deliverBody(TwitterStreamProtocol(handler))
+      else:
+        logging.info(
+            'Got a bad response: %s, phrase: %s, for: %s',
+            response.code,
+            response.phrase,
+            data)
 
     d.addCallback(handle_response)
     d.addErrback(err)
@@ -165,7 +171,13 @@ class GroupTwitterHandler:
         None,
         None)
 
-    self.id_to_handler[interpreter.service_author_id()].handle(interpreter)
+    service_author_id = interpreter.service_author_id()
+    handler = self.id_to_handler.get(service_author_id, None)
+    if handler:
+      handler.handle(interpreter)
+    else:
+      logging.info('Skipping tweet by user %s because we do not have an author with that id',
+                   service_author_id)
 
 
 class TwitterHandler:
@@ -260,6 +272,8 @@ class TwitterStreamProtocol(LineReceiver):
   def connectionLost(self, reason):
     # TODO: restart connection on error
     logging.info('Finished receiving body: %s', reason.getErrorMessage())
+    logging.info('Data: %s', self.handler.list_of_twitter_ids())
+    logging.info(reason.getTraceback())
 
 
 class WebClientContextFactory(ClientContextFactory):
