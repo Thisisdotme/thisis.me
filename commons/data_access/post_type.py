@@ -27,7 +27,7 @@ def query_all_post_types():
 
 
 def mock_initialize():
-  for identifier, label in [(1, 'highlight'), (2, 'photo-album'), (3, 'photo')]:
+  for identifier, label in [(1, 'highlight'), (2, 'photo_album'), (3, 'photo')]:
     post_type = models.ServiceObjectType(identifier, label)
 
     id_to_post_type[post_type.type_id] = post_type

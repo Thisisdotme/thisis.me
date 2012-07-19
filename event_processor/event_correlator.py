@@ -8,7 +8,7 @@ import logging
 
 from tim_commons import normalize_uri, db, json_serializer
 from mi_schema import models
-import data_access.service
+from data_access import post_type, service
 
 
 def _correlate_event(event_json):
@@ -78,7 +78,7 @@ def correlate_and_update_event(event_json, service_event, me_service_id):
 
 def _create_json_from_correlations(uri, correlated_events, author):
   service_name = _service_name_from_uri(uri)
-  service = data_access.service.name_to_service.get(service_name)
+  service = service.name_to_service.get(service_name)
 
   sources = _create_shared_services(correlated_events)
 
@@ -92,7 +92,7 @@ def _create_json_from_correlations(uri, correlated_events, author):
       source_event = service_event
     elif source_event is None:
       source_event = service_event
-      service_name = data_access.service.id_to_service[service_event.service_id].service_name
+      service_name = service.id_to_service[service_event.service_id].service_name
 
     create_time = min(create_time, service_event.create_time)
     modify_time = max(modify_time, service_event.modify_time)
@@ -112,7 +112,7 @@ def _create_json_from_correlations(uri, correlated_events, author):
 
     author_info = _create_author_info(author)
 
-    event = {'type': models.ServiceObjectType.id_to_name[source_event.type_id],
+    event = {'type': post_type.id_to_label(source_event.type_id),
              'service': service_name,
              'create_time': calendar.timegm(create_time.timetuple()),
              'modify_time': calendar.timegm(modify_time.timetuple()),
@@ -131,7 +131,7 @@ def _create_photo_json(source_event):
   location = None
   images = []
 
-  if source_event.service_id == data_access.service.name_to_id('facebook'):
+  if source_event.service_id == service.name_to_id('facebook'):
     json_obj = json_serializer.load_string(source_event.json)
 
     # for some reason not all facebook photo events have an image property; if
@@ -150,7 +150,7 @@ def _create_photo_json(source_event):
 
       size_ordered_images[size] = image
 
-  elif source_event.service_id == data_access.service.name_to_id('instagram'):
+  elif source_event.service_id == service.name_to_id('instagram'):
     json_obj = json_serializer.load_string(source_event.json)
 
     for candidate in json_obj['images'].itervalues():
@@ -176,7 +176,7 @@ def _create_shared_services(correlated_events):
   sources = []
   for service_event in correlated_events:
     sources.append(
-        {'service_name': data_access.service.id_to_service[service_event.service_id].service_name})
+        {'service_name': service.id_to_service[service_event.service_id].service_name})
 
   return sources
 

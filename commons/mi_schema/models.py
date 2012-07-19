@@ -278,16 +278,6 @@ class ServiceObjectType(Base):
   VIDEO_ALBUM_TYPE = 8
   CORRELATION_TYPE = 9
 
-  id_to_name = {1: 'highlight',
-                2: 'photo-album',
-                3: 'photo',
-                4: 'checkin',
-                5: 'status',
-                6: 'follow',
-                7: 'video',
-                8: 'video-album',
-                9: 'correlation'}
-
   def __init__(self, type_id, label):
     self.type_id = type_id
     self.label = label
