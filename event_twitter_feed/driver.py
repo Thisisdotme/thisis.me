@@ -252,7 +252,10 @@ class TwitterStreamProtocol(LineReceiver):
 
   def lineReceived(self, line):
     if line:
-      self.handler.handle(json_serializer.load_string(line))
+      try:
+        self.handler.handle(json_serializer.load_string(line))
+      except:
+        logging.exception('Error handling twitter event: %s', line)
 
   def connectionLost(self, reason):
     # TODO: restart connection on error
