@@ -33,6 +33,8 @@ class EventTwitterFeedDriver(app_base.AppBase):
     # Grab twitter consumer keys
     self.consumer_key = config['oauth']['twitter']['key']
     self.consumer_secret = config['oauth']['twitter']['secret']
+    self.default_token_key = config['oauth']['twitter']['default_access_token']
+    self.default_token_secret = config['oauth']['twitter']['default_access_token_secret']
 
     # Grab feed configuration
     self.wait_on_collector_query_delay = float(config['feed']['wait_on_collector_query_delay'])
@@ -63,22 +65,33 @@ class EventTwitterFeedDriver(app_base.AppBase):
     reactor.run()
 
   def _handle_twitter_query_result(self, result_set):
+    users_without_oauth = []
     for twitter_user in result_set:
       # start a connection to twitter
       asm = _create_author_service_map(twitter_user)
-      self._handle_user(asm)
 
-  def _handle_user(self, asm):
-    if (asm.service_author_id not in self.user_ids and
-        asm.access_token and
-        asm.access_token_secret):
-      self.user_ids.add(asm.service_author_id)
-      handler = TwitterHandler(asm, self)
+      if (asm.access_token and
+          asm.access_token_secret):
+        self._handle_users(asm.access_token, asm.access_token_secret, [asm])
+      else:
+        users_without_oauth.append(asm)
 
-      self._listen_to_twitter(asm, handler)
+    self._handle_users(self.default_token_key, self.default_token_secret, users_without_oauth)
 
-      self._notify_event_collector(asm)
+  def _handle_users(self, token_key, token_secret, author_service_maps):
+    handlers = []
+    for asm in author_service_maps:
+      if (asm.service_author_id not in self.user_ids):
+        self.user_ids.add(asm.service_author_id)
+        handler = TwitterHandler(asm, self)
+        handlers.append(handler)
 
+    group_handler = GroupTwitterHandler(handlers, self)
+
+    self._listen_to_twitter(token_key, token_secret, group_handler)
+
+    for handler in handlers:
+      self._notify_event_collector(handler.author_service_map)
       handler.schedule_collector_done()
 
   def _notify_event_collector(self, asm):
@@ -87,14 +100,10 @@ class EventTwitterFeedDriver(app_base.AppBase):
     body = json_serializer.dump_string(notification)
     self.amqp.send_message(exchange='', routing_key=queue, msg=body)
 
-  def _listen_to_twitter(
-      self,
-      asm,
-      handler):
-
+  def _listen_to_twitter(self, token_key, token_secret, handler):
     method = 'POST'
     url = 'https://stream.twitter.com/1/statuses/filter.json'
-    data = {'follow': asm.service_author_id}
+    data = {'follow': ','.join(handler.list_of_twitter_ids())}
 
     headers = _sign_request(
         method=method,
@@ -102,8 +111,8 @@ class EventTwitterFeedDriver(app_base.AppBase):
         data=data,
         consumer_key=self.consumer_key,
         consumer_secret=self.consumer_secret,
-        token_key=asm.access_token,
-        token_secret=asm.access_token_secret)
+        token_key=token_key,
+        token_secret=token_secret)
     headers['Authorization'] = [headers['Authorization'].encode('ascii')]
     headers['Content-Type'] = ['application/x-www-form-urlencoded']
 
@@ -137,6 +146,28 @@ class EventTwitterFeedDriver(app_base.AppBase):
     deferred.addErrback(err)
 
 
+class GroupTwitterHandler:
+  def __init__(self, handlers, factory):
+    self.handlers = handlers
+    self.factory = factory
+
+    self.id_to_handler = {}
+    for handler in self.handlers:
+      self.id_to_handler[handler.author_service_map.service_author_id] = handler
+
+  def list_of_twitter_ids(self):
+    return [handler.author_service_map.service_author_id for handler in self.handlers]
+
+  def handle(self, tweet):
+    interpreter = event_interpreter.create_event_interpreter(
+        'twitter',
+        tweet,
+        None,
+        None)
+
+    self.id_to_handler[interpreter.service_author_id()].handle(interpreter)
+
+
 class TwitterHandler:
   def __init__(self, author_service_map, factory):
     self.author_service_map = author_service_map
@@ -146,20 +177,14 @@ class TwitterHandler:
     self.most_recent_event_id = None
     self.most_recent_event_timestamp = None
 
-  def handle(self, tweet):
-    interpreter = event_interpreter.create_event_interpreter(
-        'twitter',
-        tweet,
-        None,
-        None)
-
+  def handle(self, interpreted_tweet):
     event_message = messages.create_event_message(
         'twitter',
         self.author_service_map.author_id,
         messages.CURRENT_STATE,
         self.author_service_map.service_author_id,
-        interpreter.event_id(),
-        tweet,
+        interpreted_tweet.event_id(),
+        interpreted_tweet.json,
         [])
     self._send_message(event_message)
 
@@ -167,12 +192,12 @@ class TwitterHandler:
       self._update_database(
           self.author_service_map.id,
           datetime.datetime.utcnow(),
-          interpreter.event_id(),
-          interpreter.created_time())
+          interpreted_tweet.event_id(),
+          interpreted_tweet.created_time())
     else:
       self.last_update_time = datetime.datetime.utcnow()
-      self.most_recent_event_id = interpreter.event_id()
-      self.most_recent_event_timestamp = interpreter.created_time()
+      self.most_recent_event_id = interpreted_tweet.event_id()
+      self.most_recent_event_timestamp = interpreted_tweet.created_time()
 
   def _send_message(self, message):
     queue = message['header']['type']

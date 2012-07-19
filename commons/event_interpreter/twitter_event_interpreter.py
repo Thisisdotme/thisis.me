@@ -39,3 +39,6 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
         return normalize_uri(urls[0].get('expanded_url'))
 
     return None
+
+  def service_author_id(self):
+    return self.json['user']['id_str']
