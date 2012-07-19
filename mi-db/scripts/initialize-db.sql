@@ -11,10 +11,10 @@ INSERT INTO highlight_type (label) VALUES
 
 INSERT INTO service_object_type (label) VALUES
 	('highlight'),
-	('photo-album'),
+	('photo_album'),
 	('photo'),
 	('checkin'),
 	('status'),
 	('follow'),
 	('video'),
-	('video-album');
+	('video_album');

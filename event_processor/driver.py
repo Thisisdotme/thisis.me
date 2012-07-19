@@ -32,6 +32,7 @@ class EventProcessorDriver(app_base.AppBase):
     # initialize the db engine & session
     db.configure_session(db_url)
     data_access.service.initialize()
+    data_access.post_type.initialize()
 
     services = services_configuration(options.services, config)
 

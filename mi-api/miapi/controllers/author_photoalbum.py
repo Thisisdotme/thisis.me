@@ -44,7 +44,7 @@ class AuthorPhotoAlbumController(object):
       order_by(ServiceEvent.id):
 
       album_obj = createServiceEvent(self.db_session, self.request, album, asm, author)
-      if album_obj['post_type_detail']['photo-album']['photo_count'] > 0:
+      if album_obj['post_type_detail']['photo_album']['photo_count'] > 0:
         albums.append(album_obj)
 
     # get all other albums
@@ -59,12 +59,12 @@ class AuthorPhotoAlbumController(object):
       order_by(ServiceEvent.create_time.desc()):
 
       album_obj = createServiceEvent(self.db_session, self.request, album, asm, author)
-      if album_obj['post_type_detail']['photo-album']['photo_count'] > 0:
+      if album_obj['post_type_detail']['photo_album']['photo_count'] > 0:
         albums.append(album_obj)
 
     # if only 2 albums exist and they contain the same number of photos remove the
     # first (which is the 'all photos' album)
-    if len(albums) == 2 and (albums[0]['post_type_detail']['photo-album']['photo_count'] == albums[1]['post_type_detail']['photo-album']['photo_count']):
+    if len(albums) == 2 and (albums[0]['post_type_detail']['photo_album']['photo_count'] == albums[1]['post_type_detail']['photo_album']['photo_count']):
       albums.pop(0)
 
     return {'author': get_tim_author_fragment(self.request, author_name),
