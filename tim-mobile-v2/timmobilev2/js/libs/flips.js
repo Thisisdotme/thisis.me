@@ -17,7 +17,7 @@
  
 
 	var Flipset 			= function(options) {
-	
+	  
 		this.$el	= options.containerEl;  //should probably just pas in the id of the container dom element
 		this.containerElemId = this.$el.attr('id');
 		this.$el.html(''); //clear out the container
@@ -389,7 +389,9 @@
 		  var endY = 0;
 		  var distance = 0;
 		  
-		  this.flipHammer = new Hammer(document.getElementById("timeline"));
+		  //this.flipHammer = new Hammer();
+		  //alert(this.containerElemId);
+		  this.flipHammer = new Hammer(document.getElementById(this.containerElemId));
 		  
 		  //get container size if it hasn't been set...
 			if (_self.containerDimensions.height == 0) {

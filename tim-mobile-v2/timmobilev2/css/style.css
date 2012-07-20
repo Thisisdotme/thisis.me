@@ -737,13 +737,15 @@ body.splash {
   margin-right: 4px;
 }
 
+footer .service-icon { margin:0 3px;}
+
 /* make these sprites.... or inline base 64? */
-.photo-page footer .source-img.linkedIn {  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center }
-.photo-page footer .source-img.facebook {  background: transparent url(/img/icons/facebook_15.png) no-repeat center center }
-.photo-page footer .source-img.instagram {  background: transparent url(/img/icons/instagram_15.png) no-repeat center center }
-.photo-page footer .source-img.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
-.photo-page footer .source-img.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
-.photo-page footer .source-img.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
+footer .service-icon.linkedIn {  background: transparent url(/img/icons/linked_in_15.png) no-repeat center center }
+footer .service-icon.facebook {  background: transparent url(/img/icons/facebook_15.png) no-repeat center center }
+footer .service-icon.instagram {  background: transparent url(/img/icons/instagram_15.png) no-repeat center center }
+footer .service-icon.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
+footer .service-icon.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
+footer .service-icon.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
 #content-container .scroll-overlay .interaction-icons {  display: none }
 
 .photo-page .interaction-icons {
@@ -854,7 +856,7 @@ footer .info {
   padding-left: 5px;
   padding-right: 10px;
 }
-footer .info .author a {
+footer .author a, footer .author a:visited {
   font-weight: bold;
   color: #000;
   text-decoration: none;

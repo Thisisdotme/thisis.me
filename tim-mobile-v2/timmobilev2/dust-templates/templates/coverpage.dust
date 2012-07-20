@@ -1,7 +1,7 @@
 <div class="cover-page">
 	<div class="header"><span id="first-name">{first_name}</span><span id="last-name">{last_name}</span></div>
 	<section class="primary-story highlight" data-event_id="{primaryStory.event_id}">
-		<p class="pullquote"><a href="timeline/{primaryStory.event_id}">{primaryStory.content.data}</a></p>
+		<p class="pullquote"><a href="timeline/{primaryStory.id}">{primaryStory.headline}</a></p>
 	</section>
 	<div class="secondary-story highlight" data-event_id="{secondaryStory.event_id}">
 		{?secondaryStory.content.label}
