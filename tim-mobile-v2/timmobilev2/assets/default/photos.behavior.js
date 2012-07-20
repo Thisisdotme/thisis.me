@@ -466,7 +466,7 @@ the behavior for the photo feature
         console.log('rendering photo list view');
         if(!this.hasRendered) {
           this.renderFlipSet({
-            pageMetaData: {count:this.album.get('count')}
+            pageMetaData: {count:getAlbumCount(this.album)}
           });
           this.hasRendered = true;
           //this.toolbarView = new TIM.views.Toolbar();
@@ -811,6 +811,16 @@ the behavior for the photo feature
   //add to feature?
   TIM.features.getByName("photos").behavior = feature;
   TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging...
+  
+  function getAlbumCount(album) {
+    var count = 0;
+    try {
+      count = album.get('post_type_detail').photo_album.photo_count;
+    } catch (e) {
+      
+    }
+    return count;
+  }
     
   
 })(TIM);
