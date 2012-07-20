@@ -295,7 +295,7 @@ $(function() {
 	
 	$.fn.animationComplete = function( callback ) {
 		if( $.support.cssTransitions ) {
-			return $( this ).one( 'webkitAnimationEnd', callback );
+			return $( this ).on( 'webkitAnimationEnd', callback );
 		}
 		else{
 			// defer execution for consistency between webkit/non webkit
@@ -387,8 +387,8 @@ $(function() {
 	 
 	  var animationName = options.animationName || TIM.defaultTransition; //changed from slide
 	
-	  var inClasses = "active in " + animationName;
-	  var outClasses = "active out " + animationName;
+	  var inClasses = "active in " + animationName + " ";
+	  var outClasses = "active out " + animationName + " ";
 	  var transitions =  + TIM.getAvailableTransitions();
 	  if(options.reverse) {
 	    inClasses += " reverse ";
@@ -399,7 +399,7 @@ $(function() {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
 	    //should have an 'official' list of transitions to remove rather than hardcoding here
 	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).animationComplete(function() {
-	      $(this).removeClass(outClasses + transitions);
+	      fromPage.removeClass(outClasses + transitions);
 	      $('#app').removeClass('transitioning');
 	      TIM.setErrorShowing(false);
   	    TIM.setSplashScreen(false);
