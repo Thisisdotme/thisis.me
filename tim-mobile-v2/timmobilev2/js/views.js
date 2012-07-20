@@ -575,10 +575,11 @@ TIM.mixins.flipset = {
       var end = options.end || this.collection.length;
       
       this.collection.each(function(item, index) {
-			  
 			  if(index < start || index >= end) return; //return if out of range
 			  
 			  itemJSON = item.toJSON();
+			  
+			  console.log(itemJSON);
 			  		   
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
@@ -586,7 +587,7 @@ TIM.mixins.flipset = {
 			  //
 			  //shouldn't skip too many non-one-page events...
 			  
-				if(item.get('title') !== undefined || item.get("type") === "photo" || item.get("content").photo_url !== undefined) {
+				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
 				  //var template = item.get("type") === "photo" ? "photoPage" : self.pageTemplate;
 				  var template = self.pageTemplate;
 					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});

@@ -46,7 +46,6 @@
       events: {
         "tap .highlight" : "showHighlight",
         "tap a" : "linkClicked"
-        
       },
       
       hasRendered: false,
@@ -71,6 +70,8 @@
   				  -should we truncate, etc. here or in the template?
   				  -this is a good place for the jquery text sizer thingy?
   				*/
+  				console.log("collection: ", this.collection, this.collection.toJSON());
+  				window.c = this.collection;
   				var name = this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName;
   				//alert(name);
   				window.n = name;
@@ -79,8 +80,8 @@
   				  first_name: name.split(' ')[0],
   				  last_name: name.split(' ')[1] || '',
   				  primaryStory: this.collection.at(0) ? this.collection.at(0).toJSON() : [],
-  				  secondaryStory: [], //this.collection.at(1) ? this.collection.at(1).toJSON() : [],
-  				  tertiaryStory: [], //this.collection.at(2) ? this.collection.at(2).toJSON() : [],
+  				  secondaryStory: this.collection.at(1) ? this.collection.at(1).toJSON() : [],
+  				  tertiaryStory: this.collection.at(2) ? this.collection.at(2).toJSON() : [],
   				}
   				console.log ("cover story:", context.primaryStory);
   				//this pattern could probably be generalized to a basic TIM view
@@ -105,7 +106,7 @@
         //going to default to the timeline feature for now since we don't know if it's a highlight or photo or regular event, etc.
         event.preventDefault();
         event.stopPropagation();
-        
+            
         if($(event.currentTarget).tagName == "a" || $(event.relatedTarget).tagName == "a") {
           return;
         }

@@ -2,7 +2,7 @@
   <div class="toolbar"><span class="grid-link" data-toolbar-item="grid-link"/><span class="detail-link" data-toolbar-item="detail-link"/><h1>{num} of {options.pageMetaData.count}</h1></div>
 	{#events}
 	  {#main_image}
-	    <div class="full-photo" style="background-image:url({url})" data-photo_id="{id}"/>
+	    <div class="full-photo" style="background-image:url({image_url})" data-photo_id="{id}"/>
 	  {/main_image}
 		<!-- img class="image" src="{url}" data-photo_id="{id}" / -->
 		{>_eventFooter/}

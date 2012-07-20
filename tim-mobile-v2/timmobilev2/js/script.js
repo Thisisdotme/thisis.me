@@ -215,20 +215,39 @@ $(function() {
     	//move these to backbone views?
     	//make sure we have tap event
     	
-    	$('#nav-toggle').on('click', (function(event){
+    	$('#nav-toggle').on('tap', (function(event){
+    	  console.log("TAPPED!", event);
     	  event.preventDefault();
     	  event.stopPropagation();
     	  $('#app').toggleClass('nav-open');
     	}));
     	
-    	$('#app').on('click', (function(event){
+    	$('#nav-toggle').on('click', (function(event){
+    	  event.preventDefault();
+    	  event.stopPropagation();
+    	}));
+    	
+    	$('#app').on('tap', (function(event){
+    	  //alert('tap 1');
+    	  console.log("GENERIC TAP EVENT: ", event);
     	  event.preventDefault();
     	}))
     	
-    	$('#app').on('click', 'a', function(event) {
-    	  event.preventDefault();
+    	
+    	$('#app').on('tap', 'a', function(event) {
+    	   event.preventDefault();
+      	  event.stopPropagation();
     	  TIM.handleLinkClick(event);
     	})
+    	
+    
+    	/*
+    	$('#app').on('click', 'a', function(event) {
+    	 // alert('click!!');
+    	  event.preventDefault();
+    	  event.stopPropagation();
+    	  TIM.handleLinkClick(event);
+    	}) */
     },
   
     //should probably pass an option here of whether to 'activate' the feature
@@ -422,5 +441,7 @@ $(function() {
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
 	  TIM.app.navigate(url, {trigger: true});
 	}
+	
+	TIM.globalHammer = new Hammer(document.body);
 	
 });

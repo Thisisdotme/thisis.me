@@ -1,21 +1,21 @@
 
-{#content}
+
  <div class="content">
-		{?photo_url}
+		{?photo}
 		   	<div class="inner-image">
-				<img src='{photo_url}' />
+				<img src='{photo.image_url}' />
 			</div>
 		{:else}
-		{/photo_url}
+		{/photo}
      <div class="inner-text">
-  	    {?label}
-  	     <p>{label}</p>
-  	    {/label}
-  	    {?data}
-  	     <p>{data}</p>
-  	    {/label}
+  	    {?headline}
+  	     <p>{headline}</p>
+  	    {/headline}
+  	    {?content}
+  	     <p>{content}</p>
+  	    {/content}
      </div>
   </div>
-{/content}
+
 {>_eventFooter/}
   

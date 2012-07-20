@@ -48,8 +48,10 @@ the behavior for the photo feature
   		  //this will be more intelligent in the future
   		  _.each(resp.photo_albums, function(album) {
   		    console.log('album: ', album);
-  		    album.cover_photo.thumb_image = album.cover_photo.images[0];
-  		    album.cover_photo.main_image = album.cover_photo.images[album.cover_photo.images.length-1];
+  		    album.headline = album.headline || 'Untitled Album';
+  		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
+  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[0];
+  		    album.main_image = cover_photo[cover_photo.length-1];
   		  });
   		  return (resp.photo_albums);
   		}
@@ -102,9 +104,14 @@ the behavior for the photo feature
   		parse: function(resp) {
   		  //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		  //this will be more intelligent in the future - making decisions based on image size metadata
+  		  console.log("photos in album:", resp.photos);
   		  _.each(resp.photos, function(photo) {
-  		    photo.thumb_image = photo.images[0];
-  		    photo.main_image = photo.images[photo.images.length-1];
+  		    //photo.thumb_image = photo.images[0];
+  		    //photo.main_image = photo.images[photo.images.length-1];
+  		    
+  		    photo.thumb_image = photo.post_type_detail.photo[0];
+    		  photo.main_image = photo.post_type_detail.photo[photo.post_type_detail.photo.length - 1]; //photo.images[photo.images.length-1];
+  		    
   		  });
   		  return (resp.photos);
   		  
@@ -120,7 +127,7 @@ the behavior for the photo feature
 
   });
   
-  //the 'home view' for the photos feature - a list of the author's photo albums
+  //the 'home view' for the photos feature - a list of the author's photo albums 
   TIM.views.PhotoAlbumList = Backbone.View.extend( {
       id: "photo-albums",
       className: "app-page photo-feature",
@@ -135,6 +142,7 @@ the behavior for the photo feature
 
   		events: {
   		  "tap .album": "showGridView"
+  		  //"click .album": "showGridView"
   		},
 
 
@@ -142,8 +150,9 @@ the behavior for the photo feature
         var that = this;
 
         var albums = this.collection.toJSON();
+        console.log('albums: ', albums);
         var templateContext = {
-                                "albums": albums
+                                "photo_albums": albums
         };
         
         var html = TIM.views.renderTemplate(this.template, templateContext);
@@ -217,7 +226,9 @@ the behavior for the photo feature
 
   		events: {
   		  "tap .thumb": "showFlipView",
-  		  "tap .grid-link": "showAlbumView",
+  		  //"tap .grid-link": "showAlbumView",
+  		  //"click .thumb": "showFlipView",
+    		"click .grid-link": "showAlbumView",
   			"swiperight" : "showAlbumView"
   		},
   		
@@ -248,6 +259,7 @@ the behavior for the photo feature
   			
   			var html = TIM.views.renderTemplate(this.template, templateContext);
     		this.$el.append(html);
+    		
   			
   			//if there's an existing iscroll element, destroy it!
   			if (this.iScrollElem) {
@@ -329,7 +341,8 @@ the behavior for the photo feature
           chunkSize = chunkSize || this.chunkSize;
           
           //only render up to the album's count size!
-          var numLeft = this.album.get('count') - this.numRendered;
+          var count = this.album.get('post_type_detail').photo_album.photo_count;
+          var numLeft = count - this.numRendered;
           if(numLeft <= 0) {
             console.log('no more to render');
             this.$el.find('.loading').html('---');
@@ -437,10 +450,12 @@ the behavior for the photo feature
       
       events: {
     			//"tap .detail-link" : "toggleMode",
+    			//"tap .grid-link" : "showGridView",
     			"tap .grid-link" : "showGridView",
     			//"tap .full-photo" : "toggleMode",
-    			"click .interaction-icons .comments" : "showComments",
-    			"click .interaction-icons .location" : "showLocation",
+    			"tap .interaction-icons .comments" : "showComments",
+    			"tap .interaction-icons .location" : "showLocation",
+    			//"tap .interaction-icons" : "interactionIconsClicked",
     			"tap .interaction-icons" : "interactionIconsClicked",
     			"swiperight" : "showGridView",
     			
@@ -451,7 +466,7 @@ the behavior for the photo feature
         console.log('rendering photo list view');
         if(!this.hasRendered) {
           this.renderFlipSet({
-            pageMetaData: {count:this.album.get('count')}
+            pageMetaData: {count:getAlbumCount(this.album)}
           });
           this.hasRendered = true;
           //this.toolbarView = new TIM.views.Toolbar();
@@ -796,6 +811,16 @@ the behavior for the photo feature
   //add to feature?
   TIM.features.getByName("photos").behavior = feature;
   TIM.loadedFeatures["photos"] = feature; //this is mainly a shorthand for console debugging...
+  
+  function getAlbumCount(album) {
+    var count = 0;
+    try {
+      count = album.get('post_type_detail').photo_album.photo_count;
+    } catch (e) {
+      
+    }
+    return count;
+  }
     
   
 })(TIM);
