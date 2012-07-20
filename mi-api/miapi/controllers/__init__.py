@@ -51,7 +51,7 @@ def get_tim_author_fragment(request, author_name):
   author_obj = {'service_name': 'me',
                 'id': author.id,
                 'name': author.author_name,
-                'full_nane': author.full_name}
+                'full_name': author.full_name}
 
   author_obj['picture'] = get_profile_image_fragment(request, asm)
 
