@@ -4,7 +4,7 @@ from mi_schema.models import Service, Author, AuthorServiceMap
 from profile_fetchers import profile_fetcher
 from tim_commons import db
 from miapi import oauth_config
-import data_access.service
+from data_access import service
 
 
 class ServiceProfileController(object):
@@ -39,10 +39,9 @@ class ServiceProfileController(object):
 
     profile_json = None
 
-    for service_id in data_access.service.id_to_service.iterkeys():
-      asm = mappings.get(service_id)
+    for service_name in ['linkedin', 'facebook', 'googleplus', 'twitter', 'instagram', 'foursquare']:
+      asm = mappings.get(service.name_to_service[service_name].id)
       if asm:
-        service_name = data_access.service.id_to_service[service_id].service_name
         fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
         profile_json = fetcher.get_author_profile(asm.service_author_id, asm)
         break
