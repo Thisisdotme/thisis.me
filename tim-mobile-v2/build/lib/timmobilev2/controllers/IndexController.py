@@ -7,7 +7,7 @@ import logging
 
 from pyramid.view import view_config
 
-from timmobilev2.models import DBSession
+from tim_commons import db
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class IndexController(object):
   '''
   def __init__(self, request):
     self.request = request
-    self.dbSession = DBSession()
+    self.dbSession = db.Session()
 
   @view_config(route_name='index', request_method='GET', renderer='timmobilev2:templates/index.pt')
   def requestHandler(self):

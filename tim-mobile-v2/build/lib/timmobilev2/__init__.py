@@ -1,25 +1,35 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from mi_utils.oauth import load_oauth_config
+from tim_commons.config import load_configuration
+from tim_commons import db
 
-from .models import DBSession
+# dictionary that holds all configuration merged from multple sources
+tim_config = {}
 
-# object created from JSON file that stores oAuth configuration for social features
-oAuthConfig = None
+# object created from JSON file that stores oAuth configuration for social services
+oauth_config = {}
+
 
 def main(global_config, **settings):
 
   """ This function returns a Pyramid WSGI application.
   """
-  
-  engine = engine_from_config(settings, 'sqlalchemy.')
-  DBSession.configure(bind=engine)
-  
-  # load the oauth configuration settings
-  global oAuthConfig
-  oAuthConfig = load_oauth_config(settings['mi.oauthkey_file'])
-  
+  """ Setup the config
+  """
+  global tim_config
+  tim_config = load_configuration('{TIM_CONFIG}/config.ini')
+
+  """ Setup the database
+  """
+  db_url = db.create_url_from_config(tim_config['db'])
+  db.configure_session(db_url)
+
+  """ load the oauth configuration settings
+  """
+  global oauth_config
+  oauth_config = tim_config['oauth']
+
   config = Configurator(settings=settings)
 
   config.add_static_view('img', 'timmobilev2:img', cache_max_age=0)
@@ -33,4 +43,3 @@ def main(global_config, **settings):
   config.scan()
 
   return config.make_wsgi_app()
-  

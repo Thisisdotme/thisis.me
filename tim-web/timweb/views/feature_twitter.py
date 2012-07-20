@@ -13,7 +13,7 @@ from pyramid.security import authenticated_userid
 from tim_commons.oauth import make_request
 from tim_commons.request_with_method import RequestWithMethod
 
-from timweb import oAuthConfig
+from timweb import oauth_config
 
 log = logging.getLogger(__name__)
 
@@ -49,8 +49,8 @@ def get_twitter(request):
 @view_config(route_name='twitter', request_method='POST', permission='author')
 def post_twitter(request):
 
-  consumer_key = oAuthConfig[FEATURE]['key']
-  consumer_secret = oAuthConfig[FEATURE]['secret']
+  consumer_key = oauth_config[FEATURE]['key']
+  consumer_secret = oauth_config[FEATURE]['secret']
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   client = oauth.Client(consumer)
   
@@ -59,7 +59,7 @@ def post_twitter(request):
   # said access token.
 
   callback = request.route_url('twitter_callback')
-  resp, content = client.request(oAuthConfig[FEATURE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback':callback}))
+  resp, content = client.request(oauth_config[FEATURE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback':callback}))
   if resp['status'] != '200':
       raise Exception("Invalid response %s (%s)." % (resp['status'], content))
   
@@ -77,7 +77,7 @@ def post_twitter(request):
 
   request.session['oauth_token_secret'] = request_token['oauth_token_secret']
 
-  redirectURL = "%s?oauth_token=%s" % (oAuthConfig[FEATURE]['authorize_url'], request_token['oauth_token'])
+  redirectURL = "%s?oauth_token=%s" % (oauth_config[FEATURE]['authorize_url'], request_token['oauth_token'])
   
   return HTTPFound(location=redirectURL)
 
@@ -96,15 +96,15 @@ def twitter_callback(request):
   # request token to sign this request. After this is done you throw away the                                                                                                              
   # request token and use the access token returned. You should store this                                                                                                                 
   # access token somewhere safe, like a database, for future use.                                                                                                                          
-  consumer_key = oAuthConfig[FEATURE]['key']
-  consumer_secret = oAuthConfig[FEATURE]['secret']
+  consumer_key = oauth_config[FEATURE]['key']
+  consumer_secret = oauth_config[FEATURE]['secret']
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   token = oauth.Token(oauth_token,oauth_token_secret)
   client = oauth.Client(consumer, token)
 
   token.set_verifier(oauth_verifier)
 
-  resp, content = client.request(oAuthConfig[FEATURE]['access_token_url'], "POST")
+  resp, content = client.request(oauth_config[FEATURE]['access_token_url'], "POST")
   access_token = dict(urlparse.parse_qsl(content))
 
   # these are the real deal and need to be stored securely in the DB                                                                                                                       

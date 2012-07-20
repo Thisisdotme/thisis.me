@@ -11,7 +11,7 @@ from pyramid.security import authenticated_userid
 from tim_commons.request_with_method import RequestWithMethod
 
 from timweb.exceptions import UnexpectedAPIResponse, GenericError
-from timweb import oAuthConfig
+from timweb import oauth_config
 
 log = logging.getLogger(__name__)
 
@@ -44,13 +44,13 @@ def get_googlePlus_info(request):
   userId = resJSON['auxillary_data']['id']
 
   # let's exchange the refresh token for an access token 
-  apiKey = oAuthConfig[FEATURE]['key']
-  apiSecret = oAuthConfig[FEATURE]['secret']
+  apiKey = oauth_config[FEATURE]['key']
+  apiSecret = oauth_config[FEATURE]['secret']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('client_secret',apiSecret),
                                 ('refresh_token',refreshToken),
                                 ('grant_type','refresh_token')])
-  req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs) 
+  req = urllib2.Request(oauth_config[FEATURE]['oauth_exchange_url'],queryArgs) 
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 
@@ -114,10 +114,10 @@ def get_googlePlus(request):
 @view_config(route_name='googleplus', request_method='POST', permission='author')
 def post_googlePlus(request):
 
-  apiKey = oAuthConfig[FEATURE]['key']
+  apiKey = oauth_config[FEATURE]['key']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('redirect_uri',request.route_url('googleplus_callback'))])
-  url = oAuthConfig[FEATURE]['oauth_url'] + queryArgs
+  url = oauth_config[FEATURE]['oauth_url'] + queryArgs
 
   log.info('Redirecting user to Google to get authorization code')
 
@@ -137,14 +137,14 @@ def googlePlus_callback(request):
     print 'code => %s' % code
 
     # let's exchange the authorization code for an access token and a refresh token
-    apiKey = oAuthConfig[FEATURE]['key']
-    apiSecret = oAuthConfig[FEATURE]['secret']
+    apiKey = oauth_config[FEATURE]['key']
+    apiSecret = oauth_config[FEATURE]['secret']
     queryArgs = urllib.urlencode([('code',code),
                                   ('client_id',apiKey),
                                   ('client_secret',apiSecret),
                                   ('redirect_uri',request.route_url('googleplus_callback')),
                                   ('grant_type','authorization_code')])
-    req = urllib2.Request(oAuthConfig[FEATURE]['oauth_exchange_url'],queryArgs) 
+    req = urllib2.Request(oauth_config[FEATURE]['oauth_exchange_url'],queryArgs) 
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
 

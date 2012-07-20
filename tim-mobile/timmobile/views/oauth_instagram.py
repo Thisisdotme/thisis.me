@@ -10,11 +10,11 @@ from pyramid.security import authenticated_userid
 
 from instagram import client
 
-from mi_url.RequestWithMethod import RequestWithMethod
+from tim_commons.request_with_method import RequestWithMethod
 
 from timmobile.exceptions import GenericError
 from timmobile.exceptions import UnexpectedAPIResponse
-from timmobile import oAuthConfig
+from timmobile import oauth_config
 from timmobile.globals import DBSession
 
 # ??? TODO - these need to come from somewhere else
@@ -52,8 +52,8 @@ def get_instagram(request):
 @view_config(route_name='instagram', request_method='POST', permission='author')
 def post_instagram(request):
   
-  config = {'client_id': oAuthConfig[FEATURE]['key'],
-            'client_secret': oAuthConfig[FEATURE]['secret'],
+  config = {'client_id': oauth_config[FEATURE]['key'],
+            'client_secret': oauth_config[FEATURE]['secret'],
             'redirect_uri': request.route_url('instagram_callback') }
    
   unauthenticated_api = client.InstagramAPI(**config)
@@ -75,8 +75,8 @@ def instagram_callback(request):
   # Get author's login name
   authorName = authenticated_userid(request)
   
-  config = {'client_id': oAuthConfig[FEATURE]['key'],
-            'client_secret': oAuthConfig[FEATURE]['secret'],
+  config = {'client_id': oauth_config[FEATURE]['key'],
+            'client_secret': oauth_config[FEATURE]['secret'],
             'redirect_uri': request.route_url('instagram_callback') }
 
   unauthenticated_api = client.InstagramAPI(**config)
@@ -88,7 +88,7 @@ def instagram_callback(request):
     raise GenericError('no access_token returned from Instagram when exchanging code for access_token')
 
   # get the author's instagram user id
-  url = '%s%s?%s' % (oAuthConfig[FEATURE]['endpoint'], 'users/self', urllib.urlencode({'access_token': access_token}))
+  url = '%s%s?%s' % (oauth_config[FEATURE]['endpoint'], 'users/self', urllib.urlencode({'access_token': access_token}))
   req = urllib2.Request(url)
   res = urllib2.urlopen(req)
   rawJSON = json.loads(res.read())

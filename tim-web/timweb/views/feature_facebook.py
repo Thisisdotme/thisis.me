@@ -12,7 +12,7 @@ from pyramid.security import authenticated_userid
 from tim_commons.request_with_method import RequestWithMethod
 
 from timweb.exceptions import UnexpectedAPIResponse, GenericError
-from timweb import oAuthConfig
+from timweb import oauth_config
 
 log = logging.getLogger(__name__)
 
@@ -103,12 +103,12 @@ def get_facebook(request):
 @view_config(route_name='facebook', request_method='POST', permission='author')
 def post_facebook(request):
 
-  api_key = oAuthConfig[FEATURE]['key']
+  api_key = oauth_config[FEATURE]['key']
   queryArgs = urllib.urlencode([('client_id',api_key),
                                 ('redirect_uri',request.route_url('facebook_callback')),
                                 ('scope','offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status')])
   
-  url = oAuthConfig[FEATURE]['oauth_url'] % queryArgs
+  url = oauth_config[FEATURE]['oauth_url'] % queryArgs
 
   log.info('Redirecting user to Facebook to get authorization code')
 
@@ -131,15 +131,15 @@ def facebook_callback(request):
     print 'code => %s' % code
     
     # let's get the acces_token
-    api_key = oAuthConfig[FEATURE]['key']
-    api_secret = oAuthConfig[FEATURE]['secret']
+    api_key = oauth_config[FEATURE]['key']
+    api_secret = oauth_config[FEATURE]['secret']
 
     queryArgs = urllib.urlencode([('client_id',api_key),
                                   ('redirect_uri',request.route_url('facebook_callback')),
                                   ('client_secret',api_secret),
                                   ('code',code)])
     
-    url = oAuthConfig[FEATURE]['access_token_url'] % queryArgs
+    url = oauth_config[FEATURE]['access_token_url'] % queryArgs
 
     try:
       req = urllib2.Request(url)
@@ -153,7 +153,7 @@ def facebook_callback(request):
       raise e
     
     # now let's get some information about the user -- namely their id
-    req = urllib2.Request(oAuthConfig[FEATURE]['url'] % ('me',fbAccessToken))
+    req = urllib2.Request(oauth_config[FEATURE]['url'] % ('me',fbAccessToken))
     res = urllib2.urlopen(req)
     meJSON = json.loads(res.read())
 
@@ -205,7 +205,7 @@ def facebook_confirmation(request):
       posts.append('<p>%s (Created: %s)</p>' % (title,timestamp.isoformat()))
 #
 #    # /me/posts
-#    req = urllib2.Request(oAuthConfig[FEATURE]['url'] % ('me/posts',access_token))
+#    req = urllib2.Request(oauth_config[FEATURE]['url'] % ('me/posts',access_token))
 #    res = urllib2.urlopen(req)
 #    postsJSON = json.loads(res.read())
 #
@@ -216,7 +216,7 @@ def facebook_confirmation(request):
 #          posts.append('<p>%s</p>' % post['story'])          
 #
 #    # /me/events
-#    req = urllib2.Request(oAuthConfig[FEATURE]['url'] % ('me/events',access_token))
+#    req = urllib2.Request(oauth_config[FEATURE]['url'] % ('me/events',access_token))
 #    res = urllib2.urlopen(req)
 #    postsJSON = json.loads(res.read())
 #

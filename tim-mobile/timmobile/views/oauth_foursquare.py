@@ -8,10 +8,10 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 
-from mi_url.RequestWithMethod import RequestWithMethod
+from tim_commons.request_with_method import RequestWithMethod
 
 from timmobile.exceptions import UnexpectedAPIResponse, GenericError
-from timmobile import oAuthConfig
+from timmobile import oauth_config
 from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
@@ -116,12 +116,12 @@ class FoursquareView(object):
   @view_config(route_name='foursquare', request_method='POST', permission='author')
   def post(self):
   
-    api_key = oAuthConfig[self.featureName]['key']
+    api_key = oauth_config[self.featureName]['key']
     queryArgs = urllib.urlencode([('client_id',api_key),
                                   ('response_type','code'),
                                   ('redirect_uri',self.request.route_url('foursquare_callback'))])
     
-    url = oAuthConfig[self.featureName]['oauth_url'] % queryArgs
+    url = oauth_config[self.featureName]['oauth_url'] % queryArgs
   
     log.info('Redirecting user to Foursquare to get authorization code')
   
@@ -144,8 +144,8 @@ class FoursquareView(object):
       print 'code => %s' % code
       
       # let's get the acces_token
-      api_key = oAuthConfig[self.featureName]['key']
-      api_secret = oAuthConfig[self.featureName]['secret']
+      api_key = oauth_config[self.featureName]['key']
+      api_secret = oauth_config[self.featureName]['secret']
   
       queryArgs = urllib.urlencode([('client_id',api_key),
                                     ('client_secret',api_secret),
@@ -153,7 +153,7 @@ class FoursquareView(object):
                                     ('redirect_uri',self.request.route_url('foursquare_callback')),
                                     ('code',code)])
       
-      url = oAuthConfig[self.featureName]['access_token_url'] % queryArgs
+      url = oauth_config[self.featureName]['access_token_url'] % queryArgs
   
       try:
         req = urllib2.Request(url)
@@ -167,7 +167,7 @@ class FoursquareView(object):
         raise e
       
       # now let's get some information about the user -- namely their id
-      req = urllib2.Request(oAuthConfig[self.featureName]['url'] % ('users/self',accessToken))
+      req = urllib2.Request(oauth_config[self.featureName]['url'] % ('users/self',accessToken))
       res = urllib2.urlopen(req)
       meJSON = json.loads(res.read())
   

@@ -6,5 +6,5 @@ from sqlalchemy.orm import (
     sessionmaker,
     )
 
-DBSession = scoped_session(sessionmaker())
-Base = declarative_base()
+DBSessionXX = scoped_session(sessionmaker())
+BaseXX = declarative_base()

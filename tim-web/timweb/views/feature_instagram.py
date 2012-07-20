@@ -13,7 +13,7 @@ from tim_commons.request_with_method import RequestWithMethod
 
 from timweb.exceptions import GenericError
 from timweb.exceptions import UnexpectedAPIResponse
-from timweb import oAuthConfig
+from timweb import oauth_config
 
 # ??? TODO - these need to come from somewhere else
 FEATURE = 'instagram'
@@ -48,8 +48,8 @@ def get_instagram(request):
 @view_config(route_name='instagram', request_method='POST', permission='author')
 def post_instagram(request):
   
-  config = {'client_id': oAuthConfig[FEATURE]['key'],
-            'client_secret': oAuthConfig[FEATURE]['secret'],
+  config = {'client_id': oauth_config[FEATURE]['key'],
+            'client_secret': oauth_config[FEATURE]['secret'],
             'redirect_uri': request.route_url('instagram_callback') }
    
   unauthenticated_api = client.InstagramAPI(**config)
@@ -71,8 +71,8 @@ def instagram_callback(request):
   # Get author's login name
   authorName = authenticated_userid(request)
   
-  config = {'client_id': oAuthConfig[FEATURE]['key'],
-            'client_secret': oAuthConfig[FEATURE]['secret'],
+  config = {'client_id': oauth_config[FEATURE]['key'],
+            'client_secret': oauth_config[FEATURE]['secret'],
             'redirect_uri': request.route_url('instagram_callback') }
 
   unauthenticated_api = client.InstagramAPI(**config)

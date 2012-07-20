@@ -8,7 +8,6 @@ from tim_commons import db
 from mi_schema import models
 from data_access import service, post_type
 
-
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
 
@@ -31,7 +30,8 @@ def main(global_config, **settings):
   db_url = db.create_url_from_config(tim_config['db'])
   db.configure_session(db_url)
 
-  # load the oauth configuration settings
+  """ load the oauth configuration settings
+  """
   global oauth_config
   oauth_config = tim_config['oauth']
 

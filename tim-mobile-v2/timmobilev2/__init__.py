@@ -1,14 +1,14 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
+from tim_commons import db
 from tim_commons.config import load_configuration
-from .models import DBSession
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
 
-# object created from JSON file that stores oAuth configuration for social features
-oAuthConfig = None
+# object created from JSON file that stores oAuth configuration for social services
+oauth_config = {}
 
 
 def main(global_config, **settings):
@@ -21,13 +21,15 @@ def main(global_config, **settings):
   global tim_config
   tim_config = load_configuration('{TIM_CONFIG}/config.ini')
 
-  """ set the oauth configuration settings
+  """ Setup the database
   """
-  global oAuthConfig
-  oAuthConfig = tim_config['oauth']
+  db_url = db.create_url_from_config(tim_config['db'])
+  db.configure_session(db_url)
 
-  engine = engine_from_config(settings, 'sqlalchemy.')
-  DBSession.configure(bind=engine)
+  """ load the oauth configuration settings
+  """
+  global oauth_config
+  oauth_config = tim_config['oauth']
 
   config = Configurator(settings=settings)
 

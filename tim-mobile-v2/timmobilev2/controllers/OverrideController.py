@@ -13,9 +13,9 @@ from pyramid.httpexceptions import HTTPNotFound
 
 from sqlalchemy.orm.exc import NoResultFound
 
+from tim_commons import db
 from mi_schema.models import Author
 
-from timmobilev2.models import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class OverrideController(object):
 
   def __init__(self, request):
     self.request = request
-    self.db_session = DBSession()
+    self.db_session = db.Session()
 
   @view_config(route_name='resource.any', request_method='GET', http_cache=0)
   def OverrideResourceHandler(self):

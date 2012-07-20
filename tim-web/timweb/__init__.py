@@ -13,7 +13,7 @@ from timweb.models import initialize_sql
 from timweb.security import groupfinder
 
 # object created from JSON file that stores oAuth configuration for social features
-oAuthConfig = None
+oauth_config = None
 
 def main(global_config, **settings):
   
@@ -30,8 +30,8 @@ def main(global_config, **settings):
   initialize_sql(engine)
 
   # load the oauth configuration settings
-  global oAuthConfig
-  oAuthConfig = tim_config['oauth']
+  global oauth_config
+  oauth_config = tim_config['oauth']
 
   authn_policy = AuthTktAuthenticationPolicy('tim_secret', callback=groupfinder, timeout=1800, reissue_time=180, max_age=1800, debug=True)
   authz_policy = ACLAuthorizationPolicy()

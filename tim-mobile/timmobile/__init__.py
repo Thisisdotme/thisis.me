@@ -11,8 +11,11 @@ from tim_commons.config import load_configuration
 from models import initialize_sql
 from security import groupfinder
 
-# object created from JSON file that stores oAuth configuration for social features
-oAuthConfig = None
+# dictionary that holds all configuration merged from multple sources
+tim_config = {}
+
+# object created from JSON file that stores oAuth configuration for social services
+oauth_config = {}
 
 
 def main(global_config, **settings):
@@ -23,8 +26,8 @@ def main(global_config, **settings):
   tim_config = load_configuration('{TIM_CONFIG}/config.ini')
 
   # load the oauth configuration settings
-  global oAuthConfig
-  oAuthConfig = tim_config['oauth']
+  global oauth_config
+  oauth_config = tim_config['oauth']
 
   """ This function returns a Pyramid WSGI application.
   """
@@ -34,7 +37,7 @@ def main(global_config, **settings):
   authn_policy = AuthTktAuthenticationPolicy('tim_secret', callback=groupfinder, timeout=1800, reissue_time=180, max_age=1800, debug=True)
   authz_policy = ACLAuthorizationPolicy()
 
-  session_factory = pyramid_beaker.session_factory_from_settings(settings) 
+  session_factory = pyramid_beaker.session_factory_from_settings(settings)
 
   config = Configurator(settings=settings,
                         root_factory='timmobile.context.RootFactory',
@@ -58,49 +61,48 @@ def main(global_config, **settings):
   config.add_route('accounts', '/accounts')
   config.add_route('account_details', '/accounts/{featurename}')
   config.add_route('newsfeed', '/newsfeed')
-  
+
   config.add_route('timeline', '/{authorname}/timeline')
-  
+
   config.add_route('profile', '/{authorname}/profile')
   config.add_route('followers', '/followers')
-  
+
   #
   # oauth setup paths
   #
 
   # twitter oauth
-  config.add_route('twitter','/oauth/twitter')
+  config.add_route('twitter', '/oauth/twitter')
   config.add_route('twitter_callback', '/oauth/twitter/callback')
 
   # facebook auth
-  config.add_route('facebook','/oauth/facebook')
+  config.add_route('facebook', '/oauth/facebook')
   config.add_route('facebook_callback', '/oauth/facebook/callback')
-  
+
   # linkedin auth
-  config.add_route('linkedin','/oauth/linkedin')
+  config.add_route('linkedin', '/oauth/linkedin')
   config.add_route('linkedin_callback', '/oauth/linkedin/callback')
- 
+
   # google+ auth
-  config.add_route('googleplus','/oauth/googleplus')
+  config.add_route('googleplus', '/oauth/googleplus')
   config.add_route('googleplus_callback', '/oauth/googleplus/callback')
 
   # instagram auth
-  config.add_route('instagram','/oauth/instagram')
+  config.add_route('instagram', '/oauth/instagram')
   config.add_route('instagram_callback', '/oauth/instagram/callback')
 
   # flickr auth
-  config.add_route('flickr','/oauth/flickr')
+  config.add_route('flickr', '/oauth/flickr')
   config.add_route('flickr_callback', '/oauth/flickr/callback')
 
   # foursquare auth
-  config.add_route('foursquare','/oauth/foursquare')
+  config.add_route('foursquare', '/oauth/foursquare')
   config.add_route('foursquare_callback', '/oauth/foursquare/callback')
-  
+
   # generic oauth
-  config.add_route('oauth','/oauth/{featurename}')
+  config.add_route('oauth', '/oauth/{featurename}')
   config.add_route('oauth_callback', '/oauth/{featurename}/callback')
-  
+
   config.scan()
 
   return config.make_wsgi_app()
-
