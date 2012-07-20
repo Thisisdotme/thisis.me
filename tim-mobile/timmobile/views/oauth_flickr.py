@@ -11,7 +11,7 @@ from timmobile.exceptions import UnexpectedAPIResponse
 
 import flickrapi
 
-from mi_url.RequestWithMethod import RequestWithMethod
+from tim_commons.request_with_method import RequestWithMethod
 from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
