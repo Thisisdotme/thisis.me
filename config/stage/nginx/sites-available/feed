@@ -9,7 +9,6 @@ server {
   location / {
       uwsgi_pass      unix:///tmp/event-feed.sock;
       include         uwsgi_params;
-      uwsgi_param     SCRIPT_NAME /;
   }
 }
 
@@ -22,6 +21,5 @@ server {
   location / {
       uwsgi_pass      unix:///tmp/event-feed.sock;
       include         uwsgi_params;
-      uwsgi_param     SCRIPT_NAME /;
   }
 }

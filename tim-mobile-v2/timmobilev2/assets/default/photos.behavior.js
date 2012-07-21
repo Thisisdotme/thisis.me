@@ -765,15 +765,16 @@ the behavior for the photo feature
     //make this a method with a callback since it's repeated between the list/grid views
     
     if (!album.hasFetchedPhotos) {
-      album.photos.max = album.get("count");
-      album.photos.setURL(album.get("searchTerm"), album.get("count"));
+      //album.photos.max = album.get("count");
+      //album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
+        timeout:25000,
   			success: function(resp) {
           album.hasFetchedPhotos = true;
           showView();
   			},
-  		  error: function(resp) {
-          console.log("error: ", resp);
+  		  error: function(resp, err) {
+          console.log("error: ", resp, err);
   			}
   		});
     } else {

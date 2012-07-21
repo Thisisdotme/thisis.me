@@ -861,6 +861,9 @@ footer .author a, footer .author a:visited {
   color: #000;
   text-decoration: none;
 }
+.photo-page footer .author a, footer .photo-page .author a:visited {
+  color: #fff;
+}
 footer .info .caption {
   display: none;
   height: 18px;
