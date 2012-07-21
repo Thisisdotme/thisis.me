@@ -78,8 +78,12 @@ args_for() {
     config_file="$1"
     instance=$(instance_for "$config_file")
     pidfile=$(pidfile_for "$config_file")
+
+    # Get the working directory
+    wd=$(dirname $(readlink $f))
+
     args="${UWSGI_ARGS} --pidfile ${pidfile} --daemonize ${UWSGI_LOG_DIR}/uwsgi-${instance}.log"
-    args="$args --ini-paste $f"
+    args="$args --ini-paste $f --chdir2 $wd"
 
     echo "$args"
 }
