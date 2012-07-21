@@ -47,7 +47,6 @@ class OverrideController(object):
       # check for a stock asset based on the author's configured template
       try:
         template, = self.db_session.query(Author.template).filter_by(author_name=author_name).one()
-        self.db_session.commit()
         log.debug("*************GOT TEMPLATE**************")
         log.debug(template)
       except NoResultFound:
