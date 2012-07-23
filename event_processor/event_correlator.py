@@ -8,7 +8,10 @@ import logging
 
 from tim_commons import normalize_uri, db, json_serializer
 from mi_schema import models
-from data_access import post_type, service
+from data_access import post_type, service, author_service_map, service_event, author
+
+import pudb
+pudb.set_trace()
 
 
 def _correlate_event(event_json):
@@ -25,8 +28,8 @@ def _correlate_event(event_json):
 
 
 def _normalize_uri(uri):
-  request = requests.head(uri, allow_redirects=True)
-  return normalize_uri(request.url)
+  response = requests.head(uri, allow_redirects=True)
+  return normalize_uri(response.url)
 
 
 def _generate_id(url):
@@ -35,50 +38,57 @@ def _generate_id(url):
   return base64.urlsafe_b64encode(encrypt.digest())[:-1]
 
 
-def correlate_and_update_event(event_json, service_event, me_service_id):
-  service_event.correlation_id, url = _correlate_event(event_json)
+def correlate_and_update_event(event_json, service_event_object, me_service_id):
+  service_event_object.correlation_id, url = _correlate_event(event_json)
 
-  if service_event.correlation_id:
+  if service_event_object.correlation_id:
     # Get the ASM for this user
-    asm = data_access.query_asm(service_event.author_id, me_service_id)
+    asm = author_service_map.query_asm_by_author_and_service(
+        service_event_object.author_id,
+        me_service_id)
 
     # We have a correlation
-    correlation_event = data_access.query_correlation_event(
+    correlation_event = service_event.query_correlation_event(
         me_service_id,
-        service_event.correlation_id,
-        service_event.author_id)
+        service_event_object.correlation_id,
+        service_event_object.author_id)
 
-    correlated_events = data_access.query_correlated_events(service_event.author_id,
-                                                            service_event.correlation_id)
+    correlated_events = service_event.query_correlated_events(
+        service_event_object.author_id,
+        service_event_object.correlation_id)
+    # Lets make sure that new event is at the front of the list
+    correlated_events.insert(0, service_event_object)
 
-    author = data_access.query_author(service_event.author_id)
+    author_object = author.query_author(service_event_object.author_id)
 
     json_string = json_serializer.dump_string(_create_json_from_correlations(
           url,
           correlated_events,
-          author))
+          author_object))
 
     if correlation_event:
-      correlation_event.modify_time = max(correlation_event.modify_time, service_event.modify_time)
+      correlation_event.modify_time = max(
+          correlation_event.modify_time,
+          service_event_object.modify_time)
       correlation_event.json = json_string
     else:
       # create a new row with this id
       correlation_event = models.ServiceEvent(
           asm.id,
           models.ServiceObjectType.CORRELATION_TYPE,
-          service_event.author_id,
+          service_event_object.author_id,
           me_service_id,
-          service_event.correlation_id,
-          service_event.create_time,
-          service_event.modify_time,
+          service_event_object.correlation_id,
+          service_event_object.create_time,
+          service_event_object.modify_time,
           url=url,
           json=json_string)
       db.Session().add(correlation_event)
 
 
 def _create_json_from_correlations(uri, correlated_events, author):
-  service_name = _service_name_from_uri(uri)
-  service = service.name_to_service.get(service_name)
+  source_service_name = _service_name_from_uri(uri)
+  source_service_object = service.name_to_service.get(source_service_name)
 
   sources = _create_shared_services(correlated_events)
 
@@ -87,8 +97,9 @@ def _create_json_from_correlations(uri, correlated_events, author):
   create_time = datetime.datetime.utcnow()
   modify_time = datetime.datetime(2000, 1, 1)
 
+  # Lets see if we can find the original source
   for service_event in correlated_events:
-    if service and service_event.service_id == service.id:
+    if source_service_object and service_event.service_id == source_service_object.id:
       source_event = service_event
     elif source_event is None:
       source_event = service_event

@@ -65,17 +65,25 @@ def create_queues(client, queues, durable=True):
 
 
 def create_queues_from_config(client, config):
-  def convert_to_bool(value):
-    if value == 'True':
-      return True
-    elif value == 'False':
-      return False
-
-    raise Exception('Invalid string value: {0}'.format(value))
-
   for service_queue_config in config.itervalues():
     for queue_config in service_queue_config.itervalues():
-      create_queues(client, [queue_config['name']], convert_to_bool(queue_config['durable']))
+      create_queues(client, [queue_config['name']], bool(queue_config['durable']))
+
+
+def delete_queues(client, queues):
+  promises = []
+  for queue in queues:
+    promise = client.queue_delete(queue=queue, if_empty=True)
+    promises.append(promise)
+
+  for promise in promises:
+    try:
+      client.wait(promise)
+    except puka.NotFound:
+      # Lets ignore not found errors
+      pass
+    except puka.PreconditionFailed, e:
+      logging.info('Unable to delete queue: %s', e)
 
 
 def send_messages(client, messages):

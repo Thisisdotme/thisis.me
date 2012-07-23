@@ -23,11 +23,11 @@ def main(global_config, **settings):
   """ This function returns a Pyramid WSGI application.
   """
   # Load global environment configuration
-  message_queue.update_pyramid_configuration(settings)
+  config.update_pyramid_configuration(settings)
 
-  config = Configurator(settings=settings)
+  configuration = Configurator(settings=settings)
 
-  config.add_route('facebook_feed', 'feed/facebook')
+  configuration.add_route('facebook_feed', 'feed/facebook')
 
-  config.scan()
-  return config.make_wsgi_app()
+  configuration.scan()
+  return configuration.make_wsgi_app()
