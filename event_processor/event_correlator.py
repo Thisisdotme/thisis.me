@@ -10,9 +10,6 @@ from tim_commons import normalize_uri, db, json_serializer
 from mi_schema import models
 from data_access import post_type, service, author_service_map, service_event, author
 
-import pudb
-pudb.set_trace()
-
 
 def _correlate_event(event_json):
   # Extract the origin url
