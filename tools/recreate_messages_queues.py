@@ -1,6 +1,6 @@
 # To delete all the current queues and re-create them again do:
 # sudo rabbitmqctl list_queues | sed -e '2,$!d' -e '$d' | cut -f 1 | \
-#      python tools/recreate_message_queus.py --delete_from_stdin
+#      python tools/recreate_message_queues.py --delete_from_stdin
 import sys
 
 from tim_commons import app_base, message_queue

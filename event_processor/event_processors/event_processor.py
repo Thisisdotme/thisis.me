@@ -106,6 +106,7 @@ class EventProcessor:
       if existing_digest != new_digest:
 
         logging.debug('Updating modified known event')
+        correlation_id, correlation_url = event_correlator.correlate_event(interpreter)
 
         # update event
         existing_event.json = new_json
@@ -117,10 +118,13 @@ class EventProcessor:
           existing_event.modify_time = interpreter.get_update_time()
         else:
           existing_event.modify_time = datetime.datetime.utcnow()
+        existing_event.correlation_id = correlation_id
 
-        event_correlator.correlate_and_update_event(interpreter,
-                                                    existing_event,
-                                                    self.me_service_id)
+        event_correlator.correlate_and_update_event(
+            correlation_url,
+            correlation_id,
+            tim_author_id,
+            self.me_service_id)
 
       else:
         # skip event
@@ -141,6 +145,7 @@ class EventProcessor:
       content = interpreter.get_content()
       photo = interpreter.get_photo()
       auxiliary_content = interpreter.get_auxiliary_content()
+      correlation_id, correlation_url = event_correlator.correlate_event(interpreter)
 
       service_event = ServiceEvent(asm.id,
                                    interpreter.get_type(),
@@ -154,10 +159,16 @@ class EventProcessor:
                                    content,
                                    photo,
                                    auxiliary_content,
-                                   json_serializer.dump_string(service_event_json))
-      event_correlator.correlate_and_update_event(interpreter, service_event, self.me_service_id)
+                                   json_serializer.dump_string(service_event_json),
+                                   correlation_id=correlation_id)
       db.Session().add(service_event)
       db.Session().flush()
+
+      event_correlator.correlate_and_update_event(
+          correlation_url,
+          correlation_id,
+          tim_author_id,
+          self.me_service_id)
 
     # process any links for this event
     if links:

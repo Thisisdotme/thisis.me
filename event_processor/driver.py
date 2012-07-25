@@ -6,7 +6,7 @@ import logging
 
 from tim_commons import message_queue, db, app_base
 from event_processors import event_processor
-import data_access.service
+from data_access import service, post_type
 
 
 class EventProcessorDriver(app_base.AppBase):
@@ -31,20 +31,20 @@ class EventProcessorDriver(app_base.AppBase):
 
     # initialize the db engine & session
     db.configure_session(db_url)
-    data_access.service.initialize()
-    data_access.post_type.initialize()
+    service.initialize()
+    post_type.initialize()
 
     services = services_configuration(options.services, config)
 
     # Get a list of all the handler
     handlers = []
-    for service in services:
+    for service_object in services:
       # Create handlers
-      processor = event_processor.from_service_name(service['name'],
+      processor = event_processor.from_service_name(service_object['name'],
                                                     max_priority,
                                                     min_duration,
-                                                    service['oauth'])
-      handler = {'queue': service['queue'],
+                                                    service_object['oauth'])
+      handler = {'queue': service_object['queue'],
                  'handler': create_processor_handler(processor)}
       handlers.append(handler)
 
@@ -63,12 +63,12 @@ class EventProcessorDriver(app_base.AppBase):
 def services_configuration(services, config):
   # If services is empty then get all the services in the configuration
   if not services:
-    for service in config['queues'].iterkeys():
-      services.append(service)
+    for service_name in config['queues'].iterkeys():
+      services.append(service_name)
 
-  return [{'name': service,
-           'oauth': config['oauth'][service],
-           'queue': config['queues'][service]['event']['name']} for service in services]
+  return [{'name': service_name,
+           'oauth': config['oauth'][service_name],
+           'queue': config['queues'][service_name]['event']['name']} for service_name in services]
 
 
 def create_processor_handler(processor):
