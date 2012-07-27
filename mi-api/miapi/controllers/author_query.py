@@ -1,11 +1,3 @@
-'''
-Created on Feb 21, 2012
-
-@author: howard
-'''
-
-import logging
-
 from pyramid.view import view_config
 from sqlalchemy import (and_)
 
@@ -20,8 +12,6 @@ from miapi.globals import LIMIT
 from . import get_tim_author_fragment
 
 from author_utils import createServiceEvent, createHighlightEvent
-
-log = logging.getLogger(__name__)
 
 
 ##
@@ -116,7 +106,11 @@ class AuthorQueryController(object):
   #
   # get details for the service event
   #
-  @view_config(route_name='author.query.events.eventId', request_method='GET', renderer='jsonp', http_cache=0)
+  @view_config(
+      route_name='author.query.events.eventId',
+      request_method='GET',
+      renderer='jsonp',
+      http_cache=0)
   def get_event_detail(self):
 
     author_name = self.request.matchdict['authorname']
@@ -138,7 +132,7 @@ class AuthorQueryController(object):
       self.request.response.status_int = 404
       return {'error': 'unknown event id %d' % serviceEventID}
 
-    return {'event': createServiceEvent(self.db_session, self.request, event, asm, author)}
+    return createServiceEvent(self.db_session, self.request, event, asm, author)
 
   # GET /v1/authors/{authorname}/topstories
   #
