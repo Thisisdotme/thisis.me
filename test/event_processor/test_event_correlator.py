@@ -63,7 +63,7 @@ class EventCorrelatorTestCase(unittest.TestCase):
         caption='caption',
         content='content',
         url=uri,
-        photoURL=photo_url,
+        photo_url=photo_url,
         json=event)]
     author = models.Author('jose', 'jose@thisis.me', 'Jose Garcia', 'password', 'template')
 

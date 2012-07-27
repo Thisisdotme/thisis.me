@@ -334,7 +334,7 @@ class ServiceEvent(Base):
   photo_width = Column(Integer)
   photo_height = Column(Integer)
 
-  auxillary_content = Column(Text(65565)) # deprecated
+  auxillary_content = Column(Text(65565))  # deprecated
 
   json = Column(Text(65535))
 
@@ -349,10 +349,12 @@ class ServiceEvent(Base):
                url=None,
                caption=None,
                content=None,
-               photoURL=None,
+               photo_url=None,
                auxillaryContent=None,
                json=None,
-               correlation_id=None):
+               correlation_id=None,
+               tagline=None,
+               headline=None):
     self.author_service_map_id = author_service_map_id
     self.type_id = type_id
     self.author_id = author_id
@@ -363,10 +365,12 @@ class ServiceEvent(Base):
     self.url = url
     self.caption = caption
     self.content = content
-    self.photo_url = photoURL
+    self.photo_url = photo_url
     self.auxillary_content = auxillaryContent
     self.json = json
-    self.correltation_id = correlation_id
+    self.correlation_id = correlation_id
+    self.tagline = tagline
+    self.headline = headline
 
   def __repr__(self):
     # not including the JSON

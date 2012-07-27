@@ -18,6 +18,7 @@ def initialize():
   post_types = query_all_post_types()
 
   for post_type in post_types:
+    db.Session().expunge(post_type)
     id_to_post_type[post_type.type_id] = post_type
 
 

@@ -13,6 +13,7 @@ def initialize():
   services = query_all_services()
 
   for service in services:
+    db.Session().expunge(service)
     name_to_service[service.service_name] = service
     id_to_service[service.id] = service
 
