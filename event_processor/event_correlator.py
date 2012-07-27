@@ -174,7 +174,7 @@ def _create_shared_services(correlated_events):
   for service_event in correlated_events:
     service_event_interpreter = event_interpreter.create_event_interpreter(
         service.id_to_service[service_event.service_id].service_name,
-        service_event.json,
+        json_serializer.load_string(service_event.json),
         None,
         None)
     sources.append(
