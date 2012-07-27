@@ -70,10 +70,10 @@ def create_queues_from_config(client, config):
       create_queues(client, [queue_config['name']], bool(queue_config['durable']))
 
 
-def delete_queues(client, queues):
+def delete_queues(client, queues, force=False):
   promises = []
   for queue in queues:
-    promise = client.queue_delete(queue=queue, if_empty=True)
+    promise = client.queue_delete(queue=queue, if_empty=not force)
     promises.append(promise)
 
   for promise in promises:

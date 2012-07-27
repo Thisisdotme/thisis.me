@@ -13,6 +13,11 @@ class RecreateMessageQueues(app_base.AppBase):
                              action='store_true',
                              default=False,
                              help='Delete all the queues listed in stdin')
+    option_parser.add_option('--force',
+                             dest='force',
+                             action='store_true',
+                             default=False,
+                             help='Force the deleting of non-empty queues')
 
   def app_main(self, config, options, args):
     client = message_queue.create_message_client(
@@ -25,7 +30,7 @@ class RecreateMessageQueues(app_base.AppBase):
     for service_queue_config in config['queues'].itervalues():
       for queue_config in service_queue_config.itervalues():
         queue = queue_config['name']
-        message_queue.delete_queues(client, [queue])
+        message_queue.delete_queues(client, [queue], force=options.force)
         message_queue.create_queues(client, [queue], bool(queue_config['durable']))
 
 
