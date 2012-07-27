@@ -12,7 +12,7 @@ from pyramid.view import view_config
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from tim_commons import db
+from tim_commons import (db, emailer)
 
 from mi_schema.models import (AuthorReservation)
 
@@ -63,10 +63,10 @@ class AuthorReservationController(object):
 
   # PUT /v1/reservation/{authorname}
   #
-  # put the event highlights for the author
+  # Add a new author reservation
   #
   @view_config(route_name='author.reservation', request_method='PUT', renderer='jsonp', http_cache=0)
-  def put_reservation(self):
+  def add_reservation(self):
 
     author_name = self.request.matchdict['authorname']
 
@@ -92,8 +92,36 @@ class AuthorReservationController(object):
       self.request.response.status_int = 409
       return {'error': e.message}
 
+    # send confirmation email
+    emailer.send_template('reservation_confirmation.html', 'accounts@thisis.me', [email], 'Username reservation confirmation', {'author_name': author_name})
+
     self.request.response.headers['Access-Control-Allow-Origin'] = '*'
     self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
     self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
     return {'author_name': author_name, 'email': email}
+
+  # DELETE /v1/reservation/{authorname}
+  #
+  # Remove an existing author reservation
+  #
+  @view_config(route_name='author.reservation', request_method='PUT', renderer='jsonp', http_cache=0)
+  def remove_reservation(self):
+
+    author_name = self.request.matchdict['authorname']
+
+    # get author-id for author_name
+    try:
+      reservation = self.db_session.query(AuthorReservation).filter(AuthorReservation.author_name == author_name).one()
+      self.db_session.delete(reservation)
+      self.db_session.flush()
+
+    except NoResultFound:
+      self.request.response.status_int = 404
+      return {'error': 'unknown author-name %s' % author_name}
+
+    except Exception, e:
+      self.request.response.status_int = 500
+      return {'error': e.message}
+
+    return {'author_name': author_name}
