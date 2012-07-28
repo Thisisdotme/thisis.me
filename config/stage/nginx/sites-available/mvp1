@@ -8,7 +8,8 @@ server {
 
   location / {
       uwsgi_pass      unix:///tmp/tim-mobile.sock;
+      include         uwsgi_params;
       auth_basic      "thisis.me";
-      auth_basic_user_file sites-available/htpasswd;
+      auth_basic_user_file htpasswd;
   }
 }
