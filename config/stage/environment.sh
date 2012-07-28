@@ -2,7 +2,14 @@ environment=stage
 export TIM_USER=ec2-user
 
 # Define the python egg cache. Let just use the user's home directory
-export PYTHON_EGG_CACHE=$(getent passwd $TIM_USER | cut -d: -f6)/.python-eggs
+command -v getent >/dev/null 2>&1
+status=$?
+if [ $status -ne 0 ]; then
+  # if getent doesn't exist then assume we are using Mac OS X
+  export PYTHON_EGG_CACHE=/Users/$TIM_USER/.python-eggs
+else
+  export PYTHON_EGG_CACHE=$(getent passwd $TIM_USER | cut -d: -f6)/.python-eggs
+fi
 
 # Define the root location for all mobile identity scripts, sourcec code, config
 # files, etc.
