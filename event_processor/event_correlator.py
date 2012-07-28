@@ -119,7 +119,7 @@ def _analyze_correlated_events(uri, correlated_events):
   if source_event:
     source_event_interpreter = event_interpreter.create_event_interpreter(
       source_service_name,
-      source_event.json,
+      json_serializer.load_string(source_event.json),
       None,
       None)
 
