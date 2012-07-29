@@ -9,6 +9,7 @@ TIM.mixins = TIM.mixins || {};
 TIM.featureHandlers = TIM.featureHandlers || {};
 TIM.loadedFeatures = TIM.loadedFeatures || {};
 TIM.authorFeatures = TIM.authorFeatures || {};
+TIM.defaultFeature = "cover";
 TIM.currentPageElem = $('#splash-screen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#content-container');
@@ -28,6 +29,9 @@ window.addEventListener("load",function() {
 });
 
 $(function() {
+    
+  var parsedUri = parseUri(window.location.href);
+  console.log("parsed uri: ", parsedUri);
   
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
@@ -156,17 +160,15 @@ $(function() {
 	TIM.featureNavView = new TIM.views.FeatureNav({
 	  collection: TIM.features
 	})
-
-	TIM.defaultFeature = "cover";
 	
 	//fetch the features for this author on load
 	//use a JSONP plugin that properly reports errors?
 	//
 	//
 	TIM.features.fetch({
-		dataType: "jsonp",
+		//dataType: "jsonp",
 		//add this timeout in case call fails...
-		timeout : 5000,
+		//timeout : 5000,
 		callbackParameter: "callback",
 		success: function(resp) {
 		  console.log('fetched features');
@@ -179,7 +181,6 @@ $(function() {
 	});
 	
 	TIM.services.fetch({
-		dataType: "jsonp",
 		//add this timeout in case call fails...
 		timeout : 5000,
 		callbackParameter: "callback",
@@ -216,7 +217,6 @@ $(function() {
     	//make sure we have tap event
     	
     	$('#nav-toggle').on('tap', (function(event){
-    	  console.log("TAPPED!", event);
     	  event.preventDefault();
     	  event.stopPropagation();
     	  $('#app').toggleClass('nav-open');
@@ -228,26 +228,19 @@ $(function() {
     	}));
     	
     	$('#app').on('tap', (function(event){
-    	  //alert('tap 1');
-    	  console.log("GENERIC TAP EVENT: ", event);
     	  event.preventDefault();
     	}))
     	
-    	
     	$('#app').on('tap', 'a', function(event) {
-    	   event.preventDefault();
-      	  event.stopPropagation();
+    	  event.preventDefault();
+      	event.stopPropagation();
     	  TIM.handleLinkClick(event);
     	})
     	
-    
-    	/*
     	$('#app').on('click', 'a', function(event) {
-    	 // alert('click!!');
     	  event.preventDefault();
     	  event.stopPropagation();
-    	  TIM.handleLinkClick(event);
-    	}) */
+    	})
     },
   
     //should probably pass an option here of whether to 'activate' the feature
@@ -260,16 +253,13 @@ $(function() {
       }
     },
     
-    //should do something more intelligent than throwing up an alert :)
-    //maybe a linkedin-style error message popping from teh bottom?
-    
     featureLoadError: function(options) {
       console.log("Feature loaded failed: ", options);
       TIM.showErrorMessage(options);
     },
     
     handleError: function(options) {
-      console.log("Error: ", options);
+      console.log("General application error: ", options);
       TIM.showErrorMessage(options);
     },
   
@@ -292,10 +282,10 @@ $(function() {
 	TIM.app = new TIM.Router();
 	
   Backbone.history.start({root: '/' + TIM.globals.authorName});
-	
+		
 	$.fn.animationComplete = function( callback ) {
-		if( $.support.cssTransitions ) {
-			return $( this ).on( 'webkitAnimationEnd', callback );
+		if( "WebKitTransitionEvent" in window ) {
+			return $( this ).one( 'webkitAnimationEnd', callback );
 		}
 		else{
 			// defer execution for consistency between webkit/non webkit
@@ -365,8 +355,6 @@ $(function() {
     TIM.setErrorShowing(true);
   };
   
-  //do transition between pages?
-  //this is going to have to evolve to be something much more like what jquery mobile does with 'changePage'
   //for now this simply handles the DOM page transition
   //
   //should keep a history stack & use that to determine whether to do a forward or reverse transition
@@ -385,7 +373,7 @@ $(function() {
 	    return;
 	  }
 	 
-	  var animationName = options.animationName || TIM.defaultTransition; //changed from slide
+	  var animationName = options.animationName || TIM.defaultTransition;
 	
 	  var inClasses = "active in " + animationName + " ";
 	  var outClasses = "active out " + animationName + " ";
@@ -397,9 +385,9 @@ $(function() {
 	  $('#app').addClass('transitioning'); //make this a TIM method?
 	  if (fromPage) {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
-	    //should have an 'official' list of transitions to remove rather than hardcoding here
 	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).animationComplete(function() {
-	      fromPage.removeClass(outClasses + transitions);
+	      console.log('animation complete for from page: ');
+	      $(this).removeClass(outClasses + transitions);
 	      $('#app').removeClass('transitioning');
 	      TIM.setErrorShowing(false);
   	    TIM.setSplashScreen(false);
@@ -410,6 +398,7 @@ $(function() {
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
+	    console.log('animation complete for to page: ');
       $(this).removeClass(transitions);
       $('#app').removeClass('transitioning');
       setTimeout(function(){

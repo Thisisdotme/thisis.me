@@ -238,7 +238,7 @@ the behavior for the photo feature
         this.collection.max = album.get("count");
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			this.collection.bind("reset", this.render);
+  			//this.collection.bind("reset", this.render);
       },
 
 
@@ -441,7 +441,6 @@ the behavior for the photo feature
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
-  			window.photos = album.photos.toJSON();
       },
       
       //add the flip events to the flip mixin
@@ -627,7 +626,7 @@ the behavior for the photo feature
     
     //keep grid/list views hanging around or just use one for each and swap out collections?
     
-    feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
+    //feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
     
     if(!feature.hasFetchedCollection) {
@@ -720,8 +719,6 @@ the behavior for the photo feature
      }
     //make this a method with a callback
     if (!album.hasFetchedPhotos) {
-      album.photos.max = album.get("count");
-      album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
   			success: function(resp) {
   		    album.hasFetchedPhotos = true;
@@ -742,7 +739,11 @@ the behavior for the photo feature
     options = options || {};
     var album = feature.albumCollection.get(options.albumId);
     //don't make a new one each time?
-    feature.gridView = feature.gridView || new TIM.views.PhotoGrid({collection: album.photos});
+    if (feature.gridView) {
+     feature.gridView.close();
+    }
+    
+    feature.gridView = new TIM.views.PhotoGrid({collection: album.photos});
     feature.gridView.album = album;
     
     //have an inner function here so it's available via callback if we have to fetch

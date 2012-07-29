@@ -8,7 +8,6 @@
    <!-- loop through sources -->
    {?origin.known} 
 	    {?origin.known.service_name}
-				<!-- <img class="{service_name}" src="{service_image_url}" /> -->
 				<span class="service-icon {origin.known.service_name}"></span>
 			{/origin.known.service_name}
    {/origin.known}

@@ -92,6 +92,7 @@ TIM.views.renderEvent = function(event, template) {
   for(var i = 0; i < event.events.length; i++) {
     var ev = event.events[i];
     var view = TIM.views.getEventView(ev);
+    console.log('event view event_type', ev, view, ev.type)
     ev.event_template = view.template; //this is horseshit - do those really need to be views?
   }
   return TIM.views.renderTemplate(template, event);
@@ -151,6 +152,7 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    },
 		
   addOne : function ( item ) {
+    console.log(item);
   	var view = new TIM.views.FeatureNavItem({model:item});
   	
   	view.render();
@@ -162,6 +164,15 @@ TIM.views.FeatureNav = Backbone.View.extend( {
 
   render: function() {
    this.addAll();
+   //this is horrible... adding 'settings' as a 'feature'?
+   var f = new TIM.models.Feature({
+     feature_name:"settings",
+     
+   });
+   console.log("FEATURE!", f);
+   this.addOne(
+     f
+   )
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {
@@ -237,7 +248,6 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	
 });
 
-//make a toolbar
 //make the comments area scrollable - really should have scrollable areas based on classes <div class="scrollable"><div class="scroll-inner"></div></div>
 //fake toggling between services
 // -throw up spinner, wait, then fade in new content
@@ -460,8 +470,7 @@ TIM.views.Page = Backbone.View.extend( {
       
       console.log('rendering page: ', this.page);
 			var that = this;
-			//console.log("pages: ", this.pages);
-			tmpl = tmpl || "timelinePage";//(this.page.events.length === 1 ? "event" : "page");
+			tmpl = tmpl || "timelinePage";
 			
 			var html = TIM.views.renderEvent(this.page, tmpl);
 			///var html = TIM.views.renderTemplate(tmpl, this.page);
@@ -541,7 +550,6 @@ TIM.mixins.flipset = {
 			
 			//makePages groups raw events into 'pages' which will be rendered into html for the flipset
 			this.makePages(options);
-				
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
 			}
@@ -552,11 +560,12 @@ TIM.mixins.flipset = {
 			}
 			
 			//replace this with this.$el.hammer() ???
-			
-			this.flipSet.initializeHammer();
-			
-			window.VIEW = this;
-	
+			try{
+			  this.flipSet.initializeHammer();
+			} catch(e) {
+			  
+			}
+
 			return this;
     },
     
@@ -588,13 +597,12 @@ TIM.mixins.flipset = {
 			  //shouldn't skip too many non-one-page events...
 			  
 				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
-				  //var template = item.get("type") === "photo" ? "photoPage" : self.pageTemplate;
 				  var template = self.pageTemplate;
 					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
 					page.push(item);
 					if(page.length == 2) {
-						self.pages.push({"event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
+						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
 						page = [];
 					}
 				}
@@ -603,14 +611,13 @@ TIM.mixins.flipset = {
 			
 			//if there's one left over, make a page of it!
 			if(page.length == 1) {
-			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
+			  self.pages.push({template: template, "event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
 			
     },
     
 		renderPageChunk: function(start) {
 			//would this fn check for earlier/later events if they haven't been loaded?
-			
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
 				end = this.pages.length;
@@ -619,7 +626,6 @@ TIM.mixins.flipset = {
 			  this.renderPage(this.pages[i]);
   			this.renderedIndex++;
 			}
-			
 			if (this.flipSet && this.pages.length > 0) {
 			  this.flipSet.createPageElements();
 			} else {
