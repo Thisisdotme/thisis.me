@@ -1,16 +1,15 @@
 import calendar
+import logging
 
 from tim_commons import json_serializer
 
-from mi_schema.models import ServiceObjectType
-
 from . import (
-  get_service_author_fragment,
-  get_location_fragment,
-  get_post_type_detail_fragment,
-  get_tim_author_fragment)
+    get_service_author_fragment,
+    get_location_fragment,
+    get_post_type_detail_fragment,
+    get_tim_author_fragment)
 
-from data_access import post_type
+from data_access import post_type, author_service_map
 
 
 def createServiceEvent(db_session, request, se, asm, author):
@@ -18,51 +17,32 @@ def createServiceEvent(db_session, request, se, asm, author):
   link = request.route_url('author.query.events.eventId',
                            authorname=author.author_name,
                            eventID=se.id)
+  event = {'id': se.id,
+           'type': post_type.id_to_label(se.type_id),
+           'link': link,
+           'truncated': False,
+           'create_time': calendar.timegm(se.create_time.timetuple()),
+           'modify_time': calendar.timegm(se.modify_time.timetuple())}
 
-  # TODO uncomment after correlation event JSON is updated -- for now return None
-  # TODO checking for correlation event handling ???
-  if se.type_id == ServiceObjectType.CORRELATION_TYPE:
-    return None
-#    # we just want to return the json after adding the links to it
-#    event = json_serializer.load_string(se.json)
-#    event['link'] = link
-#    event['id'] = se.id
-#    event['event_id'] = se.id
-#    for source in event['sources']['items']:
-#      link = 'miapi:img/l/services/color/{0}.png'.format(source['service_name'])
-#      source['link'] = request.static_url(link)
-
+  if se.headline:
+    event['headline'] = se.headline
   else:
+    # TODO remove when caption goes away
+    if se.caption:
+      event['headline'] = se.caption
+  if se.tagline:
+    event['tagline'] = se.tagline
+  if se.content:
+    event['content'] = se.content
 
-    event = {'id': se.id,
-             'type': post_type.id_to_label(se.type_id),
-             'link': link,
-             'truncated': False,
-             'create_time': calendar.timegm(se.create_time.timetuple()),
-             'modify_time': calendar.timegm(se.modify_time.timetuple())}
+  if se.photo_url:
+    event['photo'] = {'image_url': se.photo_url}
+    if se.photo_width:
+      event['photo']['width'] = se.photo_width
+    if se.photo_height:
+      event['photo']['height'] = se.photo_height
 
-    if se.headline:
-      event['headline'] = se.headline
-    else:
-      # TODO remove when caption goes away
-      if se.caption:
-        event['headline'] = se.caption
-    if se.tagline:
-      event['tagline'] = se.tagline
-    if se.content:
-      event['content'] = se.content
-
-    if se.photo_url:
-      event['photo'] = {'image_url': se.photo_url}
-      if se.photo_width:
-        event['photo']['width'] = se.photo_width
-      if se.photo_height:
-        event['photo']['height'] = se.photo_height
-
-    event['author'] = get_tim_author_fragment(request, author.author_name)
-
-    event['origin'] = {}
-    event['origin']['known'] = get_service_author_fragment(request, asm, author)
+  event['author'] = get_tim_author_fragment(request, author.author_name)
 
   location = get_location_fragment(se)
   if location:
@@ -72,6 +52,43 @@ def createServiceEvent(db_session, request, se, asm, author):
   if post_detail:
     event['post_type_detail'] = {}
     event['post_type_detail'][post_type.id_to_label(se.type_id)] = post_detail
+
+  if post_type.id_to_post_type[se.type_id].label == 'correlation':
+    json = json_serializer.load_string(se.json)
+    # Set the source
+    if json['origin']['type'] == 'known':
+      known = json['origin']['known']
+
+      event['origin'] = {'type': 'known',
+                         'known': {'event_id': known['event_id'],
+                                   'service_name': known['service_name'],
+                                   'service_event_id': known['service_event_id'],
+                                   'service_event_url': known['service_event_url'],
+                                   'service_user': get_service_author_fragment(
+                                       request,
+                                       asm,
+                                       author)}}
+    elif json['origin']['type'] == 'unknown':
+      unknown = json['origin']['unknown']
+      event['origin'] = {'type': 'unknown',
+                         'unknown': {'domain': unknown['domain'],
+                                     'small_icon': unknown['small_icon'],
+                                     'url': unknown['url']}}
+    else:
+      logging.error('Found correlation type with malformated origin: %s', json)
+
+    event['shares'] = [{
+      'event_id': share['event_id'],
+      'service_name': share['service_name'],
+      'service_event_id': share['service_event_id'],
+      'service_event_url': share['service_event_url'],
+      'service_user': get_service_author_fragment(
+          request,
+          author_service_map.query_asm_by_author_and_service(
+            share['author_id'],
+            share['service_id']),
+          author)}
+      for share in json['shares']]
 
   return event
 

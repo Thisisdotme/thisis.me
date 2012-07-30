@@ -8,6 +8,7 @@ import logging
 from tim_commons import normalize_uri, db, json_serializer
 from mi_schema import models
 from data_access import service, author_service_map, service_event
+import event_interpreter
 
 
 def correlate_event(event_json):
@@ -116,9 +117,18 @@ def _analyze_correlated_events(uri, correlated_events):
     modified_time = max(modified_time, service_event.modify_time)
 
   if source_event:
+    source_event_interpreter = event_interpreter.create_event_interpreter(
+      source_service_name,
+      json_serializer.load_string(source_event.json),
+      None,
+      None)
+
     if found_source:
       origin = {'type': 'known',
-                'event_id': source_event.id}
+                'known': {'event_id': source_event.id,
+                          'service_event_id': source_event.event_id,
+                          'service_event_url': source_event_interpreter.url(),
+                          'service_name': source_service_name}}
     else:
       parsed_uri = urlparse.urlparse(uri)
       favicon_uri = urlparse.urlunparse((
@@ -129,10 +139,13 @@ def _analyze_correlated_events(uri, correlated_events):
             '',
             ''))
       origin = {'type': 'unknown',
-                'event_id': source_event.id,
-                'domain': parsed_uri.netloc,
-                'small_icon': favicon_uri,
-                'url': uri}
+                'unknown': {'event_id': source_event.id,
+                            'service_event_id': source_event.event_id,
+                            'service_event_url': source_event_interpreter.url(),
+                            'service_name': source_service_name,
+                            'domain': parsed_uri.netloc,
+                            'small_icon': favicon_uri,
+                            'url': uri}}
     event = {'origin': origin,
              'shares': shares}
   else:
@@ -159,9 +172,18 @@ _priority = {
 def _create_shared_services(correlated_events):
   sources = []
   for service_event in correlated_events:
+    service_event_interpreter = event_interpreter.create_event_interpreter(
+        service.id_to_service[service_event.service_id].service_name,
+        json_serializer.load_string(service_event.json),
+        None,
+        None)
     sources.append(
-        {'service_name': service.id_to_service[service_event.service_id].service_name})
-
+        {'service_name': service.id_to_service[service_event.service_id].service_name,
+         'event_id': service_event.id,
+         'service_event_id': service_event.event_id,
+         'service_event_url': service_event_interpreter.url(),
+         'author_id': service_event.author_id,
+         'service_id': service_event.service_id})
   return sources
 
 
