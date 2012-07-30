@@ -758,6 +758,7 @@ footer .service-icon.google {  background: transparent url(/img/icons/google_plu
   bottom: 60px;
   height: 100px;
   width: 50px;
+  display:none; /* hide these for now */
 }
 .photo-page .interaction-icons .comments {
   position: absolute;

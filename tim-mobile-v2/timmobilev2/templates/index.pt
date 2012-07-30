@@ -1,14 +1,28 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="index" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
-
+    <style>
+      body { background-color:#fff !important; padding:20px;}
+      #index-content ul {
+        list-style-type:none;
+        padding:0;
+      }
+      #index-content li {
+        padding:4px 0;
+      }
+    </style>
 		<header data-role="header" data-position="fixed">
-			<h1>thisis.too.me</h1>
+			<h1>thisis.me</h1>
 		</header><!-- /header -->
 	
 		<div id="index-content" data-role="content">
-			This is the sales and marketing site
-			<a href="ken">view ken!!!</a>
+		  <ul>
+		    <li><a href="mchammer">MC Hammer</a></li>
+		    <li><a href="phil">Phil Goffin</a></li>
+		    <li><a href="philblack">Phil Black</a></li>
+		    <li><a href="howard">Howard</a></li>
+		    <li><a href="loree">Loree</a></li>
+		    <li><a href="ken">Ken</a></li>
+		  </ul>
 		</div><!-- /content -->
 
 	</div><!-- /page -->

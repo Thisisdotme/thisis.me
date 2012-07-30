@@ -165,14 +165,16 @@ TIM.views.FeatureNav = Backbone.View.extend( {
   render: function() {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
-   var f = new TIM.models.Feature({
-     feature_name:"settings",
-     
-   });
-   console.log("FEATURE!", f);
-   this.addOne(
-     f
-   )
+   if(false) { //don't do it for now...
+     var f = new TIM.models.Feature({
+       feature_name:"settings",
+
+     });
+     this.addOne(
+       f
+     )
+   }
+
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {

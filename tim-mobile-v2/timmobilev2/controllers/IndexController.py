@@ -20,4 +20,4 @@ class IndexController(object):
 
   @view_config(route_name='index', request_method='GET', renderer='timmobilev2:templates/index.pt')
   def requestHandler(self):
-    return {'api_endpoint': self.request.registry.settings['mi.api.endpoint']}
+    return {'api_endpoint': self.request.registry.settings['mi.api.endpoint'], 'author_name': 'this is me'}
