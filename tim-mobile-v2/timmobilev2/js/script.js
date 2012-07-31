@@ -383,7 +383,7 @@ $(function() {
 	
 	  var inClasses = "active in " + animationName + " ";
 	  var outClasses = "active out " + animationName + " ";
-	  var transitions =  + TIM.getAvailableTransitions();
+	  var transitions = TIM.getAvailableTransitions();
 	  if(options.reverse) {
 	    inClasses += " reverse ";
 	    outClasses += " reverse ";
@@ -405,7 +405,7 @@ $(function() {
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
 	    console.log('animation complete for to page: ');
-      $(this).removeClass(transitions);
+      $(this).removeClass(transitions + " in");
       $('#app').removeClass('transitioning');
       setTimeout(function(){
           window.scrollTo(0, 0);

@@ -219,7 +219,6 @@ the behavior for the photo feature
 
       initialize: function() {
           _.bindAll(this);
-          //this.collection.bind( "reset", this.render );
           this.collection.bind('pageLoaded', this.renderNextPageset, this);
           this.numRendered = 0;
       },
@@ -238,7 +237,6 @@ the behavior for the photo feature
         this.collection.max = album.get("count");
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			//this.collection.bind("reset", this.render);
       },
 
 
@@ -431,7 +429,7 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			this.collection.bind( "reset", this.render );
+  			//this.collection.bind( "reset", this.render );
       },
       
       setCollection: function(album) {
@@ -622,11 +620,9 @@ the behavior for the photo feature
     }
    
     feature.albumCollection = feature.albumCollection || new TIM.collections.PhotoAlbums();
-    feature.mainCollection = feature.mainCollection || new TIM.collections.Photos();
     
     //keep grid/list views hanging around or just use one for each and swap out collections?
     
-    //feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
     
     if(!feature.hasFetchedCollection) {
@@ -638,7 +634,6 @@ the behavior for the photo feature
       //let's try the jsonp plugin here...
       feature.albumCollection.fetch({
   			success: function(model, resp) {
-  		    //alert('got photos for album!');
   		    feature.hasFetchedCollection = true;
       		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   			},
@@ -754,7 +749,7 @@ the behavior for the photo feature
       feature.gridView.render();
 		  TIM.setLoading(false);
 		  
-	    TIM.app.navigate('/photos/' + album.id);
+	    TIM.app.navigate('/photos/' + album.id, {trigger: false});
 	    TIM.transitionPage (feature.gridView.$el, {
 	      animationName: "slide", reverse: options.reverse,
 	      callback: function() {

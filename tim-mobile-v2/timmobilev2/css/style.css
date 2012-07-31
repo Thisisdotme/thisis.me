@@ -602,7 +602,7 @@ body.splash {
   -webkit-animation-duration: 500ms;
 }
 .slide.out {
-  -webkit-transform: translateX(-100%);
+  -x-webkit-transform: translateX(-100%);
   -webkit-animation-name: slideouttoleft;
   z-index: 0;
 }
