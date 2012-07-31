@@ -42,13 +42,13 @@ def send_template(config, template, sender, recipient, subject, substitutions=No
 
   body = "" + template.substitute(substitutions) + ""
 
-  headers = ["From: " + sender,
-             "Subject: " + subject,
-             "To: " + recipient,
-             "MIME-Version: 1.0",
-             "Content-Type: text/html"]
-  headers = "\r\n".join(headers)
+  headers = ['From: ' + sender,
+             'Subject: ' + subject,
+             'To: ' + recipient,
+             'MIME-Version: 1.0',
+             'Content-Type: text/html; charset="utf-8"']
+  headers = '\r\n'.join(headers)
 
-  session.sendmail(sender, recipient, headers + "\r\n\r\n" + body)
+  session.sendmail(sender, recipient, headers + '\r\n\r\n' + body)
 
   session.quit()
