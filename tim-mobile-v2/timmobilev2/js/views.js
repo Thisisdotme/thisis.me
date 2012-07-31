@@ -165,9 +165,9 @@ TIM.views.FeatureNav = Backbone.View.extend( {
   render: function() {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
-   if(false) { //don't do it for now...
+   if(false || true) { //don't do it for now...
      var f = new TIM.models.Feature({
-       feature_name:"settings",
+       feature_name:"home",
 
      });
      this.addOne(
@@ -551,7 +551,10 @@ TIM.mixins.flipset = {
 			options.start = startIndex;
 			
 			//makePages groups raw events into 'pages' which will be rendered into html for the flipset
+			console.log("making pages hammer");
 			this.makePages(options);
+			console.log("made pages hammer");
+			
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
 			}
@@ -565,9 +568,8 @@ TIM.mixins.flipset = {
 			try{
 			  this.flipSet.initializeHammer();
 			} catch(e) {
-			  
+			  console.log(e);
 			}
-
 			return this;
     },
     
@@ -589,8 +591,6 @@ TIM.mixins.flipset = {
 			  if(index < start || index >= end) return; //return if out of range
 			  
 			  itemJSON = item.toJSON();
-			  
-			  console.log(itemJSON);
 			  		   
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
@@ -613,7 +613,7 @@ TIM.mixins.flipset = {
 			
 			//if there's one left over, make a page of it!
 			if(page.length == 1) {
-			  self.pages.push({template: template, "event_class" : "full-page", "events" : [page[0].toJSON()]});
+			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
 			
     },

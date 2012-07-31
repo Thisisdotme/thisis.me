@@ -1,6 +1,5 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
-
 #cover-container {
   background:#333 url(/loree/asset/cover_bg.jpg) no-repeat left top;
   background-size:cover;
@@ -35,12 +34,13 @@
   text-decoration:none;
 }
 
+
 .cover-page .primary-story {
   font-size:16px;
   font-weight:bold;
-  color:#fff;
+  color:#fff200;
   position:absolute;
-  top:150px;
+  top:160px;
   width:250px;
   left:28px;
   font-family:helvetica,sans-serif;
@@ -78,6 +78,50 @@
   
 }
 
+/* cameron's styles */
+
+
+.cover-page .header
+{
+	display:block;
+	left:0;
+	margin:10%;
+	margin-left:3%;
+	padding:0;
+	position:absolute;
+	top:0;
+	width:80%;
+}
+
+.cover-page .header span
+{
+	display:block;
+	font-family:"Holtwood One SC";
+	text-align:left;
+	white-space:nowrap;
+}
+
+.cover-page #first-name
+{
+	-webkit-text-fill-color:#FF0;
+	-webkit-text-stroke:1px #000;
+	line-height:30%;
+	margin-top:15%;
+	text-shadow:0 2px 4px rgba(0,0,0,0.5);
+	z-index:2;
+	font-size:40px;
+}
+
+.cover-page #last-name
+{
+	-webkit-text-fill-color:#FFF;
+	-webkit-text-stroke:1px #000;
+	margin-left:15%;
+	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
+	z-index:3;
+	font-size:32px;
+}
+
 .cover-page section
 {
 	bottom:0;
@@ -103,3 +147,4 @@
 	color:#FFCE78;
 	text-decoration:none;
 }
+

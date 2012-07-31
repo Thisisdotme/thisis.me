@@ -393,6 +393,10 @@ body.splash {
   overflow: hidden;
   color: #fff;
 }
+#feature-nav a, #feature-nav a:visited{
+  color:#fff;
+  text-decoration:none;
+}
 .nav-open #feature-nav {  width: 44px }
 #feature-nav li {
   display: block;
@@ -434,7 +438,7 @@ body.splash {
 }
 #nav-cover {  background: url(/img/nav/cover.svg) no-repeat center 5px }
 #nav-cover.active {  background: url(/img/nav/cover-active.svg) no-repeat center 5px }
-#nav-settings {
+#nav-home {
   margin-top: 4px;
   background: url(/img/nav/sign-in.svg) no-repeat center 6px;
 }

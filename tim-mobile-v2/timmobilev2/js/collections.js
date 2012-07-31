@@ -77,6 +77,19 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		
 });
 
+TIM.collections.Authors = TIM.collections.BaseCollection.extend({
+	 	model: TIM.models.Author,
+		url: TIM.apiUrl + "/authors", //get a list of the authors in the app
+		
+		initialize: function(options) {
+		  options = options || {};
+		},
+		parse: function(resp) {
+		  return (resp.authors);
+		},
+		
+});
+
 
 //
 // collection holding all types of posts the ui has to support

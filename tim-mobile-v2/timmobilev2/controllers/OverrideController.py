@@ -50,6 +50,7 @@ class OverrideController(object):
         log.debug("*************GOT TEMPLATE**************")
         log.debug(template)
       except NoResultFound:
+        log.debug("*************AINT GOT TEMPLATE**************")
         self.db_session.rollback()
         return HTTPNotFound(self.request.path)
       candidate = '%s/assets/stock/%s/%s.%s' % (base, template, resource, ext) if template else None

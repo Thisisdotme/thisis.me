@@ -310,6 +310,12 @@ $(function() {
 	    if(route.split(':')[0] === 'route') {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
+  	    
+  	    //total hack for 'home page'
+  	    if (featureName == 'home') {
+  	      location.href = "/";
+  	    }
+  	    
   	    var feature = TIM.features.getByName(featureName);
   	    if (TIM.features.getSelectedFeature()) {
   	      TIM.setLoading(true); //make this a method on TIM
