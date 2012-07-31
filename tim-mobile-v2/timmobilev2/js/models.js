@@ -147,7 +147,7 @@
   });
   
   TIM.models.Author  = Backbone.Model.extend({
-    
+  
   });
 	
 	
