@@ -9,6 +9,10 @@ def name_to_id(name):
   return name_to_service[name].id
 
 
+def id_to_name(identifier):
+  return id_to_service[identifier].service_name
+
+
 def initialize():
   services = query_all_services()
 

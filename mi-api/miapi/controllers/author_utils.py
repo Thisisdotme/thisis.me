@@ -9,7 +9,7 @@ from . import (
     get_post_type_detail_fragment,
     get_tim_author_fragment)
 
-from data_access import post_type, author_service_map
+from data_access import post_type, author_service_map, service
 
 
 def createServiceEvent(db_session, request, se, asm, author):
@@ -42,7 +42,8 @@ def createServiceEvent(db_session, request, se, asm, author):
     if se.photo_height:
       event['photo']['height'] = se.photo_height
 
-  event['author'] = get_tim_author_fragment(request, author.author_name)
+  author_info = get_tim_author_fragment(request, author.author_name)
+  event['author'] = author_info
 
   location = get_location_fragment(se)
   if location:
@@ -89,6 +90,16 @@ def createServiceEvent(db_session, request, se, asm, author):
             share['service_id']),
           author)}
       for share in json['shares']]
+  else:
+    event['origin'] = {'type': 'known',
+                       'known': {'event_id': se.id,
+                                 'service_name': service.id_to_name(se.service_id),
+                                 'service_event_id': se.event_id,
+                                 'service_event_url': se.url,
+                                 'service_user': get_service_author_fragment(
+                                     request,
+                                     asm,
+                                     author)}}
 
   return event
 
