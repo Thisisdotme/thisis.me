@@ -82,6 +82,8 @@
         favorites = localStorage.getItem('tim_favorite_authors');
         if(favorites) {
           favorites = favorites.split(',');
+        } else {
+          favorites = [];
         }
         console.log('favorites: ', favorites);
       } else {
