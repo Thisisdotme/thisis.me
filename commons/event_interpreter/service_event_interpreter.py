@@ -50,7 +50,7 @@ class ServiceEventInterpreter(object):
     get the time the event was last updated as a Python Time object
   '''
   def get_update_time(self):
-    None
+    return None
 
   def updated_time(self):
     return self.get_update_time()

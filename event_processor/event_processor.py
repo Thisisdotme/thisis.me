@@ -1,62 +1,27 @@
 import hashlib
-import sys
 import math
 import logging
-from abc import (abstractmethod, ABCMeta)
 import datetime
 
-from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
-from mi_schema.models import (ServiceEvent,
-                              AuthorServiceMap,
-                              Service,
-                              EventScannerPriority,
-                              Relationship)
-from tim_commons import json_serializer
-from tim_commons import db
-from tim_commons import total_seconds
+from mi_schema import models
+from tim_commons import json_serializer, db, total_seconds, messages
+from data_access import service, service_event
 import event_correlator
-
-
-def from_service_name(service_name, max_priority, min_duration, oauth_config):
-
-  # load the desired module from the event_collectors package
-  name = 'event_processors.' + service_name + '_event_processor'
-  __import__(name)
-  mod = sys.modules[name]
-
-  # retrieve the desired class and instantiate a new instance
-  cls = getattr(mod, service_name.capitalize() + "EventProcessor")
-  collector = cls(service_name, max_priority, min_duration, oauth_config)
-
-  return collector
+import event_interpreter
 
 
 class EventProcessor:
-
-  __metaclass__ = ABCMeta
-
   def __init__(self, service_name, max_priority, min_duration, oauth_config):
-
     self.service_name = service_name
     self.oauth_config = oauth_config
     self.max_priority = max_priority
     self.min_duration = min_duration
 
-    # get the service-id for this collector's service
-    query = db.Session().query(Service.id)
-    query = query.filter(Service.service_name == self.service_name)
-    self.service_id, = query.one()
-
-    query = db.Session().query(Service.id)
-    query = query.filter(Service.service_name == 'me')
-    self.me_service_id, = query.one()
-
-  @abstractmethod
-  def get_event_interpreter(self, service_event_json, author_service_map, oauth_config):
-    pass
+    self.service_id = service.name_to_service[service_name].id
+    self.me_service_id = service.name_to_service['me'].id
 
   def process(
       self,
@@ -66,19 +31,68 @@ class EventProcessor:
       state,
       service_event_json,
       links):
+
+    if state == messages.NOT_FOUND:
+      self.process_not_found(tim_author_id, service_author_id, service_event_id)
+    else:
+      self.process_current(
+          tim_author_id,
+          service_author_id,
+          service_event_id,
+          service_event_json,
+          links)
+
+  def process_not_found(self, tim_author_id, service_author_id, service_event_id):
+    service_object = service_event.query_service_event(
+        tim_author_id,
+        self.service_id,
+        service_event_id)
+
+    if service_object:
+      service_event.delete(service_object.id)
+
+      # do we have any correlated events?
+      if service_object.correlation_id:
+        correlated_events = service_event.query_correlated_events(
+            tim_author_id,
+            service_object.correlation_id)
+
+        if not correlated_events:
+          # list is empty we should delete the correlation event
+          count = service_event.delete_correlation_event(
+              self.me_service_id,
+              service_object.correlation_id,
+              tim_author_id)
+          if count != 1:
+            logging.error(
+                'Delete %s rows for correlation: id = %s, author = %d',
+                count,
+                service_object.correlation_id,
+                tim_author_id)
+
+  def process_current(
+      self,
+      tim_author_id,
+      service_author_id,
+      service_event_id,
+      service_event_json,
+      links):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
-    query = db.Session().query(AuthorServiceMap)
-    query = query.filter(and_(AuthorServiceMap.author_id == tim_author_id,
-                              AuthorServiceMap.service_id == self.service_id))
+    query = db.Session().query(models.AuthorServiceMap)
+    query = query.filter_by(author_id=tim_author_id, service_id=self.service_id)
     asm = query.one()
 
-    interpreter = self.get_event_interpreter(service_event_json, asm, self.oauth_config)
+    interpreter = event_interpreter.create_event_interpreter(
+        self.service_name,
+        service_event_json,
+        asm,
+        self.oauth_config)
 
     # check for existing update
     existing_event = None
     try:
-      query = db.Session().query(ServiceEvent)
+      query = db.Session().query(models.ServiceEvent)
       query = query.filter_by(author_service_map_id=asm.id, event_id=interpreter.get_id())
       existing_event = query.one()
     except NoResultFound:
@@ -147,20 +161,21 @@ class EventProcessor:
       auxiliary_content = interpreter.get_auxiliary_content()
       correlation_id, correlation_url = event_correlator.correlate_event(interpreter)
 
-      service_event = ServiceEvent(asm.id,
-                                   interpreter.get_type(),
-                                   asm.author_id,
-                                   asm.service_id,
-                                   interpreter.get_id(),
-                                   interpreter.get_create_time(),
-                                   interpreter.get_update_time(),
-                                   url,
-                                   caption,
-                                   content,
-                                   photo,
-                                   auxiliary_content,
-                                   json_serializer.dump_string(service_event_json),
-                                   correlation_id=correlation_id)
+      service_event = models.ServiceEvent(
+          asm.id,
+          interpreter.get_type(),
+          asm.author_id,
+          asm.service_id,
+          interpreter.get_id(),
+          interpreter.get_create_time(),
+          interpreter.get_update_time(),
+          url,
+          caption,
+          content,
+          photo,
+          auxiliary_content,
+          json_serializer.dump_string(service_event_json),
+          correlation_id=correlation_id)
       db.Session().add(service_event)
       db.Session().flush()
 
@@ -173,12 +188,13 @@ class EventProcessor:
     # process any links for this event
     if links:
       for link in links:
-        relationship = Relationship(tim_author_id,
-                                    link['service_id'],
-                                    link['service_event_id'],
-                                    tim_author_id,
-                                    asm.service_id,
-                                    interpreter.get_id())
+        relationship = models.Relationship(
+            tim_author_id,
+            link['service_id'],
+            link['service_event_id'],
+            tim_author_id,
+            asm.service_id,
+            interpreter.get_id())
         try:
           db.Session().add(relationship)
           db.Session().flush()
@@ -205,8 +221,11 @@ def update_scanner(event_updated,
                    max_priority,
                    min_duration):
   # Get the scanner state from the database
-  event_id = EventScannerPriority.generate_id(service_event_id, service_user_id, service_name)
-  scanner_event = db.Session().query(EventScannerPriority).get(event_id)
+  event_id = models.EventScannerPriority.generate_id(
+      service_event_id,
+      service_user_id,
+      service_name)
+  scanner_event = db.Session().query(models.EventScannerPriority).get(event_id)
 
   if scanner_event is not None:
     if event_updated:
@@ -232,5 +251,9 @@ def update_scanner(event_updated,
     elif priority > max_priority:
       priority = max_priority
 
-    scanner_event = EventScannerPriority(service_event_id, service_user_id, service_name, priority)
+    scanner_event = models.EventScannerPriority(
+        service_event_id,
+        service_user_id,
+        service_name,
+        priority)
     db.Session().add(scanner_event)

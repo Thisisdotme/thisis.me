@@ -1,12 +1,10 @@
-#!/usr/bin/env python
-
 import sys
 import datetime
 import logging
 
 from tim_commons import message_queue, db, app_base
-from event_processors import event_processor
 from data_access import service, post_type
+import event_processor
 
 
 class EventProcessorDriver(app_base.AppBase):
@@ -40,10 +38,11 @@ class EventProcessorDriver(app_base.AppBase):
     handlers = []
     for service_object in services:
       # Create handlers
-      processor = event_processor.from_service_name(service_object['name'],
-                                                    max_priority,
-                                                    min_duration,
-                                                    service_object['oauth'])
+      processor = event_processor.EventProcessor(
+          service_object['name'],
+          max_priority,
+          min_duration,
+          service_object['oauth'])
       handler = {'queue': service_object['queue'],
                  'handler': create_processor_handler(processor)}
       handlers.append(handler)

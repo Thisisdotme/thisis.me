@@ -173,6 +173,7 @@ class GroupTwitterHandler:
 
     service_author_id = interpreter.service_author_id()
     handler = self.id_to_handler.get(service_author_id, None)
+
     if handler:
       handler.handle(interpreter)
     else:
@@ -190,10 +191,14 @@ class TwitterHandler:
     self.most_recent_event_timestamp = None
 
   def handle(self, interpreted_tweet):
+    state = messages.NOT_FOUND
+    if interpreted_tweet.event_type() != 'delete':
+      state = messages.CURRENT_STATE
+
     event_message = messages.create_event_message(
         'twitter',
         self.author_service_map.author_id,
-        messages.CURRENT_STATE,
+        state,
         self.author_service_map.service_author_id,
         interpreted_tweet.event_id(),
         interpreted_tweet.json,
@@ -271,9 +276,9 @@ class TwitterStreamProtocol(LineReceiver):
 
   def connectionLost(self, reason):
     # TODO: restart connection on error
-    logging.info('Finished receiving body: %s', reason.getErrorMessage())
-    logging.info('Data: %s', self.handler.list_of_twitter_ids())
-    logging.info(reason.getTraceback())
+    logging.error('Finished receiving body: %s', reason.getErrorMessage())
+    logging.error('Data: %s', self.handler.list_of_twitter_ids())
+    logging.error(reason.getTraceback())
 
 
 class WebClientContextFactory(ClientContextFactory):
