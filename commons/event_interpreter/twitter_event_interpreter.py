@@ -1,7 +1,9 @@
 from datetime import datetime
+
 from mi_schema.models import ServiceObjectType
 from service_event_interpreter import ServiceEventInterpreter
 from tim_commons import normalize_uri
+from data_access import post_type
 
 
 class TwitterEventInterpreter(ServiceEventInterpreter):
@@ -42,3 +44,20 @@ class TwitterEventInterpreter(ServiceEventInterpreter):
 
   def service_author_id(self):
     return self.json['user']['id_str']
+
+
+class _TwitterDeleteEventInterpreter(ServiceEventInterpreter):
+  def __init__(self, json):
+    super(_TwitterDeleteEventInterpreter, self).__init__(json, None, None)
+
+  def get_type(self):
+    return post_type.name_to_post_type['delete'].type_id
+
+  def get_id(self):
+    return self.json['delete']['status']['id_str']
+
+  def get_create_time(self):
+    return None
+
+  def service_author_id(self):
+    return self.json['delete']['status']['user_id_str']

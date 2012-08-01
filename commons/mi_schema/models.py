@@ -1,4 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+    Index)
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()

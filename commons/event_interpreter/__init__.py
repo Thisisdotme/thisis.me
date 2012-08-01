@@ -1,8 +1,11 @@
-from event_interpreter.facebook_event_interpreter import (FacebookPhotoAlbumEventInterpreter,
-                                                          FacebookPhotoEventInterpreter,
-                                                          FacebookCheckinInterpreter,
-                                                          FacebookStatusEventInterpreter)
-from event_interpreter.twitter_event_interpreter import TwitterEventInterpreter
+from event_interpreter.facebook_event_interpreter import (
+    FacebookPhotoAlbumEventInterpreter,
+    FacebookPhotoEventInterpreter,
+    FacebookCheckinInterpreter,
+    FacebookStatusEventInterpreter)
+from event_interpreter.twitter_event_interpreter import (
+    TwitterEventInterpreter,
+    _TwitterDeleteEventInterpreter)
 from event_interpreter.foursquare_event_interpreter import FoursquareEventInterpreter
 from event_interpreter.googleplus_event_interpreter import GoogleplusStatusEventInterpreter
 from event_interpreter.instagram_event_interpreter import InstagramEventInterpreter
@@ -40,7 +43,10 @@ def _create_facebook_event_interpreter(json_object, author_service_map, oauth_co
 
 
 def _create_twitter_event_interpreter(json_object, author_service_map, oauth_config):
-  return _TwitterEventInterpreter(json_object, author_service_map, oauth_config)
+  if 'delete' in json_object:
+    return _TwitterDeleteEventInterpreter(json_object)
+  else:
+    return _TwitterEventInterpreter(json_object, author_service_map, oauth_config)
 
 
 def _create_foursquare_event_interpreter(json_object, author_service_map, oauth_config):

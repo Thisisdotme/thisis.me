@@ -6,26 +6,26 @@
         margin:0;
         font-size:18px;
       }
-      #index-content ul {
+      .author-list ul {
         list-style-type:none;
         padding:0;
         margin:8px 0 12px 0;
       }
-      #index-content li {
+      .author-list li {
         display:inline-block;
         vertical-align:top;
         width:90px;
         padding:8px 0;
       }
-       #index-content a,  #index-content a:visited {
+       .author-list a,  .author-list a:visited {
         color:#333;
         text-decoration:none;
         font-weight:bold;
        }
-       #index-content a span {
+       .author-list a span {
          display:block;
         }
-      #index-content a img {
+      .author-list a img {
         height:70px;
         width:70px;
         display:block;
@@ -33,30 +33,63 @@
         border:1px solid#ccc;
         padding:1px;
       }
+      #index-content-favorites {
+        display:none;
+      }
+      .favorites #index-content-favorites {
+        display:block;
+      }
+      .favorites #index-content-all {
+        display:none;
+      }
     </style>
 		<header data-role="header" data-position="fixed">
 			<h1>thisis.me featured authors</h1>
 		</header><!-- /header -->
-	
-		<div id="index-content" data-role="content">
-		 <!-- <ul>
-		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
-		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
-		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
-		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
-		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
-		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
-		  </ul> -->
-		</div><!-- /content -->
-    
-
+		<section id="authors">
+  	  <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a></div> 
+  		<div id="index-content-all" class="author-list">
+  		 <!-- <ul>
+  		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
+  		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
+  		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
+  		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
+  		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
+  		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
+  		  </ul> -->
+  		</div><!-- /content -->
+      <div id="index-content-favorites" class="author-list">
+  		  <ul>
+  		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
+  		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
+  		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
+  		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
+  		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
+  		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
+  		  </ul>
+  		</div><!-- /content -->
+    </section>
     <script src="/phil/asset/coreTemplates.dust.js"></script>
 	</div><!-- /page -->
 	
 	<script type="text/javascript" metal:fill-slot="page_script">
-	  var authorJSON;
+	  var authorJSON, favorites = [], renderFavorites;
+	  var holding = false;
     //get the authors
     $(function(){
+      
+      if (Modernizr.localstorage) {
+        favorites = localStorage.getItem('tim_favorite_authors');
+        if(favorites) {
+          favorites = favorites.split(',');
+        } else {
+          favorites = [];
+        }
+        console.log('favorites: ', favorites);
+      } else {
+        favorites = [];
+      }
+    
       //prefill with people we know we have
       TIM.authors = new TIM.collections.Authors();
       TIM.authors.reset(
@@ -122,9 +155,26 @@
       }
       
       function renderAuthors() {
-      console.log(authorJSON);
+        console.log(authorJSON);
+        var name;
+        console.log("author json", authorJSON);
         var html = TIM.views.renderTemplate("authorList", authorJSON);
-        $("#index-content").html(html);
+        $("#index-content-all").html(html);
+        renderFavorites();
+      }
+      
+      renderFavorites = function() {
+        //now do 'favorites'
+        var favoritesJSON = {authors:[]};
+        TIM.authors.each (function(item){
+          name = item.get('author_name');
+          if(isFavorite(name)) {
+            favoritesJSON.authors.push(item.toJSON());
+          }
+        })
+        console.log("favorites json", favoritesJSON);
+        html = TIM.views.renderTemplate("authorList", favoritesJSON);
+        $("#index-content-favorites").html(html);
       }
 
     	TIM.authors.fetch({
@@ -138,8 +188,103 @@
     	    authorFetchCallback();
     		}
     	});
+    	
+    	
+    	$('.author-list').on('click', 'a', function(e){
+    	  if(holding) {
+      	  e.preventDefault();
+      	  e.stopPropagation();
+      	}
+    	  holding = false;
+    	  console.log('click', e);
+    	});
+    	
+    	$('#tabs a').on('tap', function(e) {
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  var href = $(this).attr('href');
+    	  if(href === '#favorites') {
+    	    $('#authors').removeClass('all').addClass('favorites');
+    	  } else {
+    	    $('#authors').removeClass('favorites').addClass('all');
+    	  }
+    	});
+    	  	
+    	
+    	$('.author-list').on('tap', 'a', function(e) {
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  console.log('tap', e);
+    	})
+    	
+    	
+    	$('#index-content-all').on('hold', 'a', function(e){
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  console.log(e);
+    	  holding = true;
+    	  var a = $(e.currentTarget);
+    	  var name = a.data("author_name");
+    	  //search favorites, decide whether to add or delete
+    	  if(isFavorite(name)) {
+    	    var remove = confirm('remove ' + a.data("author_name") + ' from your favorites?');
+      	  if (remove) {
+            removeFavorite(name);
+      	  }
+    	  } else {
+    	    var add = confirm('add ' + a.data("author_name") + ' as a favorite?');
+      	  if (add) {
+            addFavorite(name);
+      	  }
+    	  }
+    	})
+    	
+    	
+    	
     
     });
+    
+    //temporary thing to make sure there are some favorites
+  	function bootstrapFavorites() {
+      var favs = [], name;
+  	  TIM.authors.each (function(item){
+  	    
+  	    name = item.get('author_name');
+        if (item.get('author_name') === 'mchammer' || item.get('author_name') === 'howard' ) {
+          favs.push(name);
+        }
+      })
+  	  localStorage.setItem('tim_favorite_authors', favs);
+  	}
+  	
+  	function isFavorite (name) {
+  	  for (var i = 0; i < favorites.length; i++) {
+  	    if(favorites[i] === name) {
+  	      return true;
+  	    }
+  	  }
+  	  return false;
+  	}
+  	
+  	function addFavorite(name) {
+  	  if(!isFavorite(name)) {
+  	    favorites.push(name);
+  	  }
+  	  localStorage.setItem('tim_favorite_authors', favorites);
+  	  renderFavorites();
+  	}
+  	
+  	function removeFavorite(name) {
+  	  var favs = [];
+  	  for (var i = 0; i < favorites.length; i++) {
+  	    if(favorites[i] !== name) {
+  	      favs.push(favorites[i]);
+  	    }
+  	  }
+  	  localStorage.setItem('tim_favorite_authors', favs);
+  	  favorites = favs;
+  	  renderFavorites();
+  	}
 
   </script>
 
