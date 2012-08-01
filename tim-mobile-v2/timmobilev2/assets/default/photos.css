@@ -6,7 +6,7 @@ body {
 
 #photo-grid {
   background-color:#333;
- 
+  z-index:10 !important;
 }
 
 #photo-grid .photo-grid {
@@ -81,6 +81,10 @@ body {
   -webkit-box-shadow: 0 0px 7px 2px #555;
   box-shadow:         0 0px 7px 2px #555;
   text-align:center;
+}
+
+#photo-list-container {
+  z-index:15 !important;
 }
 
 #photo-list-container .toolbar {
@@ -208,6 +212,7 @@ body {
 #photo-albums {
   background-color:#333;
   color:#ccc;
+  z-index: 5 !important;
 }
 
 .photo-albums {

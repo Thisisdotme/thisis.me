@@ -604,22 +604,19 @@ body.splash {
 .slide.out {
   -x-webkit-transform: translateX(-100%);
   -webkit-animation-name: slideouttoleft;
-  z-index: 0;
 }
 .slide.in {
   -webkit-transform: translateX();
   -webkit-animation-name: slideinfromright;
-  z-index: 10;
 }
 .slide.out.reverse {
-  -webkit-transform: translateX(100%);
+  x-webkit-transform: translateX(100%);
   -webkit-animation-name: slideouttoright;
-  z-index: 10;
 }
 .slide.in.reverse {
   -webkit-transform: translateX();
   -webkit-animation-name: slideinfromleft;
-  z-indez: 0;
+  z-index: 0;
 }
 .fade.out {
   z-index: 0;
@@ -633,8 +630,8 @@ body.splash {
 
 
 @-webkit-keyframes slideinfromright { 
-    from {  -webkit-transform: translateX(100%) }
-    to {  -webkit-transform: translateX() }
+    from {  -webkit-transform: translateX(100%); }
+    to {  -webkit-transform: translateX(); }
 }
 @-webkit-keyframes slideinfromleft { 
     from {  -webkit-transform: translateZ(-20px) }
@@ -646,7 +643,7 @@ body.splash {
 }
 @-webkit-keyframes slideouttoleft { 
     from {  -webkit-transform: translateX() }
-    30% {  -webkit-transform: translateZ(-20px) }
+    50% {  -webkit-transform: translateZ(-20px) }
     to {
       -webkit-transform: translateX();
       -webkit-transform: translateZ(-20px);
@@ -886,8 +883,8 @@ footer .info .caption {
 footer > div {  float: left }
 footer .avatar {  x-height: 40px }
 footer .avatar .frame {
-  height: 33px;
-  width: 33px;
+  height: 25px;
+  width: 20px;
   margin-left: 4px;
   margin-right: 4px;
   padding: 1px;

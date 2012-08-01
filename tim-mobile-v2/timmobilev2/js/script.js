@@ -381,8 +381,8 @@ $(function() {
 	 
 	  var animationName = options.animationName || TIM.defaultTransition;
 	
-	  var inClasses = "active in " + animationName + " ";
-	  var outClasses = "active out " + animationName + " ";
+	  var inClasses = " in " + animationName + " ";
+	  var outClasses = " out " + animationName + " ";
 	  var transitions = TIM.getAvailableTransitions();
 	  if(options.reverse) {
 	    inClasses += " reverse ";
@@ -391,9 +391,9 @@ $(function() {
 	  $('#app').addClass('transitioning'); //make this a TIM method?
 	  if (fromPage) {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
-	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).animationComplete(function() {
+	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).addClass('active').animationComplete(function() {
 	      console.log('animation complete for from page: ');
-	      $(this).removeClass(outClasses + transitions);
+	      $(this).removeClass(outClasses + transitions + ' active');
 	      $('#app').removeClass('transitioning');
 	      TIM.setErrorShowing(false);
   	    TIM.setSplashScreen(false);
@@ -403,14 +403,18 @@ $(function() {
 	     
 	    });
 	  }
-	  toPage.removeClass('out reverse').addClass(inClasses).animationComplete(function() {
-	    console.log('animation complete for to page: ');
-      $(this).removeClass(transitions + " in");
-      $('#app').removeClass('transitioning');
-      setTimeout(function(){
-          window.scrollTo(0, 0);
-      }, 0);
-    });
+	  toPage.removeClass('out reverse').addClass(inClasses);
+	  window.setTimeout(function() {
+	    toPage.addClass('active').animationComplete(function() {
+  	    console.log('animation complete for to page: ', this);
+        $(this).removeClass(transitions + " in").addClass('active');
+        $('#app').removeClass('transitioning');
+        setTimeout(function(){
+            window.scrollTo(0, 0);
+        }, 0);
+      });
+	  }, 10);
+      	  
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;
 	};

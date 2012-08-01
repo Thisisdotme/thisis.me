@@ -11,6 +11,6 @@
 				<span class="service-icon {origin.known.service_name}"></span>
 			{/origin.known.service_name}
    {/origin.known}
-    <span class="time-and-location">{time_ago} {location}</span>
+    <span class="time-and-location">{time_ago} {location.name}</span>
   </div>
 </footer>

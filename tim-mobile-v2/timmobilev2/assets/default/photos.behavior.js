@@ -148,14 +148,20 @@ the behavior for the photo feature
 
       render: function(){
         var that = this;
+        var html = '';
 
         var albums = this.collection.toJSON();
         console.log('albums: ', albums);
         var templateContext = {
                                 "photo_albums": albums
         };
+        if(this.collection.length > 0) {
+          html = TIM.views.renderTemplate(this.template, templateContext);
+        } else {
+          html = '<div class="flipset-empty"><p>This user has no photo albums.</p></div>';
+        }
         
-        var html = TIM.views.renderTemplate(this.template, templateContext);
+  
     		this.$el.html(html);
     		this.numRendered = this.collection.length;
         
@@ -164,10 +170,11 @@ the behavior for the photo feature
   			}
   			
   			$('#photo-album-list').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
-  			
-  			this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
-  			setTimeout(function () { that.iScrollElem.refresh() }, 0);
-  			
+  			if(this.collection.length > 0)	{
+  			  	this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
+      			setTimeout(function () { that.iScrollElem.refresh() }, 0);
+  			}
+  		
   		  if(!feature.showDetails) {
   		    TIM.transitionPage (this.$el);
 		    }
