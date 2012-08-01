@@ -612,6 +612,7 @@ body.splash {
 .slide.out.reverse {
   x-webkit-transform: translateX(100%);
   -webkit-animation-name: slideouttoright;
+  z-index:10;
 }
 .slide.in.reverse {
   -webkit-transform: translateX();

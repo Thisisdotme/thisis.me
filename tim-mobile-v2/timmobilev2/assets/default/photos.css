@@ -1,12 +1,5 @@
-
-@import url(http://fonts.googleapis.com/css?family=Holtwood+One+SC);
-
-body {
-}
-
 #photo-grid {
   background-color:#333;
-  z-index:10 !important;
 }
 
 #photo-grid .photo-grid {
@@ -84,7 +77,6 @@ body {
 }
 
 #photo-list-container {
-  z-index:15 !important;
 }
 
 #photo-list-container .toolbar {
@@ -212,7 +204,6 @@ body {
 #photo-albums {
   background-color:#333;
   color:#ccc;
-  z-index: 5 !important;
 }
 
 .photo-albums {

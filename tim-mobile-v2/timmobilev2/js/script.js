@@ -404,7 +404,6 @@ $(function() {
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses);
-	  window.setTimeout(function() {
 	    toPage.addClass('active').animationComplete(function() {
   	    console.log('animation complete for to page: ', this);
         $(this).removeClass(transitions + " in").addClass('active');
@@ -413,7 +412,7 @@ $(function() {
             window.scrollTo(0, 0);
         }, 0);
       });
-	  }, 10);
+	  
       	  
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;

@@ -47,10 +47,10 @@ the behavior for the photo feature
        //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		  //this will be more intelligent in the future
   		  _.each(resp.photo_albums, function(album) {
-  		    console.log('album: ', album);
   		    album.headline = album.headline || 'All Photos';
   		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
-  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[0];
+  		    var photoNum = album.headline == 'All Photos' ? 1 : 0;
+  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
   		    album.main_image = cover_photo[cover_photo.length-1];
   		  });
   		  return (resp.photo_albums);
