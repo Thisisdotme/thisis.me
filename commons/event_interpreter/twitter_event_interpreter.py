@@ -50,13 +50,13 @@ class _TwitterDeleteEventInterpreter(ServiceEventInterpreter):
   def __init__(self, json):
     super(_TwitterDeleteEventInterpreter, self).__init__(json, None, None)
 
-  def evnet_type(self):
+  def get_type(self):
     return post_type.name_to_post_type['delete'].type_id
 
-  def event_id(self):
+  def get_id(self):
     return self.json['delete']['status']['id_str']
 
-  def created_time(self):
+  def get_create_time(self):
     return None
 
   def service_author_id(self):

@@ -23,7 +23,7 @@ def query_service_event(author_id, service_id, service_event_id):
   query = query.filter_by(
       author_id=author_id,
       service_id=service_id,
-      service_event_id=service_event_id)
+      event_id=service_event_id)
   return query.first()
 
 

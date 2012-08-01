@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from mi_schema import models
 from tim_commons import json_serializer, db, total_seconds, messages
-from data_access import service, service_event
+from data_access import service, service_event, event_scanner_priority
 import event_correlator
 import event_interpreter
 
@@ -32,7 +32,7 @@ class EventProcessor:
       service_event_json,
       links):
 
-    if state == messages.NOT_FOUND:
+    if state == messages.NOT_FOUND_STATE:
       self.process_not_found(tim_author_id, service_author_id, service_event_id)
     else:
       self.process_current(
@@ -69,6 +69,8 @@ class EventProcessor:
                 count,
                 service_object.correlation_id,
                 tim_author_id)
+
+    delete_scanner_event(service_event_id, service_author_id, self.service_name)
 
   def process_current(
       self,
@@ -211,6 +213,25 @@ class EventProcessor:
                    update_time,
                    self.max_priority,
                    self.min_duration)
+
+
+def delete_scanner_event(
+    service_event_id,
+    service_user_id,
+    service_name):
+  event_id = models.EventScannerPriority.generate_id(
+      service_event_id,
+      service_user_id,
+      service_name)
+
+  count = event_scanner_priority.delete(event_id)
+  if count != 1:
+    logging.error(
+        'Delete %s event scanner priority for event = %s, user = %s, name = %s',
+        count,
+        service_event_id,
+        service_user_id,
+        service_name)
 
 
 def update_scanner(event_updated,

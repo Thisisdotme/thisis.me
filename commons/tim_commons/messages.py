@@ -1,5 +1,5 @@
 # standard state arguments used in the event messages
-CURRENT_STATE = 'current_state'
+CURRENT_STATE = 'current'
 NOT_FOUND_STATE = 'not_found'
 
 

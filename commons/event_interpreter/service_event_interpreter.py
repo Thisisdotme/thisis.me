@@ -19,6 +19,7 @@ class ServiceEventInterpreter(object):
   '''
     get the type of the event (status, photo, album, checkin, etc.)
   '''
+  # TODO: remove this
   @abstractmethod
   def get_type(self):
     pass
@@ -29,6 +30,7 @@ class ServiceEventInterpreter(object):
   '''
     get the service's unique identifier for the event
   '''
+  # TODO: remove this
   @abstractmethod
   def get_id(self):
     pass
@@ -40,6 +42,7 @@ class ServiceEventInterpreter(object):
     get the time the event the created as a Python Time object
   '''
   @abstractmethod
+  # TODO: remove this
   def get_create_time(self):
     pass
 
@@ -49,6 +52,7 @@ class ServiceEventInterpreter(object):
   '''
     get the time the event was last updated as a Python Time object
   '''
+  # TODO: remove this
   def get_update_time(self):
     return None
 
@@ -58,6 +62,7 @@ class ServiceEventInterpreter(object):
   '''
     get the events headline - a brief caption
   '''
+  # TODO: remove this
   def get_headline(self):
     return None
 
@@ -68,6 +73,7 @@ class ServiceEventInterpreter(object):
     get the event's tagline or deck - a sentence or few sentences which summarizes
     # the post
   '''
+  # TODO: remove this
   def get_tagline(self):
     return None
 
@@ -77,6 +83,7 @@ class ServiceEventInterpreter(object):
   '''
     get the event's content -- the full story or body of text
   '''
+  # TODO: remove this
   def get_content(self):
     return None
 
@@ -86,6 +93,7 @@ class ServiceEventInterpreter(object):
   '''
     get the primary photo, if any, associated with the event
   '''
+  # TODO: remove this
   def get_photo(self):
     return None
 
@@ -95,6 +103,7 @@ class ServiceEventInterpreter(object):
   '''
     get the url of the event's service page
   '''
+  # TODO: remove this
   def get_url(self):
     return None
 
@@ -104,12 +113,14 @@ class ServiceEventInterpreter(object):
   '''
     get the geo coordinates for this event
   '''
+  # TODO: remove this
   def get_location(self):
     return None
 
   '''
     get any auxiliary content for the event
   '''
+  # TODO: remove this
   def get_auxiliary_content(self):
     return None
 
@@ -121,6 +132,7 @@ class ServiceEventInterpreter(object):
     on multile platforms the origin identifies the originating
     service
   '''
+  # TODO: remove this
   def get_origin(self):
     return None
 

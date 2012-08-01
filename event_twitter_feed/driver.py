@@ -16,8 +16,9 @@ from twisted.web.http_headers import Headers
 from twisted.enterprise import adbapi
 from twisted_amqp import AmqpFactory
 
-from tim_commons import app_base, json_serializer, messages, message_queue
+from tim_commons import app_base, json_serializer, messages, message_queue, db
 from mi_schema import models
+from data_access import service, post_type
 import event_interpreter
 
 
@@ -29,6 +30,11 @@ class EventTwitterFeedDriver(app_base.AppBase):
 
     observer = PythonLoggingObserver()
     observer.start()
+
+    # initialize some important maps
+    db.configure_session(db.create_url_from_config(config['db']))
+    service.initialize()
+    post_type.initialize()
 
     # Grab twitter consumer keys
     self.consumer_key = config['oauth']['twitter']['key']
@@ -76,7 +82,8 @@ class EventTwitterFeedDriver(app_base.AppBase):
       else:
         users_without_oauth.append(asm)
 
-    self._handle_users(self.default_token_key, self.default_token_secret, users_without_oauth)
+    if users_without_oauth:
+      self._handle_users(self.default_token_key, self.default_token_secret, users_without_oauth)
 
   def _handle_users(self, token_key, token_secret, author_service_maps):
     handlers = []
@@ -191,8 +198,8 @@ class TwitterHandler:
     self.most_recent_event_timestamp = None
 
   def handle(self, interpreted_tweet):
-    state = messages.NOT_FOUND
-    if interpreted_tweet.event_type() != 'delete':
+    state = messages.NOT_FOUND_STATE
+    if post_type.id_to_label(interpreted_tweet.event_type()) != 'delete':
       state = messages.CURRENT_STATE
 
     event_message = messages.create_event_message(
