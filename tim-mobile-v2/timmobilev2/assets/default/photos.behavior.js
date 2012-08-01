@@ -49,7 +49,7 @@ the behavior for the photo feature
   		  _.each(resp.photo_albums, function(album) {
   		    album.headline = album.headline || 'All Photos';
   		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
-  		    var photoNum = album.headline == 'All Photos' ? 1 : 0;
+  		    var photoNum = album.headline == 'All Photos' && resp.photo_albums.length  > 1 ? 1 : 0;
   		    var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
   		    album.main_image = cover_photo[cover_photo.length-1];
   		  });
