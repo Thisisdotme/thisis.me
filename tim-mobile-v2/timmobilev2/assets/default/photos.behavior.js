@@ -47,10 +47,10 @@ the behavior for the photo feature
        //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		  //this will be more intelligent in the future
   		  _.each(resp.photo_albums, function(album) {
-  		    console.log('album: ', album);
-  		    album.headline = album.headline || 'Untitled Album';
+  		    album.headline = album.headline || 'All Photos';
   		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
-  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[0];
+  		    var photoNum = album.headline == 'All Photos' && resp.photo_albums.length  > 1 ? 1 : 0;
+  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
   		    album.main_image = cover_photo[cover_photo.length-1];
   		  });
   		  return (resp.photo_albums);
@@ -148,14 +148,20 @@ the behavior for the photo feature
 
       render: function(){
         var that = this;
+        var html = '';
 
         var albums = this.collection.toJSON();
         console.log('albums: ', albums);
         var templateContext = {
                                 "photo_albums": albums
         };
+        if(this.collection.length > 0) {
+          html = TIM.views.renderTemplate(this.template, templateContext);
+        } else {
+          html = '<div class="flipset-empty"><p>This user has no photo albums.</p></div>';
+        }
         
-        var html = TIM.views.renderTemplate(this.template, templateContext);
+  
     		this.$el.html(html);
     		this.numRendered = this.collection.length;
         
@@ -164,10 +170,11 @@ the behavior for the photo feature
   			}
   			
   			$('#photo-album-list').css('height', TIM.getViewportSize().height - 40 + 'px'); //subtracting 40 for the toolbar height?
-  			
-  			this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
-  			setTimeout(function () { that.iScrollElem.refresh() }, 0);
-  			
+  			if(this.collection.length > 0)	{
+  			  	this.iScrollElem = new iScroll('photo-album-list', { hScroll: false });
+      			setTimeout(function () { that.iScrollElem.refresh() }, 0);
+  			}
+  		
   		  if(!feature.showDetails) {
   		    TIM.transitionPage (this.$el);
 		    }
@@ -219,7 +226,6 @@ the behavior for the photo feature
 
       initialize: function() {
           _.bindAll(this);
-          //this.collection.bind( "reset", this.render );
           this.collection.bind('pageLoaded', this.renderNextPageset, this);
           this.numRendered = 0;
       },
@@ -238,7 +244,6 @@ the behavior for the photo feature
         this.collection.max = album.get("count");
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			this.collection.bind("reset", this.render);
       },
 
 
@@ -431,7 +436,7 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			this.collection.bind( "reset", this.render );
+  			//this.collection.bind( "reset", this.render );
       },
       
       setCollection: function(album) {
@@ -441,7 +446,6 @@ the behavior for the photo feature
         this.collection.setURL();
         this.collection.bind('pageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
-  			window.photos = album.photos.toJSON();
       },
       
       //add the flip events to the flip mixin
@@ -623,11 +627,9 @@ the behavior for the photo feature
     }
    
     feature.albumCollection = feature.albumCollection || new TIM.collections.PhotoAlbums();
-    feature.mainCollection = feature.mainCollection || new TIM.collections.Photos();
     
     //keep grid/list views hanging around or just use one for each and swap out collections?
     
-    feature.listView = feature.listView || new TIM.views.PhotoList({collection: feature.mainCollection});
     feature.albumListView = feature.albumListView || new TIM.views.PhotoAlbumList({collection: feature.albumCollection});
     
     if(!feature.hasFetchedCollection) {
@@ -639,7 +641,6 @@ the behavior for the photo feature
       //let's try the jsonp plugin here...
       feature.albumCollection.fetch({
   			success: function(model, resp) {
-  		    //alert('got photos for album!');
   		    feature.hasFetchedCollection = true;
       		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   			},
@@ -720,8 +721,6 @@ the behavior for the photo feature
      }
     //make this a method with a callback
     if (!album.hasFetchedPhotos) {
-      album.photos.max = album.get("count");
-      album.photos.setURL(album.get("searchTerm"), album.get("count"));
       album.photos.fetch({
   			success: function(resp) {
   		    album.hasFetchedPhotos = true;
@@ -742,7 +741,11 @@ the behavior for the photo feature
     options = options || {};
     var album = feature.albumCollection.get(options.albumId);
     //don't make a new one each time?
-    feature.gridView = feature.gridView || new TIM.views.PhotoGrid({collection: album.photos});
+    if (feature.gridView) {
+     feature.gridView.close();
+    }
+    
+    feature.gridView = new TIM.views.PhotoGrid({collection: album.photos});
     feature.gridView.album = album;
     
     //have an inner function here so it's available via callback if we have to fetch
@@ -753,7 +756,7 @@ the behavior for the photo feature
       feature.gridView.render();
 		  TIM.setLoading(false);
 		  
-	    TIM.app.navigate('/photos/' + album.id);
+	    TIM.app.navigate('/photos/' + album.id, {trigger: false});
 	    TIM.transitionPage (feature.gridView.$el, {
 	      animationName: "slide", reverse: options.reverse,
 	      callback: function() {

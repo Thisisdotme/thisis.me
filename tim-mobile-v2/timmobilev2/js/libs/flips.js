@@ -413,7 +413,7 @@
 			  if(_self.parentView && !_self.parentView.flipMode) {
 			    return;
 			  }
-			  console.log('hammer drag event: position Y, distance, startY, endY ' + ev.type, ev.position ? ev.position.y : 'no position', distance, startY, endY);
+			  //console.log('hammer drag event: position Y, distance, startY, endY ' + ev.type, ev.position ? ev.position.y : 'no position', distance, startY, endY);
 			  
 			  // note - this isn't how flipboard does it - they use the initial direction of the swipe
 				if(!_self._isAnimating() && !_self.loading) {

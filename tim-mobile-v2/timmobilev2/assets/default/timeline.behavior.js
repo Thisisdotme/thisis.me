@@ -108,7 +108,6 @@
         this.renderFlipSet();
         //go straight to the detail view if we got here from an external link to a story
         //change this to more like what the photo feature does...
-        
         if(feature.showDetails) {
           feature.showDetailView();
           feature.showDetails = false;

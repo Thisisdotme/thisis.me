@@ -37,6 +37,7 @@
       
       var featureName = this.get('feature_name');
       //a route for /<featurename>
+      this.set('path', (featureName === "home" ? "/" : "/" + featureName));
       
       TIM.app.route(featureName, featureName); 
       //TIM.app.route(featureName + "/:resource", featureName, function(number){});
@@ -143,6 +144,10 @@
   
   TIM.models.PostType  = Backbone.Model.extend({
     
+  });
+  
+  TIM.models.Author  = Backbone.Model.extend({
+  
   });
 	
 	

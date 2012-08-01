@@ -1,16 +1,146 @@
 <metal:index use-macro="load: master_template.html">
-
 	<div id="index" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
-
+    <style>
+      body { background-color:#fff !important; padding:20px;}
+      header h1 {
+        margin:0;
+        font-size:18px;
+      }
+      #index-content ul {
+        list-style-type:none;
+        padding:0;
+        margin:8px 0 12px 0;
+      }
+      #index-content li {
+        display:inline-block;
+        vertical-align:top;
+        width:90px;
+        padding:8px 0;
+      }
+       #index-content a,  #index-content a:visited {
+        color:#333;
+        text-decoration:none;
+        font-weight:bold;
+       }
+       #index-content a span {
+         display:block;
+        }
+      #index-content a img {
+        height:70px;
+        width:70px;
+        display:block;
+        margin-bottom:4px;
+        border:1px solid#ccc;
+        padding:1px;
+      }
+    </style>
 		<header data-role="header" data-position="fixed">
-			<h1>thisis.too.me</h1>
+			<h1>thisis.me featured authors</h1>
 		</header><!-- /header -->
 	
 		<div id="index-content" data-role="content">
-			This is the sales and marketing site
-			<a href="ken">view ken!!!</a>
+		 <!-- <ul>
+		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
+		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
+		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
+		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
+		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
+		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
+		  </ul> -->
 		</div><!-- /content -->
+    
 
+    <script src="/phil/asset/coreTemplates.dust.js"></script>
 	</div><!-- /page -->
+	
+	<script type="text/javascript" metal:fill-slot="page_script">
+	  var authorJSON;
+    //get the authors
+    $(function(){
+      //prefill with people we know we have
+      TIM.authors = new TIM.collections.Authors();
+      TIM.authors.reset(
+        [   {
+              author_id: 1,
+              author_name: "howard",
+              email: "howard@thisis.me",
+              full_name: "Howard Burrows",
+              template: null
+            },
+            {
+              author_id: 6,
+              author_name: "phil",
+              email: "phil@mobileidentity.me",
+              full_name: "Philip Goffin",
+              template: null
+            },
+            {
+              author_id: 2,
+              author_name: "loree",
+              email: "loree@mobileidentity.me",
+              full_name: "Loree Hirschman",
+              template: null
+            },
+            {
+              author_id: 8,
+              author_name: "philblack",
+              email: "pblack@trueventures.com",
+              full_name: "Philip Black",
+              template: null
+            },
+            {
+              author_id: 39,
+              author_name: "jose",
+              email: "jose@thisis.me",
+              full_name: "Jose Garcia",
+              template: null
+            
+            },
+            {
+              author_id: 37,
+              author_name: "Ken",
+              email: "k_lenga@yahoo.com",
+              full_name: "Ken Lenga",
+              template: null
+            },
+            {
+              author_id: 43,
+              author_name: "mchammer",
+              email: "mchammer",
+              full_name: "MC Hammer",
+              template: null
+            }
+        ]
+      );
+      
+      function authorFetchCallback() {
+        authorJSON = {"authors":
+            TIM.authors.toJSON()
+        }
+        
+        renderAuthors();
+      }
+      
+      function renderAuthors() {
+      console.log(authorJSON);
+        var html = TIM.views.renderTemplate("authorList", authorJSON);
+        $("#index-content").html(html);
+      }
+
+    	TIM.authors.fetch({
+    		callbackParameter: "callback",
+    		success: function(resp) {
+    		  console.log('fetched authors');
+    		  authorFetchCallback();
+    		},
+    		error: function(resp) {
+    	    console.log('fetching authors failed');
+    	    authorFetchCallback();
+    		}
+    	});
+    
+    });
+
+  </script>
 
 </metal:index>

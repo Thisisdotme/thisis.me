@@ -7,7 +7,7 @@
 	<meta http-equiv="Expires" content="-1">
 	<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 	
-  <title>${author_name}</title>
+  <title>${author_name or 'thisis.me'}</title>
   <meta name="description" content="">
   <meta name="author" content="">
 
@@ -18,7 +18,6 @@
 
   <!-- Home screen icon  Mathias Bynens http://goo.gl/6nVq0 -->
   <!-- For iPhone 4 with high-resolution Retina display: -->
-  <!-- link rel="apple-touch-icon-precomposed" sizes="114x114" href="/${author_name}/asset/apple-touch-icon-114x114-precomposed.png" -->
   <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/img/h/new-logo.png">
   <!-- For first-generation iPad: -->
   <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/img/m/apple-touch-icon-72x72-precomposed.png">
@@ -81,6 +80,7 @@
 	
   <!-- scripts concatenated and minified via ant build script -->
   <script src="/js/mylibs/helper.js"></script>
+  <script src="/js/plugins.js"></script>
 	<script src="/js/libs/underscore.js"></script>
 	<script src="/js/libs/backbone.js"></script>
 	<script src="/js/libs/iscroll.js"></script>
