@@ -307,13 +307,15 @@ $(function() {
 	    
 	    console.log('hash change event: ', arguments);
 	    
+	    localStorage.removeItem('tim_last_url');
+	    
 	    if(route.split(':')[0] === 'route') {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
-  	    
   	    //total hack for 'home page'
   	    if (featureName == 'home') {
   	      location.href = "/";
+  	      return;
   	    }
   	    
   	    var feature = TIM.features.getByName(featureName);
@@ -321,10 +323,15 @@ $(function() {
   	      TIM.setLoading(true); //make this a method on TIM
   	    }
   	    
+  	    if(localStorage && localStorage.setItem) {
+  	       localStorage.setItem('tim_last_url', '/' + TIM.pageInfo.authorName + "#" + featureName + (path || ""));
+  	    }
+  	    
   	    if(!feature) {
   	      console.log('no feature');
   	      if (TIM.features.length == 0) {
   	        TIM.eventAggregator.trigger("error", {exception: "No features loaded for this author"});
+  	        localStorage.setItem('tim_last_url', '/');
   	        return;
   	      }
   	      //we get here if there was no feature in the URL

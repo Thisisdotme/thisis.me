@@ -48,6 +48,15 @@
       #tabs a {
         padding:12px 6px;
       }
+      .no-favorites {
+        display: inline-block;
+        margin: 20px auto;
+        background-color: #FAF5B1;
+        opacity: 0.7;
+        border: 1px solid #BAAE04;
+        border-radius: 8px;
+        padding: 12px;
+      }
     </style>
 		<header data-role="header" data-position="fixed">
 			<h1>thisis.me authors</h1>
@@ -55,14 +64,6 @@
 		<section id="authors">
   	  <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a></div> 
   		<div id="index-content-all" class="author-list">
-  		 <!-- <ul>
-  		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
-  		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
-  		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
-  		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
-  		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
-  		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
-  		  </ul> -->
   		</div><!-- /content -->
       <div id="index-content-favorites" class="author-list">
   		</div><!-- /content -->
@@ -72,12 +73,20 @@
 	
 	<script type="text/javascript" metal:fill-slot="page_script">
 	  var authorJSON, favorites = [], renderFavorites;
-	  var holding = false;
+	  var holding = false; var lastURL = '/';
     //get the authors
     $(function(){
       
       if (Modernizr.localstorage) {
+        lastURL = localStorage.getItem('tim_last_url');
+        if(lastURL && lastURL != "/") {
+           localStorage.setItem('tim_last_url', '/');
+           location.href = lastURL;
+        }
+      
+        localStorage.setItem('tim_last_url', '/');
         favorites = localStorage.getItem('tim_favorite_authors');
+        
         if(favorites) {
           favorites = favorites.split(',');
         } else {
@@ -163,6 +172,7 @@
       
       renderFavorites = function() {
         //now do 'favorites'
+        var html = "<div class='no-favorites'>no favorites yet</div>";
         var favoritesJSON = {authors:[]};
         TIM.authors.each (function(item){
           name = item.get('author_name');
@@ -171,7 +181,9 @@
           }
         })
         console.log("favorites json", favoritesJSON);
-        html = TIM.views.renderTemplate("authorList", favoritesJSON);
+        if(favoritesJSON.authors.length > 0) {
+           html = TIM.views.renderTemplate("authorList", favoritesJSON);
+        }
         $("#index-content-favorites").html(html);
       }
 
