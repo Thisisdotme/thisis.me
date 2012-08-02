@@ -36,7 +36,7 @@
 
       initialize: function() {
           _.bindAll(this, "render");
-          this.model.bind( "change", this.render );
+          //this.model.bind( "change", this.render );
       },
 
   		events: {
@@ -67,6 +67,9 @@
               
             }
           }
+          
+          //make a fallback picture_url
+          templateContext.picture_url = templateContext.picture_url || "/img/default_profile_thumb.jpg";
           
           var html = TIM.views.renderTemplate("bio", templateContext);
           this.$el.append(html);
@@ -99,10 +102,11 @@
         dataType: "jsonp",
         callbackParameter: "callback",
   	  	//add this timeout in case call fails...
-    		timeout :TIM.pageInfo.authorName === "mchammer" ? 20 : 4000,
+    		timeout: TIM.pageInfo.authorName === "mchammer" ? 20 : 4000,
     		success: function(resp) {
     		  //
     		  console.log('fetched bio');
+    		  feature.bioView.render(); 
     		},
     		error: function(model, resp) {
     		  if (TIM.pageInfo.authorName === "mchammer") {

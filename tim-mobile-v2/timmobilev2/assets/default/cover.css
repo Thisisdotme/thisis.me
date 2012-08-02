@@ -133,12 +133,13 @@
 {
 	display:block;
 	font-family:'Helvetica Neue';
-	font-size:22px;
+	font-size:18px;
 	font-weight:700;
 	line-height:1.2;
 	margin-bottom:30px;
 	text-shadow:0 1px 3px rgba(0,0,0,0.5);
 	width:66%;
+	-webkit-line-clamp:3;
 }
 
 .pullquote a

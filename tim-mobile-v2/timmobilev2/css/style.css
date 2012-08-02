@@ -752,6 +752,7 @@ footer .service-icon.instagram {  background: transparent url(/img/icons/instagr
 footer .service-icon.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
 footer .service-icon.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
 footer .service-icon.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
+footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/img/h/services/color/Foursquare.png) no-repeat center center }
 #content-container .scroll-overlay .interaction-icons {  display: none }
 
 .photo-page .interaction-icons {
@@ -926,6 +927,108 @@ footer .fuzzy-time {
   color: gray;
   font-size: 12px;
 }
+
+/* flipboard css */
+
+.big-num {
+  font-size:340px;
+}
+
+.back .big-num {
+  color:red;
+}
+
+.flippage {
+	-webkit-perspective: 2200px;
+	-moz-perspective: 2200px;
+	perspective: 2200px;
+} 
+
+.page {
+	height: 50%;
+	top:50%;
+	width: 100%;
+	position: absolute;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-transform-origin: center top;
+	-moz-transform-origin: center top;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.page > div {
+	display: block;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	background: #fff;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+}
+.page .front {
+} 
+.page .back {	
+	-webkit-transform: rotateX(-180deg);
+	-moz-transform: rotateX(-180deg);
+}
+.page .outer{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	overflow: hidden;
+	z-index: 999;
+}
+.page > div > div > .content{
+	//height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+.page .front > div > .content {
+  height: 200%;
+  top: -100%;
+  width:100%;
+}
+
+.page  .back > div > .content {
+  height: 200%;
+  width:100%;
+}
+  
+.overlay, .flipoverlay{
+	background-color: rgba(0, 0, 0, 0.6);
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+.flipoverlay{
+	background-color: rgba(0, 0, 0, 0.2);
+}
+.page .content .inner{
+	height: 100%;
+}
+.page h1{
+	text-align: center;
+}
+
+
+
+
+
+
+
+/* end flipboard */
 
 /* classes for the various event types that can appear in a timeline - actually they're called 'post types' at the moment */
 

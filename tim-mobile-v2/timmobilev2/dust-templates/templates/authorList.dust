@@ -1,7 +1,10 @@
-<div id="index-content" data-role="content">
-  <ul>
-  {#authors}
-    <li><a href="{author_name}" data-author_name="{author_name}""><img src="/{author_name}/asset/profile_thumb.jpg"/><span>{full_name}</span></a></li>
-  {/authors}
-  </ul>
-</div><!-- /content -->
+
+<ul>
+{#authors}
+  <li><a href="{author_name}" data-author_name="{author_name}""><img src="/{author_name}/asset/profile_thumb.jpg"/><span>{full_name}</span></a></li>
+{/authors}
+</ul>
+{#authors}
+{:else}
+  <div class="no-authors">No Authors</div>
+{/authors}

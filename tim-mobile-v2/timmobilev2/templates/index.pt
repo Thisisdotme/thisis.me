@@ -42,6 +42,12 @@
       .favorites #index-content-all {
         display:none;
       }
+      #tabs {
+        margin-top:10px;
+      }
+      #tabs a {
+        padding:12px 6px;
+      }
     </style>
 		<header data-role="header" data-position="fixed">
 			<h1>thisis.me featured authors</h1>
@@ -59,14 +65,6 @@
   		  </ul> -->
   		</div><!-- /content -->
       <div id="index-content-favorites" class="author-list">
-  		  <ul>
-  		    <li><a href="mchammer"><img src="/mchammer/asset/profile_thumb.jpg"/>MC Hammer</a></li>
-  		    <li><a href="phil"><img src="/phil/asset/profile_thumb.jpeg"/>Phil Goffin</a></li>
-  		    <li><a href="philblack"><img src="/philblack/asset/profile_thumb.jpeg"/>Phil Black</a></li>
-  		    <li><a href="howard"><img src="/howard/asset/profile_thumb.jpg"/>Howard</a></li>
-  		    <li><a href="loree"><img src="/loree/asset/profile_thumb.jpg"/>Loree</a></li>
-  		    <li><a href="ken"><img src="/ken/asset/profile_thumb.jpg"/>Ken</a></li>
-  		  </ul>
   		</div><!-- /content -->
     </section>
     <script src="/phil/asset/coreTemplates.dust.js"></script>
