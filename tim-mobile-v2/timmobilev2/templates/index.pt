@@ -50,7 +50,7 @@
       }
     </style>
 		<header data-role="header" data-position="fixed">
-			<h1>thisis.me featured authors</h1>
+			<h1>thisis.me authors</h1>
 		</header><!-- /header -->
 		<section id="authors">
   	  <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a></div> 
