@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=PT+Sans+Narrow:400,700|Holtwood+One+SC);
 
 #cover-container {
-  background:#000 url(/timoreilly/asset/cover_bg.jpg) no-repeat left top;
+  background:#000 url(/philblack/asset/cover_bg.jpg) no-repeat left top;
   background-size:cover;
 }
 
@@ -28,29 +28,54 @@
 }
 
 .cover-page a, .cover-page a:visited {
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
   text-decoration:none;
-  color:#FFCE78;
 }
 
 
 .cover-page .primary-story {
-  box-sizing:border-box;
-  font-size:14px;
-  color:#FFCE78;
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  position:absolute;
+  top:150px;
+  width:250px;
+  left:28px;
   font-family:helvetica,sans-serif;
-  line-height:1.2;
+  line-height:1.1;
   text-shadow:1px 1px #333;
-  padding:1px 12px;
-  background-color: rgba(0, 0, 0, 0.4);
-  font-weight:normal;
 }
 
 .cover-page .secondary-story {
-  display:none;
+  position:absolute;
+  bottom:25px;
+  width:100px;
+  left:15%;
+  font-size:13px;
+  font-weight:bold;
+  color:#fff;
+  font-family:helvetica,sans-serif;
+  line-height:1.1;
+  text-shadow:1px 1px #333;
+  text-overflow:ellipsis;
+  
 }
 
 .cover-page .tertiary-story {
-  display:none;
+  position:absolute;
+   bottom:25px;
+   width:100px;
+   right:28px;
+   font-size:13px;
+   font-weight:bold;
+   color:#fff;
+   font-family:helvetica,sans-serif;
+   line-height:1.1;
+   text-shadow:1px 1px #333;
+   text-overflow:ellipsis;
+  
 }
 
 /* cameron's styles */
@@ -105,7 +130,31 @@
 	width:100%;
 }
 
-p.pullquote {
-  margin:.6em 0;
+.pullquote
+{
+	display:block;
+	font-family:'Helvetica Neue';
+	font-size:18px;
+	font-weight:700;
+	line-height:1.2;
+	margin-bottom:30px;
+	text-shadow:0 1px 3px rgba(0,0,0,0.5);
+	width:66%;
+	display:webkit-box; 
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow:hidden;
+	text-overflow: ellipsis;
 }
 
+.pullquote a
+{
+	color:#FFCE78;
+	text-decoration:none;
+}
+
+.pullquote a
+{
+	color:#FFCE78;
+	text-decoration:none;
+}
