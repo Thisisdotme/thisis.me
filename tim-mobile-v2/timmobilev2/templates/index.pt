@@ -31,9 +31,13 @@
         width:70px;
         display:block;
         margin-bottom:4px;
-        border:1px solid#ccc;
+        border:1px solid #ccc;
         padding:1px;
       }
+      .author-list a:active img {
+        border:1px solid #cee;
+      }
+      
       #index-content-favorites {
         display:none;
       }

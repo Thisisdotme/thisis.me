@@ -13,25 +13,10 @@
   font-weight: bold;
 }
 
-.cover-page h1.title {
-  font-size:34px;
-  font-weight:normal;
-  color:#fff200;
-  text-align:left;
-  -webkit-text-stroke: 1px #333;
-  position:absolute;
-  top:22px;
-  left:12px;
-  font-family: 'Holtwood One SC',serif;
-  line-height:1.1;
-  text-transform:uppercase;
-}
-
 .cover-page a, .cover-page a:visited {
   text-decoration:none;
   color:#FFCE78;
 }
-
 
 .cover-page .primary-story {
   box-sizing:border-box;
@@ -54,7 +39,6 @@
 }
 
 /* cameron's styles */
-
 
 .cover-page .header
 {

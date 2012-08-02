@@ -28,55 +28,31 @@
 }
 
 .cover-page a, .cover-page a:visited {
-  font-size:16px;
-  font-weight:bold;
-  color:#fff;
   text-decoration:none;
+  color:#FFCE78;
 }
 
 
 .cover-page .primary-story {
-  font-size:16px;
-  font-weight:bold;
-  color:#fff;
-  position:absolute;
-  top:150px;
-  width:250px;
-  left:28px;
+  box-sizing:border-box;
+  font-size:1.2em;
+  color:#FFCE78;
   font-family:helvetica,sans-serif;
-  line-height:1.1;
+  line-height:1.2;
   text-shadow:1px 1px #333;
+  padding:1px 12px;
+  background-color: rgba(0, 0, 0, 0.4);
+  font-weight:normal;
 }
 
 .cover-page .secondary-story {
-  position:absolute;
-  bottom:25px;
-  width:100px;
-  left:15%;
-  font-size:13px;
-  font-weight:bold;
-  color:#fff;
-  font-family:helvetica,sans-serif;
-  line-height:1.1;
-  text-shadow:1px 1px #333;
-  text-overflow:ellipsis;
-  
+  display:none;
 }
 
 .cover-page .tertiary-story {
-  position:absolute;
-   bottom:25px;
-   width:100px;
-   right:28px;
-   font-size:13px;
-   font-weight:bold;
-   color:#fff;
-   font-family:helvetica,sans-serif;
-   line-height:1.1;
-   text-shadow:1px 1px #333;
-   text-overflow:ellipsis;
-  
+  display:none;
 }
+
 
 /* cameron's styles */
 
@@ -86,11 +62,11 @@
 	display:block;
 	left:0;
 	margin:10%;
+	margin-top:4%;
 	margin-left:6%;
-	margin-top:6%;
 	padding:0;
 	position:absolute;
-	top:40;
+	top:0;
 	width:80%;
 }
 
@@ -131,25 +107,12 @@
 	width:100%;
 }
 
-.pullquote
-{
-	display:block;
-	font-family:'Helvetica Neue';
-	font-size:20px;
-	font-weight:700;
-	line-height:1.2;
-	margin-bottom:30px;
-	text-shadow:0 1px 3px rgba(0,0,0,0.7);
-	width:66%;
-	display:webkit-box; 
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 2;
-	overflow:hidden;
-	text-overflow: ellipsis;
+p.pullquote {
+  margin:.6em 0;
 }
 
 .pullquote a
 {
-	color:#fff;
+	color:#FFCE78;
 	text-decoration:none;
 }
