@@ -2,6 +2,7 @@
 	<div id="index" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
     <style>
       body { background-color:#fff !important; padding:20px;}
+      #index { display:none; }
       header h1 {
         margin:0;
         font-size:18px;
@@ -82,6 +83,7 @@
         if(lastURL && lastURL != "/") {
            localStorage.setItem('tim_last_url', '/');
            location.href = lastURL;
+           return;
         }
       
         localStorage.setItem('tim_last_url', '/');
@@ -250,7 +252,7 @@
     	})
     	
     	
-    	
+    	$('#index').show();
     
     });
     
