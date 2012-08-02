@@ -315,6 +315,7 @@ $(function() {
   	    //total hack for 'home page'
   	    if (featureName == 'home') {
   	      location.href = "/";
+  	      localStorage.removeItem('tim_last_url');
   	      return;
   	    }
   	    
