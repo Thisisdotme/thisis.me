@@ -488,7 +488,7 @@ the behavior for the photo feature
         }
         var that = this;
         feature.showDetails = false;
-        feature.showGridView({albumId: this.album.id, reverse:true, animationName: "fade"});
+        feature.showGridView({albumId: this.album.id, reverse:false, animationName: "fade"});
       },
       
       //we're attempting to load ahead of teh flip
