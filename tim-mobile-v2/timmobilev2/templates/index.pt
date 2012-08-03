@@ -17,6 +17,7 @@
         vertical-align:top;
         width:90px;
         padding:8px 0;
+        text-align:center;
       }
        .author-list a,  .author-list a:visited {
         color:#333;
@@ -30,6 +31,7 @@
         height:70px;
         width:70px;
         display:block;
+        margin: 0 auto;
         margin-bottom:4px;
         border:1px solid #ccc;
         padding:1px;
