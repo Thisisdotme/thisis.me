@@ -20,6 +20,7 @@ the behavior for the photo feature
   feature.showDetails = false;
   feature.showDetailId = 0;
   feature.cachedResources = {};
+  feature.throttleToolbarClick = false;
     
   TIM.models.PhotoAlbum = Backbone.Model.extend({
 
@@ -310,6 +311,9 @@ the behavior for the photo feature
 
       showFlipView: function(event) {
   		  var photoId = 0;
+  		  if (feature.throttleToolbarClick) {
+  		    return;
+  		  }
   		  if (event) {
   		    photoId = $(event.currentTarget).data('photo_id');
   		  }
@@ -482,7 +486,9 @@ the behavior for the photo feature
 
       showGridView: function(event) {
         console.log('toolbar clicked');
-        event.preventDefault();
+        feature.throttleToolbarClick = true;
+        window.setTimeout()
+        event.preventDefault(feature.throttleToolbarClick = false, 100); //hack way to prevent propagation of back button 'tap' event
         if(!this.flipMode) {
           return;
         }
