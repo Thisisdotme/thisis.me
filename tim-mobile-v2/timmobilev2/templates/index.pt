@@ -77,18 +77,28 @@
 	</div><!-- /page -->
 	
 	<script type="text/javascript" metal:fill-slot="page_script">
+	  window.TIM = TIM || {};
+	  TIM.models = TIM.models || {};
+    TIM.collections = TIM.collections || {};
+    TIM.views = TIM.views || {};
+    TIM.mixins = TIM.mixins || {};
+    TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 	  var authorJSON, favorites = [], renderFavorites;
 	  var holding = false; var lastURL = '/';
     //get the authors
     $(function(){
       
       if (Modernizr.localstorage) {
-        lastURL = localStorage.getItem('tim_last_url');
-        if(lastURL && lastURL != "/") {
-           localStorage.setItem('tim_last_url', '/');
-           location.href = lastURL;
-           return;
-        }
+        if (!$.cookie('tim_session')) {
+          lastURL = localStorage.getItem('tim_last_url');
+          if(lastURL && lastURL != "/") {
+             localStorage.setItem('tim_last_url', '/');
+             location.href = lastURL;
+             return;
+          }
+        } else {
+          $.cookie('tim_session', true);
+        }   
       
         localStorage.setItem('tim_last_url', '/');
         favorites = localStorage.getItem('tim_favorite_authors');

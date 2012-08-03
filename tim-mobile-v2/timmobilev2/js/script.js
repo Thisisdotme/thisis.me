@@ -32,6 +32,9 @@ $(function() {
     
   var parsedUri = parseUri(window.location.href);
   console.log("parsed uri: ", parsedUri);
+  if(parsedUri.path === '/') {
+    return;
+  }
   
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
@@ -449,5 +452,6 @@ $(function() {
 	}
 	
 	TIM.globalHammer = new Hammer(document.body);
+	localStorage.removeItem('tim_last_url');
 	
 });
