@@ -187,7 +187,7 @@ the behavior for the photo feature
   		    resourceId = $(event.currentTarget).data('id');
   		    albumId = $(event.currentTarget).data('album_id');
   		  }
-  		  feature.showListView(resourceId, {albumId: albumId, animationName: "slide"});
+  		  feature.showListView(resourceId, {albumId: albumId, animationName: "fade"});
       },
       
       showGridView: function(event) {
@@ -195,7 +195,7 @@ the behavior for the photo feature
   		  if (event) {
   		    resourceId = $(event.currentTarget).data('album_id');
   		  }
-  		  feature.showGridView({albumId: resourceId, animationName: "slide"});
+  		  feature.showGridView({albumId: resourceId, animationName: "fade"});
       },
       
       //figure out the next elements, add those to the grid
@@ -313,12 +313,12 @@ the behavior for the photo feature
   		  if (event) {
   		    photoId = $(event.currentTarget).data('photo_id');
   		  }
-  		  feature.showListView({albumId: this.album.id, photoId: photoId, collection: this.collection, animationName: "slide"});
+  		  feature.showListView({albumId: this.album.id, photoId: photoId, collection: this.collection, animationName: "fade"});
       },
       
       showAlbumView: function(event) {
   		  TIM.transitionPage (feature.albumListView.$el, {
-  		    animationName: "slide", reverse: true,
+  		    animationName: "fade", reverse: true,
   		    callback: function() {
             feature.albumListView.resetScrollElem();
             TIM.app.navigate('/photos');
@@ -488,7 +488,7 @@ the behavior for the photo feature
         }
         var that = this;
         feature.showDetails = false;
-        feature.showGridView({albumId: this.album.id, reverse:true, animationName: "slide"});
+        feature.showGridView({albumId: this.album.id, reverse:true, animationName: "fade"});
       },
       
       //we're attempting to load ahead of teh flip
@@ -758,7 +758,7 @@ the behavior for the photo feature
 		  
 	    TIM.app.navigate('/photos/' + album.id, {trigger: false});
 	    TIM.transitionPage (feature.gridView.$el, {
-	      animationName: "slide", reverse: options.reverse,
+	      animationName: "fade", reverse: options.reverse,
 	      callback: function() {
 	        feature.gridView.resetScrollElem();
 	      }
@@ -809,7 +809,7 @@ the behavior for the photo feature
     feature.commentsView.render();
     console.log("comments view:", feature.commentsView);
     TIM.app.navigate('/photos/album/' + resourceId + "/comments");
-    TIM.transitionPage (feature.commentsView.$el, {animationName: "slide"});
+    TIM.transitionPage (feature.commentsView.$el, {animationName: "fade"});
   }
   
   //add to feature?
