@@ -118,7 +118,9 @@
   
   //model for services, e.g. facebook, twitter, etc.
   TIM.models.Service  = Backbone.Model.extend({
-    
+    getFooterImage: function() {
+      return this.get('color_icon_high_res');
+    }
   });
   
   //model for event/post types, e.g. .

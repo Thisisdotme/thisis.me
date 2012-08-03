@@ -872,6 +872,15 @@ footer .author a, footer .author a:visited {
 .photo-page footer .author a, footer .photo-page .author a:visited {
   color: #fff;
 }
+.cover-page .service-icon {
+  display:inline-block;
+  position:relative;
+  top:-2px;
+  height:15px;
+  width:15px;
+  margin-right:5px;
+  line-height:1.1;
+}
 footer .info .caption {
   display: none;
   height: 18px;
