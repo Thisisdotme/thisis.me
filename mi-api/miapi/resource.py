@@ -1,3 +1,6 @@
+import pyramid.security
+
+
 class Root:
   def __init__(self):
     self.v1_root = location_aware(V1Root(), self, 'v1')
@@ -10,6 +13,11 @@ class Root:
 
 
 class V1Root:
+  __acl__ = [
+      (pyramid.security.Allow, pyramid.security.Everyone, 'login'),
+      (pyramid.security.Allow, pyramid.security.Authenticated, 'logout'),
+      pyramid.security.DENY_ALL]
+
   def __init__(self):
     self.authors = location_aware(Authors(), self, 'authors')
 

@@ -4,9 +4,12 @@ import pyramid.config
 import pyramid.authentication
 import pyramid.authorization
 
-from tim_commons import config, db
-from data_access import service, post_type
-from miapi import resource
+import tim_commons.config
+import tim_commons.db
+import data_access.service
+import data_access.post_type
+import miapi.resource
+import miapi.controllers.login
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -17,27 +20,30 @@ oauth_config = {}
 
 def main(global_config, **settings):
   global tim_config
-  tim_config = config.load_configuration('{TIM_CONFIG}/config.ini')
+  tim_config = tim_commons.config.load_configuration('{TIM_CONFIG}/config.ini')
 
-  db_url = db.create_url_from_config(tim_config['db'])
+  db_url = tim_commons.db.create_url_from_config(tim_config['db'])
   logging.info('Creating DB session to: %s', db_url)
-  db.configure_session(db_url)
+  tim_commons.db.configure_session(db_url)
 
   global oauth_config
   oauth_config = tim_config['oauth']
 
-  service.initialize()
-  post_type.initialize()
+  data_access.service.initialize()
+  data_access.post_type.initialize()
 
   configuration = pyramid.config.Configurator(
-      root_factory=resource.root_factory,
+      root_factory=miapi.resource.root_factory,
       settings=settings)
   # TODO: secret should be configurable
   authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
       'secret',
+      callback=miapi.controllers.login.authenticate_user,
       wild_domain=False)
   configuration.set_authentication_policy(authentication)
   configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
+  # Require that every view specify a permission by setting the default to some random string
+  configuration.set_default_permission('some_random_string')  # TODO: make this really random
 
   configuration.add_renderer('jsonp', pyramid.renderers.JSONP(param_name='callback'))
 
