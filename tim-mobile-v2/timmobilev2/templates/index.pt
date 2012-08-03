@@ -84,12 +84,13 @@
     TIM.mixins = TIM.mixins || {};
     TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 	  var authorJSON, favorites = [], renderFavorites;
-	  var holding = false; var lastURL = '/';
+	  var holding = false; var lastURL = '/', hasSession = false;
     //get the authors
     $(function(){
-      
+      hasSession = $.cookie('tim_session');
+      $.cookie('tim_session', true);
       if (Modernizr.localstorage) {
-        if (!$.cookie('tim_session')) {
+        if (!hasSession) {
           lastURL = localStorage.getItem('tim_last_url');
           if(lastURL && lastURL != "/") {
              localStorage.setItem('tim_last_url', '/');
