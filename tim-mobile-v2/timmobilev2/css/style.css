@@ -819,14 +819,14 @@ footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/i
   font-size: 16px;
 }
 @media screen and (height: 460px) { 
-    .flippage-container .event .content .inner-text {
+    /*.flippage-container .event .content .inner-text {
       float: left;
       padding: 14px;
       padding-top: 22px;
       text-align: left;
       margin: 0 auto;
       font-size: 24px;
-    }
+    } */
 }
 .flippage-container .event.full-page .content .inner-text {  padding-bottom: 0 }
 .flippage-container .event .content .inner-text p {
