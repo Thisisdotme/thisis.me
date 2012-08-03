@@ -9,8 +9,6 @@ from tim_commons import db
 from mi_schema.models import (
     Author,
     AuthorReservation,
-    AccessGroup,
-    AuthorAccessGroupMap,
     AuthorGroup,
     AuthorGroupMap,
     AuthorServiceMap,
@@ -18,16 +16,10 @@ from mi_schema.models import (
     ServiceEvent)
 import data_access.service
 
-from miapi.globals import ACCESS_GROUP_AUTHORS, DEFAULT_AUTHOR_GROUP
-
 from .feature_utils import getAuthorFeatures
 
 
 class AuthorController(object):
-
-  '''
-  Constructor
-  '''
   def __init__(self, request):
     self.request = request
     self.db_session = db.Session()
@@ -190,7 +182,7 @@ class AuthorController(object):
             so that author is following themselves.
         '''
 
-        authorGroup = AuthorGroup(author.id, DEFAULT_AUTHOR_GROUP)
+        authorGroup = AuthorGroup(author.id, 'follow')
         self.db_session.add(authorGroup)
         self.db_session.flush()
 
@@ -198,15 +190,8 @@ class AuthorController(object):
         self.db_session.add(mapping)
         self.db_session.flush()
 
-        ''' Add the new author to the authors access group '''
-        groupId, = self.db_session.query(AccessGroup.id).filter_by(group_name=ACCESS_GROUP_AUTHORS).one()
-        authorAccessGroupMap = AuthorAccessGroupMap(author.id, groupId)
-        self.db_session.add(authorAccessGroupMap)
-        self.db_session.flush()
-
         authorJSON = author.toJSONObject()
-
-        logging.info("create author %s and added to group %s" % (author_name, ACCESS_GROUP_AUTHORS))
+        logging.info("create author %s", author_name)
 
       except IntegrityError, e:
         logging.error(e.message)

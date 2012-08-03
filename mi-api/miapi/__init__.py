@@ -1,11 +1,12 @@
-from pyramid.config import Configurator
+import logging
 
-from pyramid.renderers import JSONP
+import pyramid.config
+import pyramid.authentication
+import pyramid.authorization
 
-from tim_commons.config import load_configuration
-from tim_commons import db
-
+from tim_commons import config, db
 from data_access import service, post_type
+from miapi import resource
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -15,45 +16,47 @@ oauth_config = {}
 
 
 def main(global_config, **settings):
-
-  """ This function returns a Pyramid WSGI application.
-  """
-
-  """ Setup the config
-  """
   global tim_config
-  tim_config = load_configuration('{TIM_CONFIG}/config.ini')
+  tim_config = config.load_configuration('{TIM_CONFIG}/config.ini')
 
-  """ Setup the database
-  """
   db_url = db.create_url_from_config(tim_config['db'])
+  logging.info('Creating DB session to: %s', db_url)
   db.configure_session(db_url)
 
-  """ load the oauth configuration settings
-  """
   global oauth_config
   oauth_config = tim_config['oauth']
 
   service.initialize()
   post_type.initialize()
 
-  config = Configurator(settings=settings)
+  configuration = pyramid.config.Configurator(
+      root_factory=resource.root_factory,
+      settings=settings)
+  # TODO: secret should be configurable
+  authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
+      'secret',
+      wild_domain=False)
+  configuration.set_authentication_policy(authentication)
+  configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
 
-  config.add_renderer('jsonp', JSONP(param_name='callback'))
+  configuration.add_renderer('jsonp', pyramid.renderers.JSONP(param_name='callback'))
 
-  config.add_static_view(name='img', path='miapi:img', cache_max_age=3600)
+  configuration.add_static_view(name='img', path='miapi:img', cache_max_age=3600)
 
-  # setup route and view for home page
-  config.add_route('home', '/')
-  config.add_view('miapi.controllers.about.about',
-                  route_name='home',
-                  renderer='templates/about.pt')
-  config.add_route('status', '/v1/status')
+  configuration.scan('miapi.controllers.login')
 
-  #
-  # check author name availablility
-  #
+  return configuration.make_wsgi_app()
 
+  # TODO: add status view: config.add_route('status', '/v1/status')
+  # TODO: do someething about the about template...
+  #       config.add_route('home', '/')
+  #       config.add_view('miapi.controllers.about.about',
+  #                       route_name='home',
+  #                       renderer='templates/about.pt')
+
+
+'''
+  # TODO: We can never have an author with name search. Are we suing this? Can we add this later?
   # --
   # SEARCH for matching authors; JSON list of 0 or more authors returned.
   #  Query args: name
@@ -82,11 +85,13 @@ def main(global_config, **settings):
   #
   config.add_route('author.profile.CRUD', '/v1/authors/{authorname}/profile')
 
+  # TODO: Are we using this?
   #
   # AUTHOR METRICS: collected from users browsing an author's model
   #
   config.add_route('author.metrics.visitor.CRUD', '/v1/authors/{authorname}/metrics/visitor/{visitorID}')
 
+  # TODO: What is this?
   #
   # AUTHOR MODEL: rebuild/update the data for all the author's services
   #
@@ -101,6 +106,7 @@ def main(global_config, **settings):
   config.add_route('author.query.events.eventId', '/v1/authors/{authorname}/events/{eventID}')
   config.add_route('author.query.topstories', '/v1/authors/{authorname}/topstories')
 
+  # TODO: Implememnting group is not an immidiate need. We should remove this urls
   # --
   # AUTHOR GROUP BASIC:
   #
@@ -131,6 +137,7 @@ def main(global_config, **settings):
   #
   # AUTHOR SERVICE MODEL: rebuild/update the data for the specified service
   #
+  # TODO: What is this? What permission do we need?
   config.add_route('author.services.build', '/v1/authors/{authorname}/services/{servicename}/build')
   config.add_route('author.services.update', '/v1/authors/{authorname}/services/{servicename}/update')
 
@@ -150,6 +157,7 @@ def main(global_config, **settings):
   #
   config.add_route('author.photoalbums.CRUD', '/v1/authors/{authorname}/photoalbums')
 
+  # TODO: do we want an '/v1/authors/{name}/photos/{id} url?
   #
   # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
   #
@@ -166,12 +174,14 @@ def main(global_config, **settings):
   #
   config.add_route('features', '/v1/features')
   config.add_route('feature.CRUD', '/v1/features/{featurename}')
+  # TODO: What is bundle?
   config.add_route('feature.bundle', '/v1/features/{featurename}/bundle')
 
   # --
   # AUTHOR FEATURE: list features, add/remove features
   #
 
+  # TODO: what is this and why do we need this?
   # resources for controlling an author's default features
   config.add_route('author.features.default', '/v1/authors/{authorname}/features/default')
   config.add_route('author.features.default.CRUD', '/v1/authors/{authorname}/features/default/{featurename}')
@@ -179,7 +189,4 @@ def main(global_config, **settings):
   # resources for listing, adding, and removing an author's features
   config.add_route('author.features', '/v1/authors/{authorname}/features')
   config.add_route('author.features.CRUD', '/v1/authors/{authorname}/features/{featurename}')
-
-  config.scan('miapi')
-
-  return config.make_wsgi_app()
+'''

@@ -7,8 +7,6 @@ from data_access import service
 
 from mi_schema.models import (Author, Service, ServiceEvent, AuthorServiceMap, Highlight, ServiceObjectType)
 
-from miapi.globals import LIMIT
-
 from . import get_tim_author_fragment
 
 from author_utils import createServiceEvent, createHighlightEvent
@@ -52,8 +50,7 @@ class AuthorQueryController(object):
               join(Author, AuthorServiceMap.author_id == Author.id). \
               join(Service, AuthorServiceMap.service_id == Service.id). \
               filter(and_(AuthorServiceMap.author_id == author_id, Highlight.weight > 0)). \
-              order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
-              limit(LIMIT):
+              order_by(Highlight.weight.desc(), ServiceEvent.create_time):
       events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
 
     return {'author': author_obj,
@@ -83,8 +80,7 @@ class AuthorQueryController(object):
           join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
           filter(AuthorServiceMap.author_id == author.id). \
           filter(ServiceEvent.correlation_id == None). \
-          order_by(ServiceEvent.create_time.desc()). \
-          limit(LIMIT):
+          order_by(ServiceEvent.create_time.desc()):
 
       ''' filter well-known and instagram photo albums so they
           don't appear in the timeline

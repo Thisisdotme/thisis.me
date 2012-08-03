@@ -1,8 +1,3 @@
-'''
-Created on Feb 22, 2012
-
-@author: howard
-'''
 import logging
 
 from sqlalchemy import (and_)
@@ -15,7 +10,6 @@ from data_access import service
 
 from mi_schema.models import Author, Service, AuthorServiceMap, ServiceEvent, ServiceObjectType
 
-from miapi.globals import LIMIT
 
 from author_utils import createServiceEvent
 
@@ -74,8 +68,7 @@ class AuthorServiceQueryController(object):
                     filter(and_(AuthorServiceMap.service_id == serviceId,
                                 AuthorServiceMap.author_id == author.id)). \
                     filter(ServiceEvent.correlation_id == None). \
-                    order_by(ServiceEvent.create_time.desc()). \
-                    limit(LIMIT):
+                    order_by(ServiceEvent.create_time.desc()):
 
       ''' filter well-known and instagram photo albums so they
           don't appear in the timeline

@@ -45,11 +45,6 @@ class Author(Base):
             'template': self.template}
 
 
-'''
-  Table for reserving author-names and passwords prelaunch
-'''
-
-
 class AuthorReservation(Base):
 
   __tablename__ = 'author_reservation'
@@ -67,56 +62,6 @@ class AuthorReservation(Base):
     return '<AuthorReservation(\'{0}\',\'{1}\',\'{2}\')>'.format(self.author_name,
                                                                  self.email,
                                                                  self.create_time)
-
-
-class AccessGroup(Base):
-
-  __tablename__ = 'access_group'
-
-  id = Column(Integer, primary_key=True)
-  group_name = Column(String(255), unique=True, nullable=False)
-
-  def __init__(self, groupname):
-    self.group_name = groupname
-
-  def __repr__(self):
-    return "<AccessGroup('%s')>" % (self.group_name)
-
-  def toJSONObject(self):
-    return {'access_group_id': self.id, 'groupname': self.group_name}
-
-
-'''
-TABLE: author_access_group_map
-'''
-
-
-class AuthorAccessGroupMap(Base):
-
-  __tablename__ = 'author_access_group_map'
-
-  author_id = Column(Integer,
-                     ForeignKey('author.id', ondelete="CASCADE"),
-                     primary_key=True,
-                     nullable=False)
-  group_id = Column(Integer,
-                    ForeignKey('access_group.id',
-                    ondelete="CASCADE"),
-                    primary_key=True,
-                    nullable=False)
-
-#  author = relationship("Author", backref=backref('accessGroups', order_by=group_id), cascade="all, delete, delete-orphan", single_parent=True)
-
-  def __init__(self, authorId, groupId):
-    self.author_id = authorId
-    self.group_id = groupId
-
-  def __repr__(self):
-    return "<AuthorGroupMap('%s,%s')>" % (self.author_id, self.group_id)
-
-'''
-TABLE: service
-'''
 
 
 class Service(Base):
@@ -157,11 +102,6 @@ class Service(Base):
     return {'service_id': self.id, 'name': self.service_name}
 
 
-'''
-TABLE: author_service_map
-'''
-
-
 class AuthorServiceMap(Base):
 
   __tablename__ = 'author_service_map'
@@ -200,13 +140,6 @@ class AuthorServiceMap(Base):
     return "<AuthorServiceMap('%s,%s')>" % (self.author_id, self.service_id)
 
 
-'''
-TABLE: author_group
-
-  Defines a group private to the author
-'''
-
-
 class AuthorGroup(Base):
 
   __tablename__ = 'author_group'
@@ -230,12 +163,6 @@ class AuthorGroup(Base):
     return {'author_id': self.author_id,
             'author_group_id': self.id,
             'group_name': self.group_name}
-
-'''
-TABLE: author_group_map
-
-  Maps authors to an author_group
-'''
 
 
 class AuthorGroupMap(Base):
@@ -263,11 +190,6 @@ class AuthorGroupMap(Base):
             'author_group_id': self.author_group_id}
 
 
-'''
-TABLE: service_object_type
-'''
-
-
 class ServiceObjectType(Base):
 
   __tablename__ = 'service_object_type'
@@ -293,11 +215,6 @@ class ServiceObjectType(Base):
   def __repr__(self):
     # not including the JSON
     return "<ServiceObjectType('{0},{1}')".format(self.type_id, self.label)
-
-
-'''
-TABLE: service_event
-'''
 
 
 class ServiceEvent(Base):
@@ -398,10 +315,6 @@ class ServiceEvent(Base):
   def make_well_known_service_event_id(well_known_id, author_id):
     return '{0}@{1}'.format(well_known_id, author_id)
 
-'''
-TABLE: relationship
-'''
-
 
 class Relationship(Base):
 
@@ -448,11 +361,6 @@ class OriginMap(Base):
     return "<OriginMap('%s,%s,%s')>" % (self.service_name, self.origin, self.origin_service_name)
 
 
-'''
-TABLE: highlight_type
-'''
-
-
 class HighlightType(Base):
 
   __tablename__ = 'highlight_type'
@@ -466,11 +374,6 @@ class HighlightType(Base):
 
   def __repr__(self):
     return "<HighlightType('%d,%s')>" % (self.id, self.label)
-
-
-'''
-TABLE: highlight
-'''
 
 
 class Highlight(Base):
@@ -511,11 +414,6 @@ class Highlight(Base):
                                                     self.caption,
                                                     self.content,
                                                     self.auxillary_content)
-
-
-'''
-TABLE: highlight
-'''
 
 
 class HighlightServiceEventMap(Base):
