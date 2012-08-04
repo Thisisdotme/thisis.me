@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import (
     Column,
     Integer,
@@ -53,10 +55,10 @@ class AuthorReservation(Base):
   email = Column(String(255), unique=True, nullable=False)
   create_time = Column(DateTime, nullable=False)
 
-  def __init__(self, authorname, email, create_time):
+  def __init__(self, authorname, email, create_time=None):
     self.author_name = authorname
     self.email = email
-    self.create_time = create_time
+    self.create_time = datetime.datetime.utcnow() if create_time is None else create_time
 
   def __repr__(self):
     return '<AuthorReservation(\'{0}\',\'{1}\',\'{2}\')>'.format(self.author_name,

@@ -37,13 +37,30 @@ class V1Root:
 
 
 class Authors:
-  def __getitem__(self, author_name):
-    return location_aware(Author(author_name), self, author_name)
+  __acl__ = [
+      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
+      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      pyramid.security.DENY_ALL]
+
+  def __getitem__(self, key):
+    try:
+      author_id = int(key)
+    except ValueError:
+      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+
+    return location_aware(Author(author_id), self, author_id)
 
 
 class Author:
-  def __init__(self, author_name):
-    self.author_name = author_name
+  @property
+  def __acl__(self):
+    return [
+        (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
+        (pyramid.security.Allow, self.author_id, 'write'),
+        pyramid.security.DENY_ALL]
+
+  def __init__(self, author_id):
+    self.author_id = author_id
 
   def __getitem__(self, key):
     resource = None

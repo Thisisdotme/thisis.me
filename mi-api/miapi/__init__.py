@@ -8,8 +8,10 @@ import tim_commons.config
 import tim_commons.db
 import data_access.service
 import data_access.post_type
+
 import miapi.resource
 import miapi.controllers.login
+import miapi.controllers.author
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -49,7 +51,7 @@ def main(global_config, **settings):
 
   configuration.add_static_view(name='img', path='miapi:img', cache_max_age=3600)
 
-  configuration.scan('miapi.controllers.login')
+  add_views(configuration)
 
   return configuration.make_wsgi_app()
 
@@ -59,6 +61,11 @@ def main(global_config, **settings):
   #       config.add_view('miapi.controllers.about.about',
   #                       route_name='home',
   #                       renderer='templates/about.pt')
+
+
+def add_views(configuration):
+  miapi.controllers.login.add_views(configuration)
+  miapi.controllers.author.add_views(configuration)
 
 
 '''

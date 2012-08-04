@@ -5,12 +5,23 @@ import miapi.resource
 import data_access.author
 
 
-@pyramid.view.view_config(
-    context=miapi.resource.V1Root,
-    name='login',
-    request_method='POST',
-    permission='login',
-    renderer='jsonp')
+def add_views(configuration):
+  configuration.add_view(
+      login,
+      context=miapi.resource.V1Root,
+      name='login',
+      request_method='POST',
+      permission='login',
+      renderer='jsonp')
+  configuration.add_view(
+      logout,
+      context=miapi.resource.V1Root,
+      name='logout',
+      request_method='POST',
+      permission='logout',
+      renderer='jsonp')
+
+
 def login(request):
   post = request.json_body
   login = post.get('login')
@@ -25,12 +36,6 @@ def login(request):
   return error(request.response, AUTHN_BAD_USER_PASSWD)
 
 
-@pyramid.view.view_config(
-    context=miapi.resource.V1Root,
-    name='logout',
-    request_method='POST',
-    permission='logout',
-    renderer='jsonp')
 def logout(request):
   headers = pyramid.security.forget(request)
   request.response.headers.extend(headers)
