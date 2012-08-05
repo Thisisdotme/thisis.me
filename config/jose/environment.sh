@@ -3,8 +3,8 @@ export TIM_USER=jose
 
 # Define the python egg cache. Let just use the user's home directory
 command -v getent >/dev/null 2>&1
-status=$?
-if [ $status -ne 0 ]; then
+RETURN_VALUE=$?
+if [ $RETURN_VALUE -ne 0 ]; then
   # if getent doesn't exist then assume we are using Mac OS X
   export PYTHON_EGG_CACHE=/Users/$TIM_USER/.python-eggs
 else
@@ -16,7 +16,7 @@ fi
 export TIM_HOME=/home/jose/dev/work/thisis.me
 
 # Soure the python virtual environment
-. $TIM_HOME/env/bin/activate
+source $TIM_HOME/env/bin/activate
 
 # Define root location for data file
 export TIM_DATA=$TIM_HOME/data/$environment
