@@ -32,11 +32,15 @@ body {
  border:1px solid #ccc;
  -webkit-box-shadow: 0px 0px 2px .1px #555;
  -moz-box-shadow:    0px 0px 2px .1px #555;
+ min-height:80px;
+ min-width:80px;
+ 
 }
 
 
 #bio-page .profile-img img {
-  
+  max-height:120px;
+   max-width:120px;
 }
 
 #bio-page .headline  {

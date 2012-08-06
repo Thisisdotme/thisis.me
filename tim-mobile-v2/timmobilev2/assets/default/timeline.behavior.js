@@ -217,7 +217,7 @@
 	    feature.detailView.model = model;
 		  feature.detailView.render();
 		  
-		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+		  TIM.transitionPage (feature.timelineView.$el, {"animationName":"fade"});
 		  //figure out which page the event is on!
       pageNum = feature.findPageForEvent(resourceId);          
       feature.timelineView.goToPage(pageNum);
@@ -234,7 +234,7 @@
           feature.detailView.render();
           //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
           
-          TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+          TIM.transitionPage (feature.timelineView.$el, {"animationName":"fade"});
           
           //figure out which page the event is on!
           pageNum = feature.findPageForEvent(resourceId);          
@@ -244,7 +244,7 @@
 		    },
 		    error: function(model, response) {
 		      console.log("couldn't find event: ", resourceId);
-		      TIM.transitionPage (feature.timelineView.$el, {"animationName":"slide"});
+		      TIM.transitionPage (feature.timelineView.$el, {"animationName":"fade"});
 		    }
 		  });
 		}

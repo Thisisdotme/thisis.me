@@ -4,7 +4,11 @@
   	<h1>{name}</h1>
   	<section class="headline">{headline}</section>
   	<div class="profile-img">
-  	  <img src="{picture_url}"/>
+  	  {?picture_url}
+  	    <img src="{picture_url}"/>
+  	  {:else}
+  	    <img src="/xxx-nouser/asset/profile_thumb.jpg"/>
+  	  {/picture_url}
   	</div>
   	<section class="location"><strong>Location: </strong>{location}</section>
   	{?specialties}

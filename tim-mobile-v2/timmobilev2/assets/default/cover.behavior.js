@@ -56,7 +56,7 @@
       },
 
       render: function( collection ) {
-  				var that = this;
+  				var that = this, primaryStory = undefined, primaryStoryService = undefined;
           if(!TIM.appContainerElem.find(this.$el).length)  {
             TIM.appContainerElem.append(this.$el);
     			}
@@ -72,6 +72,7 @@
   				*/
   				console.log("collection: ", this.collection, this.collection.toJSON());
   				window.c = this.collection;
+  				TIM.topstories = this.collection;
   				var name = this.collection.at(0) ? this.collection.at(0).get('author').full_name : TIM.pageInfo.authorFullName;
   				//alert(name);
   				window.n = name;
@@ -82,6 +83,20 @@
   				  primaryStory: this.collection.at(0) ? this.collection.at(0).toJSON() : [],
   				  secondaryStory: this.collection.at(1) ? this.collection.at(1).toJSON() : [],
   				  tertiaryStory: this.collection.at(2) ? this.collection.at(2).toJSON() : [],
+  				}
+  				if (context.primaryStory !== []) {
+  				  try {
+  				    if(context.primaryStory.origin.known) {
+  				      primaryStoryService = context.primaryStory.origin.known;
+  				      context.primaryStory.footerIcon = TIM.services.getByName(primaryStoryService.service_name).getFooterImage();
+  				    } else if(context.primaryStory.origin.unknown) {
+    				    primaryStoryService = context.primaryStory.origin.unknown;
+    				    context.primaryStory.footerIcon = primaryStoryService.small_icon;
+  				    }
+  				  } catch(e) {
+  				    context.primaryStory.footerIcon = undefined;
+  				  }
+  				  
   				}
   				console.log ("cover story:", context.primaryStory);
   				//this pattern could probably be generalized to a basic TIM view

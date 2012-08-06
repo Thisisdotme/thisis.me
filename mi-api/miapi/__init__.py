@@ -5,7 +5,6 @@ from pyramid.renderers import JSONP
 from tim_commons.config import load_configuration
 from tim_commons import db
 
-from mi_schema import models
 from data_access import service, post_type
 
 # dictionary that holds all configuration merged from multple sources
@@ -69,7 +68,7 @@ def main(global_config, **settings):
   # --
   # Author reservation functionality
   #
-  config.add_route('author.reservation', '/v1/reservation/{authorname}')
+  config.add_route('author.reservation', '/v1/reservations/{authorname}')
 
   # --
   # AUTHOR BASIC functionality

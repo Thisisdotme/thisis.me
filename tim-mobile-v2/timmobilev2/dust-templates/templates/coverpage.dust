@@ -2,6 +2,7 @@
 	<div class="header"><span id="first-name">{first_name}</span><span id="last-name">{last_name}</span></div>
 	<section class="primary-story highlight" data-event_id="{primaryStory.event_id}">
 		<p class="pullquote"><a href="timeline/{primaryStory.id}">
+		  {?primaryStory.footerIcon}<img class="service-icon" src="{primaryStory.footerIcon}" />{/primaryStory.footerIcon}
 		  {?primaryStory.headline}{primaryStory.headline}{/primaryStory.headline}
 		  {?primaryStory.content}{primaryStory.content}{/primaryStory.content}
 		</a></p>

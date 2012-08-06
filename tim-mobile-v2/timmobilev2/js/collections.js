@@ -11,8 +11,13 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
        TIM.eventAggregator.trigger("error", {exception: "API call failed"});
      }
      
+  
+     
      return Backbone.Collection.prototype.fetch.call(this, options);
-   }
+   },
+  getByName: function(name) {
+	  return this.find(function(model){return model.get('name') == name});
+	}
 });
 
 TIM.collections.Features = TIM.collections.BaseCollection.extend({
@@ -74,6 +79,9 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		parse: function(resp) {
 		  return (resp.services);
 		},
+		getByName: function(name) {
+		  return this.find(function(model){return model.get('name') == name});
+		}
 		
 });
 
@@ -87,6 +95,9 @@ TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 		parse: function(resp) {
 		  return (resp.authors);
 		},
+		getByName: function(name) {
+		  return this.find(function(model){return model.get('author_name') == name});
+		}
 		
 });
 

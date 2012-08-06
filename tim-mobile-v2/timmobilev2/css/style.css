@@ -265,6 +265,7 @@ body.splash {
   border: 1px solid #BAAE04;
   border-radius: 8px;
   padding: 20px;
+  color:#333;
 }
 #error-message {
   position: absolute;
@@ -752,6 +753,7 @@ footer .service-icon.instagram {  background: transparent url(/img/icons/instagr
 footer .service-icon.flickr {  background: transparent url(/img/icons/flickr_15.png) no-repeat center center }
 footer .service-icon.twitter {  background: transparent url(/img/icons/twitter_15.png) no-repeat center center }
 footer .service-icon.google {  background: transparent url(/img/icons/google_plus_15.png) no-repeat center center }
+footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/img/h/services/color/Foursquare.png) no-repeat center center }
 #content-container .scroll-overlay .interaction-icons {  display: none }
 
 .photo-page .interaction-icons {
@@ -818,14 +820,14 @@ footer .service-icon.google {  background: transparent url(/img/icons/google_plu
   font-size: 16px;
 }
 @media screen and (height: 460px) { 
-    .flippage-container .event .content .inner-text {
+    /*.flippage-container .event .content .inner-text {
       float: left;
       padding: 14px;
       padding-top: 22px;
       text-align: left;
       margin: 0 auto;
       font-size: 24px;
-    }
+    } */
 }
 .flippage-container .event.full-page .content .inner-text {  padding-bottom: 0 }
 .flippage-container .event .content .inner-text p {
@@ -870,6 +872,15 @@ footer .author a, footer .author a:visited {
 }
 .photo-page footer .author a, footer .photo-page .author a:visited {
   color: #fff;
+}
+.cover-page .service-icon {
+  display:inline-block;
+  position:relative;
+  top:-2px;
+  height:15px;
+  width:15px;
+  margin-right:5px;
+  line-height:1.1;
 }
 footer .info .caption {
   display: none;
@@ -926,6 +937,108 @@ footer .fuzzy-time {
   color: gray;
   font-size: 12px;
 }
+
+/* flipboard css */
+
+.big-num {
+  font-size:340px;
+}
+
+.back .big-num {
+  color:red;
+}
+
+.flippage {
+	-webkit-perspective: 2200px;
+	-moz-perspective: 2200px;
+	perspective: 2200px;
+} 
+
+.page {
+	height: 50%;
+	top:50%;
+	width: 100%;
+	position: absolute;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-transform-origin: center top;
+	-moz-transform-origin: center top;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.page > div {
+	display: block;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	background: #fff;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+}
+.page .front {
+} 
+.page .back {	
+	-webkit-transform: rotateX(-180deg);
+	-moz-transform: rotateX(-180deg);
+}
+.page .outer{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	overflow: hidden;
+	z-index: 999;
+}
+.page > div > div > .content{
+	//height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+.page .front > div > .content {
+  height: 200%;
+  top: -100%;
+  width:100%;
+}
+
+.page  .back > div > .content {
+  height: 200%;
+  width:100%;
+}
+  
+.overlay, .flipoverlay{
+	background-color: rgba(0, 0, 0, 0.6);
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+.flipoverlay{
+	background-color: rgba(0, 0, 0, 0.2);
+}
+.page .content .inner{
+	height: 100%;
+}
+.page h1{
+	text-align: center;
+}
+
+
+
+
+
+
+
+/* end flipboard */
 
 /* classes for the various event types that can appear in a timeline - actually they're called 'post types' at the moment */
 
