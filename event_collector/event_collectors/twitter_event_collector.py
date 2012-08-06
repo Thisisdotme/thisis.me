@@ -30,7 +30,7 @@ class TwitterEventCollector(EventCollector):
     args = {'include_rts': 1,
             'include_entities': 1,
             'trim_user': 1,
-            'count': 100}
+            'count': 200}
 
     # use authenticated access if we can
     if asm.access_token:
