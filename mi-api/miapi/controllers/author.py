@@ -14,7 +14,9 @@ import data_access.author_service_map
 import tim_commons.db
 
 import miapi.resource
-import miapi.feature_utils
+import miapi.controllers
+import miapi.controllers.feature_utils
+import miapi.controllers.author_utils
 
 
 def add_views(configuration):
@@ -54,6 +56,16 @@ def add_views(configuration):
       context=miapi.resource.Author,
       request_method='DELETE',
       permission='write',
+      renderer='jsonp',
+      http_cache=0)
+
+  # Top Stories
+  configuration.add_view(
+      view_author_topstories,
+      context=miapi.resource.Author,
+      name='topstories',
+      request_method='GET',
+      permission='read',
       renderer='jsonp',
       http_cache=0)
 
@@ -183,7 +195,7 @@ def view_author(author_context, request):
 
   author_json = author.toJSONObject()
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
-  author_json['features'] = miapi.feature_utils.getAuthorFeatures(
+  author_json['features'] = miapi.controllers.feature_utils.getAuthorFeatures(
       tim_commons.db.Session(),
       author.id)
 
@@ -234,6 +246,7 @@ def delete_author(author_context, request):
   author = data_access.author.query_author(author_id)
 
   if author is None:
+    # TODO: better error
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
@@ -244,3 +257,48 @@ def delete_author(author_context, request):
 
   # TODO: return correct code
   return {}
+
+
+def view_author_topstories(author_context, request):
+  author_id = author_context.author_id
+
+  author = data_access.author.query_author(author_id)
+
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
+
+  author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
+
+  # TODO: story limit should be configurable
+  story_limit = 5
+
+  top_stories = data_access.service_event.query_service_events_descending_time(
+      author_id,
+      story_limit)
+  events = []
+  for event in top_stories:
+    # filter well-known and instagram photo albums so they don't appear in the timeline
+    if (event.type_id == data_access.post_type.label_to_id('photo-album') and
+        (event.service_id == data_access.service.name_to_id('me') or
+         event.service_id == data_access.service.name_to_id('instagram'))):
+      continue
+
+    asm = data_access.author_service_map.query_asm_by_author_and_service(
+        author_id,
+        event.service_id)
+
+    event_obj = miapi.controllers.author_utils.createServiceEvent(
+        author_context['events'][str(event.id)],
+        request,
+        event,
+        asm,
+        author)
+    if event_obj:
+      events.append(event_obj)
+
+  # TODO: implement the correct result for paging
+  return {'author': author_object,
+          'events': events,
+          'paging': {'prev': None, 'next': None}}

@@ -115,4 +115,4 @@ def root_factory(request):
   return _root
 
 
-_root = Root()
+_root = location_aware(Root(), None, '')

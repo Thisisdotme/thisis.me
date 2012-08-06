@@ -76,22 +76,10 @@ def add_views(configuration):
   #
   config.add_route('search.author', '/v1/authors/search')
 
-  #
-  # Return list of all authors
-  #
-  config.add_route('authors', '/v1/authors')
-
   # --
   # Author reservation functionality
   #
   config.add_route('author.reservation', '/v1/reservations/{authorname}')
-
-  # --
-  # AUTHOR BASIC functionality
-  #
-  #  GET info, PUT new, PUT existing, DELETE existing
-  #
-  config.add_route('author.CRUD', '/v1/authors/{authorname}')
 
   #
   # AUTHOR PROFILE: profile information for the specified author

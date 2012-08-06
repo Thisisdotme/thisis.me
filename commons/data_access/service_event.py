@@ -28,6 +28,13 @@ def query_service_event(author_id, service_id, service_event_id):
   return query.first()
 
 
+def query_service_events_descending_time(author_id, limit):
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter_by(author_id=author_id)
+  query = query.order_by(mi_schema.models.ServiceEvent.create_time.desc())
+  return query.limit(limit)
+
+
 def delete(identifier):
   query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
   query = query.filter_by(id=identifier)

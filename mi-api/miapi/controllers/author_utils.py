@@ -1,24 +1,21 @@
 import calendar
 import logging
 
-from tim_commons import json_serializer
 
-from . import (
-    get_service_author_fragment,
-    get_location_fragment,
-    get_post_type_detail_fragment,
-    get_tim_author_fragment)
+import data_access.post_type
+import data_access.author_service_map
+import data_access.service
+import tim_commons.db
+import tim_commons.json_serializer
 
-from data_access import post_type, author_service_map, service
+import miapi.controllers
 
 
-def createServiceEvent(db_session, request, se, asm, author):
+def createServiceEvent(context, request, se, asm, author):
+  link = request.resource_url(context)
 
-  link = request.route_url('author.query.events.eventId',
-                           authorname=author.author_name,
-                           eventID=se.id)
   event = {'id': se.id,
-           'type': post_type.id_to_label(se.type_id),
+           'type': data_access.post_type.id_to_label(se.type_id),
            'link': link,
            'truncated': False,
            'create_time': calendar.timegm(se.create_time.timetuple()),
@@ -42,20 +39,23 @@ def createServiceEvent(db_session, request, se, asm, author):
     if se.photo_height:
       event['photo']['height'] = se.photo_height
 
-  author_info = get_tim_author_fragment(request, author.author_name)
+  author_info = miapi.controllers.get_tim_author_fragment(request, author.author_name)
   event['author'] = author_info
 
-  location = get_location_fragment(se)
+  location = miapi.controllers.get_location_fragment(se)
   if location:
     event['location'] = location
 
-  post_detail = get_post_type_detail_fragment(db_session, se, author)
+  post_detail = miapi.controllers.get_post_type_detail_fragment(
+      tim_commons.db.Session(),
+      se,
+      author)
   if post_detail:
     event['post_type_detail'] = {}
-    event['post_type_detail'][post_type.id_to_label(se.type_id)] = post_detail
+    event['post_type_detail'][data_access.post_type.id_to_label(se.type_id)] = post_detail
 
-  if post_type.id_to_post_type[se.type_id].label == 'correlation':
-    json = json_serializer.load_string(se.json)
+  if data_access.post_type.id_to_post_type[se.type_id].label == 'correlation':
+    json = tim_commons.json_serializer.load_string(se.json)
     # Set the source
     if json['origin']['type'] == 'known':
       known = json['origin']['known']
@@ -65,7 +65,7 @@ def createServiceEvent(db_session, request, se, asm, author):
                                    'service_name': known['service_name'],
                                    'service_event_id': known['service_event_id'],
                                    'service_event_url': known['service_event_url'],
-                                   'service_user': get_service_author_fragment(
+                                   'service_user': miapi.controllers.get_service_author_fragment(
                                        request,
                                        asm,
                                        author)}}
@@ -83,9 +83,9 @@ def createServiceEvent(db_session, request, se, asm, author):
       'service_name': share['service_name'],
       'service_event_id': share['service_event_id'],
       'service_event_url': share['service_event_url'],
-      'service_user': get_service_author_fragment(
+      'service_user': miapi.controllers.get_service_author_fragment(
           request,
-          author_service_map.query_asm_by_author_and_service(
+          data_access.author_service_map.query_asm_by_author_and_service(
             share['author_id'],
             share['service_id']),
           author)}
@@ -93,10 +93,10 @@ def createServiceEvent(db_session, request, se, asm, author):
   else:
     event['origin'] = {'type': 'known',
                        'known': {'event_id': se.id,
-                                 'service_name': service.id_to_name(se.service_id),
+                                 'service_name': data_access.service.id_to_name(se.service_id),
                                  'service_event_id': se.event_id,
                                  'service_event_url': se.url,
-                                 'service_user': get_service_author_fragment(
+                                 'service_user': miapi.controllers.get_service_author_fragment(
                                      request,
                                      asm,
                                      author)}}
@@ -104,6 +104,7 @@ def createServiceEvent(db_session, request, se, asm, author):
   return event
 
 
+'''
 def createHighlightEvent(db_session, request, highlight, se, asm, author, serviceName):
 
   # TODO: fix this: sourcesItems = get_shared_services(db_session, request, se.id, serviceName)
@@ -156,3 +157,4 @@ def serviceBuild(authorName, serviceName, incremental, s3Bucket, aws_access_key,
 #
 #  # get author-id for authorName
 #  author_id = db_session.query(Author.id).filter(Author.author_name == authorName).scalar()
+'''
