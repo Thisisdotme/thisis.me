@@ -33,7 +33,7 @@ def login(request):
     request.response.headers.extend(headers)
     return request.response
 
-  return error(request.response, AUTHN_BAD_USER_PASSWD)
+  return error(request.response, AUTHN_BAD_USER_OR_PASSWD)
 
 
 def logout(request):
@@ -43,7 +43,7 @@ def logout(request):
 
 
 # TODO move this and the error method somewhere else
-AUTHN_BAD_USER_PASSWD = 40001
+AUTHN_BAD_USER_OR_PASSWD = 40001
 
 
 def error(response, internal_code):

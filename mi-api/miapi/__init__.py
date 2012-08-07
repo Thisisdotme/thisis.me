@@ -12,6 +12,7 @@ import data_access.post_type
 import miapi.resource
 import miapi.controllers.login
 import miapi.controllers.author
+import miapi.controllers.author_reservation
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -66,6 +67,7 @@ def main(global_config, **settings):
 def add_views(configuration):
   miapi.controllers.login.add_views(configuration)
   miapi.controllers.author.add_views(configuration)
+  miapi.controllers.author_reservation.add_views(configuration)
 
 
 '''
