@@ -321,6 +321,9 @@ the behavior for the photo feature
       },
       
       showAlbumView: function(event) {
+        if (feature.throttleToolbarClick) {
+  		    return;
+  		  }
   		  TIM.transitionPage (feature.albumListView.$el, {
   		    animationName: "fade", reverse: true,
   		    callback: function() {
@@ -459,7 +462,7 @@ the behavior for the photo feature
       events: {
     			//"tap .detail-link" : "toggleMode",
     			//"tap .grid-link" : "showGridView",
-    			"tap .grid-link" : "showGridView",
+    			"click .grid-link" : "showGridView",
     			//"tap .full-photo" : "toggleMode",
     			"tap .interaction-icons .comments" : "showComments",
     			"tap .interaction-icons .location" : "showLocation",
@@ -486,9 +489,9 @@ the behavior for the photo feature
 
       showGridView: function(event) {
         console.log('toolbar clicked');
+        event.stopPropagation();
         feature.throttleToolbarClick = true;
-        window.setTimeout()
-        event.preventDefault(feature.throttleToolbarClick = false, 100); //hack way to prevent propagation of back button 'tap' event
+        window.setTimeout(feature.throttleToolbarClick = false, 100); //hack way to prevent propagation of back button 'tap' event
         if(!this.flipMode) {
           return;
         }
