@@ -709,7 +709,7 @@ body.splash {
 
 /* moved photo page css up to global file so it's accessible from other features */
 .photo-page footer > .main-text,
-.scroll-overlay .caption .main-text {  padding: 8px 16px }
+.scroll-overlay .caption .main-text {  padding: 8px }
 .photo-page .caption .grid-link,
 .photo-detail .caption .grid-link {
   position: absolute;
@@ -893,6 +893,11 @@ footer .info .caption {
   overflow: hidden;
 }
 footer > div {  float: left }
+footer div.main-text {
+  float:none;
+}
+footer .avatar, footer .author {  display:none; }
+footer .sources { padding:8px;}
 footer .avatar {  x-height: 40px }
 footer .avatar .frame {
   height: 25px;
@@ -930,13 +935,19 @@ footer x-img {
   height: 15px;
   width: 15px;
 }
-footer .fuzzy-time {
+footer .time-and-location {
   float: left;
   padding-left: 5px;
   padding-top: 2px;
   color: gray;
   font-size: 12px;
 }
+
+.photo-page footer .time-and-location {
+  color: #ccc;
+}
+
+
 
 /* flipboard css */
 

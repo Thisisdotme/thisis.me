@@ -68,7 +68,7 @@ the behavior for the photo feature
 
     initialize: function() {
       this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
-      this.set("location", "");
+      //this.set("location", "");
     },
 	
     clear: function() {
@@ -112,7 +112,7 @@ the behavior for the photo feature
   		    
   		    photo.thumb_image = photo.post_type_detail.photo[0];
     		  photo.main_image = photo.post_type_detail.photo[photo.post_type_detail.photo.length - 1]; //photo.images[photo.images.length-1];
-  		    
+  		    photo.caption_text = (photo.headline && !photo.tagline) ? photo.headline : '';
   		  });
   		  return (resp.photos);
   		  
