@@ -709,7 +709,7 @@ body.splash {
 
 /* moved photo page css up to global file so it's accessible from other features */
 .photo-page footer > .main-text,
-.scroll-overlay .caption .main-text {  padding: 8px }
+.scroll-overlay .caption .main-text {  padding: 0 8px; }
 .photo-page .caption .grid-link,
 .photo-detail .caption .grid-link {
   position: absolute;
@@ -942,11 +942,6 @@ footer .time-and-location {
   color: gray;
   font-size: 12px;
 }
-
-.photo-page footer .time-and-location {
-  color: #ccc;
-}
-
 
 
 /* flipboard css */
