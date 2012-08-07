@@ -709,7 +709,7 @@ body.splash {
 
 /* moved photo page css up to global file so it's accessible from other features */
 .photo-page footer > .main-text,
-.scroll-overlay .caption .main-text {  padding: 0 8px; }
+.scroll-overlay .caption .main-text {  padding: 0 4px; }
 .photo-page .caption .grid-link,
 .photo-detail .caption .grid-link {
   position: absolute;
@@ -852,7 +852,7 @@ footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/i
   min-width: 50%;
 }
 footer {
-  padding: 5px 5px 5px 5px;
+  padding: 8px;
   margin: 0;
   bottom: 0;
   position: absolute;
@@ -897,7 +897,7 @@ footer div.main-text {
   float:none;
 }
 footer .avatar, footer .author {  display:none; }
-footer .sources { padding:8px;}
+footer .sources { padding:4px;}
 footer .avatar {  x-height: 40px }
 footer .avatar .frame {
   height: 25px;
