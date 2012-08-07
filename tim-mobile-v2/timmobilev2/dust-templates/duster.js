@@ -19,9 +19,13 @@ watcher.on('fileModified', function(path, stats) {
     var filename = path.split("/").reverse()[0].replace(".dust","");
     var filepath = public_path + filename + ".dust.js";
     var compiled = dust.compile(data, filename);
-
+    console.log('compiling!!!');
     fs.writeFile(filepath, compiled, function (err) {
-      if (err) throw err;
+      if (err) {
+        //throw err;
+        console.log('error! ', err);
+        return;
+      }
       console.log('Saved ' + filepath);
     });
   });

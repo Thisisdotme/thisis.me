@@ -3,7 +3,7 @@
   <div class="author">
     <a href="/{author.name}/#timeline">{author.full_name}</a>
   </div>		  
-  <div class="main-text">{?tagline}{@truncate value="{tagline}" length="50"}{/truncate}{/tagline}</div>
+  <div class="main-text">{?tagline}{@truncate value="{tagline}" length="50"}{/truncate}{/tagline}{?caption_text}{@truncate value="{caption_text}" length="50"}{/truncate}{/caption_text}</div>
   <div>
    <!-- loop through sources -->
    {?origin.known} 
@@ -11,6 +11,9 @@
 				<span class="service-icon {origin.known.service_name}"></span>
 			{/origin.known.service_name}
    {/origin.known}
+   {?origin.unknown}
+			<img class="service-icon" src="{origin.unknown.small_icon}"/>
+   {/origin.unknown}
     <span class="time-and-location">{time_ago} {location.name}</span>
   </div>
 </footer>

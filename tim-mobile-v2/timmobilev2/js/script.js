@@ -29,6 +29,10 @@ window.addEventListener("load",function() {
 });
 
 $(function() {
+  
+  if(!$.cookie('tim_session')) {
+    $.cookie('tim_session', true);
+  }
     
   var parsedUri = parseUri(window.location.href);
   console.log("parsed uri: ", parsedUri);
