@@ -1,175 +1,133 @@
-from pyramid.view import view_config
-from sqlalchemy import (and_)
+import miapi.resource
+import miapi.controllers
 
-from tim_commons import db
-
-from data_access import service
-
-from mi_schema.models import (Author, Service, ServiceEvent, AuthorServiceMap, Highlight, ServiceObjectType)
-
-from . import get_tim_author_fragment
-
-from author_utils import createServiceEvent, createHighlightEvent
+import data_access.author
+import data_access.service_event
+import data_access.post_type
+import data_access.service
+import data_access.author_service_map
 
 
-##
-## author ServiceEvents functionality
-##
-
-class AuthorQueryController(object):
-  '''
-  Constructor
-  '''
-
-  def __init__(self, request):
-      self.request = request
-      self.db_session = db.Session()
-
-  # GET /v1/authors/{authorname}/highlights
-  #
-  # get the event highlights for the author
-  #
-  @view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_highlights(self):
-
-    author_name = self.request.matchdict['authorname']
-
-    # get author-id for author_name
-    try:
-      author_id = self.db_session.query(Author.id).filter(Author.author_name == author_name).scalar()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
-
-    author_obj = get_tim_author_fragment(self.request, author_name)
-
-    events = []
-    for highlight, event, asm, author, serviceName in self.db_session.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
-              join(ServiceEvent, Highlight.service_event_id == ServiceEvent.id). \
-              join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
-              join(Author, AuthorServiceMap.author_id == Author.id). \
-              join(Service, AuthorServiceMap.service_id == Service.id). \
-              filter(and_(AuthorServiceMap.author_id == author_id, Highlight.weight > 0)). \
-              order_by(Highlight.weight.desc(), ServiceEvent.create_time):
-      events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
-
-    return {'author': author_obj,
-            'events': events,
-            'paging': {'prev': None, 'next': None}}
-
-  # GET /v1/authors/{authorname}/events
-  #
-  # get all FeatureEvents for the author (constrained to query arg. filters)
-  #
-  @view_config(route_name='author.query.events', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_events(self):
-
-    author_name = self.request.matchdict['authorname']
-
-    # get author-id for author_name
-    try:
-      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
-
-    author_obj = get_tim_author_fragment(self.request, author_name)
-
-    events = []
-    for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
-          join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-          filter(AuthorServiceMap.author_id == author.id). \
-          filter(ServiceEvent.correlation_id == None). \
-          order_by(ServiceEvent.create_time.desc()):
-
-      ''' filter well-known and instagram photo albums so they
-          don't appear in the timeline
-      '''
-      if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-          (event.service_id == service.name_to_id('me') or
-           event.service_id == service.name_to_id('instagram'))):
-        continue
-
-      event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
-      if event_obj:
-        events.append(event_obj)
-
-    return {'author': author_obj,
-            'events': events,
-            'paging': {'prev': None, 'next': None}}
-
-  # GET /v1/authors/{authorname}/events/{eventID}
-  #
-  # get details for the service event
-  #
-  @view_config(
-      route_name='author.query.events.eventId',
+def add_views(configuration):
+  # Events
+  configuration.add_view(
+      get_events,
+      context=miapi.resource.Events,
       request_method='GET',
+      permission='read',
       renderer='jsonp',
       http_cache=0)
-  def get_event_detail(self):
 
-    author_name = self.request.matchdict['authorname']
-    serviceEventID = int(self.request.matchdict['eventID'])
+  # Event
+  configuration.add_view(
+      get_event_detail,
+      context=miapi.resource.Event,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
 
-    # get author-id for author_name
-    try:
-      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
-    try:
-      event, asm = self.db_session.query(ServiceEvent, AuthorServiceMap). \
-            join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-            filter(ServiceEvent.id == serviceEventID). \
-            filter(AuthorServiceMap.author_id == author.id). \
-            one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown event id %d' % serviceEventID}
 
-    return createServiceEvent(self.db_session, self.request, event, asm, author)
+def get_events(events_context, request):
+  author_id = events_context.author_id
 
-  # GET /v1/authors/{authorname}/topstories
-  #
-  # get details for the service event
-  #
-  @view_config(route_name='author.query.topstories', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_author_top_stories(self):
+  author = data_access.author.query_author(author_id)
 
-    STORY_LIMIT = 5
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author %s' % author_id}
 
-    author_name = self.request.matchdict['authorname']
+  author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
 
-    # get author-id for author_name
-    try:
-      author = self.db_session.query(Author).filter(Author.author_name == author_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+  # TODO: use paging limit should be configurable
+  page_limit = 1000
 
-    author_obj = get_tim_author_fragment(self.request, author_name)
+  event_rows = data_access.service_event.query_service_events_descending_time(
+      author_id,
+      page_limit)
+  events = []
+  for event in event_rows:
+    # filter well-known and instagram photo albums so they don't appear in the timeline
+    if (event.type_id == data_access.post_type.label_to_id('photo-album') and
+        (event.service_id == data_access.service.name_to_id('me') or
+         event.service_id == data_access.service.name_to_id('instagram'))):
+      continue
 
-    events = []
-    for event, asm in self.db_session.query(ServiceEvent, AuthorServiceMap). \
-          join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-          filter(AuthorServiceMap.author_id == author.id). \
-          filter(ServiceEvent.correlation_id == None). \
-          order_by(ServiceEvent.create_time.desc()). \
-          limit(STORY_LIMIT):
+    asm = data_access.author_service_map.query_asm_by_author_and_service(
+        author_id,
+        event.service_id)
 
-      ''' filter well-known and instagram photo albums so they
-          don't appear in the timeline
-      '''
-      if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-          (event.service_id == service.name_to_id('me') or
-           event.service_id == service.name_to_id('instagram'))):
-        continue
+    event_obj = miapi.controllers.author_utils.createServiceEvent(
+        request,
+        event,
+        asm,
+        author)
+    if event_obj:
+      events.append(event_obj)
 
-      event_obj = createServiceEvent(self.db_session, self.request, event, asm, author)
-      if event_obj:
-        events.append(event_obj)
+  # TODO: implement the correct result for paging
+  return {'author': author_object,
+          'events': events,
+          'paging': {'prev': None, 'next': None}}
 
-    return {'author': author_obj,
-            'events': events,
-            'paging': {'prev': None, 'next': None}}
+
+def get_event_detail(event_context, request):
+  author_id = event_context.author_id
+  event_id = event_context.event_id
+
+  author = data_access.author.query_author(author_id)
+
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author %s' % author_id}
+
+  event_row = data_access.service_event.query_service_event_by_id(author_id, event_id)
+
+  if event_row is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown event id %d' % event_id}
+
+  asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author_id,
+      event_row.service_id)
+
+  return miapi.controllers.author_utils.createServiceEvent(
+      request,
+      event_row,
+      asm,
+      author)
+
+
+'''
+@view_config(route_name='author.query.highlights', request_method='GET', renderer='jsonp', http_cache=0)
+def get_highlights(self):
+  author_name = self.request.matchdict['authorname']
+
+  # get author-id for author_name
+  try:
+    author_id = self.db_session.query(Author.id).filter(Author.author_name == author_name).scalar()
+  except:
+    self.request.response.status_int = 404
+    return {'error': 'unknown author %s' % author_name}
+
+  author_obj = get_tim_author_fragment(self.request, author_name)
+
+  events = []
+  for highlight, event, asm, author, serviceName in self.db_session.query(Highlight, ServiceEvent, AuthorServiceMap, Author, Service.service_name). \
+            join(ServiceEvent, Highlight.service_event_id == ServiceEvent.id). \
+            join(AuthorServiceMap, ServiceEvent.author_service_map_id == AuthorServiceMap.id). \
+            join(Author, AuthorServiceMap.author_id == Author.id). \
+            join(Service, AuthorServiceMap.service_id == Service.id). \
+            filter(and_(AuthorServiceMap.author_id == author_id, Highlight.weight > 0)). \
+            order_by(Highlight.weight.desc(), ServiceEvent.create_time):
+    events.append(createHighlightEvent(self.db_session, self.request, highlight, event, asm, author, serviceName))
+
+  return {'author': author_obj,
+          'events': events,
+          'paging': {'prev': None, 'next': None}}
+
+
+'''

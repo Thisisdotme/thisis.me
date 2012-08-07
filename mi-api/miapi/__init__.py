@@ -13,6 +13,9 @@ import miapi.resource
 import miapi.controllers.login
 import miapi.controllers.author
 import miapi.controllers.author_reservation
+import miapi.controllers.author_query
+import miapi.controllers.author_photoalbum
+import miapi.controllers.author_photos
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -68,6 +71,9 @@ def add_views(configuration):
   miapi.controllers.login.add_views(configuration)
   miapi.controllers.author.add_views(configuration)
   miapi.controllers.author_reservation.add_views(configuration)
+  miapi.controllers.author_query.add_views(configuration)
+  miapi.controllers.author_photoalbum.add_views(configuration)
+  miapi.controllers.author_photos.add_views(configuration)
 
 
 '''
@@ -77,11 +83,6 @@ def add_views(configuration):
   #  Query args: name
   #
   config.add_route('search.author', '/v1/authors/search')
-
-  # --
-  # Author reservation functionality
-  #
-  config.add_route('author.reservation', '/v1/reservations/{authorname}')
 
   #
   # AUTHOR PROFILE: profile information for the specified author
@@ -105,9 +106,6 @@ def add_views(configuration):
   # AUTHOR QUERY: query for the highlights/details for a particular author
   #
   config.add_route('author.query.highlights', '/v1/authors/{authorname}/highlights')
-  config.add_route('author.query.events', '/v1/authors/{authorname}/events')
-  config.add_route('author.query.events.eventId', '/v1/authors/{authorname}/events/{eventID}')
-  config.add_route('author.query.topstories', '/v1/authors/{authorname}/topstories')
 
   # TODO: Implememnting group is not an immidiate need. We should remove this urls
   # --
@@ -154,11 +152,6 @@ def add_views(configuration):
   # AUTHOR SERVICE PROFILE: get profile information from the specified service
   #
   config.add_route('author.services.profile', '/v1/authors/{authorname}/services/{servicename}/profile')
-
-  #
-  # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
-  #
-  config.add_route('author.photoalbums.CRUD', '/v1/authors/{authorname}/photoalbums')
 
   # TODO: do we want an '/v1/authors/{name}/photos/{id} url?
   #

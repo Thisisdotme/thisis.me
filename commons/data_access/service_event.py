@@ -1,5 +1,7 @@
 import logging
 
+import sqlalchemy.orm.exc
+
 import tim_commons.db
 import mi_schema.models
 import data_access
@@ -26,6 +28,22 @@ def query_service_event(author_id, service_id, service_event_id):
       service_id=service_id,
       event_id=service_event_id)
   return query.first()
+
+
+def query_service_event_by_id(author_id, id):
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter_by(
+      author_id=author_id,
+      id=id)
+
+  row = None
+  try:
+    row = query.one()
+  except sqlalchemy.orm.exc.NoResultFound:
+    # event not found varaible should be None
+    pass
+
+  return row
 
 
 def query_service_events_descending_time(author_id, limit):

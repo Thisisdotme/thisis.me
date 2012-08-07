@@ -11,12 +11,9 @@ import tim_commons.json_serializer
 import miapi.controllers
 
 
-def createServiceEvent(context, request, se, asm, author):
-  link = request.resource_url(context)
-
+def createServiceEvent(request, se, asm, author):
   event = {'id': se.id,
            'type': data_access.post_type.id_to_label(se.type_id),
-           'link': link,
            'truncated': False,
            'create_time': calendar.timegm(se.create_time.timetuple()),
            'modify_time': calendar.timegm(se.modify_time.timetuple())}

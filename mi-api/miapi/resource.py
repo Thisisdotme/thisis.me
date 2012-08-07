@@ -94,12 +94,10 @@ class Author:
       pass  # TODO: implement this
     elif key == 'events':
       resource = Events()
-    elif key == 'topstories':
-      pass  # TODO: implement this
     elif key == 'services':
       pass  # TODO: implement this
-    elif key == 'photoaulbums':
-      pass  # TODO implement this
+    elif key == 'photoalbums':
+      resource = PhotoAlbums()
     elif key == 'features':
       pass  # TODO implement this
 
@@ -109,14 +107,69 @@ class Author:
     raise KeyError('Key "{key}" not a valid author entry'.format(key=key))
 
 
+class PhotoAlbums:
+  def __getitem__(self, key):
+    try:
+      album_id = int(key)
+    except ValueError:
+      raise KeyError('key "{key}" not a valid photo albums entry'.format(key=key))
+
+    return location_aware(PhotoAlbum(album_id), self, key)
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+
+class PhotoAlbum:
+  def __init__(self, album_id):
+    self.album_id = album_id
+
+  def __getitem__(self, key):
+    if key == 'photos':
+      resource = Photos()
+
+    if resource:
+      return location_aware(resource, self, key)
+
+    raise KeyError('key "{key}" not a valid photo album entry.'.format(key=key))
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+
+class Photos:
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+  @property
+  def album_id(self):
+    return self.__parent__.album_id
+
+
 class Events:
-  def __getitem__(self, event_id):
+  def __getitem__(self, key):
+    try:
+      event_id = int(key)
+    except ValueError:
+      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+
     return location_aware(Event(event_id), self, event_id)
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
 
 
 class Event:
   def __init__(self, event_id):
     self.event_id = event_id
+
+  @property
+  def author_id(self):
+    return self.__parent__.__parent__.author_id
 
 
 class Services:

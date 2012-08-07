@@ -290,7 +290,6 @@ def view_author_topstories(author_context, request):
         event.service_id)
 
     event_obj = miapi.controllers.author_utils.createServiceEvent(
-        author_context['events'][str(event.id)],
         request,
         event,
         asm,
