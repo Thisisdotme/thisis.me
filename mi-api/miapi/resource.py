@@ -1,5 +1,7 @@
 import pyramid.security
 
+import data_access.author
+
 
 class Root:
   def __init__(self):
@@ -62,7 +64,13 @@ class Authors:
     try:
       author_id = int(key)
     except ValueError:
-      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+      # Key is not an integer assume that it is an author_name
+      # TODO: we can remove this once the client changes to using id.
+      author = data_access.author.query_by_author_name(key)
+      if author:
+        author_id = author.id
+      else:
+        raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
 
     return location_aware(Author(author_id), self, author_id)
 
