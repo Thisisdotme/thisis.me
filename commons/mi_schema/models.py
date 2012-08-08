@@ -113,12 +113,23 @@ class Service(Base):
   def to_JSON_dictionary(self, request):
     return {'id': self.id,
             'name': self.service_name,
-            'color_icon_high_res': request.static_url('miapi:%s' % self.color_icon_high_res),
-            'color_icon_medium_res': request.static_url('miapi:%s' % self.color_icon_medium_res),
-            'color_icon_low_res': request.static_url('miapi:%s' % self.color_icon_low_res),
-            'mono_icon_high_res': request.static_url('miapi:%s' % self.mono_icon_high_res),
-            'mono_icon_medium_res': request.static_url('miapi:%s' % self.mono_icon_medium_res),
-            'mono_icon_low_res': request.static_url('miapi:%s' % self.mono_icon_low_res)}
+            'images': {
+              'color': {
+                'high_res': request.static_url('miapi:%s' % self.color_icon_high_res),
+                'med_res': request.static_url('miapi:%s' % self.color_icon_medium_res),
+                'low_res': request.static_url('miapi:%s' % self.color_icon_low_res)
+              },
+              'mono': {
+                'high_res': request.static_url('miapi:%s' % self.mono_icon_high_res),
+                'med_res': request.static_url('miapi:%s' % self.mono_icon_medium_res),
+                'low_res': request.static_url('miapi:%s' % self.mono_icon_low_res)
+              }
+            },
+            'text': {
+              'label': None,
+              'description': None
+            }
+           }
 
 
 class AuthorServiceMap(Base):
@@ -470,12 +481,30 @@ class Feature(Base):
   def __repr__(self):
     return "<Feature('%d','%s')>" % (self.id, self.name)
 
-  def toJSONObject(self):
-    return {'id': self.id, 'name': self.name}
-
   @classmethod
   def exists(cls, feature_name):
     return db.Session().query(Feature).filter(Feature.name == feature_name).count() == 1
+
+  def to_JSON_dictionary(self, request):
+    return {'id': self.id,
+            'name': self.name,
+            'images': {
+              'color': {
+                'high_res': None,
+                'med_res': None,
+                'low_res': None
+              },
+              'mono': {
+                'high_res': None,
+                'med_res': None,
+                'low_res': None
+              }
+            },
+            'text': {
+              'label': None,
+              'description': None
+            }
+           }
 
 
 class AuthorFeatureMap(Base):

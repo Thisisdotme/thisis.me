@@ -12,7 +12,6 @@ import tim_commons.emailer
 from mi_schema.models import (AuthorReservation)
 
 import miapi.resource
-import miapi.tim_config
 
 
 def add_views(configuration):

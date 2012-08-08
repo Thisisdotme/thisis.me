@@ -56,7 +56,7 @@ def list_features(request):
 
   feature_list = []
   for feature in db.Session().query(Feature).order_by(Feature.name):
-    feature_list.append(feature.toJSONObject())
+    feature_list.append(feature.to_JSON_dictionary())
 
   return {'features': feature_list}
 
@@ -84,7 +84,7 @@ def add_feature(request):
     request.response.status_int = 409
     return {'error': e.message}
 
-  return {'feature': feature.toJSONObject()}
+  return {'feature': feature.to_JSON_dictionary()}
 
 
 def get_feature(feature_context, request):
@@ -97,7 +97,7 @@ def get_feature(feature_context, request):
     request.response.status_int = 404
     return {'error': 'feature "{0}" does not exist'.format(feature_name)}
 
-  return feature.toJSONObject()
+  return feature.to_JSON_dictionary()
 
 
 def delete_feature(feature_context, request):
@@ -117,4 +117,4 @@ def delete_feature(feature_context, request):
     request.response.status_int = 500
     return {'error': e.message}
 
-  return {}
+  return {'name': feature_name}
