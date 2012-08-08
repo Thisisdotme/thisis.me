@@ -11,7 +11,6 @@ import tim_commons.emailer
 
 from mi_schema.models import (AuthorReservation)
 
-import miapi
 import miapi.resource
 
 
@@ -50,7 +49,7 @@ def add_views(configuration):
 def preflight_crossdomain_access_control(request):
   request.response.headers['Access-Control-Allow-Origin'] = '*'
   request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
+  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
 
 def get_reservation(reservation_context, request):
@@ -71,7 +70,7 @@ def get_reservation(reservation_context, request):
 
   request.response.headers['Access-Control-Allow-Origin'] = '*'
   request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
+  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
   return {'author_name': reservation.author_name}
 
@@ -123,7 +122,7 @@ def add_reservation(reservation_context, request):
 
   request.response.headers['Access-Control-Allow-Origin'] = '*'
   request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
+  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
   return {'author_name': author_name, 'email': email}
 

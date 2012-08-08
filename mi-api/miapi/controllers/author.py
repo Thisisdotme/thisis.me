@@ -14,7 +14,6 @@ import data_access.author_service_map
 import tim_commons.db
 
 import miapi.resource
-import miapi.controllers
 import miapi.controllers.feature_utils
 import miapi.controllers.author_utils
 

@@ -6,95 +6,124 @@ Created on Dec, 2011
 
 import logging
 
-from pyramid.view import view_config
-
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
 from mi_schema.models import Service
 
 from tim_commons import db
 
+import miapi.resource
+
+
 log = logging.getLogger(__name__)
 
 
-class ServicesController(object):
+def add_views(configuration):
+  # Features
+  configuration.add_view(
+      list_services,
+      context=miapi.resource.Services,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      add_service,
+      context=miapi.resource.Services,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
 
-  '''
-  Constructor
-  '''
-  def __init__(self, request):
-    self.request = request
-    self.db_session = db.Session()
+  # Feature
+  configuration.add_view(
+      get_service,
+      context=miapi.resource.Service,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      delete_service,
+      context=miapi.resource.Service,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
 
-  # GET /v1/accounts
-  #
-  # return info on all services
-  @view_config(route_name='services', request_method='GET', renderer='jsonp', permission='admin', http_cache=0)
-  def list_accounts(self):
 
-    serviceList = []
-    for service in self.db_session.query(Service).order_by(Service.service_name):
-      serviceList.append({'service_id': service.id,
-                          'name': service.service_name,
-                          'color_icon_high_res': self.request.static_url('miapi:%s' % service.color_icon_high_res),
-                          'color_icon_medium_res': self.request.static_url('miapi:%s' % service.color_icon_medium_res),
-                          'color_icon_low_res': self.request.static_url('miapi:%s' % service.color_icon_low_res),
-                          'mono_icon_high_res': self.request.static_url('miapi:%s' % service.mono_icon_high_res),
-                          'mono_icon_medium_res': self.request.static_url('miapi:%s' % service.mono_icon_medium_res),
-                          'mono_icon_low_res': self.request.static_url('miapi:%s' % service.mono_icon_low_res)})
+# return info on all services
+def list_services(request):
 
-    return {'services': serviceList}
+  serviceList = []
+  for service in db.Session().query(Service).order_by(Service.service_name):
+    serviceList.append(service.to_JSON_dictionary)
 
-  # retrieve information about a service
-  @view_config(route_name='services.CRUD', request_method='GET', renderer='jsonp', permission='admin', http_cache=0)
-  def get(self):
+  return {'services': serviceList}
 
-    serviceName = self.request.matchdict['servicename']
 
-    service = self.db_session.query(Service).filter_by(service_name=serviceName).one()
+# retrieve information about a service
+def get_service(context, request):
 
-    return {'service_id': service.id,
-            'name': service.service_name,
-            'color_icon_high_res': self.request.static_url('miapi:%s' % service.color_icon_high_res),
-            'color_icon_medium_res': self.request.static_url('miapi:%s' % service.color_icon_medium_res),
-            'color_icon_low_res': self.request.static_url('miapi:%s' % service.color_icon_low_res),
-            'mono_icon_high_res': self.request.static_url('miapi:%s' % service.mono_icon_high_res),
-            'mono_icon_medium_res': self.request.static_url('miapi:%s' % service.mono_icon_medium_res),
-            'mono_icon_low_res': self.request.static_url('miapi:%s' % service.mono_icon_low_res)}
+  service_name = context.name
 
-  # add a new service
-  @view_config(route_name='services.CRUD', request_method='PUT', renderer='jsonp', permission='admin', http_cache=0)
-  def put(self):
+  service = db.Session().query(Service).filter_by(service_name=service_name).one()
 
-    serviceName = self.request.matchdict['servicename']
+  return service.to_JSON_dictionary(request)
 
-    images = self.request.json_body
 
-    colorHighRes = images.get('color_icon_high_res', None)
-    colorMedRes = images.get('color_icon_medium_res', None)
-    colorLowRes = images.get('color_icon_low_res', None)
-    monoHighRes = images.get('mono_icon_high_res', None)
-    monoMedRes = images.get('mono_icon_medium_res', None)
-    monoLowRes = images.get('mono_icon_low_res', None)
+# add a new service
+def add_service(request):
 
-    service = Service(serviceName, colorHighRes, colorMedRes, colorLowRes, monoHighRes, monoMedRes, monoLowRes)
+  service_info = request.json_body
 
-    try:
-      self.db_session.add(service)
-      self.db_session.flush()
+  service_name = service_info.get('name')
+  if service_name is None:
+    request.response.status_int = 400
+    return {'error': 'missing name'}
 
-      log.info("create service: %(servicename)s" % {'servicename': serviceName})
+  colorHighRes = service_info.get('color_icon_high_res', None)
+  colorMedRes = service_info.get('color_icon_medium_res', None)
+  colorLowRes = service_info.get('color_icon_low_res', None)
+  monoHighRes = service_info.get('mono_icon_high_res', None)
+  monoMedRes = service_info.get('mono_icon_medium_res', None)
+  monoLowRes = service_info.get('mono_icon_low_res', None)
 
-    except IntegrityError, e:
-      self.request.response.status_int = 409
-      return {'error': e.message}
+  service = Service(service_name, colorHighRes, colorMedRes, colorLowRes, monoHighRes, monoMedRes, monoLowRes)
 
-    service = self.db_session.query(Service).filter_by(service_name=serviceName).first()
+  db_session = db.Session()
 
-    return {'service': service.toJSONObject()}
+  try:
+    db_session.add(service)
+    db_session.flush()
 
-  # delete an existing service
-  @view_config(route_name='services.CRUD', request_method='DELETE', renderer='jsonp', permission='admin', http_cache=0)
-  def delete(self):
-    log.info("delete service: %(servicename)s" % self.request.matchdict)
-    return {'request': 'DELETE /services/%(servicename)s' % self.request.matchdict}
+    log.debug('successfully created service: {name}'.format(name=service_name))
+
+  except IntegrityError, e:
+    request.response.status_int = 409
+    return {'error': e.message}
+
+  return service.to_JSON_dictionary(request)
+
+
+# delete an existing service
+def delete_service(context, request):
+
+  service_name = context.name
+
+  db_session = db.Session()
+  try:
+    service = db_session.query(Service).filter_by(service_name=service_name).one()
+    db_session.delete(service)
+    db_session.flush()
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'service "{0}" does not exist'.format(service_name)}
+  except Exception, e:
+    request.response.status_int = 500
+    return {'error': e.message}
+
+  log.info('successfully deleted service: "{name}"'.format(name=service_name))
+
+  return {'name': service_name}

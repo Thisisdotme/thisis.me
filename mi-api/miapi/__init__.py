@@ -9,15 +9,16 @@ import tim_commons.db
 import data_access.service
 import data_access.post_type
 
-import miapi.resource
-import miapi.controllers.login
-import miapi.controllers.author
-import miapi.controllers.author_reservation
-import miapi.controllers.author_query
-import miapi.controllers.author_photoalbum
-import miapi.controllers.author_photos
-import miapi.controllers.author_service
-import miapi.controllers.author_feature
+import resource
+import controllers.login
+import controllers.author
+import controllers.author_reservation
+import controllers.author_query
+import controllers.author_photoalbum
+import controllers.author_photos
+import controllers.author_service
+import controllers.feature
+import controllers.services
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -43,12 +44,12 @@ def main(global_config, **settings):
   data_access.post_type.initialize()
 
   configuration = pyramid.config.Configurator(
-      root_factory=miapi.resource.root_factory,
+      root_factory=resource.root_factory,
       settings=settings)
   # TODO: secret should be configurable
   authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
       'secret',
-      callback=miapi.controllers.login.authenticate_user,
+      callback=controllers.login.authenticate_user,
       wild_domain=False)
   configuration.set_authentication_policy(authentication)
   configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
@@ -72,14 +73,16 @@ def main(global_config, **settings):
 
 
 def add_views(configuration):
-  miapi.controllers.login.add_views(configuration)
-  miapi.controllers.author.add_views(configuration)
-  miapi.controllers.author_reservation.add_views(configuration)
-  miapi.controllers.author_query.add_views(configuration)
-  miapi.controllers.author_photoalbum.add_views(configuration)
-  miapi.controllers.author_photos.add_views(configuration)
-  miapi.controllers.author_service.add_views(configuration)
-  miapi.controllers.author_feature.add_views(configuration)
+  controllers.login.add_views(configuration)
+  controllers.author.add_views(configuration)
+  controllers.author_reservation.add_views(configuration)
+  controllers.author_query.add_views(configuration)
+  controllers.author_photoalbum.add_views(configuration)
+  controllers.author_photos.add_views(configuration)
+  controllers.author_service.add_views(configuration)
+
+  controllers.services.add_views(configuration)
+  controllers.feature.add_views(configuration)
 
 
 '''
