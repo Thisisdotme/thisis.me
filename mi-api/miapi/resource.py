@@ -135,8 +135,7 @@ class AuthorServices:
   @property
   def __acl__(self):
     return [
-        (pyramid.security.Allow, self.author_id, 'read'),
-        (pyramid.security.Allow, self.author_id, 'write'),
+        (pyramid.security.Allow, self.author_id, ['read', 'write', 'create']),
         pyramid.security.DENY_ALL]
 
   @property

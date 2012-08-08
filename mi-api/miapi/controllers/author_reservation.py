@@ -15,19 +15,21 @@ import miapi.resource
 
 
 def add_views(configuration):
+  # Reservations
+  configuration.add_view(
+      add_reservation,
+      context=miapi.resource.Reservations,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
+
   # Reservation
   configuration.add_view(
       get_reservation,
       context=miapi.resource.Reservation,
       request_method='GET',
       permission='read',
-      renderer='jsonp',
-      http_cache=0)
-  configuration.add_view(
-      add_reservation,
-      context=miapi.resource.Reservation,
-      request_method='PUT',
-      permission='create',
       renderer='jsonp',
       http_cache=0)
   configuration.add_view(
@@ -75,8 +77,16 @@ def get_reservation(reservation_context, request):
   return {'author_name': reservation.author_name}
 
 
-def add_reservation(reservation_context, request):
-  author_name = reservation_context.author_name
+def add_reservation(request):
+  reservation_info = request.json_body
+  if not reservation_info:
+    request.response.status_int = 400
+    return {'error': 'missing required properties: email, author_name'}
+
+  author_name = reservation_info.get('author_name')
+  if author_name is None:
+    request.response.status_int = 400
+    return {'error': 'missing required property: author_name'}
 
   # validate author_name syntax: max 16 characters and only alpha-numeric, underscore, and dash
   if len(author_name) > 16:
@@ -87,12 +97,6 @@ def add_reservation(reservation_context, request):
   if not regex.match(author_name):
     request.response.status_int = 400
     return {'error': 'Username contains invalid characters.  The username can only contain alpha-numeric characters, underscore (_), and hyphen (-).'}
-
-  reservation_info = request.json_body
-
-  if not reservation_info:
-    request.response.status_int = 400
-    return {'error': 'missing required property: email'}
 
   # grab the email
   email = reservation_info.get('email')

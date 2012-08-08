@@ -74,6 +74,7 @@ def main(global_config, **settings):
 
 def add_views(configuration):
   controllers.login.add_views(configuration)
+
   controllers.author.add_views(configuration)
   controllers.author_reservation.add_views(configuration)
   controllers.author_query.add_views(configuration)
@@ -97,12 +98,6 @@ def add_views(configuration):
   # AUTHOR PROFILE: profile information for the specified author
   #
   config.add_route('author.profile.CRUD', '/v1/authors/{authorname}/profile')
-
-  # TODO: Are we using this?
-  #
-  # AUTHOR METRICS: collected from users browsing an author's model
-  #
-  config.add_route('author.metrics.visitor.CRUD', '/v1/authors/{authorname}/metrics/visitor/{visitorID}')
 
   # TODO: What is this?
   #
