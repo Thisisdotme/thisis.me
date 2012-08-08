@@ -16,8 +16,10 @@ import controllers.author_reservation
 import controllers.author_query
 import controllers.author_photoalbum
 import controllers.author_photos
+import controllers.author_service
 import controllers.feature
 import controllers.services
+
 
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
@@ -76,6 +78,7 @@ def add_views(configuration):
   controllers.author_query.add_views(configuration)
   controllers.author_photoalbum.add_views(configuration)
   controllers.author_photos.add_views(configuration)
+  controllers.author_service.add_views(configuration)
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
@@ -133,19 +136,6 @@ def add_views(configuration):
   #
   config.add_route('author.groups.query.highlights', '/v1/authors/{authorname}/groups/{groupname}/highlights')
   config.add_route('author.groups.query.events', '/v1/authors/{authorname}/groups/{groupname}/events')
-
-  # --
-  # AUTHOR SERVICE: list services, add/remove services
-  #
-  config.add_route('author.services', '/v1/authors/{authorname}/services')
-  config.add_route('author.services.CRUD', '/v1/authors/{authorname}/services/{servicename}')
-
-  #
-  # AUTHOR SERVICE MODEL: rebuild/update the data for the specified service
-  #
-  # TODO: What is this? What permission do we need?
-  config.add_route('author.services.build', '/v1/authors/{authorname}/services/{servicename}/build')
-  config.add_route('author.services.update', '/v1/authors/{authorname}/services/{servicename}/update')
 
   #
   # AUTHOR SERVICE QUERY: query for the highlights/details of the specified service and author

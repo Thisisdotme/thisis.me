@@ -117,6 +117,55 @@ TIM.views.renderTemplate = function(template, context) {
 
 TIM.renderTemplate = TIM.views.renderTemplate; //shorthand?
 
+TIM.views.Login = Backbone.View.extend( {
+        
+    className: "app-page light",
+    template: "login",
+    
+    events: {
+      //"click span" : "itemClicked"
+      "click .cancel-link" : "cancel",
+      "submit form" : "submitForm"
+    },
+    
+    initialize: function(options) {
+        options = options || {};
+        var that = this;
+        
+        _.bindAll(this);
+        //make this a Comments collection
+        
+        
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+           TIM.appContainerElem.append(this.$el);
+        }
+    },
+    
+    render: function() {
+      var that = this;
+      
+      var templateContext = {
+        message: "Hey!"
+      }
+      
+      var html = TIM.views.renderTemplate(this.template, templateContext);
+  		this.$el.html(html);
+  		return this.$el;
+    },
+    
+    submitForm: function() {
+      $('.login-form .message').html("Sorry. Not implemented.");
+      return false;
+    },
+    
+    cancel: function(e) {
+      TIM.cancelLogin();
+      e.preventDefault();
+    }
+    
+    
+} );
+
 TIM.views.ErrorMessage = Backbone.View.extend( {
    id: "error-message",
    
@@ -172,8 +221,17 @@ TIM.views.FeatureNav = Backbone.View.extend( {
      });
      this.addOne(
        f
-     )
+     );
    }
+   if (false) {
+     var f2 = new TIM.models.Feature({
+        feature_name:"login",
+
+      });
+      this.addOne(
+        f2
+      )
+    }
 
   },
 
@@ -236,9 +294,13 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	},
 	
 	loadFeature : function() {
+	  if (this.model.get('feature_name') == 'settings' || this.model.get('feature_name') == 'login') {
+	    TIM.loadSettings();
+	    return;
+	  }
 	  if(this.$el.hasClass('selected')) {
 	    //return;
-	    TIM.navigateHandler("route:" + this.model.get('feature_name')); //kinda hack way of navigateing to same feature
+	    TIM.navigateHandler("route:" + this.model.get('feature_name')); //kinda hack way of navigating to same feature
 	    return;
 	  }
 	  TIM.app.navigate(this.model.get('feature_name'), {trigger: true});

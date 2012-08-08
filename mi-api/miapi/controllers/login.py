@@ -31,7 +31,7 @@ def login(request):
   if user and check_password(user.password, password):
     headers = pyramid.security.remember(request, user.id)
     request.response.headers.extend(headers)
-    return request.response
+    return user.toJSONObject()
 
   return error(request.response, AUTHN_BAD_USER_OR_PASSWD)
 

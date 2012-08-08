@@ -338,6 +338,7 @@ body.splash {
   -webkit-box-sizing: border-box; /* Safari */
 }
 .app-page.active {  display: block }
+.app-page.light { background-color: #eee; }
 .app-page.toolbar-top {  padding-top: 40px }
 #content-container {
   position: absolute;
@@ -354,6 +355,9 @@ body.splash {
 
 .initializing #feature-nav,
 .initializing #nav-toggle {  display: none }
+
+.nav-hidden #feature-nav,
+.nav-hidden #nav-toggle {  display: none }
 
 #nav-toggle {
   background: url(/img/nav/logo.svg) no-repeat, url(/img/nav/logo-active.svg) no-repeat;
@@ -450,6 +454,10 @@ body.splash {
 #nav-signup {
   margin-top: 45px !important;
   background: url(/img/nav/sign-up.svg) no-repeat center 4px;
+}
+#nav-settings, #nav-login {
+  margin-top: 4px;
+  background: url(/img/nav/sign-up.svg) no-repeat center 6px;
 }
 .loading-previous {
   position: absolute;
@@ -577,7 +585,7 @@ body.splash {
   line-height: 40px;
   text-align: center;
 }
-.app-page.light .toolbar .back-link {
+.app-page.light .toolbar span.back-link {
   position: absolute;
   left: 8px;
   top: 2px;
@@ -918,7 +926,7 @@ footer .avatar img {
   padding-top: 7px;
   padding-left: 5px;
 }
-footer span.service-icon {
+footer span.service-icon, footer img.service-icon {
   float: left;
   height: 15px;
   width: 15px;
@@ -942,6 +950,40 @@ footer .time-and-location {
   color: gray;
   font-size: 12px;
 }
+
+/* the login form! */
+
+.login-form {
+  margin-top:40px;
+  padding:16px;
+}
+
+.login-form h1 {
+  font-size:16px;
+  margin:25px 0;
+}
+
+.login-form input {
+  border-radius:8px;
+  height:25px;
+  margin-bottom:8px;
+  width:90%;
+  outline:none;
+}
+
+.login-form #login-submit {
+  margin-top:16px;
+}
+
+.app-page .toolbar .cancel-link {
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  line-height:38px;
+  text-decoration:none;
+}
+
+/* --end login form */
 
 
 /* flipboard css */
