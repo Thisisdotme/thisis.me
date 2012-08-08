@@ -81,6 +81,7 @@ class Author:
     return [
         (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
         (pyramid.security.Allow, self.author_id, 'write'),
+        (pyramid.security.Allow, self.author_id, 'create'),
         pyramid.security.DENY_ALL]
 
   def __init__(self, author_id):
@@ -99,12 +100,33 @@ class Author:
     elif key == 'photoalbums':
       resource = PhotoAlbums()
     elif key == 'features':
-      pass  # TODO implement this
+      resource = AuthorFeatures()
 
     if resource:
       return location_aware(resource, self, key)
 
     raise KeyError('Key "{key}" not a valid author entry'.format(key=key))
+
+
+class AuthorFeatures:
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+  def __getitem__(self, key):
+    if key == 'default':
+      raise KeyError('Key "{key}" not a valid author feature entry'.format(key=key))
+
+    return location_aware(AuthorFeature(key), self, key)
+
+
+class AuthorFeature:
+  def __init__(self, feature_name):
+    self.feature_name = feature_name
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
 
 
 class AuthorServices:
@@ -194,7 +216,7 @@ class Event:
 
   @property
   def author_id(self):
-    return self.__parent__.__parent__.author_id
+    return self.__parent__.author_id
 
 
 class Services:

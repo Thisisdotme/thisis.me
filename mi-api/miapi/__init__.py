@@ -17,8 +17,12 @@ import miapi.controllers.author_query
 import miapi.controllers.author_photoalbum
 import miapi.controllers.author_photos
 import miapi.controllers.author_service
+import miapi.controllers.author_feature
+
+
 # dictionary that holds all configuration merged from multple sources
 tim_config = {}
+
 
 # object created from JSON file that stores oAuth configuration for social services
 oauth_config = {}
@@ -75,6 +79,7 @@ def add_views(configuration):
   miapi.controllers.author_photoalbum.add_views(configuration)
   miapi.controllers.author_photos.add_views(configuration)
   miapi.controllers.author_service.add_views(configuration)
+  miapi.controllers.author_feature.add_views(configuration)
 
 
 '''
@@ -140,12 +145,6 @@ def add_views(configuration):
   # AUTHOR SERVICE PROFILE: get profile information from the specified service
   #
   config.add_route('author.services.profile', '/v1/authors/{authorname}/services/{servicename}/profile')
-
-  # TODO: do we want an '/v1/authors/{name}/photos/{id} url?
-  #
-  # AUTHOR PHOTO ALBUMS: get the list of photo albums for the user
-  #
-  config.add_route('author.photoalbums.photos.CRUD', '/v1/authors/{authorname}/photoalbums/{albumID}/photos')
 
   #
   # SERVICE functionality

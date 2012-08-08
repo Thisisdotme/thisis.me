@@ -10,6 +10,8 @@ from sqlalchemy import (
     UniqueConstraint,
     Index)
 from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy.orm.exc
+import tim_commons.db
 
 Base = declarative_base()
 
@@ -452,6 +454,17 @@ class Feature(Base):
 
   def __repr__(self):
     return "<Feature('%d','%s')>" % (self.id, self.name)
+
+  @classmethod
+  def query_by_name(cls, feature_name):
+    row = None
+    try:
+      row = tim_commons.db.Session().query(Feature).filter_by(name=feature_name).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+      # feature not found
+      pass
+
+    return row
 
   def toJSONObject(self):
     return {'feature_id': self.id, 'feature_name': self.name}
