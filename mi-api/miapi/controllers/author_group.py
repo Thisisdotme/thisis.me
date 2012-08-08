@@ -16,10 +16,6 @@ from tim_commons import db
 
 from mi_schema.models import Author, AuthorGroup, AuthorGroupMap
 
-from miapi.globals import DEFAULT_AUTHOR_GROUP
-
-log = logging.getLogger(__name__)
-
 
 class AuthorGroupController(object):
 
@@ -96,7 +92,7 @@ class AuthorGroupController(object):
 
       jsonObject = authorGroup.toJSONObject()
 
-      log.info("created author_group: %s" % authorGroup)
+      logging.info("created author_group: %s" % authorGroup)
 
     except IntegrityError, e:
       self.request.response.status_int = 409
@@ -112,7 +108,7 @@ class AuthorGroupController(object):
     authorName = self.request.matchdict['authorname']
     groupName = self.request.matchdict['groupname']
 
-    if groupName == DEFAULT_AUTHOR_GROUP:
+    if groupName == 'follow':
       self.request.response.status_int = 403
       return {'error': 'cannot delete the required group %s' % groupName}
 
@@ -253,7 +249,7 @@ class AuthorGroupController(object):
       self.db_session.add(mapping)
       self.db_session.flush()
 
-      log.info("Added %s to %s's author_group %s" % (memberName, authorName, groupName))
+      logging.info("Added %s to %s's author_group %s" % (memberName, authorName, groupName))
 
     except IntegrityError, e:
       self.request.response.status_int = 409

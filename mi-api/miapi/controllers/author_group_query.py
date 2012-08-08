@@ -16,8 +16,6 @@ from data_access import service
 
 from mi_schema.models import Author, AuthorGroup, AuthorGroupMap, ServiceEvent, Service, AuthorServiceMap, Highlight, ServiceObjectType
 
-from miapi.globals import LIMIT
-
 from author_utils import createServiceEvent, createHighlightEvent
 
 log = logging.getLogger(__name__)
@@ -69,8 +67,7 @@ class AuthorGroupQueryController(object):
               join(Author, AuthorServiceMap.author_id == Author.id). \
               join(Service, AuthorServiceMap.service_id == Service.id). \
               filter(and_(AuthorGroupMap.author_group_id == authorGroup.id, Highlight.weight > 0)). \
-              order_by(Highlight.weight.desc(), ServiceEvent.create_time). \
-              limit(LIMIT):
+              order_by(Highlight.weight.desc(), ServiceEvent.create_time):
       events.append(createHighlightEvent(self.dbSession, self.request, highlight, event, asm, author, serviceName))
 
     return {'events': events, 'paging': {'prev': None, 'next': None}}
@@ -107,8 +104,7 @@ class AuthorGroupQueryController(object):
             join(Author, AuthorServiceMap.author_id == Author.id). \
             filter(AuthorGroupMap.author_group_id == authorGroup.id). \
             filter(ServiceEvent.correlation_id == None). \
-            order_by(ServiceEvent.create_time.desc()). \
-            limit(LIMIT):
+            order_by(ServiceEvent.create_time.desc()):
 
       ''' filter well-known and instagram photo albums so they
           don't appear in the timeline

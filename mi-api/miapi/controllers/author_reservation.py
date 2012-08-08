@@ -1,155 +1,163 @@
-'''
-Created on Jul 13, 2012
-
-@author: howard
-'''
-
 import logging
 import re
 from datetime import datetime
-
-from pyramid.view import view_config
 
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
-from tim_commons import (db, emailer)
+import tim_commons.db
+import tim_commons.emailer
 
 from mi_schema.models import (AuthorReservation)
 
-from miapi import tim_config
+import miapi
+import miapi.resource
 
 
-class AuthorReservationController(object):
+def add_views(configuration):
+  # Reservation
+  configuration.add_view(
+      get_reservation,
+      context=miapi.resource.Reservation,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      add_reservation,
+      context=miapi.resource.Reservation,
+      request_method='PUT',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      preflight_crossdomain_access_control,
+      context=miapi.resource.Reservation,
+      request_method='OPTIONS',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      remove_reservation,
+      context=miapi.resource.Reservation,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
 
-  # Constructor
-  #
-  def __init__(self, request):
 
-    self.request = request
-    self.db_session = db.Session()
+def preflight_crossdomain_access_control(request):
+  request.response.headers['Access-Control-Allow-Origin'] = '*'
+  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
-  # OPTIONS /v1/reservation/{authorname}
-  # preflight cross-domain requests
-  @view_config(route_name='author.reservation', request_method='OPTIONS', renderer='jsonp', http_cache=0)
-  def preflight_crossdomain_access_control(self):
 
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
+def get_reservation(reservation_context, request):
+  author_name = reservation_context.author_name
 
-  # GET /v1/reservation/{authorname}
-  #
-  # get an authorname reservation -- check to see if it exists
-  #
-  @view_config(route_name='author.reservation', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_reservation(self):
+  # get author-id for author_name
+  try:
+    query = tim_commons.db.Session().query(AuthorReservation)
+    query = query.filter_by(author_name=author_name)
+    reservation = query.one()
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'unknown author-name %s' % author_name}
 
-    author_name = self.request.matchdict['authorname']
+  except Exception, e:
+    request.response.status_int = 500
+    return {'error': e.message}
 
-    # get author-id for author_name
-    try:
-      reservation = self.db_session.query(AuthorReservation).filter(AuthorReservation.author_name == author_name).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author-name %s' % author_name}
+  request.response.headers['Access-Control-Allow-Origin'] = '*'
+  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
-    except Exception, e:
-      self.request.response.status_int = 500
-      return {'error': e.message}
+  return {'author_name': reservation.author_name}
 
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
-    return {'author_name': reservation.author_name}
+def add_reservation(reservation_context, request):
+  author_name = reservation_context.author_name
 
-  # PUT /v1/reservation/{authorname}
-  #
-  # Add a new author reservation
-  #
-  @view_config(route_name='author.reservation', request_method='PUT', renderer='jsonp', http_cache=0)
-  def add_reservation(self):
+  # validate author_name syntax: max 16 characters and only alpha-numeric, underscore, and dash
+  if len(author_name) > 16:
+    request.response.status_int = 400
+    return {'error': 'Username is too long.  The username cannot exceed 16 characters in length.'}
 
-    author_name = self.request.matchdict['authorname']
+  regex = re.compile('^[a-zA-Z0-9_]+$')
+  if not regex.match(author_name):
+    request.response.status_int = 400
+    return {'error': 'Username contains invalid characters.  The username can only contain alpha-numeric characters, underscore (_), and hyphen (-).'}
 
-    # validate author_name syntax: max 16 characters and only alpha-numeric, underscore, and dash
-    if len(author_name) > 16:
-      self.request.response.status_int = 400
-      return {'error': 'Username is too long.  The username cannot exceed 16 characters in length.'}
+  reservation_info = request.json_body
 
-    regex = re.compile('^[a-zA-Z0-9_]+$')
-    if not regex.match(author_name):
-      self.request.response.status_int = 400
-      return {'error': 'Username contains invalid characters.  The username can only contain alpha-numeric characters, underscore (_), and hyphen (-).'}
+  if not reservation_info:
+    request.response.status_int = 400
+    return {'error': 'missing required property: email'}
 
-    reservation_info = self.request.json_body
+  # grab the email
+  email = reservation_info.get('email')
+  if not email:
+    request.response.status_int = 400
+    return {'error': 'missing required property: email'}
 
-    if not reservation_info:
-      self.request.response.status_int = 400
-      return {'error': 'missing required property: email'}
+  # get author-id for author_name
+  try:
+    reservation = AuthorReservation(author_name, email, datetime.now())
+    tim_commons.db.Session().add(reservation)
+    tim_commons.db.Session().flush()
 
-    # grab the email
-    email = reservation_info.get('email')
-    if not email:
-      self.request.response.status_int = 400
-      return {'error': 'missing required property: email'}
+  except IntegrityError, e:
+    logging.error(e.message)
+    request.response.status_int = 409
+    return {'error': e.message}
 
-    # get author-id for author_name
-    try:
-      reservation = AuthorReservation(author_name, email, datetime.now())
-      self.db_session.add(reservation)
-      self.db_session.flush()
+  # send confirmation email
+  tim_commons.emailer.send_template(
+      miapi.tim_config['email'],
+      'reservation_confirmation.html',
+      'accounts@thisis.me',
+      email,
+      'Username reservation confirmation',
+      {'author_name': author_name})
 
-    except IntegrityError, e:
-      logging.error(e.message)
-      self.request.response.status_int = 409
-      return {'error': e.message}
+  request.response.headers['Access-Control-Allow-Origin'] = '*'
+  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
+  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
-    # send confirmation email
-    emailer.send_template(tim_config['email'], 'reservation_confirmation.html', 'accounts@thisis.me', email, 'Username reservation confirmation', {'author_name': author_name})
+  return {'author_name': author_name, 'email': email}
 
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-    self.request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
 
-    return {'author_name': author_name, 'email': email}
+def remove_reservation(reservation_context, request):
+  author_name = reservation_context.author_name
 
-  # DELETE /v1/reservation/{authorname}
-  #
-  # Remove an existing author reservation
-  #
-  @view_config(route_name='author.reservation', request_method='DELETE', renderer='jsonp', http_cache=0)
-  def remove_reservation(self):
+  reservation_info = request.json_body
 
-    author_name = self.request.matchdict['authorname']
+  if not reservation_info:
+    request.response.status_int = 400
+    return {'error': 'missing required property: email'}
 
-    reservation_info = self.request.json_body
+  # grab the email
+  email = reservation_info.get('email')
+  if not email:
+    request.response.status_int = 400
+    return {'error': 'missing required property: email'}
 
-    if not reservation_info:
-      self.request.response.status_int = 400
-      return {'error': 'missing required property: email'}
+  # get author-id for author_name
+  try:
+    query = tim_commons.db.Session().query(AuthorReservation)
+    query = query.filter(and_(AuthorReservation.author_name == author_name,
+                              AuthorReservation.email == email))
+    reservation = query.one()
+    tim_commons.db.Session().delete(reservation)
+    tim_commons.db.Session().flush()
 
-    # grab the email
-    email = reservation_info.get('email')
-    if not email:
-      self.request.response.status_int = 400
-      return {'error': 'missing required property: email'}
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'Unknown author-name/email combination'}
 
-    # get author-id for author_name
-    try:
-      reservation = self.db_session.query(AuthorReservation).filter(and_(AuthorReservation.author_name == author_name,
-                                                                         AuthorReservation.email == email)).one()
-      self.db_session.delete(reservation)
-      self.db_session.flush()
+  except Exception, e:
+    request.response.status_int = 500
+    return {'error': e.message}
 
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'Unknown author-name/email combination'}
-
-    except Exception, e:
-      self.request.response.status_int = 500
-      return {'error': e.message}
-
-    return {'author_name': author_name}
+  return {'author_name': author_name}

@@ -8,11 +8,15 @@ from tim_commons import db
 from mi_schema import models
 
 id_to_post_type = {}
-name_to_post_type = {}
+label_to_post_type = {}
 
 
 def id_to_label(type_id):
   return id_to_post_type[type_id].label
+
+
+def label_to_id(label):
+  return label_to_post_type[label].type_id
 
 
 def initialize():
@@ -21,12 +25,12 @@ def initialize():
   for post_type in post_types:
     db.Session().expunge(post_type)
     id_to_post_type[post_type.type_id] = post_type
-    name_to_post_type[post_type.label] = post_type
+    label_to_post_type[post_type.label] = post_type
 
   # Kinda of a hack! Post type that will never make it to the database
   delete = models.ServiceObjectType(256, 'delete')
   id_to_post_type[delete.type_id] = delete
-  name_to_post_type[delete.label] = delete
+  label_to_post_type[delete.label] = delete
 
 
 def query_all_post_types():
