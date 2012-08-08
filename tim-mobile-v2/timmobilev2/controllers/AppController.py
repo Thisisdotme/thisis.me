@@ -22,3 +22,9 @@ class AppController(object):
   def requestHandler(self):
     return {'author_name': self.request.matchdict['authorname'],
             'api_endpoint': self.request.registry.settings['mi.api.endpoint']}
+            
+            
+  @view_config(route_name='settings', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+  def settingsHandler(self):
+    return {'author_name': 'ken',
+            'api_endpoint': self.request.registry.settings['mi.api.endpoint']}

@@ -18,6 +18,9 @@ TIM.loading_ = false;
 TIM.transitioning_ = false;
 TIM.errorShowing_ = true;
 TIM.errorMessageView = undefined;
+TIM.currentUser = undefined; //the person who is currently logged in - will be an author object?
+TIM.loggedIn = false;
+TIM.navVisiblestyle_ = true;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -109,6 +112,15 @@ $(function() {
   }
 	
 	TIM.disableScrolling();
+	
+	TIM.setNavVisible = function (visible) {
+	  TIM.navVisible_ = visible;
+	  if(visible) {
+	    $('#app').removeClass('nav-hidden');
+	  } else {
+	    $('#app').addClass('nav-hidden');
+	  }
+	}
 	
 	TIM.setLoading = function (loading) {
 	  TIM._loading = loading;
@@ -326,6 +338,12 @@ $(function() {
   	      return;
   	    }
   	    
+  	    if (featureName == 'settings') {
+  	      location.href = "/settings";
+  	      localStorage.removeItem('tim_last_url');
+  	      return;
+  	    }
+  	    
   	    var feature = TIM.features.getByName(featureName);
   	    if (TIM.features.getSelectedFeature()) {
   	      TIM.setLoading(true); //make this a method on TIM
@@ -355,7 +373,7 @@ $(function() {
   	      }
   	      resourceId = undefined;
   	    }
-  	    $('#app').removeClass('nav-open');
+  	    $('#app').removeClass('nav-open nav-hidden');
   	    if (feature.behavior) {
   	        console.log('********* activating feature *********', path);
             feature.behavior.activate(path);
@@ -367,6 +385,16 @@ $(function() {
       }
   };
   
+  TIM.loadSettings = function() {
+    if(TIM.currentUser) {
+      location.href = "/settings";
+      localStorage.removeItem('tim_last_url');
+    } else {
+      TIM.showLoginForm();
+    }
+    
+  }
+  
   TIM.showErrorMessage = function (options) {
     TIM.setLoading(false);
     if (!TIM.errorMessageView) {
@@ -374,6 +402,22 @@ $(function() {
     }
     TIM.errorMessageView.render({message: options.exception});
     TIM.setErrorShowing(true);
+  };
+  
+  TIM.showLoginForm = function (options) {
+    TIM.setLoading(false);
+    if (!TIM.loginView) {
+      TIM.loginView = new TIM.views.Login();
+    }
+    TIM.loginView.render({message: "dam"});
+    TIM.setNavVisible(false);
+    TIM.app.navigate("#login");
+    TIM.transitionPage (TIM.loginView.$el);
+  };
+  
+  TIM.cancelLogin = function (options) {
+    window.history.back();
+    TIM.setNavVisible(true);
   };
   
   //for now this simply handles the DOM page transition

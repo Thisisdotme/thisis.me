@@ -1,0 +1,10 @@
+<div class="toolbar"><span class="cancel-link" href="#">Cancel</span><h1>Log In</h1></div>
+<div class="login-form">
+  <div class="message"></div>
+  <form id="login-form" action="" method="post">
+  	<input type="hidden" name="forward" value=""/>
+  	<input type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
+  	<input type="password" name="password" value=""/>
+  	<input id="login-submit" type="submit" name="form.submitted" value="Log In" />
+  </form>
+</div>
