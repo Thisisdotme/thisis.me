@@ -95,7 +95,7 @@ class Author:
     elif key == 'events':
       resource = Events()
     elif key == 'services':
-      pass  # TODO: implement this
+      resource = AuthorServices()
     elif key == 'photoalbums':
       resource = PhotoAlbums()
     elif key == 'features':
@@ -105,6 +105,31 @@ class Author:
       return location_aware(resource, self, key)
 
     raise KeyError('Key "{key}" not a valid author entry'.format(key=key))
+
+
+class AuthorServices:
+  @property
+  def __acl__(self):
+    return [
+        (pyramid.security.Allow, self.author_id, 'read'),
+        (pyramid.security.Allow, self.author_id, 'write'),
+        pyramid.security.DENY_ALL]
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+  def __getitem__(self, key):
+    return location_aware(AuthorService(key), self, key)
+
+
+class AuthorService:
+  def __init__(self, service_name):
+    self.service_name = service_name
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
 
 
 class PhotoAlbums:

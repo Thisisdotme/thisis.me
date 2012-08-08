@@ -1,160 +1,167 @@
 import logging
 from datetime import datetime
 
-from pyramid.view import view_config
 from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import NoResultFound
 
-from tim_commons import db
-from mi_schema.models import Author, Service, AuthorServiceMap, ServiceObjectType, ServiceEvent
+from mi_schema.models import Service, AuthorServiceMap, ServiceObjectType, ServiceEvent
+import tim_commons.db
 import data_access.service
+import miapi.resource
 
 
-##
-##  author/service relationship
-##
+def add_views(configuration):
+  # Author Services
+  configuration.add_view(
+      list_author_services,
+      context=miapi.resource.AuthorServices,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
 
-class AuthorServiceController(object):
+  # Author Service
+  configuration.add_view(
+      get_author_service_info,
+      context=miapi.resource.AuthorService,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      put_author_service,
+      context=miapi.resource.AuthorService,
+      request_method='PUT',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      delete_author_service,
+      context=miapi.resource.AuthorService,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
 
-  '''
-  Constructor
-  '''
-  def __init__(self, request):
-    self.request = request
-    self.db_session = db.Session()
 
-  # GET /v1/authors/{authorname}/services
-  #
-  # list all services associated with the author
-  @view_config(route_name='author.services', request_method='GET', renderer='jsonp', http_cache=0)
-  def listAuthorServices(self):
+def list_author_services(author_services_context, request):
+  author_id = author_services_context.author_id
 
-    author_name = self.request.matchdict['authorname']
+  author = data_access.author.query_author(author_id)
 
-    try:
-      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    services = []
-    for service in self.db_session.query(Service). \
-                             join(AuthorServiceMap). \
-                             filter(and_(Service.id == AuthorServiceMap.service_id),
-                                         AuthorServiceMap.author_id == author_id). \
-                             order_by(Service.service_name):
-      services.append({'service_id': service.id,
-                       'name': service.service_name,
-                       'color_icon_high_res': self.request.static_url('miapi:%s' % service.color_icon_high_res),
-                       'color_icon_medium_res': self.request.static_url('miapi:%s' % service.color_icon_medium_res),
-                       'color_icon_low_res': self.request.static_url('miapi:%s' % service.color_icon_low_res),
-                       'mono_icon_high_res': self.request.static_url('miapi:%s' % service.mono_icon_high_res),
-                       'mono_icon_medium_res': self.request.static_url('miapi:%s' % service.mono_icon_medium_res),
-                       'mono_icon_low_res': self.request.static_url('miapi:%s' % service.mono_icon_low_res)})
+  services = []
+  for service in tim_commons.db.Session().query(Service). \
+    join(AuthorServiceMap). \
+    filter(and_(Service.id == AuthorServiceMap.service_id),
+                AuthorServiceMap.author_id == author_id). \
+    order_by(Service.service_name):
 
-    return {'author_name': author_name, 'services': services}
+    services.append({'service_id': service.id,
+                     'name': service.service_name,
+                     'color_icon_high_res': request.static_url('miapi:%s' % service.color_icon_high_res),
+                     'color_icon_medium_res': request.static_url('miapi:%s' % service.color_icon_medium_res),
+                     'color_icon_low_res': request.static_url('miapi:%s' % service.color_icon_low_res),
+                     'mono_icon_high_res': request.static_url('miapi:%s' % service.mono_icon_high_res),
+                     'mono_icon_medium_res': request.static_url('miapi:%s' % service.mono_icon_medium_res),
+                     'mono_icon_low_res': request.static_url('miapi:%s' % service.mono_icon_low_res)})
 
-  # GET /v1/authors/{authorname}/services/{servicename}
-  #
-  # get info & configuration details for the author's service
-  #
-  @view_config(route_name='author.services.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
-  def getAuthorServiceInfo(self):
+  return {'author_name': author.author_name, 'services': services}
 
-    author_name = self.request.matchdict['authorname']
-    serviceName = self.request.matchdict['servicename']
 
-    try:
-      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+def get_author_service_info(author_service_context, request):
+  author_id = author_service_context.author_id
 
-    try:
-      service_id, = self.db_session.query(Service.id).filter_by(service_name=serviceName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service %s' % serviceName}
+  author = data_access.author.query_author(author_id)
 
-    try:
-      asm = self.db_session.query(AuthorServiceMap).filter_by(author_id=author_id, service_id=service_id).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service for author'}
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    response = {'author': author_name,
-                'service': serviceName,
-                'last_update_time': datetime.isoformat(asm.last_update_time) if asm.last_update_time else None}
+  service = data_access.service.name_to_service.get(author_service_context.service_name)
+  if service is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service %s' % author_service_context.service_name}
 
-    if asm.access_token:
-      response['access_token'] = asm.access_token
+  asm = data_access.author_service_map.query_asm_by_author_and_service(author_id, service.id)
+  if asm is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service for author'}
 
-    if asm.access_token_secret:
-      response['access_token_secret'] = asm.access_token_secret
+  response = {'author': author.author_name,
+              'service': service.service_name,
+              'last_update_time': datetime.isoformat(asm.last_update_time) if asm.last_update_time else None}
 
-    return response
+  if asm.access_token:
+    response['access_token'] = asm.access_token
 
-  # PUT /v1/authors/{authorname}/services/{servicename}
-  #
-  # add the service to the author's service set
-  #
-  @view_config(route_name='author.services.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
-  def putAuthorService(self):
+  if asm.access_token_secret:
+    response['access_token_secret'] = asm.access_token_secret
 
-    author_name = self.request.matchdict['authorname']
-    service_name = self.request.matchdict['servicename']
+  return response
 
-    payload = self.request.json_body
-    accessToken = payload.get('access_token')
-    accessTokenSecret = payload.get('access_token_secret')
-    service_author_id = payload.get('service_author_id')
 
-    try:
-      author_id, = self.db_session.query(Author.id).filter_by(author_name=author_name).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+def put_author_service(author_service_context, request):
+  author_id = author_service_context.author_id
 
-    try:
-      service_id, = self.db_session.query(Service.id).filter_by(service_name=service_name).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service %s' % service_name}
+  author = data_access.author.query_author(author_id)
 
-    authorServiceMap = AuthorServiceMap(author_id, service_id, accessToken, accessTokenSecret, service_author_id)
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    try:
-      self.db_session.add(authorServiceMap)
-      self.db_session.flush()
+  service = data_access.service.name_to_service.get(author_service_context.service_name)
+  if service is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service %s' % author_service_context.service_name}
 
-      # if this is instagram add an instagram photo album
-      if service_id == data_access.service.name_to_id('instagram'):
-        instagram__album = ServiceEvent(authorServiceMap.id,
-                                        ServiceObjectType.PHOTO_ALBUM_TYPE,
-                                        author_id,
-                                        service_id,
-                                        '_{0}@{1}'.format(service_name, author_id),
-                                        datetime.now(),
-                                        None,
-                                        None,
-                                        'Photos from Instagram')
-        self.db_session.add(instagram__album)
-        self.db_session.flush()
+  payload = request.json_body
+  accessToken = payload.get('access_token')
+  accessTokenSecret = payload.get('access_token_secret')
+  service_author_id = payload.get('service_author_id')
 
-      logging.info("created author/service link: %s -> %s" % (author_name, service_name))
+  author_service_map = AuthorServiceMap(
+      author_id,
+      service.id,
+      accessToken,
+      accessTokenSecret,
+      service_author_id)
 
-    except IntegrityError, e:
-      self.request.response.status_int = 409
-      return {'error': e.message}
+  try:
+    tim_commons.db.Session().add(author_service_map)
+    tim_commons.db.Session().flush()
 
-#    # load events for this service
-#    s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
-#    awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
-#    awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
-#    serviceBuild(author_name, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
+    # if this is instagram add an instagram photo album
+    if service.id == data_access.service.name_to_id('instagram'):
+      instagram__album = ServiceEvent(
+          author_service_map.id,
+          ServiceObjectType.PHOTO_ALBUM_TYPE,
+          author_id,
+          service.id,
+          '_{0}@{1}'.format(service.service_name, author_id),
+          datetime.now(),
+          None,
+          None,
+          'Photos from Instagram')
+      tim_commons.db.Session().add(instagram__album)
+      tim_commons.db.Session().flush()
 
-    response = {'author': author_name, 'service': service_name}
+    logging.info("created author/service link: %s -> %s", author.author_name, service.service_name)
+
+  except IntegrityError, e:
+    request.response.status_int = 409
+    return {'error': e.message}
+
+    response = {'author': author.author_name, 'service': service.service_name}
 
     if accessToken:
       response['access_token'] = accessToken
@@ -167,29 +174,31 @@ class AuthorServiceController(object):
 
     return response
 
-  # delete the service from the author's service set
-  #
-  @view_config(route_name='author.services.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
-  def deleteAuthorService(self):
 
-    authorname = self.request.matchdict['authorname']
-    servicename = self.request.matchdict['servicename']
+def delete_author_service(author_service_context, request):
+  author_id = author_service_context.author_id
 
-    author = self.db_session.query(Author).filter_by(author_name=authorname).first()
-    if author == None:
-      self.request.response.status_int = 404
-      return {'error': 'unknown authorname'}
+  author = data_access.author.query_author(author_id)
 
-    service = self.db_session.query(Service).filter_by(service_name=servicename).first()
-    if service == None:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service'}
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    authorServiceMap = self.db_session.query(AuthorServiceMap).filter_by(author_id=author.id, service_id=service.id).first()
-    if not authorServiceMap:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service for author'}
+  service = data_access.service.name_to_service.get(author_service_context.service_name)
+  if service is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service %s' % author_service_context.service_name}
 
-    self.db_session.delete(authorServiceMap)
+  asm = data_access.author_service_map.query_asm_by_author_and_service(author_id, service.id)
+  if asm is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service for author'}
 
-    return {}
+  tim_commons.db.Session().delete(asm)
+  tim_commons.db.Session().flush()
+  # TODO: should we delete all the service events?
+
+  return {}
