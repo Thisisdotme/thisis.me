@@ -12,7 +12,7 @@ import tim_commons.emailer
 from mi_schema.models import (AuthorReservation)
 
 import miapi.resource
-import miapi
+import miapi.tim_config
 
 
 def add_views(configuration):
@@ -71,7 +71,7 @@ def get_reservation(reservation_context, request):
 
   request.response.headers['Access-Control-Allow-Origin'] = '*'
   request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = "1209600"   # valid for 14 days
+  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
   return {'author_name': reservation.author_name}
 
@@ -123,7 +123,7 @@ def add_reservation(reservation_context, request):
 
   request.response.headers['Access-Control-Allow-Origin'] = '*'
   request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
   return {'author_name': author_name, 'email': email}
 
