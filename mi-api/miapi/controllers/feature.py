@@ -6,8 +6,6 @@ Created on Apr 24, 2012
 
 import logging
 
-from pyramid.view import view_config
-
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -15,70 +13,108 @@ from mi_schema.models import Feature
 
 from tim_commons import db
 
+import miapi.resource
+
 log = logging.getLogger(__name__)
 
 
-class FeatureController(object):
+def add_views(configuration):
+  # Features
+  configuration.add_view(
+      list_features,
+      context=miapi.resource.Features,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      add_feature,
+      context=miapi.resource.Features,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
 
-  def __init__(self, request):
-    '''
-    Constructor
-    '''
-    self.request = request
-    self.db_session = db.Session()
+  # Feature
+  configuration.add_view(
+      get_feature,
+      context=miapi.resource.Feature,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      delete_feature,
+      context=miapi.resource.Feature,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
 
-  @view_config(route_name='features', request_method='GET', renderer='jsonp', http_cache=0)
-  def listFeatures(self):
 
-    featureList = []
-    for feature in self.db_session.query(Feature).order_by(Feature.name):
-      featureList.append(feature.toJSONObject())
+def list_features(request):
 
-    return {'features': featureList}
+  feature_list = []
+  for feature in db.Session().query(Feature).order_by(Feature.name):
+    feature_list.append(feature.toJSONObject())
 
-  @view_config(route_name='feature.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
-  def addFeature(self):
+  return {'features': feature_list}
 
-    featureName = self.request.matchdict['featurename']
 
-    feature = Feature(featureName)
+def add_feature(request):
 
-    try:
-      self.db_session.add(feature)
-      self.db_session.flush()
+  feature_info = request.json_body
 
-      log.info("create feature: %(featurename)s" % {'featurename': featureName})
+  feature_name = feature_info.get('name')
+  if feature_name is None:
+    request.response.status_int = 400
+    return {'error': 'missing name'}
 
-    except IntegrityError, e:
-      self.request.response.status_int = 409
-      return {'error': e.message}
+  feature = Feature(feature_name)
 
-    return {'service': feature.toJSONObject()}
+  db_session = db.Session()
 
-  @view_config(route_name='feature.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
-  def deleteFeature(self):
+  try:
+    db_session.add(feature)
+    db_session.flush()
 
-    featureName = self.request.matchdict['featurename']
+    log.info('create feature: {0}'.format(feature_name))
 
-    try:
-      feature = self.db_session.query(Feature).filter_by(name=featureName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'feature "%s" does not exist' % featureName}
+  except IntegrityError, e:
+    request.response.status_int = 409
+    return {'error': e.message}
 
-    self.db_session.delete(feature)
+  return {'feature': feature.toJSONObject()}
 
-    return {}
 
-  @view_config(route_name='feature.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
-  def getFeature(self):
+def get_feature(feature_context, request):
 
-    featureName = self.request.matchdict['featurename']
+  feature_name = feature_context.feature_name
 
-    try:
-      feature = self.db_session.query(Feature).filter_by(name=featureName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'feature "%s" does not exist' % featureName}
+  try:
+    feature = db.Session().query(Feature).filter_by(name=feature_name).one()
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'feature "{0}" does not exist'.format(feature_name)}
 
-    return feature.toJSONObject()
+  return feature.toJSONObject()
+
+
+def delete_feature(feature_context, request):
+
+  feature_name = feature_context.feature_name
+
+  db_session = db.Session()
+
+  try:
+    feature = db_session.query(Feature).filter_by(name=feature_name).one()
+    db_session.delete(feature)
+    db_session.flush()
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'feature "{name}" does not exist'.format(name=feature_name)}
+  except Exception, e:
+    request.response.status_int = 500
+    return {'error': e.message}
+
+  return {}

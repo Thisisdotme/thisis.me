@@ -9,7 +9,10 @@ from sqlalchemy import (
     ForeignKey,
     UniqueConstraint,
     Index)
+
 from sqlalchemy.ext.declarative import declarative_base
+
+from tim_commons import db
 
 Base = declarative_base()
 
@@ -98,10 +101,24 @@ class Service(Base):
     self.mono_icon_low_res = monoIconLowRes
 
   def __repr__(self):
-    return "<Feature('%s')>" % (self.service_name)
+    return "<Service('%s')>" % (self.service_name)
 
   def toJSONObject(self):
     return {'service_id': self.id, 'name': self.service_name}
+
+  @classmethod
+  def exists(cls, service_name):
+    return db.Session().query(Service).filter(Service.service_name == service_name).count() == 1
+
+  def to_JSON_dictionary(self, request):
+    return {'id': self.id,
+            'name': self.service_name,
+            'color_icon_high_res': request.static_url('miapi:%s' % self.color_icon_high_res),
+            'color_icon_medium_res': request.static_url('miapi:%s' % self.color_icon_medium_res),
+            'color_icon_low_res': request.static_url('miapi:%s' % self.color_icon_low_res),
+            'mono_icon_high_res': request.static_url('miapi:%s' % self.mono_icon_high_res),
+            'mono_icon_medium_res': request.static_url('miapi:%s' % self.mono_icon_medium_res),
+            'mono_icon_low_res': request.static_url('miapi:%s' % self.mono_icon_low_res)}
 
 
 class AuthorServiceMap(Base):
@@ -454,7 +471,11 @@ class Feature(Base):
     return "<Feature('%d','%s')>" % (self.id, self.name)
 
   def toJSONObject(self):
-    return {'feature_id': self.id, 'feature_name': self.name}
+    return {'id': self.id, 'name': self.name}
+
+  @classmethod
+  def exists(cls, feature_name):
+    return db.Session().query(Feature).filter(Feature.name == feature_name).count() == 1
 
 
 class AuthorFeatureMap(Base):

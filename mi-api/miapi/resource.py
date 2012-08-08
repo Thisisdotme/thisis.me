@@ -2,6 +2,8 @@ import pyramid.security
 
 import data_access.author
 
+import mi_schema.models
+
 
 class Root:
   def __init__(self):
@@ -46,7 +48,7 @@ class Reservations:
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
-     return location_aware(Reservation(key), self, key)
+    return location_aware(Reservation(key), self, key)
 
 
 class Reservation:
@@ -173,13 +175,50 @@ class Event:
 
 
 class Services:
-  # TODO: implement this
-  pass
+  __acl__ = [
+      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
+      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
+      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      pyramid.security.DENY_ALL]
+
+  def __getitem__(self, key):
+    if not mi_schema.models.Service.exists(key):
+      raise KeyError('key "{key}" not a valid Services entry'.format(key=key))
+
+    return location_aware(Service(key), self, key)
 
 
+class Service:
+  def __init__(self, service_name):
+    self._name = service_name
+
+  @property
+  def name(self):
+    return self._name
+
+
+#  TODO: how do you specify that everyone can read but only the admin can create, write, and delete ???
 class Features:
-  # TODO: implement this
-  pass
+  __acl__ = [
+      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
+      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
+      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      pyramid.security.DENY_ALL]
+
+  def __getitem__(self, key):
+    if not mi_schema.models.Feature.exists(key):
+      raise KeyError('key "{key}" not a valid Features entry'.format(key=key))
+
+    return location_aware(Feature(key), self, key)
+
+
+class Feature:
+  def __init__(self, feature_name):
+    self._name = feature_name
+
+  @property
+  def name(self):
+    return self._name
 
 
 def location_aware(resource, parent, name):
