@@ -57,11 +57,11 @@ def list_author_services(author_services_context, request):
   services = []
   for service in tim_commons.db.Session().query(Service). \
     join(AuthorServiceMap). \
-    filter(and_(Service.id == AuthorServiceMap.service_id),
-                AuthorServiceMap.author_id == author_id). \
+    filter(and_(Service.id == AuthorServiceMap.service_id,
+                AuthorServiceMap.author_id == author_id)). \
     order_by(Service.service_name):
 
-    services.append(service.to_JSON_dictionary())
+    services.append(service.to_JSON_dictionary(request))
 
   return {'author_name': author.author_name, 'services': services}
 
