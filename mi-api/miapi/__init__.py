@@ -6,7 +6,6 @@ import pyramid.authentication
 import pyramid.authorization
 import pyramid.security
 
-
 import tim_commons.config
 import tim_commons.db
 import data_access.service
@@ -68,6 +67,7 @@ def main(global_config, **settings):
       view=preflight_crossdomain_access_control,
       request_method='OPTIONS',
       renderer='jsonp')
+  configuration.add_notfound_view(not_found, renderer='jsonp')
   add_views(configuration)
 
   return configuration.make_wsgi_app()
@@ -107,7 +107,7 @@ def preflight_crossdomain_access_control(request):
     if author_id:
       # call with credential. only allow *.host to call it
       # TODO: move this config
-      acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me']
+      acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis.me', 'blog.thisis.me']
 
       # parse the origin url
       origin_url = urlparse.urlparse(origin)
@@ -125,6 +125,12 @@ def preflight_crossdomain_access_control(request):
 
     return request.response
 
+  # TODO: better error
+  request.response = pyramid.httpexceptions.HTTPNotFound()
+  return {'error': 'not found'}
+
+
+def not_found(request):
   # TODO: better error
   request.response = pyramid.httpexceptions.HTTPNotFound()
   return {'error': 'not found'}
