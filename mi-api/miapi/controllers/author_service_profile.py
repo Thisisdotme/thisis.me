@@ -1,85 +1,89 @@
-from pyramid.view import view_config
-
-from mi_schema.models import Service, Author, AuthorServiceMap
+from mi_schema.models import AuthorServiceMap
 from profile_fetchers import profile_fetcher
-from tim_commons import db
-from miapi import oauth_config
 from data_access import service
 
+import tim_commons.db
+import miapi.resource
+import data_access.author
 
-class ServiceProfileController(object):
 
-  '''
-  Constructor
-  '''
-  def __init__(self, request):
-    self.request = request
-    self.db_session = db.Session()
+def add_views(configuration):
+  configuration.add_view(
+    get_profile,
+    context=miapi.resource.Author,
+    name='profile',
+    request_method='GET',
+    permission='read',
+    renderer='jsonp',
+    http_cache=0)
 
-  # get the author's profile from the first available service of highest
-  # precedence
-  @view_config(route_name='author.profile.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_profile(self):
+  configuration.add_view(
+    get_service_profile,
+    context=miapi.resource.AuthorService,
+    name='profile',
+    request_method='GET',
+    permission='read',
+    renderer='jsonp',
+    http_cache=0)
 
-    author_name = self.request.matchdict['authorname']
 
-    # get author-id for author_name
-    try:
-      author_id, = self.db_session.query(Author.id).filter(Author.author_name == author_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+def get_profile(author_context, request):
+  author_id = author_context.author_id
 
-    # service profile precedence is: linkedin, facebook, googleplus, twitter, instagram, foursquare
+  author = data_access.author.query_author(author_id)
 
-    # get all service mappings for author
-    mappings = {}
-    for asm in self.db_session.query(AuthorServiceMap).filter_by(author_id=author_id).all():
-      mappings[asm.service_id] = asm
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    profile_json = None
+  # service profile precedence is: linkedin, facebook, googleplus, twitter, instagram, foursquare
+  # get all service mappings for author
+  mappings = {}
+  for asm in tim_commons.db.Session().query(AuthorServiceMap).filter_by(author_id=author_id).all():
+    mappings[asm.service_id] = asm
 
-    for service_name in ['linkedin', 'facebook', 'googleplus', 'twitter', 'instagram', 'foursquare']:
-      asm = mappings.get(service.name_to_service[service_name].id)
-      if asm:
-        fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
-        profile_json = fetcher.get_author_profile(asm.service_author_id, asm)
-        break
+  profile_json = None
 
-    return profile_json
+  for service_name in ['linkedin', 'facebook', 'googleplus', 'twitter', 'instagram', 'foursquare']:
+    asm = mappings.get(service.name_to_service[service_name].id)
+    if asm:
+      fetcher = profile_fetcher.from_service_name(service_name, miapi.oauth_config[service_name])
+      profile_json = fetcher.get_author_profile(asm.service_author_id, asm)
+      break
 
-  # get the author's profile for the specificed service
-  @view_config(route_name='author.services.profile', request_method='GET', renderer='jsonp', http_cache=0)
-  def get_service_profile(self):
+  return profile_json
 
-    author_name = self.request.matchdict['authorname']
-    service_name = self.request.matchdict['servicename']
 
-    # get author-id for author_name
-    try:
-      author_id, = self.db_session.query(Author.id).filter(Author.author_name == author_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % author_name}
+def get_service_profile(author_service_context, request):
+  author_id = author_service_context.author_id
 
-    # get service-id for service_name
-    try:
-      service_id, = self.db_session.query(Service.id).filter(Service.service_name == service_name).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service %s' % author_name}
+  author = data_access.author.query_author(author_id)
+  if author is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown author: %s' % author_id}
 
-    fetcher = profile_fetcher.from_service_name(service_name, oauth_config[service_name])
-    if not fetcher:
-      self.request.response.status_int = 404
-      return {'error': 'profile information is not available for service %s' % service_name}
+  service = data_access.service.name_to_service.get(author_service_context.service_name)
+  if service is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service %s' % author_service_context.service_name}
 
-    try:
-      mapping = self.db_session.query(AuthorServiceMap).filter_by(service_id=service_id, author_id=author_id).one()
-    except:
-      self.request.response.status_int = 404
-      return {'error': 'unknown service for author'}
+  fetcher = profile_fetcher.from_service_name(
+      service.service_name,
+      miapi.oauth_config[service.service_name])
+  if not fetcher:
+    request.response.status_int = 404
+    return {'error': 'profile information is not available for service %s' % service.service_name}
 
-    profile_json = fetcher.get_author_profile(mapping.service_author_id, mapping)
+  try:
+    mapping = tim_commons.db.Session().query(AuthorServiceMap). \
+              filter_by(service_id=service.id, author_id=author_id).one()
+  except:
+    request.response.status_int = 404
+    return {'error': 'unknown service for author'}
 
-    return profile_json
+  profile_json = fetcher.get_author_profile(mapping.service_author_id, mapping)
+
+  return profile_json

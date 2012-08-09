@@ -23,6 +23,7 @@ import controllers.author_group
 import controllers.author_group_query
 import controllers.feature
 import controllers.services
+import controllers.author_service_profile
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -94,6 +95,7 @@ def add_views(configuration):
   controllers.author_service.add_views(configuration)
   controllers.author_group.add_views(configuration)
   controllers.author_group_query.add_views(configuration)
+  controllers.author_service_profile.add_views(configuration)
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
@@ -174,11 +176,6 @@ _acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis
   #
   config.add_route('search.author', '/v1/authors/search')
 
-  #
-  # AUTHOR PROFILE: profile information for the specified author
-  #
-  config.add_route('author.profile.CRUD', '/v1/authors/{authorname}/profile')
-
   # TODO: What is this?
   #
   # AUTHOR MODEL: rebuild/update the data for all the author's services
@@ -191,63 +188,9 @@ _acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis
   #
   config.add_route('author.query.highlights', '/v1/authors/{authorname}/highlights')
 
-  # TODO: Implememnting group is not an immidiate need. We should remove this urls
-  # --
-  # AUTHOR GROUP BASIC:
-  #
-  # GET - list of groups defined for the author
-  config.add_route('author.groups', '/v1/authors/{authorname}/groups')
-
-  # GET - get group definition; PUT - create/update group info; DELETE - delete the group
-  config.add_route('author.groups.CRUD', '/v1/authors/{authorname}/groups/{groupname}')
-
-  # GET - list of members in specified group
-  config.add_route('author.groups.members', '/v1/authors/{authorname}/groups/{groupname}/members')
-
-  # GET - get info about the member; PUT - add new member; DELETE - remove member
-  config.add_route('author.groups.members.CRUD', '/v1/authors/{authorname}/groups/{groupname}/members/{member}')
-
-  #
-  # AUTHOR GROUP QUERY: query for the highlights/details for a particular group (i.e. following)
-  #
-  config.add_route('author.groups.query.highlights', '/v1/authors/{authorname}/groups/{groupname}/highlights')
-  config.add_route('author.groups.query.events', '/v1/authors/{authorname}/groups/{groupname}/events')
-
   #
   # AUTHOR SERVICE QUERY: query for the highlights/details of the specified service and author
   #
   config.add_route('author.services.query.highlights', '/v1/authors/{authorname}/services/{servicename}/highlights')
   config.add_route('author.services.query.events', '/v1/authors/{authorname}/services/{servicename}/events')
-
-  #
-  # AUTHOR SERVICE PROFILE: get profile information from the specified service
-  #
-  config.add_route('author.services.profile', '/v1/authors/{authorname}/services/{servicename}/profile')
-
-  #
-  # SERVICE functionality
-  #
-  config.add_route('services', '/v1/services')
-  config.add_route('services.CRUD', '/v1/services/{servicename}')
-
-  #
-  # FEATURE functionality
-  #
-  config.add_route('features', '/v1/features')
-  config.add_route('feature.CRUD', '/v1/features/{featurename}')
-  # TODO: What is bundle?
-  config.add_route('feature.bundle', '/v1/features/{featurename}/bundle')
-
-  # --
-  # AUTHOR FEATURE: list features, add/remove features
-  #
-
-  # TODO: what is this and why do we need this?
-  # resources for controlling an author's default features
-  config.add_route('author.features.default', '/v1/authors/{authorname}/features/default')
-  config.add_route('author.features.default.CRUD', '/v1/authors/{authorname}/features/default/{featurename}')
-
-  # resources for listing, adding, and removing an author's features
-  config.add_route('author.features', '/v1/authors/{authorname}/features')
-  config.add_route('author.features.CRUD', '/v1/authors/{authorname}/features/{featurename}')
 '''
