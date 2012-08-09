@@ -6,7 +6,6 @@ import pyramid.authentication
 import pyramid.authorization
 import pyramid.security
 
-
 import tim_commons.config
 import tim_commons.db
 import data_access.service
