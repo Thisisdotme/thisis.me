@@ -1,8 +1,10 @@
 import logging
+import urlparse
 
 import pyramid.config
 import pyramid.authentication
 import pyramid.authorization
+import pyramid.security
 
 import tim_commons.config
 import tim_commons.db
@@ -53,13 +55,16 @@ def main(global_config, **settings):
       wild_domain=False)
   configuration.set_authentication_policy(authentication)
   configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
-  # Require that every view specify a permission by setting the default to some random string
-  configuration.set_default_permission('some_random_string')  # TODO: make this really random
 
   configuration.add_renderer('jsonp', pyramid.renderers.JSONP(param_name='callback'))
 
   configuration.add_static_view(name='img', path='miapi:img', cache_max_age=3600)
 
+  # configure not found for option
+  configuration.add_notfound_view(
+      view=preflight_crossdomain_access_control,
+      request_method='OPTIONS',
+      renderer='jsonp')
   add_views(configuration)
 
   return configuration.make_wsgi_app()
@@ -84,6 +89,40 @@ def add_views(configuration):
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
+
+
+def preflight_crossdomain_access_control(request):
+  origin = request.headers.get('Origin')
+  if origin is not None:
+    author_id = pyramid.security.authenticated_userid(request)
+
+    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
+    request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+    if author_id:
+      # call with credential. only allow *.host to call it
+      # TODO: move this config
+      acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me']
+
+      # parse the origin url
+      origin_url = urlparse.urlparse(origin)
+      origin_domain = origin_url.netloc.split(':')[0]
+
+      if origin_domain in acceptable_host:
+        request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+      else:
+        logging.info(
+            'Not allowing domain (%s) because (%s) not in %s',
+            origin,
+            origin_domain,
+            acceptable_host)
+        request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+
+    return request.response
+
+  # TODO: better error
+  request.response = pyramid.httpexceptions.HTTPNotFound()
+  return {'error': 'not found'}
 
 
 '''

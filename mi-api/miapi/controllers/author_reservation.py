@@ -33,25 +33,12 @@ def add_views(configuration):
       renderer='jsonp',
       http_cache=0)
   configuration.add_view(
-      preflight_crossdomain_access_control,
-      context=miapi.resource.Reservation,
-      request_method='OPTIONS',
-      permission='read',
-      renderer='jsonp',
-      http_cache=0)
-  configuration.add_view(
       remove_reservation,
       context=miapi.resource.Reservation,
       request_method='DELETE',
       permission='write',
       renderer='jsonp',
       http_cache=0)
-
-
-def preflight_crossdomain_access_control(request):
-  request.response.headers['Access-Control-Allow-Origin'] = '*'
-  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
 
 def get_reservation(reservation_context, request):
