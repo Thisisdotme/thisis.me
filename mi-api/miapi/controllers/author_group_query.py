@@ -71,7 +71,7 @@ def list_group_events(context, request):
          event.service_id == service.name_to_id('instagram'))):
       continue
 
-    event_obj = createServiceEvent(db_session, request, event, asm, author)
+    event_obj = createServiceEvent(request, event, asm, author)
     if event_obj:
       events.append(event_obj)
 
