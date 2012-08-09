@@ -68,6 +68,9 @@ def main(global_config, **settings):
       request_method='OPTIONS',
       renderer='jsonp')
   configuration.add_notfound_view(not_found, renderer='jsonp')
+
+  # decorate cross domain calls
+  configuration.add_subscriber(crossdomain_access_control_response, pyramid.events.NewResponse)
   add_views(configuration)
 
   return configuration.make_wsgi_app()
@@ -105,22 +108,18 @@ def preflight_crossdomain_access_control(request):
     request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
     request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
     if author_id:
-      # call with credential. only allow *.host to call it
-      # TODO: move this config
-      acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis.me', 'blog.thisis.me']
-
       # parse the origin url
       origin_url = urlparse.urlparse(origin)
       origin_domain = origin_url.netloc.split(':')[0]
 
-      if origin_domain in acceptable_host:
+      if origin_domain in _acceptable_host:
         request.response.headers['Access-Control-Allow-Credentials'] = 'true'
       else:
         logging.info(
             'Not allowing domain (%s) because (%s) not in %s',
             origin,
             origin_domain,
-            acceptable_host)
+            _acceptable_host)
         request.response.headers['Access-Control-Allow-Credentials'] = 'false'
 
     return request.response
@@ -134,6 +133,37 @@ def not_found(request):
   # TODO: better error
   request.response = pyramid.httpexceptions.HTTPNotFound()
   return {'error': 'not found'}
+
+
+def crossdomain_access_control_response(event):
+  request = event.request
+  origin = request.headers.get('Origin')
+  if origin:
+    author_id = pyramid.security.authenticated_userid(request)
+
+    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+    if author_id:
+      # parse the origin url
+      origin_url = urlparse.urlparse(origin)
+      origin_domain = origin_url.netloc.split(':')[0]
+
+      if origin_domain in _acceptable_host:
+        request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+      else:
+        logging.info(
+            'Not allowing domain (%s) because (%s) not in %s',
+            origin,
+            origin_domain,
+            _acceptable_host)
+        request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+
+  return request.response
+
+
+# call with credential. only allow *.host to call it
+# TODO: move this config
+_acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis.me', 'blog.thisis.me']
 
 
 '''
