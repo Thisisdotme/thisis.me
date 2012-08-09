@@ -8,8 +8,10 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     UniqueConstraint,
-    Index)
+    Index,
+    and_)
 
+import sqlalchemy.orm.exc
 from sqlalchemy.ext.declarative import declarative_base
 
 from tim_commons import db
@@ -43,6 +45,13 @@ class Author(Base):
                                                    self.template)
 
   def toJSONObject(self):
+    return {'author_id': self.id,
+            'author_name': self.author_name,
+            'email': self.email,
+            'full_name': self.full_name,
+            'template': self.template}
+
+  def to_JSON_dictionary(self):
     return {'author_id': self.id,
             'author_name': self.author_name,
             'email': self.email,
@@ -189,9 +198,31 @@ class AuthorGroup(Base):
   def __repr__(self):
     return "<AuthorGroup('%s,%s,%s')>" % (self.id, self.author_id, self.group_name)
 
+  @classmethod
+  def exists(cls, author_id, group_name):
+    return db.Session().query(AuthorGroup).filter(and_(AuthorGroup.author_id == author_id,
+                                                       AuthorGroup.group_name == group_name)).count() == 1
+
+  @classmethod
+  def lookup(cls, author_id, group_name):
+    author_group = None
+    try:
+      author_group = db.Session().query(AuthorGroup). \
+                                  filter(and_(AuthorGroup.author_id == author_id,
+                                              AuthorGroup.group_name == group_name)).one()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      pass
+
+    return author_group
+
+  def to_JSON_dictionary(self):
+    return {'id': self.id,
+            'group_name': self.group_name}
+
   def toJSONObject(self):
-    return {'author_id': self.author_id,
-            'author_group_id': self.id,
+    return {'id': self.id,
+            'author_id': self.author_id,
             'group_name': self.group_name}
 
 
@@ -215,9 +246,41 @@ class AuthorGroupMap(Base):
   def __repr__(self):
     return "<AuthorGroupMap('%s,%s')>" % (self.author_group_id, self.author_id)
 
-  def toJSONObject(self):
-    return {'author_id': self.author_id,
-            'author_group_id': self.author_group_id}
+  @classmethod
+  def exists(cls, author_id, group_name, member):
+    return db.Session().query(AuthorGroupMap). \
+                        join(AuthorGroup, AuthorGroupMap.author_group_id == AuthorGroup.id). \
+                        join(Author, AuthorGroupMap.author_id == Author.id). \
+                        filter(AuthorGroup.author_id == author_id). \
+                        filter(AuthorGroup.group_name == group_name). \
+                        filter(Author.author_name == member). \
+                        count() == 1
+
+  @classmethod
+  def lookup(cls, author_id, group_name, member):
+    author_group_member = None
+    try:
+      author_group_member = db.Session().query(AuthorGroupMap). \
+                          join(AuthorGroup, AuthorGroupMap.author_group_id == AuthorGroup.id). \
+                          join(Author, AuthorGroupMap.author_id == Author.id). \
+                          filter(AuthorGroup.author_id == author_id). \
+                          filter(AuthorGroup.group_name == group_name). \
+                          filter(Author.author_name == member). \
+                          one()
+
+    except sqlalchemy.orm.exc.NoResultFound:
+      pass
+
+    return author_group_member
+
+  def to_JSON_dictionary(self, author, group):
+    # lookup the member author info
+    member_author = db.Session().query(Author).get(self.author_id)
+
+    return {'author_name': author.author_name,
+            'id': author.id,
+            'group': group.to_JSON_dictionary(),
+            'member': member_author.to_JSON_dictionary()}
 
 
 class ServiceObjectType(Base):

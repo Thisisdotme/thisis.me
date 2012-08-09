@@ -61,14 +61,7 @@ def list_author_services(author_services_context, request):
                 AuthorServiceMap.author_id == author_id). \
     order_by(Service.service_name):
 
-    services.append({'service_id': service.id,
-                     'name': service.service_name,
-                     'color_icon_high_res': request.static_url('miapi:%s' % service.color_icon_high_res),
-                     'color_icon_medium_res': request.static_url('miapi:%s' % service.color_icon_medium_res),
-                     'color_icon_low_res': request.static_url('miapi:%s' % service.color_icon_low_res),
-                     'mono_icon_high_res': request.static_url('miapi:%s' % service.mono_icon_high_res),
-                     'mono_icon_medium_res': request.static_url('miapi:%s' % service.mono_icon_medium_res),
-                     'mono_icon_low_res': request.static_url('miapi:%s' % service.mono_icon_low_res)})
+    services.append(service.to_JSON_dictionary())
 
   return {'author_name': author.author_name, 'services': services}
 

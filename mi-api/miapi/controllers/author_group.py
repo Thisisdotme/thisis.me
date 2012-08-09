@@ -6,302 +6,227 @@ Created on Feb 21, 2012
 
 import logging
 
-from pyramid.view import view_config
-
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import and_
 
 from tim_commons import db
 
 from mi_schema.models import Author, AuthorGroup, AuthorGroupMap
 
+import miapi.resource
+
+
+def add_views(configuration):
+  # AuthorGroups
+  configuration.add_view(
+      list_author_groups,
+      context=miapi.resource.AuthorGroups,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      add_author_group,
+      context=miapi.resource.AuthorGroups,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
+
+  # AuthorGroup
+  configuration.add_view(
+      get_author_group,
+      context=miapi.resource.AuthorGroup,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      delete_author_group,
+      context=miapi.resource.AuthorGroup,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
+
+  # AuthorGroupMembers
+  configuration.add_view(
+      list_author_group_members,
+      context=miapi.resource.AuthorGroupMembers,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      add_author_group_member,
+      context=miapi.resource.AuthorGroupMembers,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
+
+  # AuthorGroupMembers
+  configuration.add_view(
+      get_author_group_member,
+      context=miapi.resource.AuthorGroupMember,
+      request_method='GET',
+      permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      delete_author_group_member,
+      context=miapi.resource.AuthorGroupMember,
+      request_method='DELETE',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
+
+
+# GET /v1/authors/{authorname}/groups
+#
+# return all authors that match the specified search criteria
+#
+def list_author_groups(context, request):
+
+  author = context.author
+
+  db_session = db.Session()
+
+  groupList = []
+  for group in db_session.query(AuthorGroup).filter(AuthorGroup.author_id == author.id).order_by(AuthorGroup.group_name):
+    groupList.append(group.to_JSON_dictionary())
+
+  return {'author_name': author.author_name, 'groups': groupList}
+
+
+# POST /v1/authors/{authorname}/groups
+#
+def add_author_group(context, request):
+
+  author = context.author
+
+  group_info = request.json_body
+
+  group_name = group_info.get('name')
+  if group_name is None:
+    request.response.status_int = 400
+    return {'error': 'missing required property: name'}
+
+  db_session = db.Session()
+
+  author_group = AuthorGroup(author.id, group_name)
 
-class AuthorGroupController(object):
+  try:
+    db_session.add(author_group)
+    db_session.flush()
 
-  '''
-  Constructor
-  '''
-  def __init__(self, request):
-    self.request = request
-    self.db_session = db.Session()
-
-  # GET /v1/authors/{authorname}/groups
-  #
-  # return all authors that match the specified search criteria
-  #
-  @view_config(route_name='author.groups', request_method='GET', renderer='jsonp', http_cache=0)
-  def listGroupsHndlr(self):
+    logging.info('created author_group: "{name}"'.format(name=group_name))
 
-    authorName = self.request.matchdict['authorname']
+  except IntegrityError, e:
+    request.response.status_int = 409
+    return {'error': e.message}
 
-    try:
-      authorId, = self.db_session.query(Author.id).filter(Author.author_name == authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
+  return author_group.to_JSON_dictionary()
 
-    groupList = []
-    for group in self.db_session.query(AuthorGroup).filter(AuthorGroup.author_id == authorId).order_by(AuthorGroup.group_name):
-      groupList.append(group.toJSONObject())
 
-    return {'author_id': authorId, 'groups': groupList}
-
-  # GET /v1/authors/{authorname}/groups/{groupname}
-  #
-  @view_config(route_name='author.groups.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
-  def getGroupDetailHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroup = self.db_session.query(AuthorGroup).filter(and_(AuthorGroup.author_id == authorId, AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    return authorGroup.toJSONObject()
-
-  # PUT /v1/authors/{authorname}/groups/{groupname}
-  #
-  @view_config(route_name='author.groups.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
-  def addUpdateGroupHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    authorGroup = AuthorGroup(authorId, groupName)
-    jsonObject = None
-
-    try:
-      self.db_session.add(authorGroup)
-      self.db_session.flush()
-
-      jsonObject = authorGroup.toJSONObject()
-
-      logging.info("created author_group: %s" % authorGroup)
-
-    except IntegrityError, e:
-      self.request.response.status_int = 409
-      return {'error': e.message}
-
-    return jsonObject
-
-  # DELETE /v1/authors/{authorname}/groups/{groupname}
-  #
-  @view_config(route_name='author.groups.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
-  def deleteGroupHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-
-    if groupName == 'follow':
-      self.request.response.status_int = 403
-      return {'error': 'cannot delete the required group %s' % groupName}
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroup = self.db_session.query(AuthorGroup).filter(and_(AuthorGroup.author_id == authorId, AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    self.db_session.delete(authorGroup)
-
-    return authorGroup.toJSONObject()
-
-  # GET /v1/authors/{authorname}/groups/{groupname}/members
-  #
-  @view_config(route_name='author.groups.members', request_method='GET', renderer='jsonp', http_cache=0)
-  def getGroupMembersHndr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter(Author.author_name == authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroup = self.db_session.query(AuthorGroup).filter(and_(AuthorGroup.author_id == authorId, AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    memberList = []
-    for member in self.db_session.query(Author).join(AuthorGroupMap). \
-                                 filter(Author.id == AuthorGroupMap.author_id). \
-                                 filter(AuthorGroupMap.author_group_id == authorGroup.id). \
-                                 order_by(Author.author_name):
-      memberList.append(member.toJSONObject())
-
-    responseJSON = authorGroup.toJSONObject()
-    responseJSON['author_name'] = authorName
-    responseJSON['members'] = memberList
-
-    return responseJSON
-
-  # GET /v1/authors/{authorname}/groups/{groupname}/members/{member}
-  #
-  @view_config(route_name='author.groups.members.CRUD', request_method='GET', renderer='jsonp', http_cache=0)
-  def getGroupMemberHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-    memberName = self.request.matchdict['member']
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroupId, = self.db_session.query(AuthorGroup.id).filter(and_(AuthorGroup.author_id == authorId,
-                                                                        AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    try:
-      member = self.db_session.query(Author).filter_by(author_name=memberName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown member author %s' % authorName}
-
-    try:
-      mapping = self.db_session.query(AuthorGroupMap).filter(and_(AuthorGroupMap.author_group_id == authorGroupId,
-                                                                 AuthorGroupMap.author_id == member.id)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown member %s in group %s for author %s' % (memberName, groupName, authorName)}
-
-    responseJSON = mapping.toJSONObject()
-    responseJSON['author_id'] = authorId
-    responseJSON['author_name'] = authorName
-    responseJSON['group_name'] = groupName
-    responseJSON['member'] = member.toJSONObject()
-
-    return responseJSON
-
-  # OPTIONS /v1/authors/{authorname}/groups/{groupname}/members/{member}
-  # preflight cross-domain requests
-  @view_config(route_name='author.groups.members.CRUD', request_method='OPTIONS', renderer='jsonp', http_cache=0)
-  def preflightGroupMemberHndlr(self):
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT, DELETE'
-    self.request.response.headers['Access-Control-Max-Age'] = 1209600   # valid for 14 days
-
-  # PUT /v1/authors/{authorname}/groups/{groupname}/members/{member}
-  #
-  @view_config(route_name='author.groups.members.CRUD', request_method='PUT', renderer='jsonp', http_cache=0)
-  def addUpdateGroupMemberHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-    memberName = self.request.matchdict['member']
-
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'PUT'
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroupId, = self.db_session.query(AuthorGroup.id).filter(and_(AuthorGroup.author_id == authorId,
-                                                                        AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    try:
-      member = self.db_session.query(Author).filter_by(author_name=memberName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown member author %s' % memberName}
-
-    mapping = AuthorGroupMap(authorGroupId, member.id)
-
-    try:
-      self.db_session.add(mapping)
-      self.db_session.flush()
-
-      logging.info("Added %s to %s's author_group %s" % (memberName, authorName, groupName))
-
-    except IntegrityError, e:
-      self.request.response.status_int = 409
-      return {'error': e.message}
-
-    return {'author_name': authorName,
-            'author_id': authorId,
-            'group':
-              {'group_name': groupName,
-               'author_group_id': authorGroupId,
-               'member': member.toJSONObject()
-              }
-            }
-
-  # DELETE /v1/authors/{authorname}/groups/{groupname}/members/{member}
-  #
-  @view_config(route_name='author.groups.members.CRUD', request_method='DELETE', renderer='jsonp', http_cache=0)
-  def deleteGroupMemberHndlr(self):
-
-    authorName = self.request.matchdict['authorname']
-    groupName = self.request.matchdict['groupname']
-    memberName = self.request.matchdict['member']
-
-    self.request.response.headers['Access-Control-Allow-Origin'] = '*'
-    self.request.response.headers['Access-Control-Allow-Methods'] = 'DELETE'
-
-    try:
-      authorId, = self.db_session.query(Author.id).filter_by(author_name=authorName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown author %s' % authorName}
-
-    try:
-      authorGroupId, = self.db_session.query(AuthorGroup.id).filter(and_(AuthorGroup.author_id == authorId,
-                                                                        AuthorGroup.group_name == groupName)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown group %s for author %s' % (groupName, authorName)}
-
-    try:
-      memberId, = self.db_session.query(Author.id).filter_by(author_name=memberName).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown member author %s' % memberName}
-
-    try:
-      mapping = self.db_session.query(AuthorGroupMap).filter(and_(AuthorGroupMap.author_group_id == authorGroupId,
-                                                                 AuthorGroupMap.author_id == memberId)).one()
-    except NoResultFound:
-      self.request.response.status_int = 404
-      return {'error': 'unknown member %s in group %s for author %s' % (memberName, groupName, authorName)}
-
-    self.db_session.delete(mapping)
-
-    return mapping.toJSONObject()
+# GET /v1/authors/{authorname}/groups/{groupname}
+#
+def get_author_group(context, request):
+  return context.author_group.to_JSON_dictionary()
+
+
+# DELETE /v1/authors/{authorname}/groups/{groupname}
+#
+def delete_author_group(context, request):
+
+  author_group = context.author_group
+
+  if author_group.group_name == 'follow':
+    request.response.status_int = 403
+    return {'error': 'cannot delete the required group "{name}"'.format(name=author_group.group_name)}
+
+  db_session = db.Session()
+  db_session.delete(author_group)
+  db_session.flush()
+
+  return author_group.to_JSON_dictionary()
+
+
+# GET /v1/authors/{authorname}/groups/{groupname}/members
+#
+def list_author_group_members(context, request):
+
+  author = context.author
+  author_group = context.author_group
+
+  memberList = []
+  for member in db.Session().query(AuthorGroupMap).join(Author). \
+                               filter(Author.id == AuthorGroupMap.author_id). \
+                               filter(AuthorGroupMap.author_group_id == author_group.id). \
+                               order_by(Author.author_name):
+    memberList.append(member.to_JSON_dictionary(author, author_group))
+
+  responseJSON = author_group.to_JSON_dictionary()
+  responseJSON['author_name'] = author.author_name
+  responseJSON['members'] = memberList
+
+  return responseJSON
+
+
+# POST /v1/authors/{authorname}/groups/{groupname}/members/{member}
+#
+def add_author_group_member(context, request):
+
+  author = context.author
+  author_group = context.author_group
+
+  group_info = request.json_body
+
+  member_name = group_info.get('name')
+  if member_name is None:
+    request.response.status_int = 400
+    return {'error': 'missing required property: name'}
+
+  db_session = db.Session()
+  try:
+    member = db_session.query(Author).filter_by(author_name=member_name).one()
+  except NoResultFound:
+    request.response.status_int = 404
+    return {'error': 'unknown member author %s' % member_name}
+
+  mapping = AuthorGroupMap(author_group.id, member.id)
+
+  try:
+    db_session.add(mapping)
+    db_session.flush()
+
+    logging.info("Added {member} to {author}'s author_group {group}".format(member=member.author_name,
+                                                                            author=author.author_name,
+                                                                            group=author_group.group_name))
+
+  except IntegrityError, e:
+    request.response.status_int = 409
+    return {'error': e.message}
+
+  return mapping.to_JSON_dictionary(author, author_group)
+
+
+# GET /v1/authors/{authorname}/groups/{groupname}/members/{member}
+#
+def get_author_group_member(context, request):
+
+  author = context.author
+  author_group = context.author_group
+  member = context.author_group_member
+
+  return member.to_JSON_dictionary(author, author_group)
+
+
+# DELETE /v1/authors/{authorname}/groups/{groupname}/members/{member}
+#
+def delete_author_group_member(context, request):
+
+  db_session = db.Session()
+  db_session.delete(context.author_group_member)
+
+  return context.author_group_member.to_JSON_dictionary(context.author, context.author_group)

@@ -17,6 +17,8 @@ import controllers.author_query
 import controllers.author_photoalbum
 import controllers.author_photos
 import controllers.author_service
+import controllers.author_group
+import controllers.author_group_query
 import controllers.feature
 import controllers.services
 
@@ -79,6 +81,8 @@ def add_views(configuration):
   controllers.author_photoalbum.add_views(configuration)
   controllers.author_photos.add_views(configuration)
   controllers.author_service.add_views(configuration)
+  controllers.author_group.add_views(configuration)
+  controllers.author_group_query.add_views(configuration)
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
