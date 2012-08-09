@@ -24,6 +24,7 @@ import controllers.author_group_query
 import controllers.feature
 import controllers.services
 import controllers.author_service_profile
+import controllers.author_service_query
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -95,6 +96,7 @@ def add_views(configuration):
   controllers.author_group.add_views(configuration)
   controllers.author_group_query.add_views(configuration)
   controllers.author_service_profile.add_views(configuration)
+  controllers.author_service_query.add_views(configuration)
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
@@ -103,7 +105,6 @@ def add_views(configuration):
 def preflight_crossdomain_access_control(request):
   origin = request.headers.get('Origin')
   if origin is not None:
-
     request.response.headers['Access-Control-Allow-Origin'] = origin
     request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
     request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
@@ -166,14 +167,6 @@ _acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis
 
 
 '''
-  # TODO: We can never have an author with name search. Are we suing this? Can we add this later?
-  # --
-  # SEARCH for matching authors; JSON list of 0 or more authors returned.
-  #  Query args: name
-  #
-  config.add_route('search.author', '/v1/authors/search')
-
-  # TODO: What is this?
   #
   # AUTHOR MODEL: rebuild/update the data for all the author's services
   #
@@ -189,5 +182,4 @@ _acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis
   # AUTHOR SERVICE QUERY: query for the highlights/details of the specified service and author
   #
   config.add_route('author.services.query.highlights', '/v1/authors/{authorname}/services/{servicename}/highlights')
-  config.add_route('author.services.query.events', '/v1/authors/{authorname}/services/{servicename}/events')
 '''
