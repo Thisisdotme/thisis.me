@@ -41,7 +41,7 @@ def get_events(events_context, request):
   author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
 
   # TODO: use paging limit should be configurable
-  page_limit = 1000
+  page_limit = 200
 
   event_rows = data_access.service_event.query_service_events_descending_time(
       author_id,

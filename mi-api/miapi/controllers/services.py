@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 def add_views(configuration):
-  # Features
+  # Services
   configuration.add_view(
       list_services,
       context=miapi.resource.Services,
@@ -36,7 +36,7 @@ def add_views(configuration):
       renderer='jsonp',
       http_cache=0)
 
-  # Feature
+  # Service
   configuration.add_view(
       get_service,
       context=miapi.resource.Service,

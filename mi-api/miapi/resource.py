@@ -65,16 +65,16 @@ class Authors:
   def __getitem__(self, key):
     try:
       author_id = int(key)
+      author = data_access.author.query_author(author_id)
     except ValueError:
       # Key is not an integer assume that it is an author_name
       # TODO: we can remove this once the client changes to using id.
       author = data_access.author.query_by_author_name(key)
-      if author:
-        author_id = author.id
-      else:
-        raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
 
-    return location_aware(Author(author_id), self, author_id)
+    if not author:
+      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+
+    return location_aware(Author(author), self, author.id)
 
 
 class Author:
@@ -86,8 +86,9 @@ class Author:
         (pyramid.security.Allow, self.author_id, 'create'),
         pyramid.security.DENY_ALL]
 
-  def __init__(self, author_id):
-    self.author_id = author_id
+  def __init__(self, author):
+    self._author = author
+    self.author_id = author.id
 
   def __getitem__(self, key):
     resource = None
@@ -103,11 +104,17 @@ class Author:
       resource = PhotoAlbums()
     elif key == 'features':
       resource = AuthorFeatures()
+    elif key == 'groups':
+      resource = AuthorGroups()
 
     if resource:
       return location_aware(resource, self, key)
 
     raise KeyError('Key "{key}" not a valid author entry'.format(key=key))
+
+  @property
+  def author(self):
+    return self._author
 
 
 class AuthorFeatures:
@@ -139,6 +146,10 @@ class AuthorServices:
         pyramid.security.DENY_ALL]
 
   @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
   def author_id(self):
     return self.__parent__.author_id
 
@@ -149,6 +160,10 @@ class AuthorServices:
 class AuthorService:
   def __init__(self, service_name):
     self.service_name = service_name
+
+  @property
+  def author(self):
+    return self.__parent__.author
 
   @property
   def author_id(self):
@@ -163,6 +178,10 @@ class PhotoAlbums:
       raise KeyError('key "{key}" not a valid photo albums entry'.format(key=key))
 
     return location_aware(PhotoAlbum(album_id), self, key)
+
+  @property
+  def author(self):
+    return self.__parent__.author
 
   @property
   def author_id(self):
@@ -183,11 +202,19 @@ class PhotoAlbum:
     raise KeyError('key "{key}" not a valid photo album entry.'.format(key=key))
 
   @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
   def author_id(self):
     return self.__parent__.author_id
 
 
 class Photos:
+  @property
+  def author(self):
+    return self.__parent__.author
+
   @property
   def author_id(self):
     return self.__parent__.author_id
@@ -207,6 +234,10 @@ class Events:
     return location_aware(Event(event_id), self, event_id)
 
   @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
   def author_id(self):
     return self.__parent__.author_id
 
@@ -214,6 +245,10 @@ class Events:
 class Event:
   def __init__(self, event_id):
     self.event_id = event_id
+
+  @property
+  def author(self):
+    return self.__parent__.author
 
   @property
   def author_id(self):
@@ -243,7 +278,6 @@ class Service:
     return self._name
 
 
-#  TODO: how do you specify that everyone can read but only the admin can create, write, and delete ???
 class Features:
   __acl__ = [
       (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
@@ -265,6 +299,114 @@ class Feature:
   @property
   def name(self):
     return self._name
+
+
+class AuthorGroups:
+  @property
+  def __acl__(self):
+    return [
+        (pyramid.security.Allow, self.author_id, 'read'),
+        (pyramid.security.Allow, self.author_id, 'write'),
+        (pyramid.security.Allow, self.author_id, 'create'),
+        pyramid.security.DENY_ALL]
+
+  def __getitem__(self, key):
+    group_name = key
+    author_group = mi_schema.models.AuthorGroup.lookup(self.author_id, group_name)
+    if not author_group:
+      raise KeyError('key "{key}" not a valid Group entry'.format(key=group_name))
+
+    return location_aware(AuthorGroup(author_group), self, group_name)
+
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_id(self):
+    return self.__parent__.author_id
+
+
+class AuthorGroup:
+  def __init__(self, author_group):
+    self._author_group = author_group
+
+  def __getitem__(self, key):
+    resource = None
+    if key == 'members':
+      resource = AuthorGroupMembers()
+    elif key == 'highlights':
+      resource = AuthorGroupHighlights()
+    elif key == 'events':
+      resource = AuthorGroupEvents()
+
+    if resource:
+      return location_aware(resource, self, key)
+
+    raise KeyError('Key "{key}" not a valid groups entry'.format(key=key))
+
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_group(self):
+    return self._author_group
+
+
+class AuthorGroupMembers:
+  def __getitem__(self, key):
+    member = key
+    author_group_member = mi_schema.models.AuthorGroupMap.lookup(self.author.id, self.author_group.group_name, member)
+    if not author_group_member:
+      raise KeyError('key "{key}" not a valid member entry'.format(key=member))
+
+    return location_aware(AuthorGroupMember(author_group_member), self, key)
+
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_group(self):
+    return self.__parent__.author_group
+
+
+class AuthorGroupMember:
+  def __init__(self, member):
+    self._member = member
+
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_group(self):
+    return self.__parent__.author_group
+
+  @property
+  def author_group_member(self):
+    return self._member
+
+
+class AuthorGroupHighlights:
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_group(self):
+    return self.__parent__.author_group
+
+
+class AuthorGroupEvents:
+  @property
+  def author(self):
+    return self.__parent__.author
+
+  @property
+  def author_group(self):
+    return self.__parent__.author_group
 
 
 def location_aware(resource, parent, name):
