@@ -19,6 +19,13 @@ def add_views(configuration):
       permission='read',
       renderer='jsonp',
       http_cache=0)
+  configuration.add_view(
+      add_author_service,
+      context=miapi.resource.AuthorServices,
+      request_method='POST',
+      permission='create',
+      renderer='jsonp',
+      http_cache=0)
 
   # Author Service
   configuration.add_view(
@@ -26,13 +33,6 @@ def add_views(configuration):
       context=miapi.resource.AuthorService,
       request_method='GET',
       permission='read',
-      renderer='jsonp',
-      http_cache=0)
-  configuration.add_view(
-      put_author_service,
-      context=miapi.resource.AuthorService,
-      request_method='PUT',
-      permission='write',
       renderer='jsonp',
       http_cache=0)
   configuration.add_view(
@@ -101,8 +101,8 @@ def get_author_service_info(author_service_context, request):
   return response
 
 
-def put_author_service(author_service_context, request):
-  author_id = author_service_context.author_id
+def add_author_service(author_services_context, request):
+  author_id = author_services_context.author_id
 
   author = data_access.author.query_author(author_id)
 
@@ -111,16 +111,17 @@ def put_author_service(author_service_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
-  service = data_access.service.name_to_service.get(author_service_context.service_name)
-  if service is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown service %s' % author_service_context.service_name}
-
   payload = request.json_body
+  service_name = payload.get('service_name')
   accessToken = payload.get('access_token')
   accessTokenSecret = payload.get('access_token_secret')
   service_author_id = payload.get('service_author_id')
+
+  service = data_access.service.name_to_service.get(service_name)
+  if service is None:
+    # TODO: better error
+    request.response.status_int = 404
+    return {'error': 'unknown service %s' % service_name}
 
   author_service_map = AuthorServiceMap(
       author_id,
