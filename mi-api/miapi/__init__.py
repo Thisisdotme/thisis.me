@@ -112,8 +112,6 @@ def preflight_crossdomain_access_control(request):
     origin_url = urlparse.urlparse(origin)
     origin_domain = origin_url.netloc.split(':')[0]
 
-    request.response.headers['Access-Control-Allow-Credentials'] = 'true'
-    '''
     if origin_domain in _acceptable_host:
       request.response.headers['Access-Control-Allow-Credentials'] = 'true'
     else:
@@ -123,7 +121,6 @@ def preflight_crossdomain_access_control(request):
           origin_domain,
           _acceptable_host)
       request.response.headers['Access-Control-Allow-Credentials'] = 'false'
-    '''
 
     return request.response
 
@@ -149,8 +146,6 @@ def crossdomain_access_control_response(event):
     origin_url = urlparse.urlparse(origin)
     origin_domain = origin_url.netloc.split(':')[0]
 
-    request.response.headers['Access-Control-Allow-Credentials'] = 'true'
-    '''
     if origin_domain in _acceptable_host:
       request.response.headers['Access-Control-Allow-Credentials'] = 'true'
     else:
@@ -160,7 +155,6 @@ def crossdomain_access_control_response(event):
           origin_domain,
           _acceptable_host)
       request.response.headers['Access-Control-Allow-Credentials'] = 'false'
-    '''
 
   return request.response
 
