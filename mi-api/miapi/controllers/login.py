@@ -4,6 +4,8 @@ import pyramid.security
 import miapi.resource
 import data_access.author
 
+import miapi.json_renders.author
+
 
 def add_views(configuration):
   configuration.add_view(
@@ -31,7 +33,7 @@ def login(request):
   if user and check_password(user.password, password):
     headers = pyramid.security.remember(request, user.id)
     request.response.headers.extend(headers)
-    return user.to_person_fragment_JSON_dictionary()
+    return miapi.json_renders.author.to_person_fragment_JSON_dictionary(user)
 
   return error(request.response, AUTHN_BAD_USER_OR_PASSWD)
 
