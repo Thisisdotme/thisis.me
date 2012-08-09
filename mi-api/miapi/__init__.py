@@ -107,6 +107,7 @@ def preflight_crossdomain_access_control(request):
     request.response.headers['Access-Control-Allow-Origin'] = origin
     request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
     request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+    request.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
     # parse the origin url
     origin_url = urlparse.urlparse(origin)
