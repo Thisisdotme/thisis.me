@@ -281,7 +281,7 @@ def view_author_topstories(author_context, request):
   events = []
   for event in top_stories:
     # filter well-known and instagram photo albums so they don't appear in the timeline
-    if (event.type_id == data_access.post_type.label_to_id('photo-album') and
+    if (event.type_id == data_access.post_type.label_to_id('photo_album') and
         (event.service_id == data_access.service.name_to_id('me') or
          event.service_id == data_access.service.name_to_id('instagram'))):
       continue
