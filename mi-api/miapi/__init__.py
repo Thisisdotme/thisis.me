@@ -103,25 +103,27 @@ def add_views(configuration):
 def preflight_crossdomain_access_control(request):
   origin = request.headers.get('Origin')
   if origin is not None:
-    author_id = pyramid.security.authenticated_userid(request)
 
-    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    request.response.headers['Access-Control-Allow-Origin'] = origin
     request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
     request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
-    if author_id:
-      # parse the origin url
-      origin_url = urlparse.urlparse(origin)
-      origin_domain = origin_url.netloc.split(':')[0]
 
-      if origin_domain in _acceptable_host:
-        request.response.headers['Access-Control-Allow-Credentials'] = 'true'
-      else:
-        logging.info(
-            'Not allowing domain (%s) because (%s) not in %s',
-            origin,
-            origin_domain,
-            _acceptable_host)
-        request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+    # parse the origin url
+    origin_url = urlparse.urlparse(origin)
+    origin_domain = origin_url.netloc.split(':')[0]
+
+    request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+    '''
+    if origin_domain in _acceptable_host:
+      request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+    else:
+      logging.info(
+          'Not allowing domain (%s) because (%s) not in %s',
+          origin,
+          origin_domain,
+          _acceptable_host)
+      request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+    '''
 
     return request.response
 
@@ -140,24 +142,25 @@ def crossdomain_access_control_response(event):
   request = event.request
   origin = request.headers.get('Origin')
   if origin:
-    author_id = pyramid.security.authenticated_userid(request)
-
-    request.response.headers['Access-Control-Allow-Origin'] = '*'
+    request.response.headers['Access-Control-Allow-Origin'] = origin
     request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
-    if author_id:
-      # parse the origin url
-      origin_url = urlparse.urlparse(origin)
-      origin_domain = origin_url.netloc.split(':')[0]
 
-      if origin_domain in _acceptable_host:
-        request.response.headers['Access-Control-Allow-Credentials'] = 'true'
-      else:
-        logging.info(
-            'Not allowing domain (%s) because (%s) not in %s',
-            origin,
-            origin_domain,
-            _acceptable_host)
-        request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+    # parse the origin url
+    origin_url = urlparse.urlparse(origin)
+    origin_domain = origin_url.netloc.split(':')[0]
+
+    request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+    '''
+    if origin_domain in _acceptable_host:
+      request.response.headers['Access-Control-Allow-Credentials'] = 'true'
+    else:
+      logging.info(
+          'Not allowing domain (%s) because (%s) not in %s',
+          origin,
+          origin_domain,
+          _acceptable_host)
+      request.response.headers['Access-Control-Allow-Credentials'] = 'false'
+    '''
 
   return request.response
 
