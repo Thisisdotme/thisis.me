@@ -58,7 +58,7 @@ def list_services(request):
 
   serviceList = []
   for service in db.Session().query(Service).order_by(Service.service_name):
-    serviceList.append(service.to_JSON_dictionary)
+    serviceList.append(service.to_JSON_dictionary(request))
 
   return {'services': serviceList}
 
@@ -126,4 +126,4 @@ def delete_service(context, request):
 
   log.info('successfully deleted service: "{name}"'.format(name=service_name))
 
-  return {'name': service_name}
+  return service.to_JSON_dictionary(request)
