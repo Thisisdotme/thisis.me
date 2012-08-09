@@ -54,8 +54,7 @@ def main(global_config, **settings):
   # TODO: secret should be configurable
   authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
       'secret',
-      callback=controllers.login.authenticate_user,
-      wild_domain=False)
+      callback=controllers.login.authenticate_user)
   configuration.set_authentication_policy(authentication)
   configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
 
