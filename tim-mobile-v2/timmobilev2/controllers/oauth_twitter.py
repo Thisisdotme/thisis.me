@@ -32,7 +32,7 @@ def get_twitter(request):
 
   # Query the API for installed features
   try:
-    req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'], authorName))
+    req = urllib2.Request('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'], authorName))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except urllib2.URLError, e:
@@ -50,7 +50,7 @@ def get_twitter(request):
 
   return {'feature': 'Twitter',
           'url': request.route_url('twitter'),
-          'api_endpoint': request.registry.settings['mi.api.endpoint']}
+          'api_endpoint': tim_config['api']['endpoint']}
 
 
 @view_config(route_name='twitter', request_method='POST', permission='author')
@@ -122,7 +122,7 @@ def twitter_callback(request):
   json_payload = json.dumps({'access_token': oauth_token, 'access_token_secret': oauth_token_secret, 'service_author_id': userInfoJSON['id']})
   headers = {'Content-Type': 'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                            (request.registry.settings['mi.api.endpoint'], authenticated_userid(request), FEATURE),
+                            (tim_config['api']['endpoint'], authenticated_userid(request), FEATURE),
                           'PUT',
                           json_payload,
                           headers)

@@ -31,7 +31,7 @@ def get_linkedin(request):
 
   # Query the API for installed features
   try:
-    req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authenticated_userid(request)))
+    req = urllib2.Request('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'],authenticated_userid(request)))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except urllib2.URLError, e:
@@ -49,7 +49,7 @@ def get_linkedin(request):
     
   return { 'feature':'LinkedIn',
            'url' : request.route_url('linkedin'),
-           'api_endpoint':request.registry.settings['mi.api.endpoint'] }
+           'api_endpoint':tim_config['api']['endpoint'] }
   
 @view_config(route_name='linkedin', request_method='POST', permission='author')
 def post_linkedin(request):
@@ -123,7 +123,7 @@ def linkedin_callback(request):
 
   json_payload = json.dumps({'access_token': accessToken, 'access_token_secret': accessTokenSecret, 'service_author_id': linkedinId})
   headers = {'Content-Type':'application/json; charset=utf-8'}
-  url = '{0}/v1/authors/{1}/services/{2}'.format(request.registry.settings['mi.api.endpoint'], authenticated_userid(request), FEATURE)
+  url = '{0}/v1/authors/{1}/services/{2}'.format(tim_config['api']['endpoint'], authenticated_userid(request), FEATURE)
   log.info(url)
   req = RequestWithMethod(url,
                           'PUT',

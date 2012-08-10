@@ -32,7 +32,7 @@ def get_googlePlus_info(request):
   # the presumption is that the feature already exists.  If it doesn't then this function
   # should not have been called
   req = urllib2.Request('%s/v1/authors/%s/features/%s' %
-                          (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
+                          (tim_config['api']['endpoint'], authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
   
@@ -86,7 +86,7 @@ def get_googlePlus(request):
 
     # Query the API for installed features
     try:
-      req = urllib2.Request('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authorName))
+      req = urllib2.Request('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'], authorName))
       res = urllib2.urlopen(req)
       resJSON = json.loads(res.read())
     except urllib2.URLError, e:
@@ -109,7 +109,7 @@ def get_googlePlus(request):
   if not accessToken:
     return {'feature':'GooglePlus',
             'url' : request.route_url('googleplus'),
-            'api_endpoint':request.registry.settings['mi.api.endpoint']}
+            'api_endpoint':tim_config['api']['endpoint']}
   else:
     request.session.flash('You have already added the Google+ feature.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
@@ -175,7 +175,7 @@ def googlePlus_callback(request):
   json_payload = json.dumps({'access_token': refreshToken, 'service_author_id': userId})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                            (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
+                            (tim_config['api']['endpoint'], authorName, FEATURE),
                           'PUT',
                           json_payload,
                           headers)

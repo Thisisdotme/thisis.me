@@ -45,7 +45,7 @@ class FoursquareView(object):
     # the presumption is that the feature already exists.  If it doesn't then this function
     # should not have been called
     req = urllib2.Request('%s/v1/authors/%s/features/%s' %
-                                (self.request.registry.settings['mi.api.endpoint'],authenticated_userid(self.request),self.featureName))
+                                (tim_config['api']['endpoint'],authenticated_userid(self.request),self.featureName))
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
     
@@ -82,7 +82,7 @@ class FoursquareView(object):
   
       # Query the API for installed features
       try:
-        req = urllib2.Request('%s/v1/authors/%s/features' % (self.request.registry.settings['mi.api.endpoint'],authorName))
+        req = urllib2.Request('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'],authorName))
         res = urllib2.urlopen(req)
         resJSON = json.loads(res.read())
       except urllib2.URLError, e:
@@ -104,7 +104,7 @@ class FoursquareView(object):
     if not accessToken:
       return {'feature':'Foursquare',
               'url' : self.request.route_url('foursquare'),
-              'api_endpoint':self.request.registry.settings['mi.api.endpoint']}
+              'api_endpoint':tim_config['api']['endpoint']}
     else:
   
       self.request.session.flash('Your Foursquare account is active.')
@@ -179,7 +179,7 @@ class FoursquareView(object):
     json_payload = json.dumps({'access_token': accessToken, 'service_author_id': userId})
     headers = {'Content-Type':'application/json; charset=utf-8'}
     req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                                    (self.request.registry.settings['mi.api.endpoint'],authorName,self.featureName),
+                                    (tim_config['api']['endpoint'],authorName,self.featureName),
                             'PUT',
                             json_payload,
                             headers)

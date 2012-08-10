@@ -11,6 +11,8 @@ import flickrapi
 
 from tim_commons.request_with_method import RequestWithMethod
 
+from timmobilev2 import tim_config
+
 log = logging.getLogger(__name__)
 
 api_key = 'c407ceb64f7714f1120809ec7c246b86'
@@ -37,7 +39,7 @@ def verify_flickr_access_token(flickr_access_token):
 def get_flickr_access_token(request):
 
   req = urllib2.Request('%s/v1/authors/%s/features/%s' %
-                              (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
+                              (tim_config['api']['endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
   
@@ -71,7 +73,7 @@ def get_flickr(request):
   else:
     # Query the API for installed features
     try:
-      req = RequestWithMethod('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authorName), 'GET')
+      req = RequestWithMethod('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'],authorName), 'GET')
       res = urllib2.urlopen(req)
       resJSON = json.loads(res.read())
     except Exception, e:
@@ -86,7 +88,7 @@ def get_flickr(request):
   if not flickr_access_token:
     return {'feature':'Flickr',
             'url' : request.route_url('flickr'),
-            'api_endpoint':request.registry.settings['mi.api.endpoint']}
+            'api_endpoint':tim_config['api']['endpoint']}
   else:
 
     request.session['flickr_access_token'] = flickr_access_token
@@ -120,7 +122,7 @@ def flickr_callback(request):
   json_payload = json.dumps({'access_token':flickr_access_token})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                                  (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
+                                  (tim_config['api']['endpoint'], authorName,FEATURE),
                           'PUT',
                           json_payload,
                           headers)

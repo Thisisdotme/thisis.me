@@ -52,9 +52,8 @@ def main(global_config, **settings):
   configuration = pyramid.config.Configurator(
       root_factory=resource.root_factory,
       settings=settings)
-  # TODO: secret should be configurable
   authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
-      'secret',
+      tim_config['api']['authentication_secret'],
       callback=controllers.login.authenticate_user)
   configuration.set_authentication_policy(authentication)
   configuration.set_authorization_policy(pyramid.authorization.ACLAuthorizationPolicy())
@@ -107,7 +106,7 @@ def preflight_crossdomain_access_control(request):
   if origin is not None:
     request.response.headers['Access-Control-Allow-Origin'] = origin
     request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE, OPTIONS'
-    request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+    request.response.headers['Access-Control-Max-Age'] = tim_config['api']['cors_ttl']
     request.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
 
     # parse the origin url
@@ -142,7 +141,7 @@ def crossdomain_access_control_response(event):
   origin = request.headers.get('Origin')
   if origin:
     request.response.headers['Access-Control-Allow-Origin'] = origin
-    request.response.headers['Access-Control-Max-Age'] = tim_config['cors']['cors_ttl']
+    request.response.headers['Access-Control-Max-Age'] = tim_config['api']['cors_ttl']
 
     # parse the origin url
     origin_url = urlparse.urlparse(origin)

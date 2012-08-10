@@ -7,7 +7,7 @@ import requests
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from timmobilev2 import tim_config
 
@@ -16,22 +16,18 @@ log = logging.getLogger(__name__)
 SERVICE = 'facebook'
 
 
-@view_config(route_name='facebook', request_method='GET', renderer='timmobilev2:templates/oauth.pt', permission='author')
+@view_config(route_name='facebook', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
 def get_facebook(request):
-
-  # TODO - how do we do this ???
 
   return {'feature': 'Facebook',
           'url': request.route_url('facebook'),
-          'api_endpoint': request.registry.settings['mi.api.endpoint']}
+          'api_endpoint': tim_config['api']['endpoint']}
 
 
-@view_config(route_name='facebook', request_method='POST', permission='author')
+@view_config(route_name='facebook', request_method='POST')
 def post_facebook(request):
 
-  api_key = tim_config['oauth'][SERVICE]['key']
-
-  query_args = urllib.urlencode([('client_id', api_key),
+  query_args = urllib.urlencode([('client_id', tim_config['oauth'][SERVICE]['key']),
                                 ('redirect_uri', request.route_url('facebook_callback')),
                                 ('scope', 'offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status')])
 
@@ -43,9 +39,7 @@ def post_facebook(request):
 @view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/confirmation.pt')
 def facebook_callback(request):
 
-  author_name = authenticated_userid(request)
-  
-  author_name = 'howard'
+  author_name = unauthenticated_userid(request)
 
   access_token = None
   fb_user_id = None
@@ -69,17 +63,11 @@ def facebook_callback(request):
     try:
 
       r = requests.get(url)
+      r.raise_for_status()
+
       fb_dict = parse_qs(r.text)
 
-#      req = urllib2.Request(url)
-#      res = urllib2.urlopen(req)
-#      fbDict = parse_qs(res.read())
-
       access_token = fb_dict['access_token'][0]
-
-#    except urllib2.URLError, e:
-#      log.error(e.reason)
-#      raise e
 
     except requests.exceptions.RequestException, e:
       log.error(e)
@@ -90,10 +78,17 @@ def facebook_callback(request):
                                                              resource='me',
                                                              token=access_token)
 
-    r = requests.get(url)
-    me_dict = r.json
+    try:
+      r = requests.get(url)
+      r.raise_for_status()
 
-    fb_user_id = me_dict['id']
+      me_dict = r.json
+
+      fb_user_id = me_dict['id']
+
+    except requests.exceptions.RequestException, e:
+      log.error(e)
+      raise e
 
   else:
     error_reason = request.params.get('error_reason')
@@ -109,18 +104,12 @@ def facebook_callback(request):
   headers = {'content-type': 'application/json; charset=utf-8'}
   cookies = request.cookies
 
-  r = requests.post(url, data=json.dumps(payload), headers=headers, cookies=cookies)
-  res_json = r.json
+  try:
+    r = requests.post(url, data=json.dumps(payload), headers=headers, cookies=cookies)
+    r.raise_for_status()
+  except requests.exceptions.RequestException, e:
+    log.error(e.message)
 
-#  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-#                                  (,author_name,SERVICE),
-#                          'PUT',
-#                          json_payload,
-#                          headers)
-#  res = urllib2.urlopen(req)
-#  resJSON = json.loads(res.read())
+  log.info("Added Facebook service for author %s" % author_name)
 
-  log.info("Added Facebook feature for author %s" % author_name)
-
-  request.session.flash('Your Facebook account has been successfully added.')
   return HTTPFound(location=request.route_path('app', authorname=author_name))

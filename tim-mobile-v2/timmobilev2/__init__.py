@@ -1,4 +1,6 @@
 from pyramid.config import Configurator
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from sqlalchemy import engine_from_config
 
 from tim_commons import db
@@ -27,6 +29,10 @@ def main(global_config, **settings):
   db.configure_session(db_url)
 
   config = Configurator(settings=settings)
+
+  authentication = AuthTktAuthenticationPolicy(tim_config['api']['authentication_secret'])
+  config.set_authentication_policy(authentication)
+  config.set_authorization_policy(ACLAuthorizationPolicy())
 
   config.add_static_view('img', 'timmobilev2:img', cache_max_age=0)
   config.add_static_view('css', 'timmobilev2:css', cache_max_age=0)

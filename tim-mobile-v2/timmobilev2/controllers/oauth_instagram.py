@@ -29,7 +29,7 @@ def get_instagram(request):
   
   # Query the API for installed features
   try:
-    req = RequestWithMethod('%s/v1/authors/%s/features' % (request.registry.settings['mi.api.endpoint'],authorName), 'GET')
+    req = RequestWithMethod('%s/v1/authors/%s/features' % (tim_config['api']['endpoint'], authorName), 'GET')
     res = urllib2.urlopen(req)
     resJSON = json.loads(res.read())
   except Exception, e:
@@ -41,10 +41,10 @@ def get_instagram(request):
   if len([feature for feature in resJSON['features'] if feature['name'] == FEATURE]) == 1:
     request.session.flash('Your Instagram account is active.')
     return HTTPFound(location=request.route_path('account_details',featurename=FEATURE))
-    
-  return { 'feature':'Instagram',
-           'url' : request.route_url('instagram'),
-           'api_endpoint':request.registry.settings['mi.api.endpoint'] }
+
+  return {'feature':' Instagram',
+          'url': request.route_url('instagram'),
+          'api_endpoint': tim_config['api']['endpoint']}
 
 @view_config(route_name='instagram', request_method='POST', permission='author')
 def post_instagram(request):
@@ -95,7 +95,7 @@ def instagram_callback(request):
   json_payload = json.dumps({'access_token': access_token, 'service_author_id': instagram_author_id})
   headers = {'Content-Type':'application/json; charset=utf-8'}
   req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                                                    (request.registry.settings['mi.api.endpoint'],authorName,FEATURE),
+                                                    (tim_config['api']['endpoint'],authorName,FEATURE),
                                             'PUT',
                                             json_payload,
                                             headers)
