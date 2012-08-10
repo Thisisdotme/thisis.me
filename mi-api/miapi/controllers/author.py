@@ -2,6 +2,7 @@ import logging
 import datetime
 
 from sqlalchemy.exc import IntegrityError
+import passlib.hash
 
 import mi_schema.models
 import data_access.service
@@ -88,11 +89,12 @@ def add_author(request):
     # TODO: better error
     return {'error': 'Missing author'}
 
-  password = author_info.get('password')
-  if password == None:
+  plain_password = author_info.get('password')
+  if plain_password == None:
     request.response.status_int = 400
     # TODO: better error
     return {'error': 'Missing required property: password'}
+  enc_password = passlib.hash.sha256_crypt.encrypt(plain_password)
 
   fullname = author_info.get('full_name')
   if fullname == None:
@@ -120,7 +122,7 @@ def add_author(request):
 
   try:
     # create and insert new author
-    author = mi_schema.models.Author(author_name, email, fullname, password, template)
+    author = mi_schema.models.Author(author_name, email, fullname, enc_password, template)
     data_access.author.add_author(author)
   except IntegrityError, e:
     logging.error(e.message)
@@ -210,9 +212,9 @@ def update_author(author_context, request):
 
   if author:
     author_info = request.json_body
-    password = author_info.get('password')
-    if password:
-      author.password = password
+    plain_password = author_info.get('password')
+    if plain_password:
+      author.password = passlib.hash.sha256_crypt.encrypt(plain_password)
 
     fullname = author_info.get('fullname')
     if fullname:
