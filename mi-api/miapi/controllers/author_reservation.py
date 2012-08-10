@@ -57,10 +57,6 @@ def get_reservation(reservation_context, request):
     request.response.status_int = 500
     return {'error': e.message}
 
-  request.response.headers['Access-Control-Allow-Origin'] = '*'
-  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
-
   return {'author_name': reservation.author_name}
 
 
@@ -110,10 +106,6 @@ def add_reservation(request):
       email,
       'Username reservation confirmation',
       {'author_name': author_name})
-
-  request.response.headers['Access-Control-Allow-Origin'] = '*'
-  request.response.headers['Access-Control-Allow-Methods'] = 'GET, PUT'
-  request.response.headers['Access-Control-Max-Age'] = miapi.tim_config['cors']['cors_ttl']
 
   return {'author_name': author_name, 'email': email}
 
