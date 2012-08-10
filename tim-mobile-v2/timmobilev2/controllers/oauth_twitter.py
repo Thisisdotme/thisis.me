@@ -1,28 +1,24 @@
 import logging
 import urlparse
 import urllib
-import urllib2
 import oauth2 as oauth
 import json
+import requests
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from tim_commons.oauth import make_request
-from tim_commons.request_with_method import RequestWithMethod
 
 from timmobilev2 import tim_config
-from urllib2 import HTTPError
 
 log = logging.getLogger(__name__)
 
-
-# ??? TODO - these need to go somewhere else
 SERVICE = 'twitter'
 
 
-@view_config(route_name='twitter', request_method='GET', renderer='timmobile:templates/oauth.pt')
+@view_config(route_name='twitter', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
 def get_twitter(request):
 
   return {'feature': 'Twitter',
@@ -45,26 +41,24 @@ def post_twitter(request):
   callback = request.route_url('twitter_callback')
   resp, content = client.request(tim_config['oauth'][SERVICE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback': callback}))
   if resp['status'] != '200':
-      raise Exception("Invalid response %s (%s)." % (resp['status'], content))
+    raise Exception('Invalid response {status} ({message}).'.format(status=resp['status'],
+                                                                    message=content))
 
   request_token = dict(urlparse.parse_qsl(content))
-
-#  print "Request Token:"
-#  print "    - oauth_token             = %s" % request_token['oauth_token']
-#  print "    - oauth_token_secret      = %s" % request_token['oauth_token_secret']
-#  print "    - oauth_callback_confirmed = %s" % request_token['oauth_callback_confirmed']
-#  print
 
   # Step 2: Redirect to the provider.
   request.session['oauth_token_secret'] = request_token['oauth_token_secret']
 
-  redirectURL = "{0}?oauth_token={1}".format(tim_config['oauth'][SERVICE]['authorize_url'], request_token['oauth_token'])
+  redirectURL = "{endpoint}?oauth_token={token}".format(endpoint=tim_config['oauth'][SERVICE]['authorize_url'],
+                                                        token=request_token['oauth_token'])
 
   return HTTPFound(location=redirectURL)
 
 
-@view_config(route_name='twitter_callback', request_method='GET', permission='author')
+@view_config(route_name='twitter_callback', request_method='GET')
 def twitter_callback(request):
+
+  author_id = unauthenticated_userid(request)
 
   # the oauth_token is request as a query arg; the auth_token_secret is in session store
   oauth_token = request.params['oauth_token']
@@ -79,43 +73,45 @@ def twitter_callback(request):
   # access token somewhere safe, like a database, for future use.
   consumer_key = tim_config['oauth'][SERVICE]['key']
   consumer_secret = tim_config['oauth'][SERVICE]['secret']
+
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   token = oauth.Token(oauth_token, oauth_token_secret)
+
   client = oauth.Client(consumer, token)
 
   token.set_verifier(oauth_verifier)
 
   resp, content = client.request(tim_config['oauth'][SERVICE]['access_token_url'], "POST")
+  if resp['status'] != '200':
+    raise Exception('Invalid response {status} ({message}).'.format(status=resp['status'],
+                                                                    message=content))
+
   access_token = dict(urlparse.parse_qsl(content))
 
-  # these are the real deal and need to be stored securely in the DB
+  # these tokens are the real deal and need to be passed to the API
   oauth_token = access_token['oauth_token']
   oauth_token_secret = access_token['oauth_token_secret']
 
   token = oauth.Token(oauth_token, oauth_token_secret)
   client = oauth.Client(consumer, token)
 
-  userInfoJSON = json.loads(make_request(client, 'https://api.twitter.com/1/account/verify_credentials.json').decode('utf-8'))
+  # get some information about the user from twitter
+  url = '{endpoint}account/verify_credentials.json'.format(endpoint=tim_config['oauth'][SERVICE]['endpoint'])
+  json_dict = json.loads(make_request(client, url).decode('utf-8'))
 
-  json_payload = json.dumps({'access_token': oauth_token, 'access_token_secret': oauth_token_secret, 'service_author_id': userInfoJSON['id']})
-  headers = {'Content-Type': 'application/json; charset=utf-8'}
-  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-                            (tim_config['api']['endpoint'], authenticated_userid(request), SERVICE),
-                          'PUT',
-                          json_payload,
-                          headers)
-  try:
-    res = urllib2.urlopen(req)
-    resJSON = json.loads(res.read())
-  except HTTPError, e:
-    # TODO: handle errors more gracefully here (caused by, e.g., API S3 bucket not existing)
-    print e.read()
+  url = '{endpoint}/v1/authors/{author}/services'.format(endpoint=tim_config['api']['endpoint'],
+                                                         author=author_id)
+  payload = {'name': SERVICE,
+             'access_token': oauth_token,
+             'access_token_secret': oauth_token_secret,
+             'service_author_id': json_dict['id']}
+  headers = {'content-type': 'application/json; charset=utf-8'}
+  cookies = request.cookies
 
   try:
-    request.session['twitter_access_token'] = oauth_token
-    request.session['twitter_access_token_secret'] = oauth_token_secret
-  except Exception, e:
-    print e
+    r = requests.post(url, data=json.dumps(payload), headers=headers, cookies=cookies)
+    r.raise_for_status()
+  except requests.exceptions.RequestException, e:
+    log.error(e.message)
 
-  request.session.flash('Your Twitter account has been successfully added.')
-  return HTTPFound(location=request.route_path('newsfeed'))
+  return HTTPFound(location=request.route_path('settings'))
