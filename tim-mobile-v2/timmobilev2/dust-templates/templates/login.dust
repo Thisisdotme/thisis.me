@@ -2,7 +2,9 @@
 <div class="login-form">
   <div class="message"></div>
   <form id="login-form" action="" method="post">
+    <label for="login-login">Author Name</label>
   	<input id="login-login" type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
+  	<label for="login-password">Password</label>
   	<input id="login-password" type="password" name="password" value=""/>
   </form>
   <input id="login-submit" type="submit" value="Log In" />

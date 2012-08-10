@@ -150,6 +150,8 @@ TIM.views.Login = Backbone.View.extend( {
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
   		this.$el.html(html);
+  		window.setTimeout("$('#login-login').focus()", 50);
+  		
   		return this.$el;
     },
     
@@ -227,10 +229,6 @@ TIM.views.Settings = Backbone.View.extend( {
         } else {
           item.set('enabled', 'disabled');
         }
-        if(name == 'facebook') {
-          //if(name = 'ffffff')
-          item.set('url', "https://m.facebook.com/dialog/oauth?client_id=147356348709107&redirect_uri=http://poc.thisis.me/facebook&scope=offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status");
-        }
       })
       
       var userName = TIM.authenticatedUser.get('name') || '';
@@ -250,7 +248,8 @@ TIM.views.Settings = Backbone.View.extend( {
         href = "";
       }
       if (href !== "") {
-        window.location.href = href;
+        alert(href);
+        //window.location.href = href;
       }
       return false;
     },
