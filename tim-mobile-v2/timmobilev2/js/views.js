@@ -125,7 +125,8 @@ TIM.views.Login = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "click #login-submit" : "submitForm"
+      "click #login-submit" : "submitForm",
+      "click #create-user-link" : "newUser"
     },
     
     initialize: function(options) {
@@ -171,6 +172,12 @@ TIM.views.Login = Backbone.View.extend( {
       });
  
       return false;
+    },
+    
+    newUser: function(e) {
+      TIM.showNewUserForm();
+      e.preventDefault();
+      e.stopPropagation();
     },
     
     cancel: function(e) {
@@ -219,25 +226,39 @@ TIM.views.CreateUser = Backbone.View.extend( {
     
     submitForm: function(e) {
       
-      /*
       
-      var url = TIM.apiUrl + "login";
-      $('#newuser-form').attr('action', url);
-      var login = $('#login-login').val();
-      var password = $('#login-password').val();
+      var authorName = $('#newuser-name').val();
+      var fullName = $('#newuser-fullname').val();
+      var email = $('#newuser-email').val();
+      var password = $('#newuser-password').val();
+      
+      alert("trying to create " + authorName);
+      
+      var url = TIM.apiUrl + "authors";
+     
       //fake the ajax submit here!
       
-      this.model.doLogin(login, password, function() {
-        if(TIM.isAuthorApp()) {
-          TIM.app.navigate('cover', {trigger:true});
-        } else {
-          return;
-          window.location.href = "/";
-        }
+      $.ajax({
+        type: 'POST',
+        url: TIM.apiUrl + 'authors',
+        data: JSON.stringify({ name: authorName, full_name: fullName, email: email, password: password}),
+        xhrFields: {withCredentials: true},
+        contentType: 'application/json',
+        success: function(data, xhr) {
+           console.log("create response: ", data, status, xhr);
+           //do something with the data...
+           alert('hey! new user!');
+          
+           TIM.eventAggregator.trigger('usercreated', {name:data.name});
+         },
+         error: function(data) {
+           console.log("create error: ", data);
+           $('.newuser-form .message').html('could not create that user.');
+           self.trigger('newuserError');
+         },
+        dataType: "json"
       });
-      
-      */
-      
+            
       return false;
     },
     

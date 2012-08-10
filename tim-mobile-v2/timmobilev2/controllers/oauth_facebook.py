@@ -39,7 +39,7 @@ def post_facebook(request):
 @view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/confirmation.pt')
 def facebook_callback(request):
 
-  author_name = unauthenticated_userid(request)
+  author_id = unauthenticated_userid(request)
 
   access_token = None
   fb_user_id = None
@@ -99,7 +99,7 @@ def facebook_callback(request):
     raise Exception(msg)
 
   url = '{endpoint}/v1/authors/{author}/services'.format(endpoint=tim_config['api']['endpoint'],
-                                                         author=author_name)
+                                                         author=author_id)
   payload = {'name': SERVICE, 'access_token': access_token, 'service_author_id': fb_user_id}
   headers = {'content-type': 'application/json; charset=utf-8'}
   cookies = request.cookies
@@ -110,6 +110,6 @@ def facebook_callback(request):
   except requests.exceptions.RequestException, e:
     log.error(e.message)
 
-  log.info("Added Facebook service for author %s" % author_name)
+  log.info("Added Facebook service for author %s" % author_id)
 
-  return HTTPFound(location=request.route_path('app', authorname=author_name))
+  return HTTPFound(location=request.route_path('settings'))
