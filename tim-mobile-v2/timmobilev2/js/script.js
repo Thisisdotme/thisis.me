@@ -10,6 +10,7 @@ TIM.featureHandlers = TIM.featureHandlers || {};
 TIM.loadedFeatures = TIM.loadedFeatures || {};
 TIM.authorFeatures = TIM.authorFeatures || {};
 TIM.defaultFeature = "cover";
+TIM.pageHistory = [];
 TIM.currentPageElem = $('#splash-screen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#content-container');
@@ -18,9 +19,10 @@ TIM.loading_ = false;
 TIM.transitioning_ = false;
 TIM.errorShowing_ = true;
 TIM.errorMessageView = undefined;
-TIM.currentUser = undefined; //the person who is currently logged in - will be an author object?
+TIM.currentUser = undefined; //the person who is currently logged in - will be an author object initially...
 TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
+TIM.authenticatedUser = TIM.authenticatedUser || undefined;
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -32,19 +34,42 @@ window.addEventListener("load",function() {
 });
 
 $(function() {
+  //set up global event aggregator
+	TIM.eventAggregator =  _.extend({}, Backbone.Events);
+  
+  
+  if($.cookie('tim_user_session') && false) {
+    var name = $.cookie('tim_user_name');
+    if(name && false) {
+      TIM.currentUser = new TIM.models.User({name: name});
+      TIM.currentUser.fetch({
+        dataType: 'jsonp',
+    		success: function(resp) {
+    		  console.log('fetched user');
+    		},
+    		error: function(resp, xhr) {
+    		  console.log('error response:', resp, xhr)
+    			TIM.showErrorMessage({
+    			    exception: "didn't get current user"
+    			});
+    		}
+    	});
+    } else {
+      //var name = "ken";// $.cookie('tim_user_name', 'ken');
+    }
+  }
+  
   
   if(!$.cookie('tim_session')) {
-    $.cookie('tim_session', true);
+    //$.cookie('tim_session', true);
   }
     
   var parsedUri = parseUri(window.location.href);
   console.log("parsed uri: ", parsedUri);
-  if(parsedUri.path === '/') {
+  if(parsedUri.path === '/') { //don't do all the author-specific feature stuff if we're on the home screen
     return;
   }
   
-  //set up global event aggregator
-	TIM.eventAggregator =  _.extend({}, Backbone.Events);
   
   //if there's no author, don't do anything!
   if(!TIM.pageInfo || !TIM.pageInfo.authorName || TIM.pageInfo.authorName === '') {
@@ -173,7 +198,11 @@ $(function() {
 	TIM.features = new TIM.collections.Features();
 	
 	//all available services
-	TIM.services = new TIM.collections.Services();
+	TIM.allServices = new TIM.collections.Services();
+	
+	//services for the current user
+	TIM.currentUserServices = new TIM.collections.Services();
+	TIM.currentUserServices.setURL("ken");
 	
 	//set up the main feature nav
 	TIM.featureNavView = new TIM.views.FeatureNav({
@@ -199,7 +228,7 @@ $(function() {
 		}
 	});
 	
-	TIM.services.fetch({
+	TIM.allServices.fetch({
 		//add this timeout in case call fails...
 		timeout : 5000,
 		callbackParameter: "callback",
@@ -212,6 +241,11 @@ $(function() {
 			});
 		}
 	});
+	
+	
+	
+
+	  
 	
 	//1. get features for author
 	//2. get cover page assets for author
@@ -231,6 +265,8 @@ $(function() {
     	TIM.eventAggregator.bind('detailLinkClicked', this.detailLinkClicked, this);
     	TIM.eventAggregator.bind('error:featureload', this.featureLoadError, this);
     	TIM.eventAggregator.bind('error', this.handleError, this);
+    	TIM.eventAggregator.bind('login', this.handleLogin, this);
+    	TIM.eventAggregator.bind('logout', this.handleLogout, this);
     	
     	//move these to backbone views?
     	//make sure we have tap event
@@ -294,6 +330,29 @@ $(function() {
     detailLinkClicked: function(id, featureName){
       console.log('user clicked a detail link - args are:', arguments);
       this.navigate(featureName + '/' + id, {'trigger': true}); //trigger a hashchange event
+    },
+    
+    handleLogin: function() {
+      $('#app').addClass('logged-in');
+      if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
+    	  TIM.currentUserServices.fetch({
+      		//add this timeout in case call fails...
+      		timeout : 5000,
+      		callbackParameter: "callback",
+      		success: function(resp) {
+      		  console.log('fetched user services');
+      		},
+      		error: function(resp) {
+      			TIM.showErrorMessage({
+      			    exception: "loading user services failed."
+      			});
+      		}
+      	});
+    	}
+    },
+
+    handleLogout: function() {
+      $('#app').removeClass('logged-in');
     }
         
 	})
@@ -301,6 +360,11 @@ $(function() {
 	TIM.app = new TIM.Router();
 	
   Backbone.history.start({root: '/' + TIM.globals.authorName});
+  
+  //see if we have a current user
+  TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
+  TIM.authenticatedUser.createFromCookie();
+  
 		
 	$.fn.animationComplete = function( callback ) {
 		if( "WebKitTransitionEvent" in window ) {
@@ -338,6 +402,12 @@ $(function() {
   	      return;
   	    }
   	    
+  	    //total hack for 'home page'
+  	    if (featureName == 'logout') {
+  	      TIM.doLogout();
+  	      return;
+  	    }
+  	    
   	    if (featureName == 'settings') {
   	      location.href = "/settings";
   	      localStorage.removeItem('tim_last_url');
@@ -365,7 +435,7 @@ $(function() {
   	      $('#app').removeClass('nav-open');
   	      if(TIM.features.getSelectedFeature()) {
   	          $('#app').removeClass('loading');
-  	          TIM.app.navigate(TIM.features.getSelectedFeature().get('feature_name'), {replace:true});
+  	          TIM.app.navigate(TIM.features.getSelectedFeature().get('name'), {replace:true});
   	          return;
   	      } else {
   	        feature = TIM.features.getByName("cover");
@@ -386,9 +456,10 @@ $(function() {
   };
   
   TIM.loadSettings = function() {
-    if(TIM.currentUser) {
-      location.href = "/settings";
-      localStorage.removeItem('tim_last_url');
+    if(TIM.authenticatedUser && TIM.authenticatedUser.loggedIn) {
+      //location.href = "/settings";
+      //localStorage.removeItem('tim_last_url');
+      TIM.showSettingsPage();
     } else {
       TIM.showLoginForm();
     }
@@ -407,7 +478,7 @@ $(function() {
   TIM.showLoginForm = function (options) {
     TIM.setLoading(false);
     if (!TIM.loginView) {
-      TIM.loginView = new TIM.views.Login();
+      TIM.loginView = new TIM.views.Login({model: TIM.authenticatedUser});
     }
     TIM.loginView.render({message: "dam"});
     TIM.setNavVisible(false);
@@ -420,7 +491,26 @@ $(function() {
     TIM.setNavVisible(true);
   };
   
-  //for now this simply handles the DOM page transition
+  TIM.doLogout = function() {
+    TIM.authenticatedUser.doLogout(function() { TIM.app.navigate('home', {trigger:true})});
+    //$.cookie('tim_user_name', null);
+    //$.cookie('tim_user_session', null);
+  }
+  
+  //also get the list of currently-activated services for the current user
+  
+  TIM.showSettingsPage = function (options) {
+    TIM.setLoading(false);
+    if (!TIM.settingsView) {
+      TIM.settingsView = new TIM.views.Settings({collection: TIM.allServices});
+    }
+    TIM.settingsView.render({message: "dam"});
+    TIM.setNavVisible(false);
+    TIM.app.navigate("#settings");
+    TIM.transitionPage (TIM.settingsView.$el);
+  };
+  
+  //for now this simply handles the dologoutDOM page transition
   //
   //should keep a history stack & use that to determine whether to do a forward or reverse transition
   
@@ -463,15 +553,14 @@ $(function() {
 	    });
 	  }
 	  toPage.removeClass('out reverse').addClass(inClasses);
-	    toPage.addClass('active').animationComplete(function() {
-  	    console.log('animation complete for to page: ', this);
-        $(this).removeClass(transitions + " in").addClass('active');
-        $('#app').removeClass('transitioning');
-        setTimeout(function(){
-            window.scrollTo(0, 0);
-        }, 0);
-      });
-	  
+    toPage.addClass('active').animationComplete(function() {
+	    console.log('animation complete for to page: ', this);
+      $(this).removeClass(transitions + " in").addClass('active');
+      $('#app').removeClass('transitioning');
+      setTimeout(function(){
+          window.scrollTo(0, 0);
+      }, 0);
+    });
       	  
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;

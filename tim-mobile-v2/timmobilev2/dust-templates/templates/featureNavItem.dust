@@ -1,1 +1,1 @@
-<a href="{path}">{feature_name}</a>
+<a href="{path}">{name}</a>

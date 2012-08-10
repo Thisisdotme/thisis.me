@@ -69,7 +69,7 @@
 			<h1>thisis.me authors</h1>
 		</header><!-- /header -->
 		<section id="authors">
-  	  <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a></div> 
+  	  <!-- <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a> </div>  -->
   		<div id="index-content-all" class="author-list">
   		</div><!-- /content -->
       <div id="index-content-favorites" class="author-list">
@@ -121,35 +121,35 @@
       TIM.authors.reset(
         [   {
               author_id: 1,
-              author_name: "howard",
+              name: "howard",
               email: "howard@thisis.me",
               full_name: "Howard Burrows",
               template: null
             },
             {
               author_id: 6,
-              author_name: "phil",
+              name: "phil",
               email: "phil@mobileidentity.me",
               full_name: "Philip Goffin",
               template: null
             },
             {
               author_id: 2,
-              author_name: "loree",
+              name: "loree",
               email: "loree@mobileidentity.me",
               full_name: "Loree Hirschman",
               template: null
             },
             {
               author_id: 8,
-              author_name: "philblack",
+              name: "philblack",
               email: "pblack@trueventures.com",
               full_name: "Philip Black",
               template: null
             },
             {
               author_id: 39,
-              author_name: "jose",
+              name: "jose",
               email: "jose@thisis.me",
               full_name: "Jose Garcia",
               template: null
@@ -157,14 +157,14 @@
             },
             {
               author_id: 37,
-              author_name: "Ken",
+              name: "Ken",
               email: "k_lenga@yahoo.com",
               full_name: "Ken Lenga",
               template: null
             },
             {
               author_id: 43,
-              author_name: "mchammer",
+              name: "mchammer",
               email: "mchammer",
               full_name: "MC Hammer",
               template: null
@@ -194,7 +194,7 @@
         var html = "<div class='no-favorites'>no favorites yet</div>";
         var favoritesJSON = {authors:[]};
         TIM.authors.each (function(item){
-          name = item.get('author_name');
+          name = item.get('name');
           if(isFavorite(name)) {
             favoritesJSON.authors.push(item.toJSON());
           }
@@ -231,6 +231,7 @@
     	$('#tabs a').on('tap', function(e) {
     	  e.preventDefault();
     	  e.stopPropagation();
+    	  return;
     	  var href = $(this).attr('href');
     	  if(href === '#favorites') {
     	    $('#authors').removeClass('all').addClass('favorites');
@@ -250,18 +251,19 @@
     	$('#index-content-all').on('hold', 'a', function(e){
     	  e.preventDefault();
     	  e.stopPropagation();
+    	  return;
     	  console.log(e);
     	  holding = true;
     	  var a = $(e.currentTarget);
-    	  var name = a.data("author_name");
+    	  var name = a.data("name");
     	  //search favorites, decide whether to add or delete
     	  if(isFavorite(name)) {
-    	    var remove = confirm('remove ' + a.data("author_name") + ' from your favorites?');
+    	    var remove = confirm('remove ' + a.data("name") + ' from your favorites?');
       	  if (remove) {
             removeFavorite(name);
       	  }
     	  } else {
-    	    var add = confirm('add ' + a.data("author_name") + ' as a favorite?');
+    	    var add = confirm('add ' + a.data("name") + ' as a favorite?');
       	  if (add) {
             addFavorite(name);
       	  }
@@ -278,8 +280,8 @@
       var favs = [], name;
   	  TIM.authors.each (function(item){
   	    
-  	    name = item.get('author_name');
-        if (item.get('author_name') === 'mchammer' || item.get('author_name') === 'howard' ) {
+  	    name = item.get('name');
+        if (item.get('name') === 'mchammer' || item.get('name') === 'howard' ) {
           favs.push(name);
         }
       })

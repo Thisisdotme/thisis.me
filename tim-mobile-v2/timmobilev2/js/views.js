@@ -125,7 +125,7 @@ TIM.views.Login = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "submit form" : "submitForm"
+      "click #login-submit" : "submitForm"
     },
     
     initialize: function(options) {
@@ -150,11 +150,22 @@ TIM.views.Login = Backbone.View.extend( {
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
   		this.$el.html(html);
+  		window.setTimeout("$('#login-login').focus()", 50);
+  		
   		return this.$el;
     },
     
-    submitForm: function() {
-      $('.login-form .message').html("Sorry. Not implemented.");
+    submitForm: function(e) {
+      var url = TIM.apiUrl + "login";
+      $('#login-form').attr('action', url);
+      var login = $('#login-login').val();
+      var password = $('#login-password').val();
+      //fake the ajax submit here!
+      
+      this.model.doLogin(login, password, function() {
+        TIM.app.navigate('cover', {trigger:true});
+      });
+ 
       return false;
     },
     
@@ -165,6 +176,99 @@ TIM.views.Login = Backbone.View.extend( {
     
     
 } );
+
+function doNextCall() {
+  $.ajax({
+    type: 'get',
+    url: TIM.apiUrl + "authors/ken",
+    success: function(data) {
+       alert('hey!!!!');
+       
+     },
+     error: function(data) {
+       
+     }
+  });
+}
+
+
+TIM.views.Settings = Backbone.View.extend( {
+        
+    className: "app-page light",
+    template: "services",
+    
+    events: {
+      //"click span" : "itemClicked"
+      "click .cancel-link" : "cancel",
+      "click li a" : "toggleSetting",
+      "click #logout-link" : "doLogout"
+    },
+    
+    initialize: function(options) {
+        options = options || {};
+        var that = this;
+        
+        _.bindAll(this);
+        //make this a Comments collection
+        
+        
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+           TIM.appContainerElem.append(this.$el);
+        }
+    },
+    
+    render: function() {
+      var that = this;
+      
+      //compare the list of all services vs. the author's services
+      this.collection.each(function(item){
+        var name = item.get('name');
+        item.set('url', '/oauth/' + name);
+        if(TIM.currentUserServices && TIM.currentUserServices.getByName(name)) {
+          item.set('enabled', 'enabled');
+        } else {
+          item.set('enabled', 'disabled');
+        }
+      })
+      
+      var userName = TIM.authenticatedUser.get('name') || '';
+      
+      var templateContext = {name: userName, services: this.collection.toJSON()};
+      
+      var html = TIM.views.renderTemplate(this.template, templateContext);
+  		this.$el.html(html);
+  		return this.$el;
+    },
+    
+    toggleSetting: function(e) {
+      var href = "";
+      try {
+        href = e.currentTarget.href;
+      } catch(e) {
+        href = "";
+      }
+      if (href !== "") {
+        alert(href);
+        //window.location.href = href;
+      }
+      return false;
+    },
+    
+    cancel: function(e) {
+      TIM.cancelLogin();
+      e.preventDefault();
+    },
+    
+    doLogout: function(e) {
+      TIM.doLogout();
+      e.preventDefault();
+    }
+    
+    
+} );
+
+
+
 
 TIM.views.ErrorMessage = Backbone.View.extend( {
    id: "error-message",
@@ -216,28 +320,37 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    //this is horrible... adding 'settings' as a 'feature'?
    if(false || true) { //don't do it for now...
      var f = new TIM.models.Feature({
-       feature_name:"home",
+       name:"home",
 
      });
      this.addOne(
        f
      );
    }
-   if (false) {
+   if (false || true) {
      var f2 = new TIM.models.Feature({
-        feature_name:"login",
+        name:"login",
 
       });
       this.addOne(
         f2
       )
     }
+    if (false || true) {
+      var f3 = new TIM.models.Feature({
+         name:"settings",
+
+       });
+       this.addOne(
+         f3
+       )
+     }
 
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {
  	  this.collection.each (function(feature) {
- 	    if (feature.get('feature_name') == selectedFeature.get('feature_name')) {
+ 	    if (feature.get('name') == selectedFeature.get('name')) {
  	      feature.set('selected', true);
  	    } else {
  	      feature.set('selected', false);
@@ -270,23 +383,23 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	  var templateContext = this.model.toJSON();
 	  
 	  //temporary hack to change 'timeline' to 'news'
-	  if(templateContext.feature_name === 'timeline') {
-	    templateContext.feature_name = 'news';
+	  if(templateContext.name === 'timeline') {
+	    templateContext.name = 'news';
 	  }
 	  
 	  //temporary hack - don't show highlights or places features
-	  if(templateContext.feature_name === 'highlights' || templateContext.feature_name === 'places') {
+	  if(templateContext.name === 'highlights' || templateContext.name === 'places') {
 	    //return;
 	  }
 	  
 	  var html = TIM.views.renderTemplate("featureNavItem", templateContext);
     this.$el.html(html)
-      .attr('id', 'nav-' + templateContext.feature_name)
+      .attr('id', 'nav-' + templateContext.name)
       .removeClass('selected')
       .addClass(selected ? 'selected' : '');
       
     //temporary hack - don't show highlights or places features
-	  if(templateContext.feature_name === 'highlights' || templateContext.feature_name === 'places') {
+	  if(templateContext.name === 'highlights' || templateContext.name === 'places') {
 	    this.hidden = true;
 	  }
     
@@ -294,16 +407,16 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	},
 	
 	loadFeature : function() {
-	  if (this.model.get('feature_name') == 'settings' || this.model.get('feature_name') == 'login') {
+	  if (this.model.get('name') == 'settings' || this.model.get('name') == 'login') {
 	    TIM.loadSettings();
 	    return;
 	  }
 	  if(this.$el.hasClass('selected')) {
 	    //return;
-	    TIM.navigateHandler("route:" + this.model.get('feature_name')); //kinda hack way of navigating to same feature
+	    TIM.navigateHandler("route:" + this.model.get('name')); //kinda hack way of navigating to same feature
 	    return;
 	  }
-	  TIM.app.navigate(this.model.get('feature_name'), {trigger: true});
+	  TIM.app.navigate(this.model.get('name'), {trigger: true});
 	},
 	
 	featureLoaded: function() {

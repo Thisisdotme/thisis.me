@@ -1,5 +1,83 @@
 (function ( TIM ) {
   
+  TIM.models.AuthenticatedUser = Backbone.Model.extend({
+      url: TIM.apiUrl + "login",
+      loggedIn: false,
+      logoutUrl: TIM.apiUrl + "logout",
+      doLogin: function(name, password, callback) {
+        
+        
+          var self = this;
+          
+          /*
+          
+          $.post('/login', { name: name, password: password }, function(data) {
+            self.set(data); // data should be in JSON and contain model of this user
+          }, 'json').error(
+            self.trigger('loginError'); // our custom event
+          );
+          
+          */
+          
+          $.ajax({
+            type: 'POST',
+            url: this.url,
+            data: JSON.stringify({ login: name, password: password}),
+            xhrFields: {withCredentials: true},
+            contentType: 'application/json',
+            success: function(data, xhr) {
+               console.log("login response: ", data, status, xhr);
+               //do something with the data...
+               self.set(data);
+               $.cookie('tim_author_name', data.name);
+               self.loggedIn = true;
+               if(callback) {
+                 callback();
+               }
+               TIM.eventAggregator.trigger('login', {name:data.name});
+             },
+             error: function(data) {
+               console.log("login error: ", data);
+               $('.login-form .message').html('could not find that user name and password.');
+               self.trigger('loginError');
+             },
+            dataType: "json"
+          });
+        
+      },
+      doLogout: function(callback) {
+        $.ajax({
+           type: 'POST',
+           url: this.logoutUrl,
+           xhrFields: {withCredentials: true},
+           contentType: 'application/json',
+           success: function(data, xhr) {
+              $.removeCookie('tim_author_name');
+              if(callback) {
+                callback();
+              }
+              TIM.eventAggregator.trigger('logout', {});
+            },
+            error: function(data) {
+              alert('logout failed!!!');
+            },
+           dataType: "json"
+         });
+      },
+      createFromCookie: function() {
+        //see if there's a session and tim_author_name cookie...
+        var authorName = $.cookie('tim_author_name');
+        if(authorName && $.cookie('auth_tkt')) {
+          this.set({'name': authorName});
+          this.loggedIn = true;
+          TIM.eventAggregator.trigger('login', {});
+        } else {
+          this.loggedIn = false;
+          TIM.eventAggregator.trigger('logout', {});
+        }
+      }
+  });
+  
   //this was a sort of experimental 'model' to use for a feature's behavior...
   //for now I think it was a case of 'object-oriented overkill', but I'm keeping it here for the moment but not using it
   TIM.models.FeatureBehavior = Backbone.Model.extend({
@@ -35,7 +113,7 @@
       
       //if 3 levels, add 3rd route?
       
-      var featureName = this.get('feature_name');
+      var featureName = this.get('name');
       //a route for /<featurename>
       this.set('path', (featureName === "home" ? "/" : "/" + featureName));
       
@@ -66,7 +144,7 @@
     loadResources: function() {
       var self = this;
       //load behavior script, template, stylesheet
-      var featureName = this.get('feature_name');
+      var featureName = this.get('name');
       
       //load the behavior
       $.getScript("/" + TIM.pageInfo.authorName + "/asset/" + featureName + ".behavior.js")
@@ -149,7 +227,19 @@
   });
   
   TIM.models.Author  = Backbone.Model.extend({
+  });
   
+  TIM.models.User  = Backbone.Model.extend({
+    name: "ken",
+    dataType:"jsonp",
+    callbackFunction: "callback",
+    url: TIM.apiUrl + 'authors/',
+    initialize: function(options) {
+      this.url = TIM.apiUrl + 'authors/' + this.get('name');
+    },
+    parse: function(resp) {
+		  return (resp.author);
+		}
   });
 	
 	
