@@ -996,6 +996,50 @@ footer .time-and-location {
   margin-top:16px;
 }
 
+.login-form #create-user-link {
+  display:block;
+  margin-top:1em;;
+  text-align:center;
+}
+
+.app-page .toolbar .cancel-link {
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  line-height:38px;
+  text-decoration:none;
+}
+
+/* --end login form */
+
+/* the new user form! */
+
+.newuser-form {
+  margin-top:40px;
+  padding:16px;
+}
+
+.newuser-form label {
+  display:block;
+}
+
+.newuser-form h1 {
+  font-size:16px;
+  margin:25px 0;
+}
+
+.newuser-form input {
+  border-radius:8px;
+  height:25px;
+  margin-bottom:8px;
+  width:90%;
+  outline:none;
+}
+
+.newuser-form #login-submit {
+  margin-top:16px;
+}
+
 .app-page .toolbar .cancel-link {
   position: absolute;
   left: 8px;

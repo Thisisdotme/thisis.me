@@ -8,4 +8,5 @@
   	<input id="login-password" type="password" name="password" value=""/>
   </form>
   <input id="login-submit" type="submit" value="Log In" />
+  <a id="create-user-link" href="/newuser">Sign Up</a>
 </div>
