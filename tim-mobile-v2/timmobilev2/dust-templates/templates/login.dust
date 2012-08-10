@@ -2,9 +2,8 @@
 <div class="login-form">
   <div class="message"></div>
   <form id="login-form" action="" method="post">
-  	<input type="hidden" name="forward" value=""/>
-  	<input type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
-  	<input type="password" name="password" value=""/>
-  	<input id="login-submit" type="submit" name="form.submitted" value="Log In" />
+  	<input id="login-login" type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
+  	<input id="login-password" type="password" name="password" value=""/>
   </form>
+  <input id="login-submit" type="submit" value="Log In" />
 </div>

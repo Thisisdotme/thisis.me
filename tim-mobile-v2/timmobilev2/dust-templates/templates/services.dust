@@ -1,0 +1,16 @@
+<div class="toolbar"><span class="cancel-link" href="#">Back</span><h1>Settings</h1></div>
+<div id="settings">
+			<div class="services-form">
+  			<h3>Add/Remove Accounts for {name}</h3>
+  			<ul>
+  			{#services}
+  				<li><a href="{url}">{name}</a></li>
+  			{/services}
+  			</ul>
+  			<form id="services-form" method="POST">
+  			</form>
+  		</div>
+  		<a id="logout-link" href="/logout">Logout</a>
+</div><!-- /page -->
+
+

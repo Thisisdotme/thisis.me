@@ -179,6 +179,7 @@
   
     if(!feature.collectionInitialized) {
       feature.mainCollection.fetch({
+        dataType: "json",
   			success: function(resp) {
 			    feature.collectionInitialized = true;
   			}

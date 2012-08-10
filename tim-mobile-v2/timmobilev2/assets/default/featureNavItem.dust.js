@@ -1,1 +1,1 @@
-(function(){dust.register("featureNavItem",body_0);function body_0(chk,ctx){return chk.write("<a href=\"").reference(ctx.get("path"),ctx,"h").write("\">").reference(ctx.get("feature_name"),ctx,"h").write("</a>");}return body_0;})();
+(function(){dust.register("featureNavItem",body_0);function body_0(chk,ctx){return chk.write("<a href=\"").reference(ctx.get("path"),ctx,"h").write("\">").reference(ctx.get("name"),ctx,"h").write("</a>");}return body_0;})();

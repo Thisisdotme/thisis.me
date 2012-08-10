@@ -459,6 +459,17 @@ body.splash {
   margin-top: 4px;
   background: url(/img/nav/sign-up.svg) no-repeat center 6px;
 }
+#feature-nav #nav-settings {
+  display:none;
+}
+.logged-in #feature-nav #nav-settings {
+  display:block;
+}
+#nav-login {
+}
+.logged-in #feature-nav #nav-login {
+  display:none;
+}
 .loading-previous {
   position: absolute;
   height: 100%;
@@ -984,6 +995,19 @@ footer .time-and-location {
 }
 
 /* --end login form */
+
+/* the settings page! */
+
+.services-form {
+  margin-top:40px;
+  padding:16px;
+}
+
+#logout-link {
+
+}
+
+/* end settings page */
 
 
 /* flipboard css */

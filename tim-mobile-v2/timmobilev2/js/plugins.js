@@ -245,7 +245,7 @@ parseUri.options = {
 //jquery cookies
 /*jshint eqnull:true */
 /*!
- * jQuery Cookie Plugin v1.1
+ * jQuery Cookie Plugin v1.2
  * https://github.com/carhartl/jquery-cookie
  *
  * Copyright 2011, Klaus Hartl
@@ -253,23 +253,25 @@ parseUri.options = {
  * http://www.opensource.org/licenses/mit-license.php
  * http://www.opensource.org/licenses/GPL-2.0
  */
-(function($, document) {
+(function ($, document, undefined) {
 
 	var pluses = /\+/g;
+
 	function raw(s) {
 		return s;
 	}
+
 	function decoded(s) {
 		return decodeURIComponent(s.replace(pluses, ' '));
 	}
 
-	$.cookie = function(key, value, options) {
+	$.cookie = function (key, value, options) {
 
 		// key and at least value given, set cookie...
-		if (arguments.length > 1 && (!/Object/.test(Object.prototype.toString.call(value)) || value == null)) {
+		if (value !== undefined && !/Object/.test(Object.prototype.toString.call(value))) {
 			options = $.extend({}, $.cookie.defaults, options);
 
-			if (value == null) {
+			if (value === null) {
 				options.expires = -1;
 			}
 
@@ -298,10 +300,19 @@ parseUri.options = {
 				return decode(parts.join('='));
 			}
 		}
+
 		return null;
 	};
 
 	$.cookie.defaults = {};
+
+	$.removeCookie = function (key, options) {
+		if ($.cookie(key, options) !== null) {
+			$.cookie(key, null, options);
+			return true;
+		}
+		return false;
+	};
 
 })(jQuery, document);
 

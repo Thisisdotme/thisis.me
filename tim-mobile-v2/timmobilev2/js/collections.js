@@ -5,7 +5,7 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
      options = options || {};
      options.dataType = options.dataType || "jsonp";
      options.callbackParameter = options.callbackParameter || "callback";
-     options.timeout = options.timeout || 5000;
+     options.timeout = options.timeout || 15000;
      
      options.error = options.error || function(model, resp) {
        TIM.eventAggregator.trigger("error", {exception: "API call failed"});
@@ -25,14 +25,14 @@ TIM.collections.Features = TIM.collections.BaseCollection.extend({
 		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName,
 		parse: function(resp) {
 		  //this is probably a bad place to do this, but...
-		  TIM.pageInfo.authorFirstName = resp.author.author_name;
-		  TIM.pageInfo.authorFullName = resp.author.full_name;
+		  TIM.pageInfo.authorFirstName = resp.author_name;
+		  TIM.pageInfo.authorFullName = resp.full_name;
 		  
-		  return (resp.author.features);
+		  return (resp.features);
 		},
 		
 		getByName: function(name) {
-		  return this.find(function(model){return model.get('feature_name') == name});
+		  return this.find(function(model){return model.get('name') == name});
 		},
 		
 		getSelectedFeature: function() {
@@ -81,6 +81,9 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		},
 		getByName: function(name) {
 		  return this.find(function(model){return model.get('name') == name});
+		},
+		setURL: function(username) {
+		  this.url = TIM.apiUrl + "authors/" + username + "/services";
 		}
 		
 });
@@ -93,10 +96,10 @@ TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 		  options = options || {};
 		},
 		parse: function(resp) {
-		  return (resp.authors);
+		  return (resp);
 		},
 		getByName: function(name) {
-		  return this.find(function(model){return model.get('author_name') == name});
+		  return this.find(function(model){return model.get('name') == name});
 		}
 		
 });

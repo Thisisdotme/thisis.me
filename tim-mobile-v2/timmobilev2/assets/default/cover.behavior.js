@@ -88,7 +88,7 @@
   				  try {
   				    if(context.primaryStory.origin.known) {
   				      primaryStoryService = context.primaryStory.origin.known;
-  				      context.primaryStory.footerIcon = TIM.services.getByName(primaryStoryService.service_name).getFooterImage();
+  				      context.primaryStory.footerIcon = TIM.allServices.getByName(primaryStoryService.service_name).getFooterImage();
   				    } else if(context.primaryStory.origin.unknown) {
     				    primaryStoryService = context.primaryStory.origin.unknown;
     				    context.primaryStory.footerIcon = primaryStoryService.small_icon;
@@ -152,6 +152,9 @@
   			},
   			error: function(resp) {
 				  TIM.eventAggregator.trigger("error", {exception: "Could not load cover stories."})
+				  feature.collectionLoaded = true;
+				  coverView.render();
+				  TIM.transitionPage ($("#cover-container"));
   			}
   		});
     } else {
