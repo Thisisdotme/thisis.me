@@ -465,6 +465,16 @@ body.splash {
 .logged-in #feature-nav #nav-settings {
   display:block;
 }
+
+.logged-in #feature-nav #nav-settings {
+  display:block;
+}
+
+.logged-in #feature-nav #nav-settings:nth-child(2) {
+  margin-top:56px; /* total hack! */
+}
+
+
 #nav-login {
 }
 .logged-in #feature-nav #nav-login {
@@ -1031,9 +1041,12 @@ footer .time-and-location {
 .services-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
 .services-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
 .services-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
-.services-form li.foursquare {  background: url(/img/icons/foursquare_15.png) left center no-repeat }
+.services-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
 .services-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
 .services-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
+.services-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
+.services-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
+.services-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
 
 #logout-link {
   display:block;
@@ -1041,6 +1054,12 @@ footer .time-and-location {
   margin:0 auto;
   width:150px;
 }
+
+.addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
+.addfeature div { float: left; }
+.addfeature img { margin-top: 10px; max-height: 100%;	max-width: 100%; }
+.addfeature .logo { width: 80px; }
+.addfeature .arrow { margin-top: 25px; width: 60px; font-weight: bold; font-size: 30px; }
 
 /* end settings page */
 

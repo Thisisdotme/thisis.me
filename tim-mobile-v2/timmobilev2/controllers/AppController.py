@@ -24,9 +24,13 @@ class AppController(object):
   def requestHandler(self):
     return {'author_name': self.request.matchdict['authorname'],
             'api_endpoint': tim_config['api']['endpoint']}
-            
-            
+
   @view_config(route_name='settings', request_method='GET', renderer='timmobilev2:templates/settings.pt')
   def settingsHandler(self):
-    return {'author_name': 'ken',
+    return {'author_name': 'this is me',
+            'api_endpoint': tim_config['api']['endpoint']}
+
+  @view_config(route_name='login', request_method='GET', renderer='timmobilev2:templates/login.pt')
+  def loginHandler(self):
+    return {'author_name': 'this is me',
             'api_endpoint': tim_config['api']['endpoint']}

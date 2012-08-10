@@ -40,6 +40,7 @@ def main(global_config, **settings):
 
   config.add_route('index', '/')
   config.add_route('settings', '/settings')
+  config.add_route('login', '/login')
   # config.add_route('app', '/{authorname}/')
   config.add_route('app', '/{authorname}')
 

@@ -11,7 +11,7 @@ TIM.loadedFeatures = TIM.loadedFeatures || {};
 TIM.authorFeatures = TIM.authorFeatures || {};
 TIM.defaultFeature = "cover";
 TIM.pageHistory = [];
-TIM.currentPageElem = $('#splash-screen');
+TIM.currentPageElem = TIM.currentPageElem || $('#splash-screen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#content-container');
 TIM.defaultTransition = "fade";
@@ -62,12 +62,6 @@ $(function() {
   
   if(!$.cookie('tim_session')) {
     //$.cookie('tim_session', true);
-  }
-    
-  var parsedUri = parseUri(window.location.href);
-  console.log("parsed uri: ", parsedUri);
-  if(parsedUri.path === '/') { //don't do all the author-specific feature stuff if we're on the home screen
-    return;
   }
   
   
@@ -202,31 +196,12 @@ $(function() {
 	
 	//services for the current user
 	TIM.currentUserServices = new TIM.collections.Services();
-	TIM.currentUserServices.setURL("ken");
+
 	
 	//set up the main feature nav
 	TIM.featureNavView = new TIM.views.FeatureNav({
 	  collection: TIM.features
 	})
-	
-	//fetch the features for this author on load
-	//use a JSONP plugin that properly reports errors?
-	//
-	//
-	TIM.features.fetch({
-		//dataType: "jsonp",
-		//add this timeout in case call fails...
-		//timeout : 5000,
-		callbackParameter: "callback",
-		success: function(resp) {
-		  console.log('fetched features');
-		},
-		error: function(resp) {
-			TIM.showErrorMessage({
-			    exception: "loading features failed for " + TIM.pageInfo.authorName + ". perhaps this author doesn't exist?"
-			});
-		}
-	});
 	
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
@@ -242,14 +217,22 @@ $(function() {
 		}
 	});
 	
+	var parsedUri = parseUri(window.location.href);
+  
+  if (parsedUri.path == '/settings') {
+    
+  }
+  
+  	
+	TIM.isAuthorApp = function() {
+	  var val = true;
+	  if(parsedUri.path === '/' || parsedUri.path == '/login' || parsedUri.path == '/settings') { //don't do all the author-specific feature stuff if we're on the home screen
+      val = false;
+    }
+    return val;
+	}
 	
-	
-
-	  
-	
-	//1. get features for author
-	//2. get cover page assets for author
-		
+			
   TIM.Router = Backbone.Router.extend({
 	  
 	  routes: {
@@ -323,7 +306,10 @@ $(function() {
       hash = hash || "cover";
       this.navigate(''); //doing this so the following call actually triggers the event
       
-      this.navigate(hash, {'trigger': true}); //trigger a hashchange event
+      if(TIM.isAuthorApp()) {
+        this.navigate(hash, {'trigger': true}); //trigger a hashchange event
+      }
+      
     },
   
     //this obviously needs to be more generalized - should work for <a> tags
@@ -333,39 +319,79 @@ $(function() {
     },
     
     handleLogin: function() {
-      $('#app').addClass('logged-in');
-      if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
-    	  TIM.currentUserServices.fetch({
-      		//add this timeout in case call fails...
-      		timeout : 5000,
-      		callbackParameter: "callback",
-      		success: function(resp) {
-      		  console.log('fetched user services');
-      		},
-      		error: function(resp) {
-      			TIM.showErrorMessage({
-      			    exception: "loading user services failed."
-      			});
-      		}
-      	});
-    	}
+      $('#app').addClass('logged-in').removeClass('logged-out');
     },
 
     handleLogout: function() {
-      $('#app').removeClass('logged-in');
+      $('#app').removeClass('logged-in').addClass('logged-out');;
     }
         
 	})
 	
+	TIM.fetchCurrentUserServices = function(options) {
+	  options = options || {};
+	  if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
+      TIM.currentUserServices.setURL(TIM.authenticatedUser.get('name'));
+  	  TIM.currentUserServices.fetch({
+    		//add this timeout in case call fails...
+    		timeout : 5000,
+    		callbackParameter: "callback",
+    		success: function(resp) {
+    		  console.log('fetched user services ', TIM.currentUserServices.length);
+    		  TIM.currentUserServices.initialized = true;
+    		  if(options.callback) {
+    		    options.callback();
+    		  }
+    		},
+    		error: function(resp) {
+    			TIM.showErrorMessage({
+    			    exception: "loading user services failed."
+    			});
+    		}
+    	});
+  	}
+	}
+	
 	TIM.app = new TIM.Router();
 	
-  Backbone.history.start({root: '/' + TIM.globals.authorName});
+	if(TIM.isAuthorApp()) {
+	  Backbone.history.start({root: '/' + TIM.globals.authorName});
+	} else {
+	  Backbone.history.start({root: parsedUri.path});
+	  TIM.app.route("logout", "logout"); 
+	  TIM.app.route("login", "login"); 
+	}
+	
+	//fetch the features for this author on load
+	//use a JSONP plugin that properly reports errors?
+	//
+	//
+	if (TIM.isAuthorApp()) {
+	  TIM.features.fetch({
+  		//dataType: "jsonp",
+  		//add this timeout in case call fails...
+  		//timeout : 5000,
+  		callbackParameter: "callback",
+  		success: function(resp) {
+  		  console.log('fetched features');
+  		},
+  		error: function(resp) {
+  			TIM.showErrorMessage({
+  			    exception: "loading features failed for " + TIM.pageInfo.authorName + ". perhaps this author doesn't exist?"
+  			});
+  		}
+  	});
+	} else {
+	  TIM.features.reset([
+	      {name: "login"},
+	      {name: "settings"}
+	    ]) 
+	}
   
   //see if we have a current user
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
   
-		
 	$.fn.animationComplete = function( callback ) {
 		if( "WebKitTransitionEvent" in window ) {
 			return $( this ).one( 'webkitAnimationEnd', callback );
@@ -395,8 +421,11 @@ $(function() {
 	    if(route.split(':')[0] === 'route') {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
+  	    
+  	    console.log("feature name", featureName);
+  	    
   	    //total hack for 'home page'
-  	    if (featureName == 'home') {
+  	    if (featureName == 'home' || (featureName == 'catchAll' && path == 'home')) {
   	      location.href = "/";
   	      localStorage.removeItem('tim_last_url');
   	      return;
@@ -408,7 +437,19 @@ $(function() {
   	      return;
   	    }
   	    
-  	    if (featureName == 'settings') {
+  	    if (featureName == 'login') {
+  	      TIM.showLoginForm();
+  	      return;
+  	    }
+  	    
+  	    //total hack for 'home page'
+  	    if (parsedUri.path == "/settings" && path == 'cover') {
+  	      location.href = "/settings";
+  	      return;
+  	    }
+  	    
+  	    
+  	    if (featureName == 'settings' || parsedUri.path == "/setttings") {
   	      location.href = "/settings";
   	      localStorage.removeItem('tim_last_url');
   	      return;
@@ -425,6 +466,11 @@ $(function() {
   	    
   	    if(!feature) {
   	      console.log('no feature');
+  	      if(featureName == "logout" && parsedUri.path == "/settings") {
+  	        location.href = "/settings";
+    	      localStorage.removeItem('tim_last_url');
+    	      return;
+  	      }
   	      if (TIM.features.length == 0) {
   	        TIM.eventAggregator.trigger("error", {exception: "No features loaded for this author"});
   	        localStorage.setItem('tim_last_url', '/');
@@ -493,24 +539,34 @@ $(function() {
   
   TIM.doLogout = function() {
     TIM.authenticatedUser.doLogout(function() { TIM.app.navigate('home', {trigger:true})});
-    //$.cookie('tim_user_name', null);
-    //$.cookie('tim_user_session', null);
   }
   
   //also get the list of currently-activated services for the current user
   
   TIM.showSettingsPage = function (options) {
-    TIM.setLoading(false);
-    if (!TIM.settingsView) {
-      TIM.settingsView = new TIM.views.Settings({collection: TIM.allServices});
+    options = options || {};
+    function showView() {
+      TIM.setLoading(false);
+      if (!TIM.settingsView) {
+        TIM.settingsView = new TIM.views.Settings({collection: TIM.allServices, userCollection: TIM.currentUserServices});
+      }
+      TIM.settingsView.render({message: "dam"});
+      TIM.setNavVisible(false);
+      if(!options.noHashChange) {
+        TIM.app.navigate("#settings");
+      }
+      TIM.transitionPage (TIM.settingsView.$el);
     }
-    TIM.settingsView.render({message: "dam"});
-    TIM.setNavVisible(false);
-    TIM.app.navigate("#settings");
-    TIM.transitionPage (TIM.settingsView.$el);
+    
+    if(TIM.currentUserServices.initialized) {
+      showView();
+    } else {
+      TIM.fetchCurrentUserServices({callback:showView});
+    }
+    
   };
   
-  //for now this simply handles the dologoutDOM page transition
+  //for now this simply handles the DOM page transition
   //
   //should keep a history stack & use that to determine whether to do a forward or reverse transition
   
@@ -590,5 +646,22 @@ $(function() {
 	
 	TIM.globalHammer = new Hammer(document.body);
 	localStorage.removeItem('tim_last_url');
+	
+	if(parsedUri.path === '/settings') {
+	  if(!TIM.authenticatedUser.loggedIn) {
+	    TIM.showLoginForm();
+	    return;
+	  }
+	  TIM.setLoading(true);
+	 TIM.showSettingsPage({noHashChange:true});
+	}
+
+	if(parsedUri.path === '/') {
+	  if(!TIM.authenticatedUser.loggedIn) {
+	    //show login link
+	  } else {
+	    //show hello message!
+	  }
+	}
 	
 });
