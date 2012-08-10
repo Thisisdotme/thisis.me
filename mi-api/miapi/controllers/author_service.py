@@ -92,12 +92,6 @@ def get_author_service_info(author_service_context, request):
               'service': service.service_name,
               'last_update_time': datetime.isoformat(asm.last_update_time) if asm.last_update_time else None}
 
-  if asm.access_token:
-    response['access_token'] = asm.access_token
-
-  if asm.access_token_secret:
-    response['access_token_secret'] = asm.access_token_secret
-
   return response
 
 
