@@ -72,6 +72,7 @@ TIM.collections.Comments = TIM.collections.BaseCollection.extend({
 TIM.collections.Services = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Service,
 		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		initialized: false,
 		
 		initialize: function(options) {
 		  options = options || {};

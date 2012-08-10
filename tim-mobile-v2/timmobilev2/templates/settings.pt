@@ -1,0 +1,25 @@
+<metal:index use-macro="load: master_template.html">
+  
+	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
+  	<a href="#" id="nav-toggle"></a>
+		
+		<div id="content-container">
+		  <div id="loading-img"><div>loading...</div></div>
+		</div>
+		<nav id="feature-nav" class="clearfix">
+  		<ul id="feature-nav-items"></ul>
+  	</nav>
+  	<script src="/ken/asset/coreTemplates.dust.js"></script>
+  
+  	<!-- remote debugger script! uncomment for remote debugging in weinre! -->
+  	
+  	<!-- script src="http://10.0.1.5:8081/target/target-script-min.js#anonymous"></script -->
+	</div><!-- /page -->
+	<script type="text/javascript" metal:fill-slot="page_script">
+		TIM.pageInfo = {
+			authorName: '${author_name}'
+		}
+		
+	</script>
+</metal:index>
+

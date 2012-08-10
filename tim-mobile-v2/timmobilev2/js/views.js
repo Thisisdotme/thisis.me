@@ -163,7 +163,12 @@ TIM.views.Login = Backbone.View.extend( {
       //fake the ajax submit here!
       
       this.model.doLogin(login, password, function() {
-        TIM.app.navigate('cover', {trigger:true});
+        if(TIM.isAuthorApp()) {
+          TIM.app.navigate('cover', {trigger:true});
+        } else {
+          return;
+          window.location.href = "/";
+        }
       });
  
       return false;
@@ -248,8 +253,8 @@ TIM.views.Settings = Backbone.View.extend( {
         href = "";
       }
       if (href !== "") {
-        alert(href);
-        //window.location.href = href;
+        //alert(href);
+        window.location.href = href;
       }
       return false;
     },
@@ -318,34 +323,35 @@ TIM.views.FeatureNav = Backbone.View.extend( {
   render: function() {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
-   if(false || true) { //don't do it for now...
-     var f = new TIM.models.Feature({
-       name:"home",
-
-     });
-     this.addOne(
-       f
-     );
-   }
-   if (false || true) {
-     var f2 = new TIM.models.Feature({
-        name:"login",
-
-      });
-      this.addOne(
-        f2
-      )
-    }
-    if (false || true) {
-      var f3 = new TIM.models.Feature({
-         name:"settings",
+   if(TIM.isAuthorApp()) {
+     if(false || true) {
+       var f = new TIM.models.Feature({
+         name:"home",
 
        });
        this.addOne(
-         f3
-       )
+         f
+       );
      }
+     if (false || true) {
+       var f2 = new TIM.models.Feature({
+          name:"login",
 
+        });
+        this.addOne(
+          f2
+        )
+      }
+      if (false || true) {
+        var f3 = new TIM.models.Feature({
+           name:"settings",
+
+         });
+         this.addOne(
+           f3
+         )
+       }
+   }
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {

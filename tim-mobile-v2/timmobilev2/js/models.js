@@ -67,7 +67,7 @@
       createFromCookie: function() {
         //see if there's a session and tim_author_name cookie...
         var authorName = $.cookie('tim_author_name');
-        if(authorName && $.cookie('auth_tkt')) {
+        if(authorName) {
           this.set({'name': authorName});
           this.loggedIn = true;
           TIM.eventAggregator.trigger('login', {});
