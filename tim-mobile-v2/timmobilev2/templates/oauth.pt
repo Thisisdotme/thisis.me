@@ -1,0 +1,29 @@
+<metal:index use-macro="load: master_template.html">
+	<div id="oauth" data-role="page" data-title="Accounts" data-theme="a" metal:fill-slot="page_content">
+		<header data-role="header" data-position="fixed">
+			<a href="/accounts" data-role="button" data-icon="arrow-l" data-iconpos="notext">All Accounts</a>
+			<div class="header-logo"><img src="/img/thisisme_logo.png" alt="${feature}"/></div>
+<!-- 			<h1>${feature}</h1> -->
+		</header><!-- /header -->
+	
+		<div data-role="content">
+			<div>
+				<div class="addfeature">
+					<div class="logo"><img src="/img/thisisme/me_gloss.png"/></div>
+					<div class="arrow"><img src="/img/icons/arrow-grey-l.png" /></div>
+					<div class="logo"><img src="/img/social_icons/${feature}.png" /></div>
+				</div>
+			</div>
+			<div>
+				<h1>Add ${feature} Feature?</h1>
+				<p>This will redirect to ${feature} where you'll enter your credentials and then return here</p>
+				<form action="${url}" method="post" data-ajax="false">
+					<input type="submit" name="form.submitted" value="Continue"/>
+				</form>
+			</div>
+			
+		</div><!-- /content -->
+	</div><!-- /page -->
+
+	<script type="text/javascript" metal:fill-slot="page_script"></script>
+</metal:index>
