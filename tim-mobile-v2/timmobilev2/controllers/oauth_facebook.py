@@ -110,7 +110,7 @@ def facebook_callback(request):
                                                              resource='me',
                                                              token=access_token)
                                                              
-    url = '{endpoint}{resource}?access_token={token}' % query_args_2
+    #url = '{endpoint}{resource}?access_token={token}' % query_args_2
     
     print url
                                                            

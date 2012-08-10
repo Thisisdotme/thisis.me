@@ -306,7 +306,10 @@ $(function() {
       hash = hash || "cover";
       this.navigate(''); //doing this so the following call actually triggers the event
       
-      this.navigate(hash, {'trigger': true}); //trigger a hashchange event
+      if(TIM.isAuthorApp()) {
+        this.navigate(hash, {'trigger': true}); //trigger a hashchange event
+      }
+      
     },
   
     //this obviously needs to be more generalized - should work for <a> tags
@@ -317,7 +320,6 @@ $(function() {
     
     handleLogin: function() {
       $('#app').addClass('logged-in').removeClass('logged-out');
-      //TIM.fetchCurrentUserServices();
     },
 
     handleLogout: function() {
@@ -445,6 +447,7 @@ $(function() {
   	      location.href = "/settings";
   	      return;
   	    }
+  	    
   	    
   	    if (featureName == 'settings' || parsedUri.path == "/setttings") {
   	      location.href = "/settings";

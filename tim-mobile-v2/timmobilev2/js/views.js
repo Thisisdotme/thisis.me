@@ -166,7 +166,6 @@ TIM.views.Login = Backbone.View.extend( {
         if(TIM.isAuthorApp()) {
           TIM.app.navigate('cover', {trigger:true});
         } else {
-          return;
           window.location.href = "/";
         }
       });
@@ -182,19 +181,73 @@ TIM.views.Login = Backbone.View.extend( {
     
 } );
 
-function doNextCall() {
-  $.ajax({
-    type: 'get',
-    url: TIM.apiUrl + "authors/ken",
-    success: function(data) {
-       alert('hey!!!!');
-       
-     },
-     error: function(data) {
-       
-     }
-  });
-}
+TIM.views.CreateUser = Backbone.View.extend( {
+        
+    className: "app-page light",
+    template: "newuser",
+    
+    events: {
+      //"click span" : "itemClicked"
+      "click .cancel-link" : "cancel",
+      "click #newuser-submit" : "submitForm"
+    },
+    
+    initialize: function(options) {
+        options = options || {};
+        var that = this;
+        
+        _.bindAll(this);
+        
+        if(TIM.appContainerElem.find(this.el).length == 0)  {
+           TIM.appContainerElem.append(this.$el);
+        }
+    },
+    
+    render: function() {
+      var that = this;
+      
+      var templateContext = {
+        message: "Hey!"
+      }
+      
+      var html = TIM.views.renderTemplate(this.template, templateContext);
+  		this.$el.html(html);
+  		window.setTimeout("$('#newuser-name').focus()", 50);
+  		
+  		return this.$el;
+    },
+    
+    submitForm: function(e) {
+      
+      /*
+      
+      var url = TIM.apiUrl + "login";
+      $('#newuser-form').attr('action', url);
+      var login = $('#login-login').val();
+      var password = $('#login-password').val();
+      //fake the ajax submit here!
+      
+      this.model.doLogin(login, password, function() {
+        if(TIM.isAuthorApp()) {
+          TIM.app.navigate('cover', {trigger:true});
+        } else {
+          return;
+          window.location.href = "/";
+        }
+      });
+      
+      */
+      
+      return false;
+    },
+    
+    cancel: function(e) {
+      TIM.cancelLogin();
+      e.preventDefault();
+    }
+    
+    
+} );
 
 
 TIM.views.Settings = Backbone.View.extend( {
