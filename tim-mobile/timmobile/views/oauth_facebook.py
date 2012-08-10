@@ -36,7 +36,7 @@ def get_facebook_info(request):
                               (request.registry.settings['mi.api.endpoint'],authenticated_userid(request),FEATURE))
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
-  
+
   # ??? TODO - enhance the error handling
   accessToken = resJSON['access_token']
   if not accessToken:
@@ -49,12 +49,12 @@ def get_facebook_info(request):
 
   return accessToken, facebookUserId
 
-  
+
 @view_config(route_name='facebook', request_method='GET', renderer='timmobile:templates/oauth.pt', permission='author')
 def get_facebook(request):
-  
+
   # first check if the author has already added this feature.
-  
+
   # Get author's login name
   authorName = authenticated_userid(request)
 
@@ -68,13 +68,13 @@ def get_facebook(request):
       facebookAccessToken = None
       del request.session['facebook_access_token']
       del request.session['facebook_user_id']
-     
+
   else:
 
     # Query the API for installed services
 
     try:
-      req = urllib2.Request('%s/v1/authors/%s/services' % (request.registry.settings['mi.api.endpoint'],authorName))
+      req = urllib2.Request('%s/v1/authors/%s/services' % (request.registry.settings['mi.api.endpoint'], authorName))
       res = urllib2.urlopen(req)
       resJSON = json.loads(res.read())
     except urllib2.URLError, e:

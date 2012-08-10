@@ -13,7 +13,7 @@ from timmobilev2 import tim_config
 
 log = logging.getLogger(__name__)
 
-FEATURE = 'facebook'
+SERVICE = 'facebook'
 
 
 @view_config(route_name='facebook', request_method='GET', renderer='timmobilev2:templates/oauth.pt', permission='author')
@@ -29,13 +29,13 @@ def get_facebook(request):
 @view_config(route_name='facebook', request_method='POST', permission='author')
 def post_facebook(request):
 
-  api_key = tim_config['oauth'][FEATURE]['key']
+  api_key = tim_config['oauth'][SERVICE]['key']
 
   query_args = urllib.urlencode([('client_id', api_key),
                                 ('redirect_uri', request.route_url('facebook_callback')),
                                 ('scope', 'offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status')])
 
-  url = tim_config['oauth'][FEATURE]['oauth_url'].format(args=query_args)
+  url = tim_config['oauth'][SERVICE]['oauth_url'].format(args=query_args)
 
   return HTTPFound(location=url)
 
@@ -44,6 +44,8 @@ def post_facebook(request):
 def facebook_callback(request):
 
   author_name = authenticated_userid(request)
+  
+  author_name = 'howard'
 
   access_token = None
   fb_user_id = None
@@ -54,15 +56,15 @@ def facebook_callback(request):
     print 'code => %s' % code
 
     # let's get the acces_token
-    api_key = tim_config['oauth'][FEATURE]['key']
-    api_secret = tim_config['oauth'][FEATURE]['secret']
+    api_key = tim_config['oauth'][SERVICE]['key']
+    api_secret = tim_config['oauth'][SERVICE]['secret']
 
     query_args = urllib.urlencode([('client_id', api_key),
                                   ('redirect_uri', request.route_url('facebook_callback')),
                                   ('client_secret', api_secret),
                                   ('code', code)])
 
-    url = tim_config['oauth'][FEATURE]['access_token_url'].format(args=query_args)
+    url = tim_config['oauth'][SERVICE]['access_token_url'].format(args=query_args)
 
     try:
 
@@ -84,7 +86,7 @@ def facebook_callback(request):
       raise e
 
     # now let's get some information about the user -- namely their id
-    url = '{endpoint}{resource}?access_token={token}'.format(endpoint=tim_config['oauth'][FEATURE]['url'],
+    url = '{endpoint}{resource}?access_token={token}'.format(endpoint=tim_config['oauth'][SERVICE]['endpoint'],
                                                              resource='me',
                                                              token=access_token)
 
@@ -101,18 +103,17 @@ def facebook_callback(request):
     log.error(msg)
     raise Exception(msg)
 
-  url = '{endpoint}/v1/authors/{author}/services/{service}'.format(endpoint=tim_config['api']['endpoint'],
-                                                                   author=author_name,
-                                                                   service=FEATURE)
-  payload = {'access_token': access_token, 'service_author_id': fb_user_id}
+  url = '{endpoint}/v1/authors/{author}/services'.format(endpoint=tim_config['api']['endpoint'],
+                                                         author=author_name)
+  payload = {'name': SERVICE, 'access_token': access_token, 'service_author_id': fb_user_id}
   headers = {'content-type': 'application/json; charset=utf-8'}
   cookies = request.cookies
 
-  r = requests.put(url, data=json.dumps(payload), headers=headers, cookies=cookies)
+  r = requests.post(url, data=json.dumps(payload), headers=headers, cookies=cookies)
   res_json = r.json
 
 #  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-#                                  (,author_name,FEATURE),
+#                                  (,author_name,SERVICE),
 #                          'PUT',
 #                          json_payload,
 #                          headers)

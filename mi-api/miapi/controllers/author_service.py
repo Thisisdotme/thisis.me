@@ -112,7 +112,7 @@ def add_author_service(author_services_context, request):
     return {'error': 'unknown author: %s' % author_id}
 
   payload = request.json_body
-  service_name = payload.get('service_name')
+  service_name = payload.get('name')
   accessToken = payload.get('access_token')
   accessTokenSecret = payload.get('access_token_secret')
   service_author_id = payload.get('service_author_id')

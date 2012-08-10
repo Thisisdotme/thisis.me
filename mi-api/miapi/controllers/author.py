@@ -83,7 +83,7 @@ def list_authors(request):
 def add_author(request):
   author_info = request.json_body
 
-  author_name = author_info.get('login')
+  author_name = author_info.get('name')
   if author_name is None:
     # TODO: better error
     return {'error': 'Missing author'}
@@ -94,11 +94,11 @@ def add_author(request):
     # TODO: better error
     return {'error': 'Missing required property: password'}
 
-  fullname = author_info.get('fullname')
+  fullname = author_info.get('full_name')
   if fullname == None:
     request.response.status_int = 400
     # TODO: better error
-    return {'error': 'Missing required property: fullname'}
+    return {'error': 'Missing required property: full_name'}
 
   email = author_info.get('email')
   if email == None:
