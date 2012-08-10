@@ -2,17 +2,14 @@ import logging
 import datetime
 import urllib2
 import json
- 
+
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 
-from timmobile.exceptions import UnexpectedAPIResponse
-
 import flickrapi
 
 from tim_commons.request_with_method import RequestWithMethod
-from timmobile.globals import DBSession
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +44,7 @@ def get_flickr_access_token(request):
   # ??? TODO - enhance the error handling
   access_token = resJSON['access_token']
   if not access_token:
-    raise UnexpectedAPIResponse('missing access_token for Instagram for author %s' % authenticated_userid(request))
+    raise Exception('missing access_token for Instagram for author %s' % authenticated_userid(request))
 
   if not verify_flickr_access_token(access_token):
     access_token = None

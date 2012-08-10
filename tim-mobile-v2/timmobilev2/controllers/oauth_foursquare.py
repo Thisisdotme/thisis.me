@@ -10,9 +10,7 @@ from pyramid.security import authenticated_userid
 
 from tim_commons.request_with_method import RequestWithMethod
 
-from timmobile.exceptions import UnexpectedAPIResponse, GenericError
-from timmobile import oauth_config
-from timmobile.globals import DBSession
+from timmobilev2 import tim_config
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +52,7 @@ class FoursquareView(object):
     # ??? TODO - enhance the error handling
     accessToken = resJSON['access_token']
     if not accessToken:
-      raise UnexpectedAPIResponse('missing access_token for %s for author %s' % (self.featureName,authenticated_userid(self.request)))
+      raise Exception('missing access_token for %s for author %s' % (self.featureName,authenticated_userid(self.request)))
   
     if not self.verify_access_token(accessToken):
       accessToken = None
@@ -116,12 +114,12 @@ class FoursquareView(object):
   @view_config(route_name='foursquare', request_method='POST', permission='author')
   def post(self):
   
-    api_key = oauth_config[self.featureName]['key']
+    api_key = tim_config['oauth'][self.featureName]['key']
     queryArgs = urllib.urlencode([('client_id',api_key),
                                   ('response_type','code'),
                                   ('redirect_uri',self.request.route_url('foursquare_callback'))])
     
-    url = oauth_config[self.featureName]['oauth_url'] % queryArgs
+    url = tim_config['oauth'][self.featureName]['oauth_url'] % queryArgs
   
     log.info('Redirecting user to Foursquare to get authorization code')
   
@@ -144,8 +142,8 @@ class FoursquareView(object):
       print 'code => %s' % code
       
       # let's get the acces_token
-      api_key = oauth_config[self.featureName]['key']
-      api_secret = oauth_config[self.featureName]['secret']
+      api_key = tim_config['oauth'][self.featureName]['key']
+      api_secret = tim_config['oauth'][self.featureName]['secret']
   
       queryArgs = urllib.urlencode([('client_id',api_key),
                                     ('client_secret',api_secret),
@@ -153,7 +151,7 @@ class FoursquareView(object):
                                     ('redirect_uri',self.request.route_url('foursquare_callback')),
                                     ('code',code)])
       
-      url = oauth_config[self.featureName]['access_token_url'] % queryArgs
+      url = tim_config['oauth'][self.featureName]['access_token_url'] % queryArgs
   
       try:
         req = urllib2.Request(url)
@@ -161,13 +159,13 @@ class FoursquareView(object):
         resJSON = json.loads(res.read())
   
         accessToken = resJSON['access_token']
-  
+
       except urllib2.URLError, e:
         log.error(e.reason)
         raise e
-      
+
       # now let's get some information about the user -- namely their id
-      req = urllib2.Request(oauth_config[self.featureName]['url'] % ('users/self',accessToken))
+      req = urllib2.Request(tim_config['oauth'][self.featureName]['url'] % ('users/self',accessToken))
       res = urllib2.urlopen(req)
       meJSON = json.loads(res.read())
   
@@ -176,7 +174,7 @@ class FoursquareView(object):
       
     else:
       error = self.request.params.get('error')
-      raise GenericError('Error authenticating user with Foursquare: %s' % error)
+      raise Exception('Error authenticating user with Foursquare: %s' % error)
     
     json_payload = json.dumps({'access_token': accessToken, 'service_author_id': userId})
     headers = {'Content-Type':'application/json; charset=utf-8'}

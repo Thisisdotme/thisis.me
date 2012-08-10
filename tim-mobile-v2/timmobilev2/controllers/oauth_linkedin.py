@@ -13,9 +13,7 @@ from pyramid.security import authenticated_userid
 from tim_commons.request_with_method import RequestWithMethod
 from tim_commons.oauth import make_request
 
-from timmobile.exceptions import UnexpectedAPIResponse
-from timmobile import oauth_config
-from timmobile.globals import DBSession
+from timmobilev2 import tim_config
 
 log = logging.getLogger(__name__)
 
@@ -56,8 +54,8 @@ def get_linkedin(request):
 @view_config(route_name='linkedin', request_method='POST', permission='author')
 def post_linkedin(request):
 
-  consumer_key = oauth_config[FEATURE]['key']
-  consumer_secret = oauth_config[FEATURE]['secret']
+  consumer_key = tim_config['oauth'][FEATURE]['key']
+  consumer_secret = tim_config['oauth'][FEATURE]['secret']
   consumer = oauth.Consumer(consumer_key, consumer_secret)
   client = oauth.Client(consumer)
   
@@ -66,7 +64,7 @@ def post_linkedin(request):
   # said access token.
 
   callback = request.route_url('linkedin_callback')
-  resp, content = client.request(oauth_config[FEATURE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback':callback}))
+  resp, content = client.request(tim_config['oauth'][FEATURE]['request_token_url'], "POST", body=urllib.urlencode({'oauth_callback':callback}))
   if resp['status'] != '200':
       raise Exception("Invalid response %s (%s)." % (resp['status'], content))
   
@@ -82,7 +80,7 @@ def post_linkedin(request):
 
   request.session['oauth_token_secret'] = request_token['oauth_token_secret']
 
-  redirectURL = "%s?oauth_token=%s" % (oauth_config[FEATURE]['authorize_url'], request_token['oauth_token'])
+  redirectURL = "%s?oauth_token=%s" % (tim_config['oauth'][FEATURE]['authorize_url'], request_token['oauth_token'])
   
   return HTTPFound(location=redirectURL)
 
@@ -101,14 +99,14 @@ def linkedin_callback(request):
   # request token to sign this request. After this is done you throw away the
   # request token and use the access token returned. You should store this
   # access token somewhere safe, like a database, for future use.
-  consumer = oauth.Consumer(oauth_config[FEATURE]['key'], oauth_config[FEATURE]['secret'])
+  consumer = oauth.Consumer(tim_config['oauth'][FEATURE]['key'], tim_config['oauth'][FEATURE]['secret'])
   
   token = oauth.Token(oauth_token,oauth_token_secret)
   token.set_verifier(oauth_verifier)
 
   client = oauth.Client(consumer, token)
   
-  resp, content = client.request(oauth_config[FEATURE]['access_token_url'], "POST")
+  resp, content = client.request(tim_config['oauth'][FEATURE]['access_token_url'], "POST")
   access_token = dict(urlparse.parse_qsl(content))
 
   # these are the real deal and need to be stored securely in the DB

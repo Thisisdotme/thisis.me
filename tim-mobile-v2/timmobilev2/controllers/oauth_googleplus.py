@@ -10,9 +10,7 @@ from pyramid.security import authenticated_userid
 
 from tim_commons.request_with_method import RequestWithMethod
 
-from timmobile.exceptions import UnexpectedAPIResponse, GenericError
-from timmobile import oauth_config
-from timmobile.globals import DBSession
+from timmobilev2 import tim_config
 
 log = logging.getLogger(__name__)
 
@@ -40,18 +38,18 @@ def get_googlePlus_info(request):
   
   refreshToken = resJSON['access_token']
   if not refreshToken:
-    raise UnexpectedAPIResponse('missing access_token for %s for author %s' % (FEATURE,authenticated_userid(request)))
+    raise Exception('missing access_token for %s for author %s' % (FEATURE,authenticated_userid(request)))
 
   userId = resJSON['auxillary_data']['id']
 
   # let's exchange the refresh token for an access token
-  apiKey = oauth_config[FEATURE]['key']
-  apiSecret = oauth_config[FEATURE]['secret']
+  apiKey = tim_config['oauth'][FEATURE]['key']
+  apiSecret = tim_config['oauth'][FEATURE]['secret']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('client_secret',apiSecret),
                                 ('refresh_token',refreshToken),
                                 ('grant_type','refresh_token')])
-  req = urllib2.Request(oauth_config[FEATURE]['oauth_exchange_url'],queryArgs)
+  req = urllib2.Request(tim_config['oauth'][FEATURE]['oauth_exchange_url'],queryArgs)
   res = urllib2.urlopen(req)
   resJSON = json.loads(res.read())
 
@@ -123,10 +121,10 @@ def post_googlePlus(request):
 
   print request.route_url('googleplus_callback')
   
-  apiKey = oauth_config[FEATURE]['key']
+  apiKey = tim_config['oauth'][FEATURE]['key']
   queryArgs = urllib.urlencode([('client_id',apiKey),
                                 ('redirect_uri',request.route_url('googleplus_callback'))])
-  url = oauth_config[FEATURE]['oauth_url'] + queryArgs
+  url = tim_config['oauth'][FEATURE]['oauth_url'] + queryArgs
 
   return HTTPFound(location=url)
 
@@ -142,15 +140,15 @@ def googlePlus_callback(request):
     print 'code => %s' % code
 
     # let's exchange the authorization code for an access token and a refresh token
-    apiKey = oauth_config[FEATURE]['key']
-    apiSecret = oauth_config[FEATURE]['secret']
+    apiKey = tim_config['oauth'][FEATURE]['key']
+    apiSecret = tim_config['oauth'][FEATURE]['secret']
     queryArgs = urllib.urlencode([('code',code),
                                   ('client_id',apiKey),
                                   ('client_secret',apiSecret),
                                   ('redirect_uri',request.route_url('googleplus_callback')),
                                   ('grant_type','authorization_code')])
 
-    req = urllib2.Request(oauth_config[FEATURE]['oauth_exchange_url'],queryArgs)
+    req = urllib2.Request(tim_config['oauth'][FEATURE]['oauth_exchange_url'],queryArgs)
 
     try:
       res = urllib2.urlopen(req)
@@ -164,7 +162,7 @@ def googlePlus_callback(request):
   else:
     error = request.params.get('error')
     log.error('Google+ oauth failed: %s' % error)
-    raise GenericError(error)
+    raise Exception(error)
 
   # now let's get some information about the user -- namely their id
   req = urllib2.Request('https://www.googleapis.com/oauth2/v1/userinfo?access_token=%s' % accessToken)

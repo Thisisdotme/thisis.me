@@ -43,7 +43,7 @@ def post_facebook(request):
 @view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/confirmation.pt')
 def facebook_callback(request):
 
-  authorName = authenticated_userid(request)
+  author_name = authenticated_userid(request)
 
   access_token = None
   fb_user_id = None
@@ -102,7 +102,7 @@ def facebook_callback(request):
     raise Exception(msg)
 
   url = '{endpoint}/v1/authors/{author}/services/{service}'.format(endpoint=tim_config['api']['endpoint'],
-                                                                   author=authorName,
+                                                                   author=author_name,
                                                                    service=FEATURE)
   payload = {'access_token': access_token, 'service_author_id': fb_user_id}
   headers = {'content-type': 'application/json; charset=utf-8'}
@@ -112,14 +112,14 @@ def facebook_callback(request):
   res_json = r.json
 
 #  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %
-#                                  (,authorName,FEATURE),
+#                                  (,author_name,FEATURE),
 #                          'PUT',
 #                          json_payload,
 #                          headers)
 #  res = urllib2.urlopen(req)
 #  resJSON = json.loads(res.read())
 
-  log.info("Added Facebook feature for author %s" % authorName)
+  log.info("Added Facebook feature for author %s" % author_name)
 
   request.session.flash('Your Facebook account has been successfully added.')
-  return HTTPFound(location=request.route_path('newsfeed'))
+  return HTTPFound(location=request.route_path('app', authorname=author_name))
