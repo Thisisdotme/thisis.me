@@ -30,13 +30,16 @@ def get_facebook(request):
 def post_facebook(request):
 
   api_key = tim_config['oauth'][SERVICE]['key']
-
+  
+  
   query_args = urllib.urlencode([('client_id', api_key),
                                 ('redirect_uri', request.route_url('facebook_callback')),
                                 ('scope', 'offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status')])
 
-  url = tim_config['oauth'][SERVICE]['oauth_url'].format(args=query_args)
-
+  url = tim_config['oauth'][SERVICE]['oauth_url'] % (query_args)
+  
+  print url
+  
   return HTTPFound(location=url)
 
 
@@ -65,18 +68,30 @@ def facebook_callback(request):
                                   ('code', code)])
 
     url = tim_config['oauth'][SERVICE]['access_token_url'].format(args=query_args)
+    url = tim_config['oauth'][SERVICE]['access_token_url'] % (query_args)
 
     try:
-
+      
+      print 'doing get 2'
+      
+      print url
+      
       r = requests.get(url)
+      
+      print 'did get'
       fb_dict = parse_qs(r.text)
-
+      
+      print 'did parse'
+      
 #      req = urllib2.Request(url)
 #      res = urllib2.urlopen(req)
 #      fbDict = parse_qs(res.read())
-
+      
+      print fb_dict
+      
       access_token = fb_dict['access_token'][0]
-
+      
+      print 'got access token'
 #    except urllib2.URLError, e:
 #      log.error(e.reason)
 #      raise e
@@ -84,12 +99,21 @@ def facebook_callback(request):
     except requests.exceptions.RequestException, e:
       log.error(e)
       raise e
-
+    
+    query_args_2 = urllib.urlencode([('client_id', api_key),
+                                  ('redirect_uri', request.route_url('facebook_callback')),
+                                  ('client_secret', api_secret),
+                                  ('code', code)])  
+      
     # now let's get some information about the user -- namely their id
     url = '{endpoint}{resource}?access_token={token}'.format(endpoint=tim_config['oauth'][SERVICE]['endpoint'],
                                                              resource='me',
                                                              token=access_token)
-
+                                                             
+    url = '{endpoint}{resource}?access_token={token}' % query_args_2
+    
+    print url
+                                                           
     r = requests.get(url)
     me_dict = r.json
 
@@ -108,8 +132,9 @@ def facebook_callback(request):
   payload = {'name': SERVICE, 'access_token': access_token, 'service_author_id': fb_user_id}
   headers = {'content-type': 'application/json; charset=utf-8'}
   cookies = request.cookies
-
+  print 'doing post'
   r = requests.post(url, data=json.dumps(payload), headers=headers, cookies=cookies)
+  print 'did post'
   res_json = r.json
 
 #  req = RequestWithMethod('%s/v1/authors/%s/services/%s' %

@@ -1,0 +1,36 @@
+<metal:index use-macro="load: master_template.html">
+  
+	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
+  	<a href="#" id="nav-toggle"></a>
+		
+		<div id="content-container">
+		  <div class="app-page light active">
+  		  <div class="toolbar"><span class="cancel-link" href="#">Cancel</span><h1>Log In</h1></div>
+        <div class="login-form">
+          <div class="message"></div>
+          <form id="login-form" action="" method="post">
+            <label for="login-login">Author Name</label>
+          	<input id="login-login" type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
+          	<label for="login-password">Password</label>
+          	<input id="login-password" type="password" name="password" value=""/>
+          </form>
+          <input id="login-submit" type="submit" value="Log In" />
+        </div>
+      </div>
+		</div>
+		<nav id="feature-nav" class="clearfix">
+  		<ul id="feature-nav-items"></ul>
+  	</nav>
+  
+  	<!-- remote debugger script! uncomment for remote debugging in weinre! -->
+  	
+  	<!-- script src="http://10.0.1.5:8081/target/target-script-min.js#anonymous"></script -->
+	</div><!-- /page -->
+	<script type="text/javascript" metal:fill-slot="page_script">
+	  TIM = TIM || {};
+		TIM.pageInfo = {
+			authorName: '${author_name}'
+		}
+	</script>
+</metal:index>
+

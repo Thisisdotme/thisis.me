@@ -26,5 +26,10 @@ class AppController(object):
             
   @view_config(route_name='settings', request_method='GET', renderer='timmobilev2:templates/settings.pt')
   def settingsHandler(self):
-    return {'author_name': 'ken',
+    return {'author_name': 'this is me',
+            'api_endpoint': self.request.registry.settings['mi.api.endpoint']}
+
+  @view_config(route_name='login', request_method='GET', renderer='timmobilev2:templates/login.pt')
+  def loginHandler(self):
+    return {'author_name': 'this is me',
             'api_endpoint': self.request.registry.settings['mi.api.endpoint']}

@@ -1,7 +1,7 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="index" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
+	<div id="app" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
     <style>
-      body { background-color:#fff !important; padding:20px;}
+      body { background-color:#fff !important;}
       #index { display:none; }
       header h1 {
         margin:0;
@@ -9,8 +9,8 @@
       }
       .author-list ul {
         list-style-type:none;
-        padding:0;
-        margin:8px 0 12px 0;
+        padding:0 20px;
+        margin:8px auto 12px auto;
       }
       .author-list li {
         display:inline-block;
@@ -64,29 +64,63 @@
         border-radius: 8px;
         padding: 12px;
       }
+      
+      #welcome-message, #login-link, #settings-link {
+        display:none;
+      }
+      
+      .logged-in #welcome-message, .logged-in #settings-link {
+        display:block;
+      }
+      
+      .logged-out #login-link {
+        display:block;
+      }
+      
+      #index-page {
+        padding-top:40px;
+      }
+      
     </style>
-		<header data-role="header" data-position="fixed">
-			<h1>thisis.me authors</h1>
-		</header><!-- /header -->
-		<section id="authors">
-  	  <!-- <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a> </div>  -->
-  		<div id="index-content-all" class="author-list">
-  		</div><!-- /content -->
-      <div id="index-content-favorites" class="author-list">
-  		</div><!-- /content -->
-    </section>
+    <a href="#" id="nav-toggle"></a>
+		
+		<div id="content-container">
+		  <div id="index-page" class="app-page light active">
+    		<div class="toolbar">
+    			<h1>thisis.me</h1>
+    		</div><!-- /header -->
+    		<div id="index-page-scrollable">
+    		  <div>
+        		<section id="authors">
+          	  <!-- <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a> </div>  -->
+          		<div id="index-content-all" class="author-list">
+          		</div><!-- /content -->
+              <div id="index-content-favorites" class="author-list">
+          		</div><!-- /content -->
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav id="feature-nav" class="clearfix">
+  		<ul id="feature-nav-items"></ul>
+  	</nav>
     <script src="/phil/asset/coreTemplates.dust.js"></script>
 	</div><!-- /page -->
 	
 	<script type="text/javascript" metal:fill-slot="page_script">
 	  window.TIM = TIM || {};
+	  TIM.pageInfo = {
+			authorName: '${author_name}'
+		}
+	  
 	  TIM.models = TIM.models || {};
     TIM.collections = TIM.collections || {};
     TIM.views = TIM.views || {};
     TIM.mixins = TIM.mixins || {};
     TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 	  var authorJSON, favorites = [], renderFavorites;
-	  var holding = false; var lastURL = '/', hasSession = false;
+	  var holding = false; var lastURL = '/', hasSession = false, $scrollElem, iScrollElem;
     //get the authors
     $(function(){
       hasSession = $.cookie('tim_session');
@@ -186,6 +220,13 @@
         console.log("author json", authorJSON);
         var html = TIM.views.renderTemplate("authorList", authorJSON);
         $("#index-content-all").html(html);
+        $scrollElem =  $("#index-page-scrollable"); //this.$scrollElem || this.$el.find('.scrollable');
+        $scrollElem.css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
+        iScrollElem = new iScroll(this.$scrollElem.get(0), { 
+               hScroll: false,
+               vScrollbar: false
+          });
+   			setTimeout(function () { iScrollElem.refresh();  }, 0);
         renderFavorites();
       }
       
@@ -226,6 +267,7 @@
       	}
     	  holding = false;
     	  console.log('click', e);
+    	  window.location.href = (e.currentTarget.href);
     	});
     	
     	$('#tabs a').on('tap', function(e) {
@@ -316,7 +358,8 @@
   	  favorites = favs;
   	  renderFavorites();
   	}
-
+  	TIM.currentPageElem = $('#index-page');
+  	
   </script>
 
 </metal:index>
