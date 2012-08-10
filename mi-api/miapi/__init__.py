@@ -1,10 +1,13 @@
 import logging
 import urlparse
+import datetime
 
+import zope.interface
 import pyramid.config
 import pyramid.authentication
 import pyramid.authorization
 import pyramid.security
+import pyramid.interfaces
 
 import tim_commons.config
 import tim_commons.db
@@ -53,7 +56,7 @@ def main(global_config, **settings):
       root_factory=resource.root_factory,
       settings=settings)
   # TODO: secret should be configurable
-  authentication = pyramid.authentication.AuthTktAuthenticationPolicy(
+  authentication = AuthenticationPolicy(
       'secret',
       callback=controllers.login.authenticate_user)
   configuration.set_authentication_policy(authentication)
@@ -159,6 +162,76 @@ def crossdomain_access_control_response(event):
       request.response.headers['Access-Control-Allow-Credentials'] = 'false'
 
   return request.response
+
+
+@zope.interface.implementer(pyramid.interfaces.IAuthenticationPolicy)
+class AuthenticationPolicy(pyramid.authentication.AuthTktAuthenticationPolicy):
+  def __init__(
+      self,
+      secret,
+      callback=None,
+      cookie_name='auth_tkt',
+      secure=False,
+      include_ip=False,
+      timeout=None,
+      reissue_time=None,
+      max_age=None,
+      path="/",
+      http_only=False,
+      wild_domain=True,
+      debug=False):
+    self.cookie = AuthTktCookieHelper(
+        secret,
+        cookie_name=cookie_name,
+        secure=secure,
+        include_ip=include_ip,
+        timeout=timeout,
+        reissue_time=reissue_time,
+        max_age=max_age,
+        http_only=http_only,
+        path=path,
+        wild_domain=wild_domain)
+    self.callback = callback
+    self.debug = debug
+
+
+class AuthTktCookieHelper(pyramid.authentication.AuthTktCookieHelper):
+  def _get_cookies(self, environ, value, max_age=None):
+    cookies = super(AuthTktCookieHelper, self)._get_cookies(environ, value, max_age)
+
+    if max_age is pyramid.authentication.EXPIRE:
+        max_age = "; Max-Age=0; Expires=Wed, 31-Dec-97 23:59:59 GMT"
+    elif max_age is not None:
+        later = datetime.datetime.utcnow() + datetime.timedelta(
+            seconds=int(max_age))
+        # Wdy, DD-Mon-YY HH:MM:SS GMT
+        expires = later.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        # the Expires header is *required* at least for IE7 (IE7 does
+        # not respect Max-Age)
+        max_age = "; Max-Age=%s; Expires=%s" % (max_age, expires)
+    else:
+        max_age = ''
+
+    cur_domain = environ.get('HTTP_HOST', environ.get('SERVER_NAME'))
+    if ':' in cur_domain:
+      cur_domain = cur_domain.split(':', 1)[0]
+
+    if self.wild_domain:
+      if '.' in cur_domain:
+        top_domain = cur_domain.split('.')[1:]
+        print top_domain, cur_domain
+        if len(top_domain) > 1:
+          cur_domain = '.'.join(top_domain)
+        else:
+          cur_domain = top_domain[0]
+
+        wild_domain = '.' + cur_domain
+        print wild_domain
+        cookies.append(('Set-Cookie', '%s="%s"; Path=%s; Domain=%s%s%s' % (
+                self.cookie_name, value, self.path, wild_domain, max_age,
+                self.static_flags)))
+
+    return cookies
 
 
 # call with credential. only allow *.host to call it
