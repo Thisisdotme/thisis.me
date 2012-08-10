@@ -242,22 +242,10 @@ $(function() {
 		}
 	});
 	
-	if(false) {
-	  TIM.currentUserServices.fetch({
-  		//add this timeout in case call fails...
-  		timeout : 5000,
-  		callbackParameter: "callback",
-  		success: function(resp) {
-  		  console.log('fetched user services');
-  		},
-  		error: function(resp) {
-  			TIM.showErrorMessage({
-  			    exception: "loading user services failed."
-  			});
-  		}
-  	});
+	
+	
+
 	  
-	}
 	
 	//1. get features for author
 	//2. get cover page assets for author
@@ -346,6 +334,21 @@ $(function() {
     
     handleLogin: function() {
       $('#app').addClass('logged-in');
+      if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
+    	  TIM.currentUserServices.fetch({
+      		//add this timeout in case call fails...
+      		timeout : 5000,
+      		callbackParameter: "callback",
+      		success: function(resp) {
+      		  console.log('fetched user services');
+      		},
+      		error: function(resp) {
+      			TIM.showErrorMessage({
+      			    exception: "loading user services failed."
+      			});
+      		}
+      	});
+    	}
     },
 
     handleLogout: function() {
@@ -361,6 +364,7 @@ $(function() {
   //see if we have a current user
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
+  
 		
 	$.fn.animationComplete = function( callback ) {
 		if( "WebKitTransitionEvent" in window ) {

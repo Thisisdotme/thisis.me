@@ -221,6 +221,12 @@ TIM.views.Settings = Backbone.View.extend( {
       //compare the list of all services vs. the author's services
       this.collection.each(function(item){
         var name = item.get('name');
+        item.set('url', '/oauth/' + name);
+        if(TIM.currentUserServices && TIM.currentUserServices.getByName(name)) {
+          item.set('enabled', 'enabled');
+        } else {
+          item.set('enabled', 'disabled');
+        }
         if(name == 'facebook') {
           //if(name = 'ffffff')
           item.set('url', "https://m.facebook.com/dialog/oauth?client_id=147356348709107&redirect_uri=http://poc.thisis.me/facebook&scope=offline_access,read_stream,user_photos,user_checkins,user_events,user_groups,user_videos,user_about_me,user_education_history,user_status");

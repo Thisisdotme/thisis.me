@@ -34,10 +34,7 @@
                if(callback) {
                  callback();
                }
-               TIM.eventAggregator.trigger('login', {});
-               //$.cookie('auth_tkt', data.auth_tkt, {domain: ''})
-               //doNextCall();
-
+               TIM.eventAggregator.trigger('login', {name:data.name});
              },
              error: function(data) {
                console.log("login error: ", data);
@@ -56,8 +53,6 @@
            contentType: 'application/json',
            success: function(data, xhr) {
               $.removeCookie('tim_author_name');
-              //$.cookie('auth_tkt', data.auth_tkt, {domain: ''})
-              //doNextCall();
               if(callback) {
                 callback();
               }

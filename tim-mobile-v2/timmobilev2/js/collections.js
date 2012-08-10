@@ -77,6 +77,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		  options = options || {};
 		},
 		parse: function(resp) {
+		  console.log('services: ', resp)
 		  return (resp.services);
 		},
 		getByName: function(name) {

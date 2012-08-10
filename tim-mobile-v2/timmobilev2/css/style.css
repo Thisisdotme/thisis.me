@@ -1003,8 +1003,43 @@ footer .time-and-location {
   padding:16px;
 }
 
-#logout-link {
+.services-form li a:link, .services-form li a:visited {
+  color:#369;
+  text-decoration:none;
+}
 
+.services-form ul {
+  list-style:none;
+  margin:1em 0;
+  padding:0;
+}
+
+.services-form li.enabled a {
+  font-weight:bold;
+}
+
+.services-form li.disabled a{
+  font-weight:normal;
+}
+
+.services-form li {
+  padding-left:20px;
+  line-height:1.5;
+}
+
+.services-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
+.services-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
+.services-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
+.services-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
+.services-form li.foursquare {  background: url(/img/icons/foursquare_15.png) left center no-repeat }
+.services-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
+.services-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
+
+#logout-link {
+  display:block;
+  text-align: center;
+  margin:0 auto;
+  width:150px;
 }
 
 /* end settings page */
