@@ -93,4 +93,6 @@ def instagram_callback(request):
   except requests.exceptions.RequestException, e:
     log.error(e.message)
 
+  log.info("Added Instagram service for author %s" % author_id)
+
   return HTTPFound(location=request.route_path('settings'))
