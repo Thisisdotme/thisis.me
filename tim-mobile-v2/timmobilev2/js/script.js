@@ -150,8 +150,19 @@ $(function() {
 	  }
 	}
 	
+	
+	
 	TIM.isLoading = function() {
 	  return TIM._loading;
+	}
+	
+	TIM.setInitializing = function (initializing) {
+	  TIM._initializing = initializing;
+	  if(initializing) {
+	    $('#app').addClass('initializing');
+	  } else {
+	    $('#app').removeClass('initializing');
+	  }
 	}
 	
 	TIM.setSplashScreen = function (splash) {
