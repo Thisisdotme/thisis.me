@@ -1,8 +1,6 @@
 import logging
-import urllib2
 import urllib
 import json
-from datetime import datetime
 
 import requests
 
@@ -11,8 +9,6 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import authenticated_userid
 
 from instagram import client
-
-from tim_commons.request_with_method import RequestWithMethod
 
 from timmobilev2 import tim_config
 
@@ -62,7 +58,7 @@ def instagram_callback(request):
 
   unauthenticated_api = client.InstagramAPI(**config)
 
-  access_token = unauthenticated_api.exchange_code_for_access_token(code)
+  access_token, user_data = unauthenticated_api.exchange_code_for_access_token(code)
 
   # TODO: proper handling of error case
   if not access_token:
