@@ -248,7 +248,7 @@ TIM.views.CreateUser = Backbone.View.extend( {
            console.log("create response: ", data, status, xhr);
            //do something with the data...
            alert('hey! new user!');
-          
+           
            TIM.eventAggregator.trigger('usercreated', {name:data.name});
          },
          error: function(data) {
@@ -299,15 +299,23 @@ TIM.views.Settings = Backbone.View.extend( {
     render: function() {
       var that = this;
       
+      
       //compare the list of all services vs. the author's services
       this.collection.each(function(item){
         var name = item.get('name');
         item.set('url', '/oauth/' + name);
+        
         if(TIM.currentUserServices && TIM.currentUserServices.getByName(name)) {
           item.set('enabled', 'enabled');
         } else {
           item.set('enabled', 'disabled');
         }
+        
+        //remove the 'me' service for display
+        if(name == 'me') {
+          that.collection.remove(item, {silent:true})
+        }
+        
       })
       
       var userName = TIM.authenticatedUser.get('name') || '';
