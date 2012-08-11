@@ -299,10 +299,17 @@ TIM.views.Settings = Backbone.View.extend( {
     render: function() {
       var that = this;
       
+      //remove the 'me' service for display
+      var me = that.collection.getByName('me');
+      if(me) {
+        that.collection.remove(me);
+      }
       
       //compare the list of all services vs. the author's services
       this.collection.each(function(item){
+        
         var name = item.get('name');
+        
         item.set('url', '/oauth/' + name);
         
         if(TIM.currentUserServices && TIM.currentUserServices.getByName(name)) {
@@ -311,10 +318,7 @@ TIM.views.Settings = Backbone.View.extend( {
           item.set('enabled', 'disabled');
         }
         
-        //remove the 'me' service for display
-        if(name == 'me') {
-          that.collection.remove(item, {silent:true})
-        }
+        
         
       })
       
