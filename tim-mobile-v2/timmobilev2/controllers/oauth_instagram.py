@@ -6,7 +6,7 @@ import requests
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from instagram import client
 
@@ -50,7 +50,7 @@ def instagram_callback(request):
     raise Exception('missing code query argument from Instagram callback')
 
   # Get author's login name
-  author_id = authenticated_userid(request)
+  author_id = unauthenticated_userid(request)
 
   config = {'client_id': tim_config['oauth'][SERVICE]['key'],
             'client_secret': tim_config['oauth'][SERVICE]['secret'],

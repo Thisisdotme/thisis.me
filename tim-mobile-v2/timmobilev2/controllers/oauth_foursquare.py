@@ -6,7 +6,7 @@ import requests
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from timmobilev2 import tim_config
 
@@ -37,7 +37,7 @@ def foursquare_post(request):
 @view_config(route_name='foursquare_callback', request_method='GET')
 def foursquare_callback(request):
 
-  author_id = authenticated_userid(request)
+  author_id = unauthenticated_userid(request)
 
   code = request.params.get('code')
   if not code:
