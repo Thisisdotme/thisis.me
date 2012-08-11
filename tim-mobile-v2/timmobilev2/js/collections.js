@@ -5,7 +5,7 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
      options = options || {};
      options.dataType = options.dataType || "jsonp";
      options.callbackParameter = options.callbackParameter || "callback";
-     options.timeout = options.timeout || 15000;
+     options.timeout = options.timeout || 25000;
      
      options.error = options.error || function(model, resp) {
        TIM.eventAggregator.trigger("error", {exception: "API call failed"});

@@ -1,3 +1,4 @@
+import passlib.hash
 import pyramid.view
 import pyramid.security
 
@@ -57,7 +58,7 @@ def error(response, internal_code):
 
 
 def check_password(expected_encoded_password, actual_plain_password):
-  return expected_encoded_password == actual_plain_password
+  return passlib.hash.sha256_crypt.verify(actual_plain_password, expected_encoded_password)
 
 
 def authenticate_user(user_id, request):

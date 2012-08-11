@@ -566,6 +566,17 @@ $(function() {
     
   };
   
+  TIM.showNewUserForm = function (options) {
+    TIM.setLoading(false);
+    if (!TIM.newUserView) {
+      TIM.newUserView = new TIM.views.CreateUser();
+    }
+    TIM.newUserView.render({message: "dam"});
+    TIM.setNavVisible(false);
+    TIM.app.navigate("#login");
+    TIM.transitionPage (TIM.newUserView.$el);
+  };
+  
   //for now this simply handles the DOM page transition
   //
   //should keep a history stack & use that to determine whether to do a forward or reverse transition

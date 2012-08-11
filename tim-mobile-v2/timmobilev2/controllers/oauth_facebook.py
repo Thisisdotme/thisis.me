@@ -112,4 +112,4 @@ def facebook_callback(request):
 
   log.info("Added Facebook service for author %s" % author_id)
 
-  return HTTPFound(location=request.route_path('app', authorname=author_id))
+  return HTTPFound(location=request.route_path('settings'))
