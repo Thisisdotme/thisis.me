@@ -1,5 +1,4 @@
 import passlib.hash
-import pyramid.view
 import pyramid.security
 
 import miapi.resource

@@ -6,7 +6,6 @@ import tim_commons.db
 import data_access.service
 import miapi.resource
 import miapi.controllers.author_utils
-import miapi.controllers
 
 
 def add_views(configuration):
