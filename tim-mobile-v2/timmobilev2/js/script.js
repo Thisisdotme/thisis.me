@@ -37,7 +37,6 @@ $(function() {
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
   
-  
   if($.cookie('tim_user_session') && false) {
     var name = $.cookie('tim_user_name');
     if(name && false) {
@@ -133,6 +132,7 @@ $(function() {
 	TIM.disableScrolling();
 	
 	TIM.setNavVisible = function (visible) {
+	  visible = true;
 	  TIM.navVisible_ = visible;
 	  if(visible) {
 	    $('#app').removeClass('nav-hidden');
@@ -395,7 +395,8 @@ $(function() {
 	} else {
 	  TIM.features.reset([
 	      {name: "login"},
-	      {name: "settings"}
+	      {name: "settings"},
+	      {name: "home"}
 	    ]) 
 	}
   
@@ -544,7 +545,12 @@ $(function() {
   };
   
   TIM.cancelLogin = function (options) {
-    window.history.back();
+    if(TIM.isAuthorApp()) {
+      TIM.app.navigate("#cover", {trigger: true});
+    } else {
+      window.location.href = "/";
+    }
+    //window.history.back();
     TIM.setNavVisible(true);
   };
   

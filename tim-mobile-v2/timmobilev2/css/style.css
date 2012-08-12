@@ -239,7 +239,7 @@ body.splash {
   text-align: center;
 }
 #loading-img > div {
-  background: rgba(60,60,60,.6);
+  background: rgba(60,60,60,.8);
   position: absolute;
   top: 40%;
   height: 60px;
@@ -1001,16 +1001,22 @@ footer .time-and-location {
 
 .login-form #create-user-link {
   display:block;
-  margin-top:1em;;
+  margin-top:1em;
   text-align:center;
 }
 
 .app-page .toolbar .cancel-link {
   position: absolute;
   left: 8px;
-  top: 2px;
-  line-height:38px;
+  top: 7px;
+  line-height:22px;
   text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:0 4px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  color:#333;
 }
 
 /* --end login form */
@@ -1043,13 +1049,6 @@ footer .time-and-location {
   margin-top:16px;
 }
 
-.app-page .toolbar .cancel-link {
-  position: absolute;
-  left: 8px;
-  top: 2px;
-  line-height:38px;
-  text-decoration:none;
-}
 
 /* --end login form */
 
@@ -1100,6 +1099,16 @@ footer .time-and-location {
   text-align: center;
   margin:0 auto;
   width:150px;
+}
+
+.add-feature-container {
+  margin-top:40px;
+  padding:12px;
+}
+
+.add-feature-container h1 {
+  font-size:1.4em;
+  margin-top:1.5em;
 }
 
 .addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
