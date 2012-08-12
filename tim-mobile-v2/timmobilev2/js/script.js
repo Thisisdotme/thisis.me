@@ -533,12 +533,12 @@ $(function() {
     TIM.setErrorShowing(true);
   };
   
-  TIM.showErrorFlashjMessage = function (options) {
+  TIM.showFlashMessage = function (options) {
     TIM.setLoading(false);
-    if (!TIM.errorMessageView) {
-      TIM.errorMessageView = new TIM.views.ErrorMessage();
+    if (!TIM.flashMessageView) {
+      TIM.flashMessageView = new TIM.views.ErrorMessage();
     }
-    TIM.errorMessageView.render({message: options.exception});
+    TIM.flashMessageView.render({message: options.exception});
     TIM.setErrorShowing(true);
   };
   

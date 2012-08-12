@@ -1004,14 +1004,31 @@ footer .time-and-location {
 
 .login-form input {
   border-radius:8px;
-  height:25px;
+  padding:6px;
   margin-bottom:8px;
   width:100%;
   outline:none;
+  display:block;
+  box-sizing: border-box;
+  font-size:1.2em;
 }
 
-.login-form #login-submit {
-  margin-top:16px;
+.login-form #login-submit,  .newuser-form #newuser-submit {
+  margin:16px auto 2.5em auto;
+  width:180px;
+  display:block;
+  padding: 6px 6px 7px;
+  height:auto;
+}
+
+.newuser-form #newuser-submit {
+  margin-bottom:1.2em;
+}
+
+.form-container {
+  max-width: 250px;
+  margin:0 auto;
+  box-sizing: border-box;
 }
 
 .login-form #create-user-link, .newuser-form #login-link  {

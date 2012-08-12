@@ -204,7 +204,8 @@ TIM.views.CreateUser = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "click #newuser-submit" : "submitForm"
+      "click #newuser-submit" : "submitForm",
+      "click #login-link" : "showLogin"
     },
     
     initialize: function(options) {
@@ -268,6 +269,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
       });
             
       return false;
+    },
+    
+    showLogin: function(e) {
+      TIM.showLoginForm();
+      e.preventDefault();
+      e.stopPropagation();
     },
     
     cancel: function(e) {
