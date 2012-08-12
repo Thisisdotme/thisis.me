@@ -51,9 +51,9 @@ body, button, input, select, textarea { font-family: sans-serif; color: #222; }
    Links
    ========================================================================== */
 
-a { color: #00e; }
-a:visited { color: #551a8b; }
-a:hover { color: #06e; }
+a { color: #5980AB; }
+a:visited { color: #5980AB; }
+a:hover { color: #5980AB; }
 a:focus { outline: thin dotted; }
 
 /* Improve readability when focused and hovered in all browsers: h5bp.com/h */
@@ -273,12 +273,12 @@ body.splash {
 #error-message {
   position: absolute;
   bottom: 0;
-  width: 100%;
+  width: 93%;
   background-color: #FAF5B1;
   opacity: 0.7;
   border: 1px solid #BAAE04;
   border-radius: 2px;
-  display: none;
+  x-display: none;
   z-index: 100;
 }
 .error #error-message {  display: block }
@@ -978,8 +978,9 @@ footer .time-and-location {
 /* the login form! */
 
 .login-form {
-  margin-top:40px;
+  margin:40px auto 0 auto;
   padding:16px;
+  max-width:400px;
 }
 
 .login-form h1 {
@@ -987,11 +988,25 @@ footer .time-and-location {
   margin:25px 0;
 }
 
+.login-form label {
+  display:block;
+}
+
+.login-form .message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.7;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+  visibility:hidden;
+  margin-bottom:12px;
+}
+
 .login-form input {
   border-radius:8px;
   height:25px;
   margin-bottom:8px;
-  width:90%;
+  width:100%;
   outline:none;
 }
 
@@ -999,7 +1014,7 @@ footer .time-and-location {
   margin-top:16px;
 }
 
-.login-form #create-user-link {
+.login-form #create-user-link, .newuser-form #login-link  {
   display:block;
   margin-top:1em;
   text-align:center;
@@ -1020,6 +1035,24 @@ footer .time-and-location {
 }
 
 /* --end login form */
+
+#flash-message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.9;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+display:none;
+  margin-bottom:12px;
+  position:absolute;
+  bottom:8px;
+  z-index:0;
+}
+
+#app.flash-message #flash-message {
+  display:block;
+  z-index:100;
+}
 
 /* the new user form! */
 

@@ -1,5 +1,5 @@
 <div class="toolbar"><span class="cancel-link" href="#">Cancel</span><h1>Log In</h1></div>
-<div class="login-form">
+<div class="login-form input-form">
   <div class="message"></div>
   <form id="login-form" action="" method="post">
     <label for="login-login">Author Name</label>

@@ -25,6 +25,14 @@ TIM.views.EventView = Backbone.View.extend( {
    }
 });
 
+TIM.views.messageView = Backbone.View.extend( {
+   className: "message",
+   template:"message",
+   render: function() {
+     var html = ''; 
+   }
+});
+
 TIM.tapEvent = "tap";
 
 TIM.views.Highlight = TIM.views.EventView.extend( {

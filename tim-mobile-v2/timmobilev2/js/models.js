@@ -38,7 +38,7 @@
              },
              error: function(data) {
                console.log("login error: ", data);
-               $('.login-form .message').html('could not find that user name and password.');
+               $('.login-form .message').html('Could not find that user name and password.').css('visibility','visible');
                self.trigger('loginError');
              },
             dataType: "json"

@@ -1,5 +1,5 @@
 <div class="toolbar"><span class="cancel-link" href="#">Cancel</span><h1>Create New User</h1></div>
-<div class="newuser-form">
+<div class="newuser-form input-form">
   <div class="message"></div>
   <form id="newuser-form" action="" method="post">
     <label for="newuser-name">Author Name</label>
@@ -12,4 +12,5 @@
   	<input id="newuser-password" type="password" name="password" value=""/>
   </form>
   <input id="newuser-submit" type="submit" value="Create" />
+  <a id="login-link" href="/newuser">Already have an account? Sign In!</a>
 </div>

@@ -533,6 +533,15 @@ $(function() {
     TIM.setErrorShowing(true);
   };
   
+  TIM.showErrorFlashjMessage = function (options) {
+    TIM.setLoading(false);
+    if (!TIM.errorMessageView) {
+      TIM.errorMessageView = new TIM.views.ErrorMessage();
+    }
+    TIM.errorMessageView.render({message: options.exception});
+    TIM.setErrorShowing(true);
+  };
+  
   TIM.showLoginForm = function (options) {
     TIM.setLoading(false);
     if (!TIM.loginView) {
