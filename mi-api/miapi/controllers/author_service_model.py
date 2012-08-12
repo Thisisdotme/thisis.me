@@ -8,8 +8,6 @@ import logging
 
 from pyramid.view import view_config
 
-from author_utils import serviceBuild
-
 log = logging.getLogger(__name__)
 
 
@@ -33,7 +31,7 @@ class AuthorServiceModelController(object):
     s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
     awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
     awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
-    serviceBuild(authorName, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
+#    serviceBuild(authorName, serviceName, False, s3Bucket, awsAccessKey, awsSecretKey)
 
     return {}
 
@@ -50,6 +48,6 @@ class AuthorServiceModelController(object):
     s3Bucket = self.request.registry.settings.get('mi.s3_bucket')
     awsAccessKey = self.request.registry.settings.get('mi.aws_access_key')
     awsSecretKey = self.request.registry.settings.get('mi.aws_secret_key')
-    serviceBuild(authorName, serviceName, True, s3Bucket, awsAccessKey, awsSecretKey)
+#    serviceBuild(authorName, serviceName, True, s3Bucket, awsAccessKey, awsSecretKey)
 
     return {}

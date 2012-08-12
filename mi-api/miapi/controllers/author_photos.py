@@ -8,10 +8,9 @@ from mi_schema.models import (
     Relationship,
     AuthorServiceMap)
 
-import miapi.controllers
 import miapi.controllers.author_utils
 import miapi.resource
-import data_access.service
+import data_access.author
 import tim_commons.db
 
 
