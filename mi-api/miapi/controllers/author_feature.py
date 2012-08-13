@@ -73,7 +73,7 @@ def list_author_features(author_features_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
-  features = getAuthorFeatures(tim_commons.db.Session(), author_id)
+  features = getAuthorFeatures(tim_commons.db.Session(), author_id, request)
 
   return {'author_name': author.author_name, 'features': features}
 

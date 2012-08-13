@@ -28,6 +28,7 @@ import controllers.feature
 import controllers.services
 import controllers.author_service_profile
 import controllers.author_service_query
+import controllers.author_feature
 
 
 # dictionary that holds all configuration merged from multple sources
@@ -99,6 +100,7 @@ def add_views(configuration):
   controllers.author_group_query.add_views(configuration)
   controllers.author_service_profile.add_views(configuration)
   controllers.author_service_query.add_views(configuration)
+  controllers.author_feature.add_views(configuration)
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
