@@ -90,6 +90,32 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		
 });
 
+
+//
+// base collections for all features, eg. photos, cover, etc.
+//
+
+TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
+	 	model: TIM.models.AppFeature,
+		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		initialized: false,
+		
+		initialize: function(options) {
+		  options = options || {};
+		},
+		parse: function(resp) {
+		  console.log('features response: ', resp)
+		  return (resp.services);
+		},
+		getByName: function(name) {
+		  return this.find(function(model){return model.get('name') == name});
+		},
+		setURL: function(username) {
+		  this.url = TIM.apiUrl + "authors/" + username + "/features";
+		}
+		
+});
+
 TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Author,
 		url: TIM.apiUrl + "/authors", //get a list of the authors in the app

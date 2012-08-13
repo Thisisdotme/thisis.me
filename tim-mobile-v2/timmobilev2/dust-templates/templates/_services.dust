@@ -1,5 +1,5 @@
 
-<div class="services-form tab-content">
+<div class="services-form settings-form tab-content">
 	<h3>Add/Remove Accounts for {name}</h3>
 	<ul>
 	{#services}

@@ -1,8 +1,10 @@
-<div class="features-form tab-content">
+<div class="features-form tab-content settings-form">
 	<h3>Add/Remove Features for {name}</h3>
 	<ul>
 	{#features}
-		<li class="{name} {enabled}"><a href="{url}">{name}</a></li>
+		<li class="{name} {enabled}"> {name} 
+		  <a class="activate" href="{url}">activate</a><span class="deactivate">active</span>
+		</li>
 	{/features}
 	</ul>
 	<form id="features-form" method="POST">

@@ -199,8 +199,37 @@ $(function() {
 	
 	//TIM.setLoading(true);  //don't show 'loading' message by default!
 	
-	//collection of features for this author
+	//all available app features - hardcode for now, API call to get list doesn't exist?
+	TIM.allFeatures = new TIM.collections.AppFeatures(
+	  [
+	    {
+	      name: "cover"
+	    },
+	    {
+	      name: "timeline"
+	    },
+	    {
+	      name: "highlights"
+	    },
+	    {
+	      name: "photos"
+	    },
+	    {
+	      name: "videos"
+	    },
+	    {
+	      name: "places"
+	    },
+	    {
+	      name: "bio"
+	    }
+	  ]
+	);
+	
+	TIM.currentUserFeatures = new TIM.collections.AppFeatures();
+	
 	TIM.features = new TIM.collections.Features();
+	
 	
 	//all available services
 	TIM.allServices = new TIM.collections.Services();
@@ -357,6 +386,33 @@ $(function() {
     		error: function(resp) {
     			TIM.showErrorMessage({
     			    exception: "loading user services failed."
+    			});
+    		}
+    	});
+  	}
+	}
+	
+	TIM.fetchCurrentUserFeatures = function(options) {
+	  options = options || {};
+	  TIM.currentUserFeatures.initialized = true;
+	  return;
+	  
+	  if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
+      TIM.currentUserFeatures.setURL(TIM.authenticatedUser.get('name'));
+  	  TIM.currentUserFeatures.fetch({
+    		//add this timeout in case call fails...
+    		timeout : 5000,
+    		callbackParameter: "callback",
+    		success: function(resp) {
+    		  console.log('fetched user features ', TIM.currentUserFeatures.length);
+    		  TIM.currentUserFeatures.initialized = true;
+    		  if(options.callback) {
+    		    options.callback();
+    		  }
+    		},
+    		error: function(resp) {
+    			TIM.showErrorMessage({
+    			    exception: "loading user features failed."
     			});
     		}
     	});
@@ -571,12 +627,22 @@ $(function() {
   
   TIM.showSettingsPage = function (options) {
     options = options || {};
+    
     function showView() {
+      if(!TIM.currentUserServices.initialized || !TIM.currentUserFeatures.initialized) {
+        return;
+      }
       TIM.setLoading(false);
       if (!TIM.settingsView) {
-        TIM.settingsView = new TIM.views.Settings({collection: TIM.allServices, userCollection: TIM.currentUserServices});
+        TIM.settingsView = new TIM.views.Settings(
+            { collection: TIM.allServices, 
+              userCollection: TIM.currentUserServices,
+              featureCollection: TIM.allFeatures,
+              userFeatureCollection: TIM.currentUserFeatures
+            }
+        );
       }
-      TIM.settingsView.render({message: "dam"});
+      TIM.settingsView.render({message: ""});
       TIM.setNavVisible(false);
       if(!options.noHashChange) {
         TIM.app.navigate("#settings");
@@ -584,10 +650,19 @@ $(function() {
       TIM.transitionPage (TIM.settingsView.$el);
     }
     
-    if(TIM.currentUserServices.initialized) {
+    function loadResources() {
+      if (!TIM.currentUserServices.initialized) {
+        TIM.fetchCurrentUserServices({callback:showView});
+      }
+      if (!TIM.currentUserFeatures.initialized) {
+        TIM.fetchCurrentUserFeatures({callback:showView});
+      }
+    }
+    
+    if(TIM.currentUserServices.initialized && TIM.currentUserFeatures.initialized) {
       showView();
     } else {
-      TIM.fetchCurrentUserServices({callback:showView});
+      loadResources();
     }
     
   };

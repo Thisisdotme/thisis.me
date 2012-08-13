@@ -984,16 +984,16 @@ footer .time-and-location {
   max-width:400px;
 }
 
-.login-form h1 {
+.input-form h1 {
   font-size:16px;
   margin:25px 0;
 }
 
-.login-form label {
+.input-form label {
   display:block;
 }
 
-.login-form .message {
+.input-form .message {
   padding:8px;
   background-color: #FAF5B1;
   opacity: 0.7;
@@ -1003,7 +1003,7 @@ footer .time-and-location {
   margin-bottom:12px;
 }
 
-.login-form input {
+.input-form input {
   border-radius:8px;
   padding:6px;
   margin-bottom:8px;
@@ -1014,7 +1014,7 @@ footer .time-and-location {
   font-size:1.2em;
 }
 
-.login-form #login-submit,  .newuser-form #newuser-submit {
+.input-form .submit-button {
   margin:16px auto 2.5em auto;
   width:180px;
   display:block;
@@ -1113,6 +1113,10 @@ display:none;
   display:none;
 }
 
+.edit-profile-form .display-none {
+  display:none;
+}
+
 .profile .edit-profile-form, .features .features-form, .services .services-form {
   display: block;
 }
@@ -1168,32 +1172,32 @@ nav.side-tabs a {
   margin:0 0 1em 0;
 }
 
-.services-form {
+.settings-form {
   x-margin-top:40px;
   padding:8px 16px;
 }
 
-.services-form li a:link, .services-form li a:visited {
+.settings-form li a:link, .settings-form li a:visited {
   color:#369;
   text-decoration:none;
 }
 
-.services-form ul {
+.settings-form ul {
   list-style:none;
   margin:1em 0;
   padding:0;
 }
 
-.services-form li {
+.settings-form li {
   position:relative;
   border-bottom: 1px dotted #ddd;
 }
 
-.services-form li.enabled a.activate {
+.settings-form li.enabled a.activate {
   display:none;
 }
 
-.services-form li.disabled a.activate {
+.settings-form li.disabled a.activate {
   text-decoration:none;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -1204,11 +1208,11 @@ nav.side-tabs a {
   color:#333;
 }
   
-.services-form li.disabled .deactivate{
+.settings-form li.disabled .deactivate{
   display:none;
 }
 
-.services-form li .deactivate, .activate{
+.settings-form li .deactivate, .activate{
   margin-left:15px;
   position:absolute;
   top:0px;
@@ -1216,36 +1220,37 @@ nav.side-tabs a {
   margin-top:2px;
 }
 
-.services-form li .deactivate{
+.settings-form li .deactivate{
   text-transform: uppercase;
   color:#3a6;
 }
 
-.services-form li .activate{
+.settings-form li .activate{
   top:2px;
 }
 
-.services-form li {
+.settings-form li {
   padding-left:20px;
   line-height:2.2;
+  background: url(/img/icons/thisisme_15.png) left center no-repeat;
 }
 
-.services-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
-.services-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
-.services-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
-.services-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
-.services-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
-.services-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
-.services-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
-.services-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
-.services-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
-.services-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
+
+.settings-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
+.settings-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
+.settings-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
+.settings-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
+.settings-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
+.settings-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
+.settings-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
+.settings-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
+.settings-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
+.settings-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
 
 #logout-link {
   display:block;
-  text-align: center;
-  margin:0 auto;
-  width:150px;
+  margin:2em 0 0 0;
+  cursor: pointer;
 }
 
 /* the oauth confirmation page */

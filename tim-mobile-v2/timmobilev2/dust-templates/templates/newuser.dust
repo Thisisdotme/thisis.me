@@ -12,7 +12,7 @@
     	<label for="newuser-password">Password</label>
     	<input id="newuser-password" type="password" name="password" value=""/>
     </form>
-    <input id="newuser-submit" type="submit" value="Create" />
+    <input id="newuser-submit" class="submit-button" type="submit" value="Create" />
     <a id="login-link" href="/newuser">Already have an account? Sign In!</a>
   </div>
 </div>

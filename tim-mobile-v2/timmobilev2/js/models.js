@@ -190,6 +190,11 @@
   });
   
   //base model for all comments
+  TIM.models.AppFeature  = Backbone.Model.extend({
+    
+  });
+  
+  //base model for all comments
   TIM.models.Comment  = Backbone.Model.extend({
     
   });

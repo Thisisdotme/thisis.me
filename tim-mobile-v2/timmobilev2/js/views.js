@@ -294,7 +294,8 @@ TIM.views.Settings = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "click li a" : "toggleSetting",
+      "click .services-form li a" : "toggleSetting",
+      "click .features-form li a" : "toggleFeature",
       "click #logout-link" : "doLogout",
       "click .profile-tab" : "showProfileInfo",
       "click .services-tab" : "showServices",
@@ -303,11 +304,13 @@ TIM.views.Settings = Backbone.View.extend( {
     
     initialize: function(options) {
         options = options || {};
+        if(options.featureCollection) {
+          this.featureCollection = options.featureCollection;
+        }
+        
         var that = this;
         
         _.bindAll(this);
-        //make this a Comments collection
-        
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -335,14 +338,25 @@ TIM.views.Settings = Backbone.View.extend( {
         } else {
           item.set('enabled', 'disabled');
         }
+      })
+      
+      //compare the list of all features vs. the author's features
+      this.featureCollection.each(function(item){
         
+        var name = item.get('name');
         
+        item.set('url', '/oauth/' + name);
         
+        if(TIM.currentUserFeatures && TIM.currentUserFeatures.getByName(name)) {
+          item.set('enabled', 'enabled');
+        } else {
+          item.set('enabled', 'disabled');
+        }
       })
       
       var userName = TIM.authenticatedUser.get('name') || '';
       
-      var templateContext = {name: userName, services: this.collection.toJSON()};
+      var templateContext = {name: userName, services: this.collection.toJSON(), features: this.featureCollection.toJSON()};
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
   		this.$el.html(html);
@@ -363,6 +377,10 @@ TIM.views.Settings = Backbone.View.extend( {
         window.location.href = href;
       }
       return false;
+    },
+    
+    toggleFeature: function(e) {
+      alert('hey!');
     },
     
     cancel: function(e) {

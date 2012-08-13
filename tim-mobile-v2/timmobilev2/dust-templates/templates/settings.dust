@@ -6,6 +6,7 @@
       <li class="services-tab"></li>
       <li class="features-tab"></li>
     </ul>
+    <a id="logout-link">log out</a>
   </nav>
   <div class="main-content">
     {>_profileEdit/}
