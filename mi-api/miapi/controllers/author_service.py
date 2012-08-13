@@ -8,6 +8,7 @@ from mi_schema.models import Service, AuthorServiceMap, ServiceObjectType, Servi
 import tim_commons.db
 import data_access.service
 import miapi.resource
+import miapi.json_renders.service
 
 
 def add_views(configuration):
@@ -61,7 +62,7 @@ def list_author_services(author_services_context, request):
                 AuthorServiceMap.author_id == author_id)). \
     order_by(Service.service_name):
 
-    services.append(service.to_JSON_dictionary(request))
+    services.append(miapi.json_renders.service.to_JSON_dictionary(service, request))
 
   return {'author_name': author.author_name, 'services': services}
 
