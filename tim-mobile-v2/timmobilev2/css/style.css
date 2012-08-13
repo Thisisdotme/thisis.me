@@ -51,9 +51,9 @@ body, button, input, select, textarea { font-family: sans-serif; color: #222; }
    Links
    ========================================================================== */
 
-a { color: #00e; }
-a:visited { color: #551a8b; }
-a:hover { color: #06e; }
+a { color: #5980AB; }
+a:visited { color: #5980AB; }
+a:hover { color: #5980AB; }
 a:focus { outline: thin dotted; }
 
 /* Improve readability when focused and hovered in all browsers: h5bp.com/h */
@@ -229,7 +229,7 @@ body.splash {
 
 #loading-img {
   display: none;
-  background: transparent url(/img/loading.gif) center center no-repeat;
+  background: transparent center center no-repeat;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -239,17 +239,20 @@ body.splash {
   text-align: center;
 }
 #loading-img > div {
-  background: rgba(60,60,60,.6);
+  background: rgba(60,60,60,.8);
   position: absolute;
-  top: 40%;
-  height: 60px;
+  top: 44%;
+  height: 30px;
   line-height: 30px;
   width: 30%;
   border: 1px solid #999;
   border-radius: 8px;
   left: 35%;
   margin: 0 auto;
-  color: #ccc;
+  color: #eee;
+  text-shadow: #333 1px 1px 2px;
+  font-weight:bold;
+  
 }
 .loading #loading-img {  display: block }
 .flipset-empty {
@@ -275,7 +278,7 @@ body.splash {
   opacity: 0.7;
   border: 1px solid #BAAE04;
   border-radius: 2px;
-  display: none;
+  x-display: none;
   z-index: 100;
 }
 .error #error-message {  display: block }
@@ -791,7 +794,7 @@ footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/i
   bottom: 60px;
   height: 100px;
   width: 50px;
-  display:none; /* hide these for now */
+  x-display:none; /* hide these for now */
 }
 .photo-page .interaction-icons .comments {
   position: absolute;
@@ -925,12 +928,13 @@ footer > div {  float: left }
 footer div.main-text {
   float:none;
 }
-footer .avatar, footer .author {  display:none; }
+footer .avatar, footer .author { display:none; }
+footer .author { display:none; }
 footer .sources { padding:4px;}
-footer .avatar {  x-height: 40px }
+footer .avatar {  height: 22px }
 footer .avatar .frame {
-  height: 25px;
-  width: 20px;
+  height: 21px;
+  width: 15px;
   margin-left: 4px;
   margin-right: 4px;
   padding: 1px;
@@ -975,42 +979,98 @@ footer .time-and-location {
 /* the login form! */
 
 .login-form {
-  margin-top:40px;
+  margin:40px auto 0 auto;
   padding:16px;
+  max-width:400px;
 }
 
-.login-form h1 {
+.input-form h1 {
   font-size:16px;
   margin:25px 0;
 }
 
-.login-form input {
-  border-radius:8px;
-  height:25px;
-  margin-bottom:8px;
-  width:90%;
-  outline:none;
-}
-
-.login-form #login-submit {
-  margin-top:16px;
-}
-
-.login-form #create-user-link {
+.input-form label {
   display:block;
-  margin-top:1em;;
+}
+
+.input-form .message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.7;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+  visibility:hidden;
+  margin-bottom:12px;
+}
+
+.input-form input {
+  border-radius:8px;
+  padding:6px;
+  margin-bottom:8px;
+  width:100%;
+  outline:none;
+  display:block;
+  box-sizing: border-box;
+  font-size:1.2em;
+}
+
+.input-form .submit-button {
+  margin:16px auto 2.5em auto;
+  width:180px;
+  display:block;
+  padding: 6px 6px 7px;
+  height:auto;
+}
+
+.newuser-form #newuser-submit {
+  margin-bottom:1.2em;
+}
+
+.form-container {
+  max-width: 250px;
+  margin:0 auto;
+  box-sizing: border-box;
+}
+
+.login-form #create-user-link, .newuser-form #login-link  {
+  display:block;
+  margin-top:1em;
   text-align:center;
 }
 
 .app-page .toolbar .cancel-link {
   position: absolute;
   left: 8px;
-  top: 2px;
-  line-height:38px;
+  top: 7px;
+  line-height:22px;
   text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:0 4px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  color:#333;
 }
 
 /* --end login form */
+
+#flash-message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.9;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+display:none;
+  margin-bottom:12px;
+  position:absolute;
+  bottom:8px;
+  z-index:0;
+}
+
+#app.flash-message #flash-message {
+  display:block;
+  z-index:100;
+}
 
 /* the new user form! */
 
@@ -1040,63 +1100,169 @@ footer .time-and-location {
   margin-top:16px;
 }
 
-.app-page .toolbar .cancel-link {
-  position: absolute;
-  left: 8px;
-  top: 2px;
-  line-height:38px;
-  text-decoration:none;
-}
 
 /* --end login form */
 
 /* the settings page! */
 
-.services-form {
-  margin-top:40px;
-  padding:16px;
+
+.edit-profile-form, .features-form, .services-form {
+  margin:0 auto;
+  padding:8px 16px;
+  max-width:400px;
+  display:none;
 }
 
-.services-form li a:link, .services-form li a:visited {
+.edit-profile-form .display-none {
+  display:none;
+}
+
+.profile .edit-profile-form, .features .features-form, .services .services-form {
+  display: block;
+}
+
+nav.side-tabs {
+  font-size:11px;
+  overflow:hidden;
+}
+
+nav.side-tabs a {
+  display:block;
+  text-decoration:none;
+}
+
+.split-pane {  padding-left: 52px; }
+.split-pane .side-tabs {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  width: 45px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 -45px;
+  float: left;
+  position:relative;
+  right:-1px;
+}
+
+/* side tabs nav for settings page */
+.settings-page .side-tabs li {
+  height:40px;
+}
+.settings-page .side-tabs li.selected {  background: url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat }
+.settings-page .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat }
+.settings-page .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat }
+.settings-page.profile .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.services .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.features .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.comment-list .comments {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #ccc;
+}
+
+.split-pane .main-content {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #CCC;
+  min-height: 340px;
+}
+
+.settings-page h3 {
+  margin:0 0 1em 0;
+}
+
+.settings-form {
+  x-margin-top:40px;
+  padding:8px 16px;
+}
+
+.settings-form li a:link, .settings-form li a:visited {
   color:#369;
   text-decoration:none;
 }
 
-.services-form ul {
+.settings-form ul {
   list-style:none;
   margin:1em 0;
   padding:0;
 }
 
-.services-form li.enabled a {
-  font-weight:bold;
+.settings-form li {
+  position:relative;
+  border-bottom: 1px dotted #ddd;
 }
 
-.services-form li.disabled a{
-  font-weight:normal;
+.settings-form li.enabled a.activate {
+  display:none;
 }
 
-.services-form li {
+.settings-form li.disabled a.activate {
+  text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:2px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  line-height:13px;
+  color:#333;
+}
+  
+.settings-form li.disabled .deactivate{
+  display:none;
+}
+
+.settings-form li .deactivate, .activate{
+  margin-left:15px;
+  position:absolute;
+  top:0px;
+  right:0px;
+  margin-top:2px;
+}
+
+.settings-form li .deactivate{
+  text-transform: uppercase;
+  color:#3a6;
+}
+
+.settings-form li .activate{
+  top:2px;
+}
+
+.settings-form li {
   padding-left:20px;
-  line-height:1.5;
+  line-height:2.2;
+  background: url(/img/icons/thisisme_15.png) left center no-repeat;
 }
 
-.services-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
-.services-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
-.services-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
-.services-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
-.services-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
-.services-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
-.services-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
-.services-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
-.services-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
-.services-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
+
+.settings-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
+.settings-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
+.settings-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
+.settings-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
+.settings-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
+.settings-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
+.settings-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
+.settings-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
+.settings-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
+.settings-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
 
 #logout-link {
   display:block;
-  text-align: center;
-  margin:0 auto;
-  width:150px;
+  margin:2em 0 0 0;
+  cursor: pointer;
+}
+
+/* the oauth confirmation page */
+
+.add-feature-container {
+  margin-top:40px;
+  padding:12px;
+}
+
+.add-feature-container h1 {
+  font-size:1.4em;
+  margin-top:1.5em;
 }
 
 .addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }

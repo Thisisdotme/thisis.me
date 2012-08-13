@@ -5,9 +5,10 @@
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
 		
 		
-		<div id="content-container">
+		<div id="content-container" class="flash-message">
 		  <div id="splash-screen" class="app-page active"></div>
 		  <div id="loading-img"><div>loading...</div></div>
+		  <div id="flash-message"><div>Hey!  A flash messgae!</div></div>
 		</div>
 		<nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>

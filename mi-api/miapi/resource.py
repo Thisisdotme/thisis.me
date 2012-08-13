@@ -27,6 +27,7 @@ class V1Root:
     self.services = location_aware(Services(), self, 'services')
     self.features = location_aware(Features(), self, 'features')
     self.reservations = location_aware(Reservations(), self, 'reservations')
+    self.status = location_aware(Status(), self, 'status')
 
   def __getitem__(self, key):
     if key == self.authors.__name__:
@@ -37,8 +38,16 @@ class V1Root:
       return self.features
     elif key == self.reservations.__name__:
       return self.reservations
+    elif key == self.status.__name__:
+      return self.status
 
     raise KeyError('key "{key}" not a valid v1 root entry'.format(key=key))
+
+
+class Status:
+  __acl__ = [
+      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
+      pyramid.security.DENY_ALL]
 
 
 class Reservations:

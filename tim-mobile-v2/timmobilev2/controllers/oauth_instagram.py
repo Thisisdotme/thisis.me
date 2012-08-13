@@ -1,18 +1,14 @@
 import logging
-import urllib2
 import urllib
 import json
-from datetime import datetime
 
 import requests
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import authenticated_userid
+from pyramid.security import unauthenticated_userid
 
 from instagram import client
-
-from tim_commons.request_with_method import RequestWithMethod
 
 from timmobilev2 import tim_config
 
@@ -54,7 +50,7 @@ def instagram_callback(request):
     raise Exception('missing code query argument from Instagram callback')
 
   # Get author's login name
-  author_id = authenticated_userid(request)
+  author_id = unauthenticated_userid(request)
 
   config = {'client_id': tim_config['oauth'][SERVICE]['key'],
             'client_secret': tim_config['oauth'][SERVICE]['secret'],
@@ -62,7 +58,7 @@ def instagram_callback(request):
 
   unauthenticated_api = client.InstagramAPI(**config)
 
-  access_token = unauthenticated_api.exchange_code_for_access_token(code)
+  access_token, user_data = unauthenticated_api.exchange_code_for_access_token(code)
 
   # TODO: proper handling of error case
   if not access_token:
@@ -96,5 +92,7 @@ def instagram_callback(request):
     r.raise_for_status()
   except requests.exceptions.RequestException, e:
     log.error(e.message)
+
+  log.info("Added Instagram service for author %s" % author_id)
 
   return HTTPFound(location=request.route_path('settings'))

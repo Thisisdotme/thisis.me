@@ -29,9 +29,10 @@ import controllers.services
 import controllers.author_service_profile
 import controllers.author_service_query
 import controllers.author_feature
+import controllers.status
 
 
-# dictionary that holds all configuration merged from multple sources
+# dictionary that holds all configuration merged from multiple sources
 tim_config = {}
 
 
@@ -88,6 +89,8 @@ def main(global_config, **settings):
 
 
 def add_views(configuration):
+  controllers.status.add_views(configuration)
+
   controllers.login.add_views(configuration)
 
   controllers.author.add_views(configuration)

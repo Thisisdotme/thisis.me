@@ -1,11 +1,12 @@
 <metal:index use-macro="load: master_template.html">
   
-  <div class="initializing" id="app" data-role="page" data-title="App" data-url="/oauth}" metal:fill-slot="page_content">
+  <div class="initializing" id="app" data-role="page" data-title="App" data-url="/oauth" metal:fill-slot="page_content">
   	<a href="#" id="nav-toggle"></a>
 		
 		<div id="content-container">
 		  <div class="app-page light active">
-        <div>
+		    <div class="toolbar"><a class="cancel-link" href="/settings">Cancel</a><h1>Add Feature</h1></div>
+        <div class="add-feature-container">
     			<div>
     				<div class="addfeature">
     					<div class="logo"><img src="/img/thisisme/me_gloss.png"/></div>
@@ -37,6 +38,10 @@
 		TIM.pageInfo = {
 			authorName: ''
 		}
+		$('.toolbar .cancel-link').click(function(e){
+		  //e.preventDefault();
+		  //window.history.back();
+		})
 	</script>
   
 

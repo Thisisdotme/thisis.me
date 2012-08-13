@@ -25,6 +25,14 @@ TIM.views.EventView = Backbone.View.extend( {
    }
 });
 
+TIM.views.messageView = Backbone.View.extend( {
+   className: "message",
+   template:"message",
+   render: function() {
+     var html = ''; 
+   }
+});
+
 TIM.tapEvent = "tap";
 
 TIM.views.Highlight = TIM.views.EventView.extend( {
@@ -196,7 +204,8 @@ TIM.views.CreateUser = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "click #newuser-submit" : "submitForm"
+      "click #newuser-submit" : "submitForm",
+      "click #login-link" : "showLogin"
     },
     
     initialize: function(options) {
@@ -248,7 +257,7 @@ TIM.views.CreateUser = Backbone.View.extend( {
            console.log("create response: ", data, status, xhr);
            //do something with the data...
            alert('hey! new user!');
-          
+           
            TIM.eventAggregator.trigger('usercreated', {name:data.name});
          },
          error: function(data) {
@@ -262,6 +271,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
       return false;
     },
     
+    showLogin: function(e) {
+      TIM.showLoginForm();
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
@@ -273,23 +288,29 @@ TIM.views.CreateUser = Backbone.View.extend( {
 
 TIM.views.Settings = Backbone.View.extend( {
         
-    className: "app-page light",
-    template: "services",
+    className: "app-page light toolbar-top settings-page services",
+    template: "settings",
     
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
-      "click li a" : "toggleSetting",
-      "click #logout-link" : "doLogout"
+      "click .services-form li a" : "toggleSetting",
+      "click .features-form li a" : "toggleFeature",
+      "click #logout-link" : "doLogout",
+      "click .profile-tab" : "showProfileInfo",
+      "click .services-tab" : "showServices",
+      "click .features-tab" : "showFeatures"
     },
     
     initialize: function(options) {
         options = options || {};
+        if(options.featureCollection) {
+          this.featureCollection = options.featureCollection;
+        }
+        
         var that = this;
         
         _.bindAll(this);
-        //make this a Comments collection
-        
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -299,11 +320,34 @@ TIM.views.Settings = Backbone.View.extend( {
     render: function() {
       var that = this;
       
+      //remove the 'me' service for display
+      var me = that.collection.getByName('me');
+      if(me) {
+        that.collection.remove(me);
+      }
+      
       //compare the list of all services vs. the author's services
       this.collection.each(function(item){
+        
         var name = item.get('name');
+        
         item.set('url', '/oauth/' + name);
+        
         if(TIM.currentUserServices && TIM.currentUserServices.getByName(name)) {
+          item.set('enabled', 'enabled');
+        } else {
+          item.set('enabled', 'disabled');
+        }
+      })
+      
+      //compare the list of all features vs. the author's features
+      this.featureCollection.each(function(item){
+        
+        var name = item.get('name');
+        
+        item.set('url', 'feature-' + name);
+        
+        if(TIM.currentUserFeatures && TIM.currentUserFeatures.getByName(name)) {
           item.set('enabled', 'enabled');
         } else {
           item.set('enabled', 'disabled');
@@ -312,7 +356,7 @@ TIM.views.Settings = Backbone.View.extend( {
       
       var userName = TIM.authenticatedUser.get('name') || '';
       
-      var templateContext = {name: userName, services: this.collection.toJSON()};
+      var templateContext = {name: userName, services: this.collection.toJSON(), features: this.featureCollection.toJSON()};
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
   		this.$el.html(html);
@@ -320,6 +364,8 @@ TIM.views.Settings = Backbone.View.extend( {
     },
     
     toggleSetting: function(e) {
+      event.preventDefault();
+      event.stopPropagation();
       var href = "";
       try {
         href = e.currentTarget.href;
@@ -333,6 +379,22 @@ TIM.views.Settings = Backbone.View.extend( {
       return false;
     },
     
+    toggleFeature: function(e) {
+       event.preventDefault();
+        event.stopPropagation();
+        var name = "";
+        try {
+          name = $(e.currentTarget).data('feature-name');
+        } catch(e) {
+          name = "";
+        }
+        if (name !== "") {
+          alert("activete " + name);
+          //window.location.href = href;
+        }
+        return false;
+    },
+    
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
@@ -341,8 +403,29 @@ TIM.views.Settings = Backbone.View.extend( {
     doLogout: function(e) {
       TIM.doLogout();
       e.preventDefault();
-    }
+    },
     
+    showProfileInfo: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('profile');
+      this.$el.removeClass('services features');
+    },
+    
+    showServices: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('services');
+      this.$el.removeClass('features profile');
+    
+    },
+    
+    showFeatures: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('features');
+      this.$el.removeClass('services profile');
+    }
     
 } );
 

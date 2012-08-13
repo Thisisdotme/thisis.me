@@ -1,5 +1,5 @@
 <metal:index use-macro="load: master_template.html">
-	<div id="app" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
+	<div id="app" class="initializing loading" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
     <style>
       body { background-color:#fff !important;}
       #index { display:none; }
@@ -101,6 +101,7 @@
           </div>
         </div>
       </div>
+      <div id="loading-img"><div>loading...</div></div>
     </div>
     <nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>
@@ -227,6 +228,8 @@
                vScrollbar: false
           });
    			setTimeout(function () { iScrollElem.refresh();  }, 0);
+   			TIM.setLoading(false);
+   			TIM.setInitializing(false);
         renderFavorites();
       }
       

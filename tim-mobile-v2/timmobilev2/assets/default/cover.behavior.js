@@ -43,7 +43,10 @@
       
       className: "app-page",
       
+      loadingNews: false,
+      
       events: {
+        "swipe" : "showNews",
         "tap .highlight" : "showHighlight",
         "tap a" : "linkClicked"
       },
@@ -133,6 +136,16 @@
         event.preventDefault();
         event.stopPropagation(); //let the global handler for link clicks take care of it!
         TIM.handleLinkClick(event);
+      },
+      
+      showNews: function(event) {
+        var that = this;
+        if (this.loadingNews) {
+          return;
+        }
+        TIM.app.navigate('timeline', {trigger:true});
+        this.loadingNews = true;
+        window.setTimeout('that.loadingNes = false', 10000); //hacky way of re-enabling 'cover swipe'
       }
   });
   
