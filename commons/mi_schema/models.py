@@ -556,33 +556,9 @@ class Feature(Base):
 
     return row
 
-  def toJSONObject(self):
-    return {'id': self.id, 'name': self.name}
-
   @classmethod
   def exists(cls, feature_name):
     return db.Session().query(Feature).filter(Feature.name == feature_name).count() == 1
-
-  def to_JSON_dictionary(self, request):
-    return {'id': self.id,
-            'name': self.name,
-            'images': {
-              'color': {
-                'high_res': None,
-                'med_res': None,
-                'low_res': None
-              },
-              'mono': {
-                'high_res': None,
-                'med_res': None,
-                'low_res': None
-              }
-            },
-            'text': {
-              'label': None,
-              'description': None
-            }
-           }
 
 
 class AuthorFeatureMap(Base):

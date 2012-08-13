@@ -197,7 +197,7 @@ def view_author(author_context, request):
   author_json = author.toJSONObject()
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
   # ??? HAB what's wrong with passing session's around
-  author_json['features'] = miapi.controllers.feature_utils.getAuthorFeatures(
+  author_json['features'] = miapi.controllers.feature_utils.get_author_features(
       tim_commons.db.Session(),
       author.id,
       request)

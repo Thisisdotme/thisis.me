@@ -36,7 +36,7 @@ def post_facebook(request):
   return HTTPFound(location=url)
 
 
-@view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/confirmation.pt')
+@view_config(route_name='facebook_callback', request_method='GET')
 def facebook_callback(request):
 
   author_id = unauthenticated_userid(request)
@@ -46,8 +46,6 @@ def facebook_callback(request):
 
   code = request.params.get('code')
   if code:
-
-    print 'code => %s' % code
 
     # let's get the acces_token
     api_key = tim_config['oauth'][SERVICE]['key']

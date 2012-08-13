@@ -7,7 +7,7 @@ from sqlalchemy import func
 
 from mi_schema.models import Feature, AuthorFeatureMap, AuthorFeatureDefault
 
-from .feature_utils import getAuthorFeatures
+from .feature_utils import get_author_features
 import miapi.resource
 import data_access.author
 import tim_commons.db
@@ -73,7 +73,7 @@ def list_author_features(author_features_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
-  features = getAuthorFeatures(tim_commons.db.Session(), author_id, request)
+  features = get_author_features(tim_commons.db.Session(), author_id, request)
 
   return {'author_name': author.author_name, 'features': features}
 
@@ -88,7 +88,14 @@ def add_author_feature(author_features_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
-  feature_name = request.json_body['feature_name']
+  json_dict = request.json_body
+
+  if not 'name' in json_dict:
+    # TODO: better error
+    request.response.status_int = 400
+    return {'error': 'missing required attribute "name"'}
+
+  feature_name = json_dict['name']
 
   feature = Feature.query_by_name(feature_name)
   if feature is None:

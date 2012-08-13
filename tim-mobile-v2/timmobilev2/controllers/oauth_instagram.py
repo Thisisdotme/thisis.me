@@ -58,7 +58,7 @@ def instagram_callback(request):
 
   unauthenticated_api = client.InstagramAPI(**config)
 
-  access_token, user_data = unauthenticated_api.exchange_code_for_access_token(code)
+  access_token = unauthenticated_api.exchange_code_for_access_token(code)[0]
 
   # TODO: proper handling of error case
   if not access_token:

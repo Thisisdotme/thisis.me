@@ -24,14 +24,14 @@ class AuthorModelController(object):
 
   @view_config(route_name='author.model.build', request_method='GET', renderer='jsonp', http_cache=0)
   def authorFull(self):
-
+    '''
     author_name = self.request.matchdict['authorname']
-
+    '''
     return {'error': 'not implemented'}
 
   @view_config(route_name='author.model.update', request_method='GET', renderer='jsonp', http_cache=0)
   def authorIncremental(self):
-
+    '''
     author_name = self.request.matchdict['authorname']
-
+    '''
     return {'error': 'not implemented'}
