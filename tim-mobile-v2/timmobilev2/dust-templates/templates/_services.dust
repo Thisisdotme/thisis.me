@@ -1,0 +1,16 @@
+
+<div class="services-form tab-content">
+	<h3>Add/Remove Accounts for {name}</h3>
+	<ul>
+	{#services}
+		<li class="{name} {enabled}"> {name} 
+		  <a class="activate" href="{url}">activate</a><span class="deactivate">active</span>
+		</li>
+	{/services}
+	</ul>
+	<form id="services-form" method="POST">
+	</form>
+</div>
+
+
+

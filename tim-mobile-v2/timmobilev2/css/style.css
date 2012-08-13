@@ -229,7 +229,7 @@ body.splash {
 
 #loading-img {
   display: none;
-  background: transparent url(/img/loading.gif) center center no-repeat;
+  background: transparent center center no-repeat;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -241,8 +241,8 @@ body.splash {
 #loading-img > div {
   background: rgba(60,60,60,.8);
   position: absolute;
-  top: 40%;
-  height: 60px;
+  top: 44%;
+  height: 30px;
   line-height: 30px;
   width: 30%;
   border: 1px solid #999;
@@ -273,7 +273,7 @@ body.splash {
 #error-message {
   position: absolute;
   bottom: 0;
-  width: 93%;
+  width: 100%;
   background-color: #FAF5B1;
   opacity: 0.7;
   border: 1px solid #BAAE04;
@@ -794,7 +794,7 @@ footer .service-icon.foursquare {  background: transparent url(//api.thisis.me/i
   bottom: 60px;
   height: 100px;
   width: 50px;
-  display:none; /* hide these for now */
+  x-display:none; /* hide these for now */
 }
 .photo-page .interaction-icons .comments {
   position: absolute;
@@ -928,12 +928,13 @@ footer > div {  float: left }
 footer div.main-text {
   float:none;
 }
-footer .avatar, footer .author {  display:none; }
+footer .avatar, footer .author { display:none; }
+footer .author { display:none; }
 footer .sources { padding:4px;}
-footer .avatar {  x-height: 40px }
+footer .avatar {  height: 22px }
 footer .avatar .frame {
-  height: 25px;
-  width: 20px;
+  height: 21px;
+  width: 15px;
   margin-left: 4px;
   margin-right: 4px;
   padding: 1px;
@@ -1104,9 +1105,72 @@ display:none;
 
 /* the settings page! */
 
+
+.edit-profile-form, .features-form, .services-form {
+  margin:0 auto;
+  padding:8px 16px;
+  max-width:400px;
+  display:none;
+}
+
+.profile .edit-profile-form, .features .features-form, .services .services-form {
+  display: block;
+}
+
+nav.side-tabs {
+  font-size:11px;
+  overflow:hidden;
+}
+
+nav.side-tabs a {
+  display:block;
+  text-decoration:none;
+}
+
+.split-pane {  padding-left: 52px; }
+.split-pane .side-tabs {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  width: 45px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 -45px;
+  float: left;
+  position:relative;
+  right:-1px;
+}
+
+/* side tabs nav for settings page */
+.settings-page .side-tabs li {
+  height:40px;
+}
+.settings-page .side-tabs li.selected {  background: url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat }
+.settings-page .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat }
+.settings-page .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat }
+.settings-page.profile .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.services .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.features .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.comment-list .comments {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #ccc;
+}
+
+.split-pane .main-content {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #CCC;
+  min-height: 340px;
+}
+
+.settings-page h3 {
+  margin:0 0 1em 0;
+}
+
 .services-form {
-  margin-top:40px;
-  padding:16px;
+  x-margin-top:40px;
+  padding:8px 16px;
 }
 
 .services-form li a:link, .services-form li a:visited {
@@ -1120,17 +1184,50 @@ display:none;
   padding:0;
 }
 
-.services-form li.enabled a {
-  font-weight:bold;
+.services-form li {
+  position:relative;
+  border-bottom: 1px dotted #ddd;
 }
 
-.services-form li.disabled a{
-  font-weight:normal;
+.services-form li.enabled a.activate {
+  display:none;
+}
+
+.services-form li.disabled a.activate {
+  text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:2px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  line-height:13px;
+  color:#333;
+}
+  
+.services-form li.disabled .deactivate{
+  display:none;
+}
+
+.services-form li .deactivate, .activate{
+  margin-left:15px;
+  position:absolute;
+  top:0px;
+  right:0px;
+  margin-top:2px;
+}
+
+.services-form li .deactivate{
+  text-transform: uppercase;
+  color:#3a6;
+}
+
+.services-form li .activate{
+  top:2px;
 }
 
 .services-form li {
   padding-left:20px;
-  line-height:1.5;
+  line-height:2;
 }
 
 .services-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
@@ -1150,6 +1247,8 @@ display:none;
   margin:0 auto;
   width:150px;
 }
+
+/* the oauth confirmation page */
 
 .add-feature-container {
   margin-top:40px;

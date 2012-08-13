@@ -1,0 +1,15 @@
+<div class="toolbar"><span class="cancel-link" href="#">Back</span><h1>Settings</h1></div>
+<div class="settings-container split-pane">
+  <nav class="side-tabs">
+    <ul>
+      <li class="profile-tab"></li>
+      <li class="services-tab"></li>
+      <li class="features-tab"></li>
+    </ul>
+  </nav>
+  <div class="main-content">
+    {>_profileEdit/}
+    {>_services/}
+    {>_authorFeatures/}
+  </div>
+</div>

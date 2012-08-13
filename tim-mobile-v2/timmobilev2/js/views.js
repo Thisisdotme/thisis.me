@@ -288,14 +288,17 @@ TIM.views.CreateUser = Backbone.View.extend( {
 
 TIM.views.Settings = Backbone.View.extend( {
         
-    className: "app-page light",
-    template: "services",
+    className: "app-page light toolbar-top settings-page services",
+    template: "settings",
     
     events: {
       //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click li a" : "toggleSetting",
-      "click #logout-link" : "doLogout"
+      "click #logout-link" : "doLogout",
+      "click .profile-tab" : "showProfileInfo",
+      "click .services-tab" : "showServices",
+      "click .features-tab" : "showFeatures"
     },
     
     initialize: function(options) {
@@ -347,6 +350,8 @@ TIM.views.Settings = Backbone.View.extend( {
     },
     
     toggleSetting: function(e) {
+      event.preventDefault();
+      event.stopPropagation();
       var href = "";
       try {
         href = e.currentTarget.href;
@@ -368,8 +373,29 @@ TIM.views.Settings = Backbone.View.extend( {
     doLogout: function(e) {
       TIM.doLogout();
       e.preventDefault();
-    }
+    },
     
+    showProfileInfo: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('profile');
+      this.$el.removeClass('services features');
+    },
+    
+    showServices: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('services');
+      this.$el.removeClass('features profile');
+    
+    },
+    
+    showFeatures: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.$el.addClass('features');
+      this.$el.removeClass('services profile');
+    }
     
 } );
 

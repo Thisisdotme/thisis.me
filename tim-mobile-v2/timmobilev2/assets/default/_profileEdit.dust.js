@@ -1,0 +1,1 @@
+(function(){dust.register("_profileEdit",body_0);function body_0(chk,ctx){return chk.write("<div class=\"edit-profile-form tab-content\"><h3>Edit Profile</h3><form id=\"edit-profile-form\" method=\"POST\">HEY!</form></div>");}return body_0;})();
