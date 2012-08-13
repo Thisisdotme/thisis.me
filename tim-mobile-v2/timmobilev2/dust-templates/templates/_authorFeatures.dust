@@ -3,7 +3,7 @@
 	<ul>
 	{#features}
 		<li class="{name} {enabled}"> {name} 
-		  <a class="activate" href="{url}">activate</a><span class="deactivate">active</span>
+		  <a class="activate" data-feature-name="{name}" href="{url}">activate</a><span class="deactivate">active</span>
 		</li>
 	{/features}
 	</ul>

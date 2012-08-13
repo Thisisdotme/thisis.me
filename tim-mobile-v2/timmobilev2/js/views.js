@@ -345,7 +345,7 @@ TIM.views.Settings = Backbone.View.extend( {
         
         var name = item.get('name');
         
-        item.set('url', '/oauth/' + name);
+        item.set('url', 'feature-' + name);
         
         if(TIM.currentUserFeatures && TIM.currentUserFeatures.getByName(name)) {
           item.set('enabled', 'enabled');
@@ -380,7 +380,19 @@ TIM.views.Settings = Backbone.View.extend( {
     },
     
     toggleFeature: function(e) {
-      alert('hey!');
+       event.preventDefault();
+        event.stopPropagation();
+        var name = "";
+        try {
+          name = $(e.currentTarget).data('feature-name');
+        } catch(e) {
+          name = "";
+        }
+        if (name !== "") {
+          alert("activete " + name);
+          //window.location.href = href;
+        }
+        return false;
     },
     
     cancel: function(e) {
