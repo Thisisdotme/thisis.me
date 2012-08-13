@@ -36,8 +36,10 @@ def flickr_post(request):
   return HTTPFound(location=url)
 
 
-@view_config(route_name='flickr_callback', request_method='GET')
+@view_config(route_name='flickr_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
 def flickr_callback(request):
+
+  error_msg = None
 
   author_id = authenticated_userid(request)
 
@@ -64,7 +66,14 @@ def flickr_callback(request):
     r.raise_for_status()
   except requests.exceptions.RequestException, e:
     log.error(e.message)
+    if e.response.status_code == 409:
+      error_msg = 'Service already exists for this author ({message})'.format(message=e.message)
 
   log.info("Added Flicr service for author %s" % author_id)
 
-  return HTTPFound(location=request.route_path('newsfeed'))
+  json_dict = {'api_endpoint': tim_config['api']['endpoint']}
+
+  if error_msg:
+    json_dict['error_msg'] = error_msg
+
+  return json_dict

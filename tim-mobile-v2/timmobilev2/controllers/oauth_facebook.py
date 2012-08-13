@@ -36,8 +36,10 @@ def post_facebook(request):
   return HTTPFound(location=url)
 
 
-@view_config(route_name='facebook_callback', request_method='GET')
+@view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
 def facebook_callback(request):
+
+  error_msg = None
 
   author_id = unauthenticated_userid(request)
 
@@ -107,7 +109,14 @@ def facebook_callback(request):
     r.raise_for_status()
   except requests.exceptions.RequestException, e:
     log.error(e.message)
+    if e.response.status_code == 409:
+      error_msg = 'Service already exists for this author ({message})'.format(message=e.message)
 
   log.info("Added Facebook service for author %s" % author_id)
 
-  return HTTPFound(location=request.route_path('settings'))
+  json_dict = {'api_endpoint': tim_config['api']['endpoint']}
+
+  if error_msg:
+    json_dict['error_msg'] = error_msg
+
+  return json_dict

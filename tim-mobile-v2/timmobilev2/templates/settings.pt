@@ -1,6 +1,6 @@
 <metal:index use-macro="load: master_template.html">
   
-	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
+	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name | 'thisis.me'}" metal:fill-slot="page_content">
   	<a href="#" id="nav-toggle"></a>
 		
 		<div id="content-container">
@@ -17,7 +17,7 @@
 	</div><!-- /page -->
 	<script type="text/javascript" metal:fill-slot="page_script">
 		TIM.pageInfo = {
-			authorName: '${author_name}'
+			authorName: '${author_name | "thisis.me"}'
 		}
 		
 	</script>
