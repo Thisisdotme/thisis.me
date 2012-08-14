@@ -511,33 +511,28 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
    if(TIM.isAuthorApp()) {
-     if(false || true) {
-       var f = new TIM.models.Feature({
-         name:"home",
+     var f = new TIM.models.Feature({
+       name:"home",
+     });
+     this.addOne(
+       f
+     );
+  
+     var f2 = new TIM.models.Feature({
+        name:"login",
+
+      });
+      this.addOne(
+        f2
+      )
+   
+      var f3 = new TIM.models.Feature({
+         name:"settings",
 
        });
        this.addOne(
-         f
-       );
-     }
-     if (false || true) {
-       var f2 = new TIM.models.Feature({
-          name:"login",
-
-        });
-        this.addOne(
-          f2
-        )
-      }
-      if (false || true) {
-        var f3 = new TIM.models.Feature({
-           name:"settings",
-
-         });
-         this.addOne(
-           f3
-         )
-       }
+         f3
+       )
    }
   },
 
@@ -613,7 +608,6 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	},
 	
 	featureLoaded: function() {
-	  //alert('the view knows the feature is loaded!!!!!!!!');
 	}
 	
 });
@@ -641,7 +635,7 @@ TIM.views.Comments = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "swiperight" : "hideComments",
-      "tap .back-link" : "hideComments",
+      "click .back-link" : "hideComments",
       "tap .service-tabs li" : "switchService"
     },
     

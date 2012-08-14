@@ -77,7 +77,7 @@
             },
             error: function(data) {
               TIM.eventAggregator.trigger('error', {exception:"couldn't add feature!"});
-              console.log('logout failed');
+              console.log('feature add failed');
             },
            dataType: "json"
          });

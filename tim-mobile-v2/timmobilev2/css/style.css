@@ -383,7 +383,7 @@ body.splash {
   -webkit-touch-callout: none; /* disable callout, image save panel */
   -webkit-tap-highlight-color: transparent; /* "turn off" link highlight */
 }
-.nav-open #nav-toggle {  background: url(/img/nav/logo-active.svg) no-repeat }
+.nav-open #nav-toggle {  background: url(/img/nav/logo-active.svg) no-repeat; background-size: contain; }
 #feature-nav {
   padding: 0;
   margin: 0;

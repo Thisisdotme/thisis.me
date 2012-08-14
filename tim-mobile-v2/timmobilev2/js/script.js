@@ -538,7 +538,7 @@ $(function() {
   	      TIM.setLoading(true); //make this a method on TIM
   	    }
   	    
-  	    if(localStorage && localStorage.setItem) {
+  	    if(localStorage && localStorage.setItem && TIM.isAuthorApp()) {
   	       localStorage.setItem('tim_last_url', '/' + TIM.pageInfo.authorName + "#" + featureName + (path || ""));
   	    }
   	    
