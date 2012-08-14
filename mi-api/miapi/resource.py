@@ -296,19 +296,24 @@ class Features:
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
-    if not mi_schema.models.Feature.exists(key):
+    feature = mi_schema.models.Feature.query_by_name(key)
+    if not feature:
       raise KeyError('key "{key}" not a valid Features entry'.format(key=key))
 
-    return location_aware(Feature(key), self, key)
+    return location_aware(Feature(feature), self, key)
 
 
 class Feature:
-  def __init__(self, feature_name):
-    self._name = feature_name
+  def __init__(self, feature):
+    self._feature = feature
+
+  @property
+  def feature(self):
+    return self._feature
 
   @property
   def name(self):
-    return self._name
+    return self._feature.name
 
 
 class AuthorGroups:

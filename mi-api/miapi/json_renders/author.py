@@ -12,6 +12,14 @@ import mi_schema.models
 import data_access.service
 
 
+def to_JSON_dictionary(self):
+  return {'id': self.id,
+          'author_name': self.author_name,
+          'email': self.email,
+          'full_name': self.full_name,
+          'template': self.template}
+
+
 def to_person_fragment_JSON_dictionary(author, author_service_map=None):
   JSON_dict = {'service_name': 'me',
                'id': author.id,
