@@ -331,10 +331,13 @@ $(function() {
       $('#app').removeClass('logged-in').addClass('logged-out');;
     },
     
+    //handler for when a new user has been created... try to log them in!
     handleNewUser: function(user) {
       var name = user.name;
       var password = user.password;
+      
       console.log(user);
+      
       if (name && password) {
         TIM.authenticatedUser.doLogin(name, password, function(){
            if(TIM.isAuthorApp()) {
