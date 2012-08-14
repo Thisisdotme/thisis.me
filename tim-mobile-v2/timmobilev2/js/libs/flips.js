@@ -78,7 +78,7 @@
 		
 		addSourceItem: function(elem, opts) {
 		  opts = opts || {};
-		  console.log('adding elem to source items');
+		  //console.log('adding elem to source items');
 		  if (opts && opts.addToStart) {
 		    this.sourceItems.unshift(elem);
 		  } else {

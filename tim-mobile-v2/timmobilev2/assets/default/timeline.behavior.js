@@ -166,7 +166,8 @@
   feature.activate = function(resourceId) {
     if(resourceId) { 
       
-      //turning off direct navigation to the 
+      //turning off direct navigation to the detail view
+      //
       //go straight to detail view for this resource...
       //actually we want to just go to the proper location in the timeline
       //load collection first?
@@ -192,11 +193,7 @@
   	  }
   	}
   };
-  
-  //maybe have methods to show detail view, show list view, show grid view?
-  //instead of drilling in, at this point...
-  //at the very least, go to the correct spot in the flipset
-  
+    
   feature.showDetailView = function(resourceId) {
     //do this or else should have the detail view fetch the model?
     //cache models that have already been fetched?
@@ -233,6 +230,8 @@
 		    success: function(model, response) {
           console.log('fetched model: ', model);
           feature.detailView.render();
+          
+          // - no longer going straight to the 'detail view'
           //TIM.transitionPage (feature.detailView.$el, {"animationName":"slide"});
           
           TIM.transitionPage (feature.timelineView.$el, {"animationName":"fade"});
@@ -256,7 +255,6 @@
     for(var i = 0; i < feature.timelineView.pages.length; i++) {
       var page = feature.timelineView.pages[i];
       for(var j = 0; j < page.events.length; j++) {
-        console.log(page.events[j], eventId);
         if (page.events[j].id == eventId) {
           pageNum = i + 1;
         }

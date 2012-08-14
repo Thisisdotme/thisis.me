@@ -1,11 +1,9 @@
 <div class="edit-profile-form tab-content">
-	<h3>Edit Profile</h3>
+	<h3>Edit Profile for {name}</h3>
 	<div class="profile-form input-form">
     <div class="form-container"> 
       <div class="message display-none"></div>
       <form id="edit-profile-form" method="POST">
-        <label for="edit-profile-name">Author Name</label>
-      	<input id="edit-profile-name" type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
       	<label for="edit-profile-fullname">Full Name</label>
       	<input id="edit-profile-fullname" type="text" autocapitalize="off" autocorrect="off" autocomplete="off" name="login" value=""/>
       	<label for="edit-profile-email">Email</label>

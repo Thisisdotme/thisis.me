@@ -15,6 +15,8 @@ from tim_commons import db
 
 import miapi.resource
 
+import miapi.json_renders.feature
+
 log = logging.getLogger(__name__)
 
 
@@ -56,7 +58,7 @@ def list_features(request):
 
   feature_list = []
   for feature in db.Session().query(Feature).order_by(Feature.name):
-    feature_list.append(feature.to_JSON_dictionary())
+    feature_list.append(miapi.json_renders.feature.to_JSON_dictionary(feature, request))
 
   return {'features': feature_list}
 
@@ -84,37 +86,27 @@ def add_feature(request):
     request.response.status_int = 409
     return {'error': e.message}
 
-  return {'feature': feature.to_JSON_dictionary()}
+  return {'feature': miapi.json_renders.feature.to_JSON_dictionary(feature, request)}
 
 
 def get_feature(feature_context, request):
 
-  feature_name = feature_context.feature_name
+  feature = feature_context.feature
 
-  try:
-    feature = db.Session().query(Feature).filter_by(name=feature_name).one()
-  except NoResultFound:
-    request.response.status_int = 404
-    return {'error': 'feature "{0}" does not exist'.format(feature_name)}
-
-  return feature.to_JSON_dictionary()
+  return miapi.json_renders.feature.to_JSON_dictionary(feature, request)
 
 
 def delete_feature(feature_context, request):
 
-  feature_name = feature_context.feature_name
+  feature = feature_context.feature
 
   db_session = db.Session()
 
   try:
-    feature = db_session.query(Feature).filter_by(name=feature_name).one()
     db_session.delete(feature)
     db_session.flush()
-  except NoResultFound:
-    request.response.status_int = 404
-    return {'error': 'feature "{name}" does not exist'.format(name=feature_name)}
   except Exception, e:
     request.response.status_int = 500
     return {'error': e.message}
 
-  return {'name': feature_name}
+  return miapi.json_renders.feature.to_JSON_dictionary(feature, request)

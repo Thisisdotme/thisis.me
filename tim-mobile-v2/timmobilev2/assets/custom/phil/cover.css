@@ -54,11 +54,7 @@
 }
 
 
-/* cameron's styles */
-
-
-.cover-page .header
-{
+.cover-page .header {
 	display:block;
 	left:0;
 	margin:10%;
@@ -70,16 +66,14 @@
 	width:80%;
 }
 
-.cover-page .header span
-{
+.cover-page .header span {
 	display:block;
 	font-family:"Holtwood One SC";
 	text-align:left;
 	white-space:nowrap;
 }
 
-.cover-page #first-name
-{
+.cover-page #first-name {
 	-webkit-text-fill-color:#FF0;
 	-webkit-text-stroke:1px #000;
 	line-height:30%;
@@ -89,8 +83,7 @@
 	font-size:44px;
 }
 
-.cover-page #last-name
-{
+.cover-page #last-name {
 	-webkit-text-fill-color:#FFF;
 	-webkit-text-stroke:1px #000;
 	margin-left:10%;
@@ -99,8 +92,7 @@
 	font-size:36px;
 }
 
-.cover-page section
-{
+.cover-page section {
 	bottom:0;
 	left:0;
 	position:absolute;

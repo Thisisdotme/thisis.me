@@ -52,7 +52,7 @@ TIM.views.Photo = TIM.views.EventView.extend( {
 
 TIM.views.Checkin = TIM.views.EventView.extend( {
   className: "event checkin",
-  template:"_event"   
+  template:"_checkin"   
 });
 
 TIM.views.Status = TIM.views.EventView.extend( {
@@ -86,6 +86,9 @@ TIM.views.getEventView = function (event) {
     case "follow":
       view = new TIM.views.Follow({event: event});
       break;
+    case "checkin":
+      view = new TIM.views.Checkin({event: event});
+      break;
     default: 
       view = new TIM.views.EventView({event: event});
   }
@@ -99,9 +102,14 @@ TIM.views.renderEvent = function(event, template) {
   event.event_template = event.event_template || "_event";
   for(var i = 0; i < event.events.length; i++) {
     var ev = event.events[i];
+    
+    //ugh, terrible place to find the image url
+    if (ev.origin.known) {
+      ev.footer_img = TIM.allServices.getFooterImage(ev.origin.known.service_name);
+    }
+    
     var view = TIM.views.getEventView(ev);
-    console.log('event view event_type', ev, view, ev.type)
-    ev.event_template = view.template; //this is horseshit - do those really need to be views?
+    ev.event_template = view.template; //this is probably wrong - do those really need to be views?
   }
   return TIM.views.renderTemplate(template, event);
 }
@@ -123,7 +131,7 @@ TIM.views.renderTemplate = function(template, context) {
 	return html;
 }
 
-TIM.renderTemplate = TIM.views.renderTemplate; //shorthand?
+TIM.renderTemplate = TIM.views.renderTemplate; //shorthand...
 
 TIM.views.Login = Backbone.View.extend( {
         
@@ -131,10 +139,10 @@ TIM.views.Login = Backbone.View.extend( {
     template: "login",
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click #login-submit" : "submitForm",
-      "click #create-user-link" : "newUser"
+      "click #create-user-link" : "newUser",
+      "keypress" : "handlekeypress"
     },
     
     initialize: function(options) {
@@ -142,8 +150,6 @@ TIM.views.Login = Backbone.View.extend( {
         var that = this;
         
         _.bindAll(this);
-        //make this a Comments collection
-        
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -154,7 +160,7 @@ TIM.views.Login = Backbone.View.extend( {
       var that = this;
       
       var templateContext = {
-        message: "Hey!"
+        message: ""
       }
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
@@ -169,7 +175,8 @@ TIM.views.Login = Backbone.View.extend( {
       $('#login-form').attr('action', url);
       var login = $('#login-login').val();
       var password = $('#login-password').val();
-      //fake the ajax submit here!
+      
+      //validate before trying to log in!
       
       this.model.doLogin(login, password, function() {
         if(TIM.isAuthorApp()) {
@@ -191,8 +198,13 @@ TIM.views.Login = Backbone.View.extend( {
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
-    }
+    },
     
+    handlekeypress: function(e) {
+      if (e.keyCode == 13) {
+        this.submitForm()
+      }
+    }
     
 } );
 
@@ -202,10 +214,10 @@ TIM.views.CreateUser = Backbone.View.extend( {
     template: "newuser",
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click #newuser-submit" : "submitForm",
-      "click #login-link" : "showLogin"
+      "click #login-link" : "showLogin",
+      "keypress" : "handlekeypress"
     },
     
     initialize: function(options) {
@@ -223,7 +235,7 @@ TIM.views.CreateUser = Backbone.View.extend( {
       var that = this;
       
       var templateContext = {
-        message: "Hey!"
+        message: ""
       }
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
@@ -235,14 +247,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
     
     submitForm: function(e) {
       
-      
+      var self = this;
       var authorName = $('#newuser-name').val();
       var fullName = $('#newuser-fullname').val();
       var email = $('#newuser-email').val();
       var password = $('#newuser-password').val();
-      
-      alert("trying to create " + authorName);
-      
+    
       var url = TIM.apiUrl + "authors";
      
       //fake the ajax submit here!
@@ -256,14 +266,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
         success: function(data, xhr) {
            console.log("create response: ", data, status, xhr);
            //do something with the data...
-           alert('hey! new user!');
-           
-           TIM.eventAggregator.trigger('usercreated', {name:data.name});
+           TIM.eventAggregator.trigger('usercreated', {name:data.author_name, password:password});
          },
          error: function(data) {
            console.log("create error: ", data);
-           $('.newuser-form .message').html('could not create that user.');
-           self.trigger('newuserError');
+           $('.newuser-form .message').html('could not create user.').css('visibility', 'visible');
+           //self.trigger('newuserError');
          },
         dataType: "json"
       });
@@ -280,6 +288,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
+    } ,
+
+    handlekeypress: function(e) {
+      if (e.keyCode == 13) {
+        this.submitForm()
+      }
     }
     
     
@@ -345,7 +359,7 @@ TIM.views.Settings = Backbone.View.extend( {
         
         var name = item.get('name');
         
-        item.set('url', 'feature-' + name);
+        item.set('url', name);
         
         if(TIM.currentUserFeatures && TIM.currentUserFeatures.getByName(name)) {
           item.set('enabled', 'enabled');
@@ -380,7 +394,7 @@ TIM.views.Settings = Backbone.View.extend( {
     },
     
     toggleFeature: function(e) {
-       event.preventDefault();
+        event.preventDefault();
         event.stopPropagation();
         var name = "";
         try {
@@ -389,8 +403,7 @@ TIM.views.Settings = Backbone.View.extend( {
           name = "";
         }
         if (name !== "") {
-          alert("activete " + name);
-          //window.location.href = href;
+          TIM.authenticatedUser.addFeature(name);
         }
         return false;
     },
@@ -440,6 +453,10 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
        this.$messageEl = $('#error-message > div');
    },
    
+   events: {
+     "click div" : "close"
+   },
+   
    render: function (options) {
      options = options || {};
      var message = options.message || "We encountered an error.  Please try again.";
@@ -448,6 +465,37 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
      if(TIM.appContainerElem.find(this.el).length == 0)  {
 			  TIM.appContainerElem.append(this.$el);
 		  }     
+   },
+   
+   close: function(e) {
+     this.$el.hide();
+   }
+});
+
+TIM.views.FlashMessage = Backbone.View.extend( {
+   id: "flash-message",
+   
+   initialize: function() {
+       _.bindAll(this);
+       this.$messageEl = $('#flash-message > div');
+   },
+   
+   events: {
+     "click div" : "close"
+   },
+   
+   render: function (options) {
+     options = options || {};
+     var message = options.message || "Successful!";
+     this.$el.html('<div>' + message + '</div>');
+     if(TIM.appContainerElem.find(this.el).length == 0)  {
+			  TIM.appContainerElem.append(this.$el);
+		  } 
+		 this.$el.show();
+   },
+   
+   close: function(e) {
+     this.$el.hide();
    }
 });
    
@@ -467,7 +515,6 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    },
 		
   addOne : function ( item ) {
-    console.log(item);
   	var view = new TIM.views.FeatureNavItem({model:item});
   	
   	view.render();
@@ -480,35 +527,21 @@ TIM.views.FeatureNav = Backbone.View.extend( {
   render: function() {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
-   if(TIM.isAuthorApp()) {
-     if(false || true) {
-       var f = new TIM.models.Feature({
-         name:"home",
+   this.renderDefaults();
+   
+  },
+  
+  renderDefaults: function() {
+     if(TIM.isAuthorApp()) {
+        var f1 = new TIM.models.Feature({name:"settings"});
+        this.addOne(f1);
+        
+        var f2 = new TIM.models.Feature({name:"login"});
+        this.addOne(f2);
 
-       });
-       this.addOne(
-         f
-       );
-     }
-     if (false || true) {
-       var f2 = new TIM.models.Feature({
-          name:"login",
-
-        });
-        this.addOne(
-          f2
-        )
+        var f3 = new TIM.models.Feature({name:"home"});
+        this.addOne(f3);
       }
-      if (false || true) {
-        var f3 = new TIM.models.Feature({
-           name:"settings",
-
-         });
-         this.addOne(
-           f3
-         )
-       }
-   }
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {
@@ -518,7 +551,6 @@ TIM.views.FeatureNav = Backbone.View.extend( {
  	    } else {
  	      feature.set('selected', false);
  	    }
- 	    //console.log(feature);
  	  });
  	  $("#feature-nav").removeClass('active');
  	}
@@ -542,7 +574,6 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	render : function () {
 	  var self = this;
 	  var selected = this.model.get('selected');
-	  console.log('rendering menu item');
 	  var templateContext = this.model.toJSON();
 	  
 	  //temporary hack to change 'timeline' to 'news'
@@ -583,7 +614,6 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	},
 	
 	featureLoaded: function() {
-	  //alert('the view knows the feature is loaded!!!!!!!!');
 	}
 	
 });
@@ -611,7 +641,7 @@ TIM.views.Comments = Backbone.View.extend( {
     events: {
       //"click span" : "itemClicked"
       "swiperight" : "hideComments",
-      "tap .back-link" : "hideComments",
+      "click .back-link" : "hideComments",
       "tap .service-tabs li" : "switchService"
     },
     
@@ -762,8 +792,8 @@ TIM.views.Toolbar = Backbone.View.extend( {
       {name: 'detailLink'}
     ],
     
-    initialize: function(spec) {
-        spec = spec || {};
+    initialize: function(options) {
+        options = options || {};
         _.bindAll(this);
     },
     
@@ -780,8 +810,7 @@ TIM.views.Toolbar = Backbone.View.extend( {
     //maybe broadcast it app-wide?
     
     itemClicked: function(event) {
-      var item = event.currentTarget;//event.data('name')
-      //console.log(event, item);
+      var item = event.currentTarget;
       this.trigger('itemClicked', $(item).data('toolbar-item'));
     }
     
@@ -806,15 +835,13 @@ TIM.views.Page = Backbone.View.extend( {
 				this.page = spec.page;
     },
 
-    render: function( tmpl, callback ) {
+    render: function(tmpl, callback) {
       
-      console.log('rendering page: ', this.page);
 			var that = this;
 			tmpl = tmpl || "timelinePage";
 			
 			var html = TIM.views.renderEvent(this.page, tmpl);
-			///var html = TIM.views.renderTemplate(tmpl, this.page);
-      //this.$el.append(html);
+			
       callback(html);
       this.hasRendered = true;
     }
@@ -843,17 +870,17 @@ TIM.mixins.flipset = {
 		},
 		
 		//
-		// send pages to the flips script one at a time as strings?
-		// maybe have the flips script render the pages instead?
+		// send pages to the flipset object one at a time as strings?
+		// maybe have the flipset object render the pages instead?
 		//
 		
-		renderPage: function(page){  //'pages' could just be 'page'
+		renderPage: function(page){ 
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({page:page});
 	    var tmpl = page.template ? page.template : this.pageTemplate;
 	    var that = this;
 	    
-	    console.log("page template: ", tmpl);
+	    //console.log("page template: ", tmpl);
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
 	    //seems wasteful
@@ -861,6 +888,7 @@ TIM.mixins.flipset = {
         if (!that.flipSetInitialized) {
 					
 					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml], parentView: that});
+					
 					window.flipSet = that.flipSet; //for debugging
 					that.flipSetInitialized = true;
 				} else {
@@ -889,9 +917,7 @@ TIM.mixins.flipset = {
 			options.start = startIndex;
 			
 			//makePages groups raw events into 'pages' which will be rendered into html for the flipset
-			console.log("making pages hammer");
 			this.makePages(options);
-			console.log("made pages hammer");
 			
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
@@ -902,7 +928,6 @@ TIM.mixins.flipset = {
 			  TIM.appContainerElem.append(this.$el);
 			}
 			
-			//replace this with this.$el.hammer() ???
 			try{
 			  this.flipSet.initializeHammer();
 			} catch(e) {
@@ -937,9 +962,11 @@ TIM.mixins.flipset = {
 			  //shouldn't skip too many non-one-page events...
 			  
 				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
+				  //we have a 'single event page'
 				  var template = self.pageTemplate;
 					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
+				  //it's a half-page event
 					page.push(item);
 					if(page.length == 2) {
 						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
@@ -969,10 +996,9 @@ TIM.mixins.flipset = {
 			if (this.flipSet && this.pages.length > 0) {
 			  this.flipSet.createPageElements();
 			} else {
-			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>'); //hack for empty highlights, should be generalized
+			  this.$el.html('<div class="flipset-empty"><p>This user has no events</p></div>'); //hack for empty highlights/events, should be generalized
 			}
 		},
-		
 		
 		//this is called when the user has flipped to the next page in the flipset...
 		flipNext: function(){
@@ -980,7 +1006,7 @@ TIM.mixins.flipset = {
 			var that = this;
 			
 			//prerendering 3 pages & sending to flipset
-			//we always want to have this many pages available to teh flipset because it needs to have as many as 4 pages in the DOM at one time
+			//we always want to have this many pages available to the flipset because it needs to have as many as 4 pages in the DOM at one time
 			
 			if(this.pageNum == (this.renderedIndex - 3)) {
 				this.renderPageChunk(this.renderedIndex);
@@ -1041,7 +1067,7 @@ TIM.mixins.flipset = {
   		
 		},
 		
-		//maybe a handler to do something when the user has flipped a page
+		//a handler to do something when the user has flipped a page
 		pageChanged: function (num) {
 		  
 		}

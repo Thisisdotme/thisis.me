@@ -14,6 +14,7 @@ from mi_schema.models import Service
 from tim_commons import db
 
 import miapi.resource
+import miapi.json_renders.service
 
 
 log = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ def list_services(request):
 
   serviceList = []
   for service in db.Session().query(Service).order_by(Service.service_name):
-    serviceList.append(service.to_JSON_dictionary(request))
+    serviceList.append(miapi.json_renders.service.to_JSON_dictionary(service, request))
 
   return {'services': serviceList}
 
@@ -70,7 +71,7 @@ def get_service(context, request):
 
   service = db.Session().query(Service).filter_by(service_name=service_name).one()
 
-  return service.to_JSON_dictionary(request)
+  return miapi.json_renders.service.to_JSON_dictionary(service, request)
 
 
 # add a new service
@@ -104,7 +105,7 @@ def add_service(request):
     request.response.status_int = 409
     return {'error': e.message}
 
-  return service.to_JSON_dictionary(request)
+  return miapi.json_renders.service.to_JSON_dictionary(service, request)
 
 
 # delete an existing service
@@ -126,4 +127,4 @@ def delete_service(context, request):
 
   log.info('successfully deleted service: "{name}"'.format(name=service_name))
 
-  return service.to_JSON_dictionary(request)
+  return miapi.json_renders.service.to_JSON_dictionary(service, request)

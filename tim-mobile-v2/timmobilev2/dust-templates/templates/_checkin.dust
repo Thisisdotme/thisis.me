@@ -1,4 +1,4 @@
- <div class="content follow">
+ <div class="content checkin">
 		{?photo}
 		   	<div class="inner-image">
 				<img src='{photo.image_url}' />

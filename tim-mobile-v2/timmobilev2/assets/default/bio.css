@@ -3,7 +3,7 @@
 body {
 }
 
-.bio {
+#bio-page .bio {
   padding:8px;
   background-color:#333;
   color:#f6f6f6;

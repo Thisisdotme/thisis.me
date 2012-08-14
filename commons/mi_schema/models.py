@@ -44,14 +44,6 @@ class Author(Base):
                                                    self.password,
                                                    self.template)
 
-  # OBSOLETE -- DO NOT USE
-  def toJSONObject(self):
-    return {'id': self.id,
-            'author_name': self.author_name,
-            'email': self.email,
-            'full_name': self.full_name,
-            'template': self.template}
-
   def to_JSON_dictionary(self):
     return {'id': self.id,
             'author_name': self.author_name,
@@ -113,33 +105,9 @@ class Service(Base):
   def __repr__(self):
     return "<Service('%s')>" % (self.service_name)
 
-  def toJSONObject(self):
-    return {'service_id': self.id, 'name': self.service_name}
-
   @classmethod
   def exists(cls, service_name):
     return db.Session().query(Service).filter(Service.service_name == service_name).count() == 1
-
-  def to_JSON_dictionary(self, request):
-    return {'id': self.id,
-            'name': self.service_name,
-            'images': {
-              'color': {
-                'high_res': request.static_url('miapi:%s' % self.color_icon_high_res),
-                'med_res': request.static_url('miapi:%s' % self.color_icon_medium_res),
-                'low_res': request.static_url('miapi:%s' % self.color_icon_low_res)
-              },
-              'mono': {
-                'high_res': request.static_url('miapi:%s' % self.mono_icon_high_res),
-                'med_res': request.static_url('miapi:%s' % self.mono_icon_medium_res),
-                'low_res': request.static_url('miapi:%s' % self.mono_icon_low_res)
-              }
-            },
-            'text': {
-              'label': None,
-              'description': None
-            }
-           }
 
 
 class AuthorServiceMap(Base):
@@ -219,11 +187,6 @@ class AuthorGroup(Base):
 
   def to_JSON_dictionary(self):
     return {'id': self.id,
-            'group_name': self.group_name}
-
-  def toJSONObject(self):
-    return {'id': self.id,
-            'author_id': self.author_id,
             'group_name': self.group_name}
 
 
@@ -556,33 +519,9 @@ class Feature(Base):
 
     return row
 
-  def toJSONObject(self):
-    return {'id': self.id, 'name': self.name}
-
   @classmethod
   def exists(cls, feature_name):
     return db.Session().query(Feature).filter(Feature.name == feature_name).count() == 1
-
-  def to_JSON_dictionary(self, request):
-    return {'id': self.id,
-            'name': self.name,
-            'images': {
-              'color': {
-                'high_res': None,
-                'med_res': None,
-                'low_res': None
-              },
-              'mono': {
-                'high_res': None,
-                'med_res': None,
-                'low_res': None
-              }
-            },
-            'text': {
-              'label': None,
-              'description': None
-            }
-           }
 
 
 class AuthorFeatureMap(Base):

@@ -2,17 +2,21 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
    //override 'fetch' globally here
    fetch: function(options) {
      //set some global defaults for fetching
+     //
+     
      options = options || {};
-     options.dataType = options.dataType || "jsonp";
+     options.dataType = options.dataType || "json";
      options.callbackParameter = options.callbackParameter || "callback";
      options.timeout = options.timeout || 25000;
+     
+     //CORS!
+     options.xhrFields = {withCredentials: true};
+     options.contentType = 'application/json';
      
      options.error = options.error || function(model, resp) {
        TIM.eventAggregator.trigger("error", {exception: "API call failed"});
      }
-     
-  
-     
+    
      return Backbone.Collection.prototype.fetch.call(this, options);
    },
   getByName: function(name) {
@@ -48,7 +52,7 @@ TIM.collections.Features = TIM.collections.BaseCollection.extend({
 });
 
 //
-// base collections for all comments in teh system
+// base collection for all comments in the system
 //
 
 TIM.collections.Comments = TIM.collections.BaseCollection.extend({
@@ -86,6 +90,14 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		},
 		setURL: function(username) {
 		  this.url = TIM.apiUrl + "authors/" + username + "/services";
+		},
+		getFooterImage : function(name) {
+		  var service = this.getByName(name);
+		  if (service) {
+		    return service.getFooterImage();
+		  } else {
+		    return "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
+		  }
 		}
 		
 });
@@ -105,13 +117,13 @@ TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 		},
 		parse: function(resp) {
 		  console.log('features response: ', resp)
-		  return (resp.services);
+		  return (resp.features);
 		},
 		getByName: function(name) {
 		  return this.find(function(model){return model.get('name') == name});
 		},
 		setURL: function(username) {
-		  this.url = TIM.apiUrl + "authors/" + username + "/features";
+		  this.url = TIM.apiUrl + "authors/" + username;
 		}
 		
 });
@@ -129,7 +141,6 @@ TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 		getByName: function(name) {
 		  return this.find(function(model){return model.get('name') == name});
 		}
-		
 });
 
 
@@ -186,7 +197,7 @@ TIM.mixins.paging = {
   },
   
   //get earlier events and append them to the beginning of the collection
-  //basically the same as  getNextPage with 'at' set to 0 in the call to 'fetch'
+  //basically the same as getNextPage with 'at' set to 0 in the call to 'fetch'
   getPrevPage: function() {
   
   },

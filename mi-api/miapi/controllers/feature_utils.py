@@ -8,8 +8,10 @@ from sqlalchemy import (and_)
 
 from mi_schema.models import Author, Feature, AuthorFeatureMap, AuthorFeatureDefault
 
+import miapi.json_renders.feature
 
-def getAuthorFeatures(db_session, author_id, request):
+
+def get_author_features(db_session, author_id, request):
 
   features = []
   for feature, afd in db_session.query(Feature, AuthorFeatureDefault). \
@@ -18,7 +20,7 @@ def getAuthorFeatures(db_session, author_id, request):
                                            AuthorFeatureMap.feature_id == AuthorFeatureDefault.feature_id)). \
       join(Author, AuthorFeatureMap.author_id == author_id). \
       order_by(AuthorFeatureMap.sequence):
-    featureJSONObj = feature.to_JSON_dictionary(request)
+    featureJSONObj = miapi.json_renders.feature.to_JSON_dictionary(feature, request)
     if afd:
       featureJSONObj['default'] = True
     features.append(featureJSONObj)

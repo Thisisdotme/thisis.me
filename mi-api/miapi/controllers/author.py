@@ -17,6 +17,7 @@ import tim_commons.db
 import miapi.resource
 import miapi.controllers.feature_utils
 import miapi.controllers.author_utils
+import miapi.json_renders.author
 
 
 def add_views(configuration):
@@ -75,7 +76,7 @@ def add_views(configuration):
 def list_authors(request):
   author_list = []
   for author in data_access.author.query_authors():
-    author_json = author.toJSONObject()
+    author_json = miapi.json_renders.author.to_JSON_dictionary(author)
     author_list.append(author_json)
 
   return author_list
@@ -176,7 +177,7 @@ def add_author(request):
   data_access.author_group_map.add_author_group_map(
       mi_schema.models.AuthorGroupMap(author_group.id, author.id))
 
-  author_json = author.toJSONObject()
+  author_json = miapi.json_renders.author.to_JSON_dictionary(author)
   logging.info("create author %s", author_name)
 
   # TODO: return the correct code
@@ -194,10 +195,10 @@ def view_author(author_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author %s' % author_id}
 
-  author_json = author.toJSONObject()
+  author_json = miapi.json_renders.author.to_JSON_dictionary(author)
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
   # ??? HAB what's wrong with passing session's around
-  author_json['features'] = miapi.controllers.feature_utils.getAuthorFeatures(
+  author_json['features'] = miapi.controllers.feature_utils.get_author_features(
       tim_commons.db.Session(),
       author.id,
       request)
@@ -237,7 +238,7 @@ def update_author(author_context, request):
       return {'error': e.message}
 
     # TODO: return the correct code
-    return author.toJSONObject()
+    return miapi.json_renders.author.to_JSON_dictionary(author)
 
   # TODO: better error
   return {'error': 'user does not exist'}
