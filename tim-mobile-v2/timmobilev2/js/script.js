@@ -43,7 +43,7 @@ $(function() {
   }
   
   //if there's no author, don't do anything!
-  if(!TIM.pageInfo || !TIM.pageInfo.authorName || TIM.pageInfo.authorName === '') {
+  if(!TIM.pageInfo) {
     return;
   }
   
@@ -225,27 +225,44 @@ $(function() {
 	var parsedUri = parseUri(window.location.href);
   
   //are we looking at an author's app or are we somewhere else (homepage, etc.)
+  
+  TIM.nonAuthorPaths = ['/', '/login', '/settings'];
+  TIM.forbiddenAuthorNames = ["thisis.me", "this is me", ""];
+  
 	TIM.isAuthorApp = function() {
-	  var val = true;
-	  if (TIM.pageInfo.authorName === 'thisis.me') {
-	    val = false;
+	  var val = true, i, j;
+	  
+	  //check for a path that's not an author app
+	  for (i = 0; i < TIM.nonAuthorPaths.length; i++) {
+	    if(parsedUri.path === TIM.nonAuthorPaths[i]) {
+	      val = false;
+	      break;
+	    }
 	  }
-	  if(parsedUri.path === '/' || parsedUri.path == '/login' || parsedUri.path == '/settings') { //don't do all the author-specific feature stuff if we're on the home screen
-      val = false;
-    }
+	  //check 'forbidden author names'
+	  for (j = 0; j < TIM.forbiddenAuthorNames.length; j++) {
+	    if(TIM.pageInfo.authorName === TIM.forbiddenAuthorNames[j]) {
+	      val = false;
+	      break;
+	    }
+	  }
+
     return val;
 	}
-	
-			
+				
   TIM.Router = Backbone.Router.extend({
 	  
 	  routes: {
-	    //setting these routes so that basically every hash change gets handled, whether there's a corresponding feature for it or not
+	    //setting these routes so that every hash change gets handled, whether there's a corresponding feature for it or not
       "*anything" : "catchAll",
       "" : "catchAll"
     },
 
     initialize: function() {
+      
+      //
+      // binding some handlers for some 'app-wide' events that may be triggered throughout the app
+      //
           	
     	TIM.eventAggregator.bind('featureloaded', this.featureLoaded, this);
     	TIM.eventAggregator.bind('featurenavrendered', this.featureNavRendered, this);
@@ -257,8 +274,9 @@ $(function() {
     	TIM.eventAggregator.bind('usercreated', this.handleNewUser, this);
     	TIM.eventAggregator.bind('addedfeature', this.handleFeatureAdd, this);
     	
-    	//move these to backbone views?
-    	//make sure we have tap event
+    	//some 'global' DOM event handers
+    	//
+    	//might want a global 'app view' to do these bindings?
     	
     	$('#nav-toggle').on('tap', (function(event){
     	  event.preventDefault();
@@ -286,8 +304,11 @@ $(function() {
     	  event.stopPropagation();
     	})
     },
-  
-    //should probably pass an option here of whether to 'activate' the feature
+    
+    //
+    //this is called wehn a feature has finished loading (css, templates, behavior)
+    //if it's passed 'nabigateOnLoad' as an option, it will 'activate' the feature
+    //
     featureLoaded: function(options) {
       console.log("Feature loaded callback: ", options);
       var feature = options.feature, path = options.path, navigate = options.navigateOnLoad;
@@ -306,7 +327,8 @@ $(function() {
       console.log("General application error: ", options);
       TIM.showErrorMessage(options);
     },
-  
+    
+    ///this is called when the the main 'feature nav' has finished rendering
     featureNavRendered: function(){
       var hash = window.location.hash;
       hash = hash || "cover";
@@ -317,9 +339,8 @@ $(function() {
       }
     },
   
-    //this obviously needs to be more generalized - should work for <a> tags
+    //this needs to be more generalized - should work for <a> tags
     detailLinkClicked: function(id, featureName){
-      console.log('user clicked a detail link - args are:', arguments);
       this.navigate(featureName + '/' + id, {'trigger': true}); //trigger a hashchange event
     },
     
@@ -335,8 +356,6 @@ $(function() {
     handleNewUser: function(user) {
       var name = user.name;
       var password = user.password;
-      
-      console.log(user);
       
       if (name && password) {
         TIM.authenticatedUser.doLogin(name, password, function(){
@@ -354,17 +373,16 @@ $(function() {
       TIM.showSettingsView();
     }
         
-	})
+	}) //end of router declaration
+	
 	
 	TIM.fetchCurrentUserServices = function(options) {
 	  options = options || {};
 	  if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
       TIM.currentUserServices.setURL(TIM.authenticatedUser.get('name'));
   	  TIM.currentUserServices.fetch({
-    		//add this timeout in case call fails...
     		timeout : 5000,
     		success: function(resp) {
-    		  console.log('fetched user services ', TIM.currentUserServices.length);
     		  TIM.currentUserServices.initialized = true;
     		  if(options.callback) {
     		    options.callback();
@@ -386,7 +404,6 @@ $(function() {
 	  if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
       TIM.currentUserFeatures.setURL(TIM.authenticatedUser.get('name'));
   	  TIM.currentUserFeatures.fetch({
-    		//add this timeout in case call fails...
     		timeout : 5000,
     		success: function(resp) {
     		  console.log('fetched user features ', TIM.currentUserFeatures.length);
@@ -420,6 +437,7 @@ $(function() {
 	//
 	
 	if (TIM.isAuthorApp()) {
+	  //get features for this author from backend
 	  TIM.features.fetch({
   		success: function(resp) {
   		  console.log('fetched features');
@@ -431,6 +449,7 @@ $(function() {
   		}
   	});
 	} else {
+	  //just add default 'nav items'
 	  TIM.features.reset([
 	      {name: "login"},
 	      {name: "settings"},
@@ -443,7 +462,6 @@ $(function() {
   
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
-  
   
 	$.fn.animationComplete = function( callback ) {
 		if("WebKitTransitionEvent" in window) {
@@ -587,13 +605,16 @@ $(function() {
   };
   
   TIM.showLoginForm = function (options) {
+    options = options || {};
     TIM.setLoading(false);
     if (!TIM.loginView) {
       TIM.loginView = new TIM.views.Login({model: TIM.authenticatedUser});
     }
-    TIM.loginView.render({message: "dam"});
+    TIM.loginView.render();
     TIM.setNavVisible(false);
-    TIM.app.navigate("#login");
+    if(!options.noHashChange) {
+      TIM.app.navigate("#login");
+    }
     TIM.transitionPage (TIM.loginView.$el);
   };
   
@@ -668,6 +689,9 @@ $(function() {
   //
   //for now this simply handles the DOM page transition
   //
+  // takes 2 arguments
+  // toPage is the DOM element we want to display as a 'page'
+  // options is a hash which can specify the transition name, whether it's a reverse transition, and a callback function to invoke
   //
   
 	TIM.transitionPage = function (toPage, options) {
@@ -761,6 +785,12 @@ $(function() {
 	  }
 	  TIM.setLoading(true);
 	  TIM.showSettingsPage({noHashChange:true});
+	}
+	
+	//if the user's trying to go directly to the login page, show the login form
+	if(parsedUri.path === '/login' || TIM.pageInfo.intendedPath === 'login') {
+	  TIM.showLoginForm({noHashChange:true});
+    return;
 	}
 	
 	//show an error message if there's one present in the page (provided by the server-side page template)
