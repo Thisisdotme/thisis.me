@@ -1,5 +1,4 @@
 <metal:index use-macro="load: master_template.html">
-  
 	<div class="initializing" id="app" data-role="page" data-title="App" data-url="/${author_name}" metal:fill-slot="page_content">
   	<a href="#" id="nav-toggle"></a>
 		<link rel="stylesheet" href="/${author_name}/asset/theme.css">
@@ -8,12 +7,11 @@
 		<div id="content-container" class="flash-message">
 		  <div id="splash-screen" class="app-page active"></div>
 		  <div id="loading-img"><div>loading...</div></div>
-		  <div id="flash-message"><div>Hey!  A flash messgae!</div></div>
 		</div>
 		<nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>
   	</nav>
-  	<script src="/${author_name}/asset/coreTemplates.dust.js"></script>
+  	<script src="/js/templates/coreTemplates.dust.js"></script>
   	
   	<!-- remote debugger script! uncomment for remote debugging in weinre! -->
   	

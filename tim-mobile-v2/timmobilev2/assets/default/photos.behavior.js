@@ -480,10 +480,6 @@ the behavior for the photo feature
             pageMetaData: {count:getAlbumCount(this.album)}
           });
           this.hasRendered = true;
-          //this.toolbarView = new TIM.views.Toolbar();
-          //var toolbarEl = this.toolbarView.render();
-          //this.$el.append(toolbarEl);
-          //this.toolbarView.bind('itemClicked', this.toolbarClicked, this);
         }
       },
 
@@ -503,8 +499,6 @@ the behavior for the photo feature
       //we're attempting to load ahead of teh flip
       renderNextPageset: function() {
         this.renderFlipSet();
-        //maybe do this a coupld of flips ahead?
-        //this.flipNext();
         TIM.setLoading(false);
       },
       
@@ -647,7 +641,6 @@ the behavior for the photo feature
       //it should be paged via (perhaps) infinite scroll
       
       //call fetch here
-      //let's try the jsonp plugin here...
       feature.albumCollection.fetch({
   			success: function(model, resp) {
   		    feature.hasFetchedCollection = true;

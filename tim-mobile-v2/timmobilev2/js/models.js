@@ -5,44 +5,33 @@
       loggedIn: false,
       logoutUrl: TIM.apiUrl + "logout",
       doLogin: function(name, password, callback) {
+      
+        var self = this;
         
-        
-          var self = this;
-          
-          /*
-          
-          $.post('/login', { name: name, password: password }, function(data) {
-            self.set(data); // data should be in JSON and contain model of this user
-          }, 'json').error(
-            self.trigger('loginError'); // our custom event
-          );
-          
-          */
-          
-          $.ajax({
-            type: 'POST',
-            url: this.url,
-            data: JSON.stringify({ login: name, password: password}),
-            xhrFields: {withCredentials: true},
-            contentType: 'application/json',
-            success: function(data, xhr) {
-               console.log("login response: ", data, status, xhr);
-               //do something with the data...
-               self.set(data);
-               $.cookie('tim_author_name', data.name);
-               self.loggedIn = true;
-               if(callback) {
-                 callback();
-               }
-               TIM.eventAggregator.trigger('login', {name:data.name});
-             },
-             error: function(data) {
-               console.log("login error: ", data);
-               $('.login-form .message').html('Could not find that user name and password.').css('visibility','visible');
-               self.trigger('loginError');
-             },
-            dataType: "json"
-          });
+        $.ajax({
+          type: 'POST',
+          url: this.url,
+          data: JSON.stringify({ login: name, password: password}),
+          xhrFields: {withCredentials: true},
+          contentType: 'application/json',
+          success: function(data, xhr) {
+             console.log("login response: ", data, status, xhr);
+             //do something with the data...
+             self.set(data);
+             $.cookie('tim_author_name', data.name);
+             self.loggedIn = true;
+             if(callback) {
+               callback();
+             }
+             TIM.eventAggregator.trigger('login', {name:data.name});
+           },
+           error: function(data) {
+             console.log("login error: ", data);
+             $('.login-form .message').html('Could not find that user name and password.').css('visibility','visible');
+             self.trigger('loginError');
+           },
+          dataType: "json"
+        });
         
       },
       doLogout: function(callback) {
@@ -59,7 +48,25 @@
               TIM.eventAggregator.trigger('logout', {});
             },
             error: function(data) {
-              alert('logout failed!!!');
+              console.log('logout failed');
+            },
+           dataType: "json"
+         });
+      },
+      addFeature: function(featureName, callback) {
+        var json = {name: featureName};
+        $.ajax({
+           type: 'POST',
+           url: TIM.apiUrl + 'authors/' + this.get('name') + "/features",
+           data: JSON.stringify (json),
+           xhrFields: {withCredentials: true},
+           contentType: 'application/json',
+           success: function(data, xhr) { 
+              TIM.eventAggregator.trigger('addedfeature', {});
+            },
+            error: function(data) {
+              TIM.eventAggregator.trigger('error', {exception:"couldn't add feature!"});
+              console.log('feature add failed');
             },
            dataType: "json"
          });
@@ -67,7 +74,8 @@
       createFromCookie: function() {
         //see if there's a session and tim_author_name cookie...
         var authorName = $.cookie('tim_author_name');
-        if(authorName) {
+        var authTkt = $.cookie('auth_tkt');
+        if(authorName && authTkt) {
           this.set({'name': authorName});
           this.loggedIn = true;
           TIM.eventAggregator.trigger('login', {});
@@ -107,20 +115,19 @@
     },
 
     initialize: function() {
-      //add route to this feature to router  /<featurename>
-      //also add route to detail view to router /<featurename>/<resourceid>
-      //could also be /featurename/<listid>/<resourceid>
-      
-      //if 3 levels, add 3rd route?
-      
+      //when the feature is initialized 
+      //we add the feature's routes to the router  
+      //<featurename>
+      //<featurename>/<additional path>
+      //it's up to the feature to decide what to do with the additional path
+
       var featureName = this.get('name');
-      //a route for /<featurename>
       this.set('path', (featureName === "home" ? "/" : "/" + featureName));
       
+      //a route for /<featurename>
       TIM.app.route(featureName, featureName); 
-      //TIM.app.route(featureName + "/:resource", featureName, function(number){});
       
-      //TIM.app.route(featureName + "/:collection/:resource", featureName, function(resource, collection){return 9000}); //we probably have to get way more 'general-purpose' here, but this might (tenuously) do for now?
+      //a route for /<featurename>/<any additional path>
       TIM.app.route(featureName + "/*path", featureName, function(path){});
       
     },
@@ -202,7 +209,11 @@
   //model for services, e.g. facebook, twitter, etc.
   TIM.models.Service  = Backbone.Model.extend({
     getFooterImage: function() {
-      return this.get('color_icon_high_res');
+      var imgs = this.get('images');
+      if (imgs) {
+        return imgs.color.high_res;
+      }
+      return TIM.placeholderIcon;
     }
   });
   
