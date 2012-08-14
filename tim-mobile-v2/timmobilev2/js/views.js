@@ -453,6 +453,33 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
      this.$el.hide();
    }
 });
+
+TIM.views.FlashMessage = Backbone.View.extend( {
+   id: "flash-message",
+   
+   initialize: function() {
+       _.bindAll(this);
+       this.$messageEl = $('#flash-message > div');
+   },
+   
+   events: {
+     "click div" : "close"
+   },
+   
+   render: function (options) {
+     options = options || {};
+     var message = options.message || "Successful!";
+     this.$el.html('<div>' + message + '</div>');
+     if(TIM.appContainerElem.find(this.el).length == 0)  {
+			  TIM.appContainerElem.append(this.$el);
+		  } 
+		 this.$el.show();
+   },
+   
+   close: function(e) {
+     this.$el.hide();
+   }
+});
    
 
 TIM.views.FeatureNav = Backbone.View.extend( {

@@ -73,7 +73,6 @@
            xhrFields: {withCredentials: true},
            contentType: 'application/json',
            success: function(data, xhr) { 
-              alert('added feature!')
               TIM.eventAggregator.trigger('addedfeature', {});
             },
             error: function(data) {

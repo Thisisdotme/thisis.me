@@ -122,10 +122,13 @@
     TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 	  var authorJSON, favorites = [], renderFavorites;
 	  var holding = false; var lastURL = '/', hasSession = false, $scrollElem, iScrollElem;
+	  
     //get the authors
+    
     $(function(){
       hasSession = $.cookie('tim_session');
       $.cookie('tim_session', true);
+      //using localstorage to navigate to last saved state upon new session (a workaround for demoing from home screen)
       if (Modernizr.localstorage) {
         if (!hasSession) {
           lastURL = localStorage.getItem('tim_last_url');

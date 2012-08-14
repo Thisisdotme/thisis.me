@@ -175,6 +175,15 @@ $(function() {
 	  }
 	}
 	
+	TIM.setFlashMessageShowing = function (show) {
+	  TIM.flashMessageShowing_ = show;
+	  if(show) {
+	    $('#app').addClass('flash-message');
+	  } else {
+	    $('#app').removeClass('flash-message');
+	  }
+	}
+	
 	//TIM.setLoading(true);  //don't show 'loading' message by default!
 	
 	//all available app features - hardcode for now, API call to get list doesn't exist?
@@ -267,6 +276,7 @@ $(function() {
     	TIM.eventAggregator.bind('login', this.handleLogin, this);
     	TIM.eventAggregator.bind('logout', this.handleLogout, this);
     	TIM.eventAggregator.bind('usercreated', this.handleNewUser, this);
+    	TIM.eventAggregator.bind('addedfeature', this.handleFeatureAdd, this);
     	
     	//move these to backbone views?
     	//make sure we have tap event
@@ -356,6 +366,11 @@ $(function() {
             }
         });
       }
+    },
+    
+    handleFeatureAdd: function() {
+      TIM.showFlashMessage('Added new feature!');
+      TIM.showSettingsView();
     }
         
 	})
@@ -586,10 +601,10 @@ $(function() {
   TIM.showFlashMessage = function (options) {
     TIM.setLoading(false);
     if (!TIM.flashMessageView) {
-      TIM.flashMessageView = new TIM.views.ErrorMessage();
+      TIM.flashMessageView = new TIM.views.FlashMessage();
     }
-    TIM.flashMessageView.render({message: options.exception});
-    TIM.setErrorShowing(true);
+    TIM.flashMessageView.render({message: options.text});
+    TIM.setFlashMessageShowing(true);
   };
   
   TIM.showLoginForm = function (options) {
@@ -609,7 +624,6 @@ $(function() {
     } else {
       window.location.href = "/";
     }
-    //window.history.back();
     TIM.setNavVisible(true);
   };
   
@@ -742,10 +756,6 @@ $(function() {
 	  event.preventDefault();
 	  var el = event.currentTarget;
 	 
-	  //everything after the first slash?
-	  //this probably needs to be something more intelligent with scary regular expressions!
-	  //
-	  
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
 	  TIM.app.navigate(url, {trigger: true});
 	}
@@ -761,19 +771,10 @@ $(function() {
 	  TIM.setLoading(true);
 	 TIM.showSettingsPage({noHashChange:true});
 	}
-
-	if(parsedUri.path === '/') {
-	  if(!TIM.authenticatedUser.loggedIn) {
-	    //show login link
-	  } else {
-	    //show hello message!
-	  }
-	}
 	
 	if(TIM.errorInfo && TIM.errorInfo !== '') {
 	  TIM.showErrorMessage({exception: TIM.errorInfo});
 	}
 
-	console.log('at bottom', parsedUri)
 	
 });

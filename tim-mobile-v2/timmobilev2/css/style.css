@@ -1060,11 +1060,12 @@ footer .time-and-location {
   opacity: 0.9;
   border: 1px solid #BAAE04;
   border-radius: 4px;
-display:none;
+  display:none;
   margin-bottom:12px;
   position:absolute;
   bottom:8px;
   z-index:0;
+  width:93%;
 }
 
 #app.flash-message #flash-message {
