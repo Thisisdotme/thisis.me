@@ -629,6 +629,18 @@ body.splash {
   
 }
 
+.app-page .photo-album .thumbnail  {
+  height:35px;
+  width:35px;
+  float:left;
+  margin:8px;
+}
+
+.app-page .photo-album .thumbnail img {
+  height:35px;
+  width:35px;
+}
+
 /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
     Built by David Kaneda and maintained by Jonathan Stark.
 */
