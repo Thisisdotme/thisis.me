@@ -141,7 +141,8 @@ TIM.views.Login = Backbone.View.extend( {
     events: {
       "click .cancel-link" : "cancel",
       "click #login-submit" : "submitForm",
-      "click #create-user-link" : "newUser"
+      "click #create-user-link" : "newUser",
+      "keypress" : "handlekeypress"
     },
     
     initialize: function(options) {
@@ -197,6 +198,12 @@ TIM.views.Login = Backbone.View.extend( {
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
+    },
+    
+    handlekeypress: function(e) {
+      if (e.keyCode == 13) {
+        this.submitForm()
+      }
     }
     
 } );
@@ -209,7 +216,8 @@ TIM.views.CreateUser = Backbone.View.extend( {
     events: {
       "click .cancel-link" : "cancel",
       "click #newuser-submit" : "submitForm",
-      "click #login-link" : "showLogin"
+      "click #login-link" : "showLogin",
+      "keypress" : "handlekeypress"
     },
     
     initialize: function(options) {
@@ -280,6 +288,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
     cancel: function(e) {
       TIM.cancelLogin();
       e.preventDefault();
+    } ,
+
+    handlekeypress: function(e) {
+      if (e.keyCode == 13) {
+        this.submitForm()
+      }
     }
     
     

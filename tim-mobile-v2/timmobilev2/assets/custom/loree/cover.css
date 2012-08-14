@@ -13,20 +13,6 @@
   font-weight: bold;
 }
 
-.cover-page h1.title {
-  font-size:34px;
-  font-weight:normal;
-  color:#fff200;
-  text-align:left;
-  -webkit-text-stroke: 1px #333;
-  position:absolute;
-  top:22px;
-  left:12px;
-  font-family: 'Holtwood One SC',serif;
-  line-height:1.1;
-  text-transform:uppercase;
-}
-
 .cover-page a, .cover-page a:visited {
   text-decoration:none;
   color:#FFCE78;
@@ -53,12 +39,7 @@
   display:none;
 }
 
-
-/* cameron's styles */
-
-
-.cover-page .header
-{
+.cover-page .header {
 	display:block;
 	left:0;
 	margin:10%;
@@ -70,16 +51,14 @@
 	width:80%;
 }
 
-.cover-page .header span
-{
+.cover-page .header span {
 	display:block;
 	font-family:"Holtwood One SC";
 	text-align:left;
 	white-space:nowrap;
 }
 
-.cover-page #first-name
-{
+.cover-page #first-name {
 	-webkit-text-fill-color:#FF0;
 	-webkit-text-stroke:1px #000;
 	line-height:30%;
@@ -89,8 +68,7 @@
 	font-size:44px;
 }
 
-.cover-page #last-name
-{
+.cover-page #last-name {
 	-webkit-text-fill-color:#FFF;
 	-webkit-text-stroke:1px #000;
 	margin-left:10%;
@@ -99,8 +77,7 @@
 	font-size:36px;
 }
 
-.cover-page section
-{
+.cover-page section {
 	bottom:0;
 	left:0;
 	position:absolute;
@@ -111,8 +88,7 @@ p.pullquote {
   margin:.6em 0;
 }
 
-.pullquote a
-{
+.pullquote a {
 	color:#FFCE78;
 	text-decoration:none;
 }
