@@ -17,18 +17,19 @@
     			<div>
     				<h1>Add ${feature} Feature?</h1>
     				<p>This will redirect to ${feature} where you'll enter your credentials and then return here</p>
-    				<form action="${url}" method="post" data-ajax="false">
-    					<input type="submit" name="form.submitted" value="Continue"/>
+    				<form id="oauth-form" action="${url}" method="post" data-ajax="false">
+    					<input id="oauth-submit-button" type="submit" name="form.submitted" value="Continue"/>
     				</form>
     			</div>
 
     		</div><!-- /content -->
       </div>
+      <div id="loading-img"><div>loading...</div></div>
 		</div>
 		<nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>
   	</nav>
-  
+    <script src="/js/templates/coreTemplates.dust.js"></script>
   	<!-- remote debugger script! uncomment for remote debugging in weinre! -->
   	
   	<!-- script src="http://10.0.1.5:8081/target/target-script-min.js#anonymous"></script -->
@@ -41,6 +42,9 @@
 		$('.toolbar .cancel-link').click(function(e){
 		  //e.preventDefault();
 		  //window.history.back();
+		})
+		$('#oauth-form').submit(function(e){
+		  TIM.setLoading(true);
 		})
 	</script>
   
