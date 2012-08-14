@@ -769,6 +769,10 @@ $(function() {
 	    //show hello message!
 	  }
 	}
+	
+	if(TIM.errorInfo && TIM.errorInfo !== '') {
+	  TIM.showErrorMessage({exception: TIM.errorInfo});
+	}
 
 	console.log('at bottom', parsedUri)
 	
