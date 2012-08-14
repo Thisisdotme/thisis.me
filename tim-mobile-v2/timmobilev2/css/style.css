@@ -1150,7 +1150,6 @@ nav.side-tabs a {
 }
 
 .settings-form {
-  x-margin-top:40px;
   padding:8px 16px;
 }
 
@@ -1199,7 +1198,7 @@ nav.side-tabs a {
 
 .settings-form li .deactivate{
   text-transform: uppercase;
-  color:#3a6;
+  color:#666;
 }
 
 .settings-form li .activate{

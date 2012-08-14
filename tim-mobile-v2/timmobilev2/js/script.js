@@ -687,7 +687,7 @@ $(function() {
   };
   
   //
-  //for now this simply handles the DOM page transition
+  // this handles the DOM page transition between two 'app pages'
   //
   // takes 2 arguments
   // toPage is the DOM element we want to display as a 'page'
@@ -754,7 +754,7 @@ $(function() {
         });
       	  
 	  TIM.currentPageElem = toPage;
-	  TIM.previousPageElem = fromPage;
+	  TIM.previousPageElem = fromPage; //should keep a history of DOM pages?
 	};
 	
 	TIM.availableTransitions = ["fade","slide","flip"];
