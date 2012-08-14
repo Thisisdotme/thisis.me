@@ -9,7 +9,7 @@
 		<nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>
   	</nav>
-  	<script src="/js/coreTemplates.dust.js"></script>
+  	<script src="/js/templates/coreTemplates.dust.js"></script>
   
   	<!-- remote debugger script! uncomment for remote debugging in weinre! -->
   	
