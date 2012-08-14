@@ -7,7 +7,6 @@
 		<div id="content-container" class="flash-message">
 		  <div id="splash-screen" class="app-page active"></div>
 		  <div id="loading-img"><div>loading...</div></div>
-		  Hey I'm the app!
 		</div>
 		<nav id="feature-nav" class="clearfix">
   		<ul id="feature-nav-items"></ul>
