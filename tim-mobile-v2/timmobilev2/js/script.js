@@ -482,7 +482,7 @@ $(function() {
   
   TIM.navigateHandler = function(route, path) {
 	    
-	    // the 'route' argument will be in the form "route:featurename"
+	    // the 'route' argument will be in the form "route:<featurename>"
 	    //
 	    // the 'path' argument will be there if there's additional path info for the feature to handle
 	    
@@ -513,32 +513,29 @@ $(function() {
   	      return;
   	    }
   	    
-  	    //navigate straight to the settings page if that's what the user's requesting
-  	    if (parsedUri.path == "/settings" && path == 'cover') {
-  	      location.href = "/settings";
+  	    //there isn't a proper settings 'feature', so special-case this
+  	    if (featureName == 'settings') {
+  	      TIM.showSettingsPage();
   	      return;
   	    }
-  	    
-  	    //navigate straight to the settings page if that's what the user's requesting
-  	    if (featureName == 'settings' || parsedUri.path == "/settings") {
-  	      location.href = "/settings";
-  	      localStorage.removeItem('tim_last_url');
-  	      return;
-  	    }
-  	    
+  	  
   	    var feature = TIM.features.getByName(featureName);
   	    
   	    //show the loading message if we're navigating from one feature to the other
   	    if (TIM.features.getSelectedFeature()) {
-  	      TIM.setLoading(true); //make this a method on TIM
+  	      TIM.setLoading(true);
   	    }
   	    
+  	    //this is used for demo purposed so the demo-er doen't have to save everyone's app separately to the home screen
   	    if(localStorage && localStorage.setItem && TIM.isAuthorApp()) {
   	       localStorage.setItem('tim_last_url', '/' + TIM.pageInfo.authorName + "#" + featureName + (path || ""));
   	    }
   	    
   	    if(!feature) {
-  	      console.log('no feature');
+  	      
+  	      //we didn't find the feature in the set of loaded features
+  	      console.log('feature not found');
+  	      
   	      if(featureName == "logout" && parsedUri.path == "/settings") {
   	        location.href = "/settings";
     	      localStorage.removeItem('tim_last_url');
@@ -554,6 +551,7 @@ $(function() {
   	      //stay on the current feature if there is one, or else go to the cover page
   	      
   	      $('#app').removeClass('nav-open');
+  	      
   	      if(TIM.features.getSelectedFeature()) {
   	          $('#app').removeClass('loading');
   	          TIM.app.navigate(TIM.features.getSelectedFeature().get('name'), {replace:true});
@@ -564,7 +562,9 @@ $(function() {
   	      }
   	      resourceId = undefined;
   	    }
+  	    
   	    $('#app').removeClass('nav-open nav-hidden');
+  	    
   	    if (feature.behavior) {
   	        console.log('********* feature already loaded: activating  ********* (feature, path)', feature, path);
             feature.behavior.activate(path);
@@ -695,9 +695,10 @@ $(function() {
   //
   
 	TIM.transitionPage = function (toPage, options) {
-	  //TIM.setErrorShowing(false);
 	  $('#app').removeClass('loading initializing nav-open');
 	  options = options || {};
+	  
+	  //can explicitly pass in the 'from page' or else we'll consider the current page element to be the 'from page'
 	  var fromPage = options.fromPage || TIM.currentPageElem;
 	  
 	  //only do transition if necessary - if the from and to page are the same, just return
@@ -713,6 +714,7 @@ $(function() {
 	  var inClasses = " in " + animationName + " ";
 	  var outClasses = " out " + animationName + " ";
 	  var transitions = TIM.getAvailableTransitions();
+	  
 	  if(options.reverse) {
 	    inClasses += " reverse ";
 	    outClasses += " reverse ";
@@ -772,10 +774,11 @@ $(function() {
 	  
 	  //first look at data attribute of element
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
-	  TIM.app.navigate(url, {trigger: true});
+	  
+	  TIM.app.navigate(url, {trigger: true}); //trigger is set to true to trigger a backbone hashchange event
 	}
 	
-	localStorage.removeItem('tim_last_url'); //this is used for saving to homescreen demo purposes
+	localStorage.removeItem('tim_last_url'); //this is used for 'saving to homescreen' demo purposes
 	
 	//if the user's trying to go directly to the settings page, prevent them if not authenticated
 	if(parsedUri.path === '/settings' || TIM.pageInfo.intendedPath === 'settings') {
@@ -784,12 +787,12 @@ $(function() {
 	    return;
 	  }
 	  TIM.setLoading(true);
-	  TIM.showSettingsPage({noHashChange:true});
+	  TIM.showSettingsPage({noHashChange:true}); //don't need to append #settings to the url
 	}
 	
 	//if the user's trying to go directly to the login page, show the login form
 	if(parsedUri.path === '/login' || TIM.pageInfo.intendedPath === 'login') {
-	  TIM.showLoginForm({noHashChange:true});
+	  TIM.showLoginForm({noHashChange:true});  //don't need to append #login to the url
     return;
 	}
 	
