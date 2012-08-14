@@ -36,33 +36,11 @@ window.addEventListener("load",function() {
 $(function() {
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
-  
-  if($.cookie('tim_user_session') && false) {
-    var name = $.cookie('tim_user_name');
-    if(name && false) {
-      TIM.currentUser = new TIM.models.User({name: name});
-      TIM.currentUser.fetch({
-        dataType: 'jsonp',
-    		success: function(resp) {
-    		  console.log('fetched user');
-    		},
-    		error: function(resp, xhr) {
-    		  console.log('error response:', resp, xhr)
-    			TIM.showErrorMessage({
-    			    exception: "didn't get current user"
-    			});
-    		}
-    	});
-    } else {
-      //var name = "ken";// $.cookie('tim_user_name', 'ken');
-    }
-  }
-  
+    
   
   if(!$.cookie('tim_session')) {
-    //$.cookie('tim_session', true);
+    $.cookie('tim_session', true);
   }
-  
   
   //if there's no author, don't do anything!
   if(!TIM.pageInfo || !TIM.pageInfo.authorName || TIM.pageInfo.authorName === '') {
@@ -259,13 +237,11 @@ $(function() {
 	
 	var parsedUri = parseUri(window.location.href);
   
-  if (parsedUri.path == '/settings') {
-    
-  }
-  
-  	
 	TIM.isAuthorApp = function() {
 	  var val = true;
+	  if (TIM.pageInfo.authorName === 'thisis.me') {
+	    val = false;
+	  }
 	  if(parsedUri.path === '/' || parsedUri.path == '/login' || parsedUri.path == '/settings') { //don't do all the author-specific feature stuff if we're on the home screen
       val = false;
     }
@@ -290,6 +266,7 @@ $(function() {
     	TIM.eventAggregator.bind('error', this.handleError, this);
     	TIM.eventAggregator.bind('login', this.handleLogin, this);
     	TIM.eventAggregator.bind('logout', this.handleLogout, this);
+    	TIM.eventAggregator.bind('usercreated', this.handleNewUser, this);
     	
     	//move these to backbone views?
     	//make sure we have tap event
@@ -364,6 +341,21 @@ $(function() {
 
     handleLogout: function() {
       $('#app').removeClass('logged-in').addClass('logged-out');;
+    },
+    
+    handleNewUser: function(user) {
+      var name = user.name;
+      var password = user.password;
+      console.log(user);
+      if (name && password) {
+        TIM.authenticatedUser.doLogin(name, password, function(){
+           if(TIM.isAuthorApp()) {
+              TIM.app.navigate('cover', {trigger:true});
+            } else {
+              window.location.href = "/";
+            }
+        });
+      }
     }
         
 	})
@@ -395,8 +387,7 @@ $(function() {
 	TIM.fetchCurrentUserFeatures = function(options) {
 	  options = options || {};
 	  TIM.currentUserFeatures.initialized = true;
-	  return;
-	  
+	 
 	  if(TIM.authenticatedUser && TIM.authenticatedUser.get('name')) {
       TIM.currentUserFeatures.setURL(TIM.authenticatedUser.get('name'));
   	  TIM.currentUserFeatures.fetch({
@@ -460,6 +451,8 @@ $(function() {
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
   
+  console.log('have user')
+  
 	$.fn.animationComplete = function( callback ) {
 		if( "WebKitTransitionEvent" in window ) {
 			return $( this ).one( 'webkitAnimationEnd', callback );
@@ -477,6 +470,8 @@ $(function() {
 	TIM.app.bind('all', function(route, path) {
 	    TIM.navigateHandler(route, path);  //move the handler fn outside of here so we can explicitly call it elsewhere
   });
+  
+  console.log('bind navigate handler')
   
   TIM.navigateHandler = function(route, path) {
 	    
@@ -577,7 +572,6 @@ $(function() {
     } else {
       TIM.showLoginForm();
     }
-    
   }
   
   TIM.showErrorMessage = function (options) {
@@ -759,7 +753,7 @@ $(function() {
 	TIM.globalHammer = new Hammer(document.body);
 	localStorage.removeItem('tim_last_url');
 	
-	if(parsedUri.path === '/settings') {
+	if(parsedUri.path === '/settings' || TIM.pageInfo.intendedPath === 'settings') {
 	  if(!TIM.authenticatedUser.loggedIn) {
 	    TIM.showLoginForm();
 	    return;
@@ -775,5 +769,7 @@ $(function() {
 	    //show hello message!
 	  }
 	}
+
+	console.log('at bottom', parsedUri)
 	
 });

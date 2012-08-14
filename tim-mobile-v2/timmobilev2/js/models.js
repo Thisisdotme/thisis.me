@@ -59,7 +59,26 @@
               TIM.eventAggregator.trigger('logout', {});
             },
             error: function(data) {
-              alert('logout failed!!!');
+              console.log('logout failed');
+            },
+           dataType: "json"
+         });
+      },
+      addFeature: function(featureName, callback) {
+        var json = {name: featureName};
+        $.ajax({
+           type: 'POST',
+           url: TIM.apiUrl + 'authors/' + this.get('name') + "/features",
+           data: JSON.stringify (json),
+           xhrFields: {withCredentials: true},
+           contentType: 'application/json',
+           success: function(data, xhr) { 
+              alert('added feature!')
+              TIM.eventAggregator.trigger('addedfeature', {});
+            },
+            error: function(data) {
+              TIM.eventAggregator.trigger('error', {exception:"couldn't add feature!"});
+              console.log('logout failed');
             },
            dataType: "json"
          });

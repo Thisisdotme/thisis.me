@@ -235,14 +235,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
     
     submitForm: function(e) {
       
-      
+      var self = this;
       var authorName = $('#newuser-name').val();
       var fullName = $('#newuser-fullname').val();
       var email = $('#newuser-email').val();
       var password = $('#newuser-password').val();
-      
-      alert("trying to create " + authorName);
-      
+    
       var url = TIM.apiUrl + "authors";
      
       //fake the ajax submit here!
@@ -256,14 +254,12 @@ TIM.views.CreateUser = Backbone.View.extend( {
         success: function(data, xhr) {
            console.log("create response: ", data, status, xhr);
            //do something with the data...
-           alert('hey! new user!');
-           
-           TIM.eventAggregator.trigger('usercreated', {name:data.name});
+           TIM.eventAggregator.trigger('usercreated', {name:data.author_name, password:password});
          },
          error: function(data) {
            console.log("create error: ", data);
-           $('.newuser-form .message').html('could not create that user.');
-           self.trigger('newuserError');
+           $('.newuser-form .message').html('could not create user.').css('visibility', 'visible');
+           //self.trigger('newuserError');
          },
         dataType: "json"
       });
@@ -345,7 +341,7 @@ TIM.views.Settings = Backbone.View.extend( {
         
         var name = item.get('name');
         
-        item.set('url', 'feature-' + name);
+        item.set('url', name);
         
         if(TIM.currentUserFeatures && TIM.currentUserFeatures.getByName(name)) {
           item.set('enabled', 'enabled');
@@ -380,7 +376,7 @@ TIM.views.Settings = Backbone.View.extend( {
     },
     
     toggleFeature: function(e) {
-       event.preventDefault();
+        event.preventDefault();
         event.stopPropagation();
         var name = "";
         try {
@@ -389,8 +385,7 @@ TIM.views.Settings = Backbone.View.extend( {
           name = "";
         }
         if (name !== "") {
-          alert("activete " + name);
-          //window.location.href = href;
+          TIM.authenticatedUser.addFeature(name);
         }
         return false;
     },
@@ -440,6 +435,10 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
        this.$messageEl = $('#error-message > div');
    },
    
+   events: {
+     "click div" : "close"
+   },
+   
    render: function (options) {
      options = options || {};
      var message = options.message || "We encountered an error.  Please try again.";
@@ -448,6 +447,10 @@ TIM.views.ErrorMessage = Backbone.View.extend( {
      if(TIM.appContainerElem.find(this.el).length == 0)  {
 			  TIM.appContainerElem.append(this.$el);
 		  }     
+   },
+   
+   close: function(e) {
+     this.$el.hide();
    }
 });
    

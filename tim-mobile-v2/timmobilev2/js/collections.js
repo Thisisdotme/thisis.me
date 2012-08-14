@@ -105,13 +105,13 @@ TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 		},
 		parse: function(resp) {
 		  console.log('features response: ', resp)
-		  return (resp.services);
+		  return (resp.features);
 		},
 		getByName: function(name) {
 		  return this.find(function(model){return model.get('name') == name});
 		},
 		setURL: function(username) {
-		  this.url = TIM.apiUrl + "authors/" + username + "/features";
+		  this.url = TIM.apiUrl + "authors/" + username;
 		}
 		
 });
