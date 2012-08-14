@@ -109,8 +109,7 @@ TIM.views.renderEvent = function(event, template) {
     }
     
     var view = TIM.views.getEventView(ev);
-    console.log('event view event_type', ev, view, ev.type)
-    ev.event_template = view.template; //this is horseshit - do those really need to be views?
+    ev.event_template = view.template; //this is probably wrong - do those really need to be views?
   }
   return TIM.views.renderTemplate(template, event);
 }
@@ -132,7 +131,7 @@ TIM.views.renderTemplate = function(template, context) {
 	return html;
 }
 
-TIM.renderTemplate = TIM.views.renderTemplate; //shorthand?
+TIM.renderTemplate = TIM.views.renderTemplate; //shorthand...
 
 TIM.views.Login = Backbone.View.extend( {
         
@@ -140,7 +139,6 @@ TIM.views.Login = Backbone.View.extend( {
     template: "login",
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click #login-submit" : "submitForm",
       "click #create-user-link" : "newUser"
@@ -151,7 +149,6 @@ TIM.views.Login = Backbone.View.extend( {
         var that = this;
         
         _.bindAll(this);
-        //make this a Comments collection
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -162,7 +159,7 @@ TIM.views.Login = Backbone.View.extend( {
       var that = this;
       
       var templateContext = {
-        message: "Hey!"
+        message: ""
       }
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
@@ -177,7 +174,8 @@ TIM.views.Login = Backbone.View.extend( {
       $('#login-form').attr('action', url);
       var login = $('#login-login').val();
       var password = $('#login-password').val();
-      //fake the ajax submit here!
+      
+      //validate before trying to log in!
       
       this.model.doLogin(login, password, function() {
         if(TIM.isAuthorApp()) {
@@ -201,7 +199,6 @@ TIM.views.Login = Backbone.View.extend( {
       e.preventDefault();
     }
     
-    
 } );
 
 TIM.views.CreateUser = Backbone.View.extend( {
@@ -210,7 +207,6 @@ TIM.views.CreateUser = Backbone.View.extend( {
     template: "newuser",
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click #newuser-submit" : "submitForm",
       "click #login-link" : "showLogin"
@@ -231,7 +227,7 @@ TIM.views.CreateUser = Backbone.View.extend( {
       var that = this;
       
       var templateContext = {
-        message: "Hey!"
+        message: ""
       }
       
       var html = TIM.views.renderTemplate(this.template, templateContext);
@@ -505,7 +501,6 @@ TIM.views.FeatureNav = Backbone.View.extend( {
    },
 		
   addOne : function ( item ) {
-    console.log(item);
   	var view = new TIM.views.FeatureNavItem({model:item});
   	
   	view.render();
@@ -518,30 +513,21 @@ TIM.views.FeatureNav = Backbone.View.extend( {
   render: function() {
    this.addAll();
    //this is horrible... adding 'settings' as a 'feature'?
-   if(TIM.isAuthorApp()) {
-     var f = new TIM.models.Feature({
-       name:"home",
-     });
-     this.addOne(
-       f
-     );
-  
-     var f2 = new TIM.models.Feature({
-        name:"login",
-
-      });
-      this.addOne(
-        f2
-      )
+   this.renderDefaults();
    
-      var f3 = new TIM.models.Feature({
-         name:"settings",
+  },
+  
+  renderDefaults: function() {
+     if(TIM.isAuthorApp()) {
+        var f1 = new TIM.models.Feature({name:"settings"});
+        this.addOne(f1);
+        
+        var f2 = new TIM.models.Feature({name:"login"});
+        this.addOne(f2);
 
-       });
-       this.addOne(
-         f3
-       )
-   }
+        var f3 = new TIM.models.Feature({name:"home"});
+        this.addOne(f3);
+      }
   },
 
  	highlightSelectedNavItem: function(selectedFeature) {
@@ -551,7 +537,6 @@ TIM.views.FeatureNav = Backbone.View.extend( {
  	    } else {
  	      feature.set('selected', false);
  	    }
- 	    //console.log(feature);
  	  });
  	  $("#feature-nav").removeClass('active');
  	}
@@ -575,7 +560,6 @@ TIM.views.FeatureNavItem = Backbone.View.extend({
 	render : function () {
 	  var self = this;
 	  var selected = this.model.get('selected');
-	  console.log('rendering menu item');
 	  var templateContext = this.model.toJSON();
 	  
 	  //temporary hack to change 'timeline' to 'news'
@@ -794,8 +778,8 @@ TIM.views.Toolbar = Backbone.View.extend( {
       {name: 'detailLink'}
     ],
     
-    initialize: function(spec) {
-        spec = spec || {};
+    initialize: function(options) {
+        options = options || {};
         _.bindAll(this);
     },
     
@@ -812,8 +796,7 @@ TIM.views.Toolbar = Backbone.View.extend( {
     //maybe broadcast it app-wide?
     
     itemClicked: function(event) {
-      var item = event.currentTarget;//event.data('name')
-      //console.log(event, item);
+      var item = event.currentTarget;
       this.trigger('itemClicked', $(item).data('toolbar-item'));
     }
     
@@ -883,7 +866,7 @@ TIM.mixins.flipset = {
 	    var tmpl = page.template ? page.template : this.pageTemplate;
 	    var that = this;
 	    
-	    console.log("page template: ", tmpl);
+	    //console.log("page template: ", tmpl);
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
 	    //seems wasteful

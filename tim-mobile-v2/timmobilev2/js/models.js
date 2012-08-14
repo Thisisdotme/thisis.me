@@ -115,20 +115,19 @@
     },
 
     initialize: function() {
-      //add route to this feature to router  /<featurename>
-      //also add route to detail view to router /<featurename>/<resourceid>
-      //could also be /featurename/<listid>/<resourceid>
-      
-      //if 3 levels, add 3rd route?
-      
+      //when the feature is initialized 
+      //we add the feature's routes to the router  
+      //<featurename>
+      //<featurename>/<additional path>
+      //it's up to the feature to decide what to do with the additional path
+
       var featureName = this.get('name');
-      //a route for /<featurename>
       this.set('path', (featureName === "home" ? "/" : "/" + featureName));
       
+      //a route for /<featurename>
       TIM.app.route(featureName, featureName); 
-      //TIM.app.route(featureName + "/:resource", featureName, function(number){});
       
-      //TIM.app.route(featureName + "/:collection/:resource", featureName, function(resource, collection){return 9000}); //we probably have to get way more 'general-purpose' here, but this might (tenuously) do for now?
+      //a route for /<featurename>/<any additional path>
       TIM.app.route(featureName + "/*path", featureName, function(path){});
       
     },
@@ -214,7 +213,7 @@
       if (imgs) {
         return imgs.color.high_res;
       }
-      return "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
+      return TIM.placeholderIcon;
     }
   });
   

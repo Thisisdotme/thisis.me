@@ -14,6 +14,7 @@ TIM.pageHistory = [];
 TIM.currentPageElem = TIM.currentPageElem || $('#splash-screen');
 TIM.previousPageElem = undefined;
 TIM.appContainerElem = $('#content-container');
+TIM.placeholderIcon = "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
 TIM.defaultTransition = "fade";
 TIM.loading_ = false;
 TIM.transitioning_ = false;
@@ -359,7 +360,6 @@ $(function() {
   	  TIM.currentUserServices.fetch({
     		//add this timeout in case call fails...
     		timeout : 5000,
-    		callbackParameter: "callback",
     		success: function(resp) {
     		  console.log('fetched user services ', TIM.currentUserServices.length);
     		  TIM.currentUserServices.initialized = true;
@@ -385,7 +385,6 @@ $(function() {
   	  TIM.currentUserFeatures.fetch({
     		//add this timeout in case call fails...
     		timeout : 5000,
-    		callbackParameter: "callback",
     		success: function(resp) {
     		  console.log('fetched user features ', TIM.currentUserFeatures.length);
     		  TIM.currentUserFeatures.initialized = true;
@@ -412,15 +411,13 @@ $(function() {
 	  TIM.app.route("login", "login"); 
 	}
 	
+	//
 	//fetch the features for this author on load
 	//if it's not an author's app, just add the default nav items (login, settings, home)
 	//
+	
 	if (TIM.isAuthorApp()) {
 	  TIM.features.fetch({
-  		//dataType: "jsonp",
-  		//add this timeout in case call fails...
-  		//timeout : 5000,
-  		callbackParameter: "callback",
   		success: function(resp) {
   		  console.log('fetched features');
   		},
@@ -439,11 +436,11 @@ $(function() {
 	}
   
   //see if we have a current user
-  //if we have an auth_tkt cookie we can assume we do... the api is free to reject requests
+  //if we have an auth_tkt cookie we can assume we do... the api is free to reject requests even if the front end thinks there's a user
+  
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
   
-  console.log('have user')
   
 	$.fn.animationComplete = function( callback ) {
 		if("WebKitTransitionEvent" in window) {
@@ -457,60 +454,60 @@ $(function() {
 	};
 	
 	//binding to 'all' on the router - this will get fired for any hash change event
-	//make sure menu item is selected
 	
 	TIM.app.bind('all', function(route, path) {
 	    TIM.navigateHandler(route, path);  //move the handler fn outside of here so we can explicitly call it elsewhere
   });
   
-  console.log('bind navigate handler')
-  
   TIM.navigateHandler = function(route, path) {
 	    
 	    // the 'route' argument will be in the form "route:featurename"
+	    //
+	    // the 'path' argument will be there if there's additional path info for the feature to handle
 	    
 	    console.log('hash change event: ', arguments);
 	    
-	    localStorage.removeItem('tim_last_url');
+	    localStorage.removeItem('tim_last_url');  //last url is for 'save to home screen' use
 	    
 	    if(route.split(':')[0] === 'route') {
 	      
   	    var featureName = route.split(':')[1]; //assuming the hash will start with the feature name
   	    
-  	    console.log("feature name", featureName);
-  	    
-  	    //total hack for 'home page'
+  	    //there is no registered 'feature' for the home page, so just navigate to the site root
   	    if (featureName == 'home' || (featureName == 'catchAll' && path == 'home')) {
   	      location.href = "/";
   	      localStorage.removeItem('tim_last_url');
   	      return;
   	    }
   	    
-  	    //total hack for 'home page'
+  	     //there isn't a proper logout 'feature', so special-case this
   	    if (featureName == 'logout') {
   	      TIM.doLogout();
   	      return;
   	    }
   	    
+  	    //there isn't a proper login 'feature', so special-case this
   	    if (featureName == 'login') {
   	      TIM.showLoginForm();
   	      return;
   	    }
   	    
-  	    //total hack for 'home page'
+  	    //navigate straight to the settings page if that's what the user's requesting
   	    if (parsedUri.path == "/settings" && path == 'cover') {
   	      location.href = "/settings";
   	      return;
   	    }
   	    
-  	    
-  	    if (featureName == 'settings' || parsedUri.path == "/setttings") {
+  	    //navigate straight to the settings page if that's what the user's requesting
+  	    if (featureName == 'settings' || parsedUri.path == "/settings") {
   	      location.href = "/settings";
   	      localStorage.removeItem('tim_last_url');
   	      return;
   	    }
   	    
   	    var feature = TIM.features.getByName(featureName);
+  	    
+  	    //show the loading message if we're navigating from one feature to the other
   	    if (TIM.features.getSelectedFeature()) {
   	      TIM.setLoading(true); //make this a method on TIM
   	    }
@@ -531,8 +528,10 @@ $(function() {
   	        localStorage.setItem('tim_last_url', '/');
   	        return;
   	      }
+  	      
   	      //we get here if there was no feature in the URL
   	      //stay on the current feature if there is one, or else go to the cover page
+  	      
   	      $('#app').removeClass('nav-open');
   	      if(TIM.features.getSelectedFeature()) {
   	          $('#app').removeClass('loading');
@@ -546,13 +545,15 @@ $(function() {
   	    }
   	    $('#app').removeClass('nav-open nav-hidden');
   	    if (feature.behavior) {
-  	        console.log('********* activating feature *********', path);
+  	        console.log('********* feature already loaded: activating  ********* (feature, path)', feature, path);
             feature.behavior.activate(path);
             TIM.features.setSelectedFeature(feature); //this should be a callback from the feature when it's been activated?
         } else {
           feature.loadFeature(path);
           TIM.features.setSelectedFeature(feature);
         }
+      } else {
+        console.log('hash change info did not start with route:');
       }
   };
   
