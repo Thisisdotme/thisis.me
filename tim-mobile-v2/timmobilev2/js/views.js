@@ -52,7 +52,7 @@ TIM.views.Photo = TIM.views.EventView.extend( {
 
 TIM.views.Checkin = TIM.views.EventView.extend( {
   className: "event checkin",
-  template:"_event"   
+  template:"_checkin"   
 });
 
 TIM.views.Status = TIM.views.EventView.extend( {
@@ -86,6 +86,9 @@ TIM.views.getEventView = function (event) {
     case "follow":
       view = new TIM.views.Follow({event: event});
       break;
+    case "checkin":
+      view = new TIM.views.Checkin({event: event});
+      break;
     default: 
       view = new TIM.views.EventView({event: event});
   }
@@ -99,6 +102,12 @@ TIM.views.renderEvent = function(event, template) {
   event.event_template = event.event_template || "_event";
   for(var i = 0; i < event.events.length; i++) {
     var ev = event.events[i];
+    
+    //ugh, terrible place to find the image url
+    if (ev.origin.known) {
+      ev.footer_img = TIM.allServices.getFooterImage(ev.origin.known.service_name);
+    }
+    
     var view = TIM.views.getEventView(ev);
     console.log('event view event_type', ev, view, ev.type)
     ev.event_template = view.template; //this is horseshit - do those really need to be views?
@@ -143,7 +152,6 @@ TIM.views.Login = Backbone.View.extend( {
         
         _.bindAll(this);
         //make this a Comments collection
-        
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -830,15 +838,13 @@ TIM.views.Page = Backbone.View.extend( {
 				this.page = spec.page;
     },
 
-    render: function( tmpl, callback ) {
+    render: function(tmpl, callback) {
       
-      console.log('rendering page: ', this.page);
 			var that = this;
 			tmpl = tmpl || "timelinePage";
 			
 			var html = TIM.views.renderEvent(this.page, tmpl);
-			///var html = TIM.views.renderTemplate(tmpl, this.page);
-      //this.$el.append(html);
+			
       callback(html);
       this.hasRendered = true;
     }
@@ -867,11 +873,11 @@ TIM.mixins.flipset = {
 		},
 		
 		//
-		// send pages to the flips script one at a time as strings?
-		// maybe have the flips script render the pages instead?
+		// send pages to the flipset object one at a time as strings?
+		// maybe have the flipset object render the pages instead?
 		//
 		
-		renderPage: function(page){  //'pages' could just be 'page'
+		renderPage: function(page){ 
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({page:page});
 	    var tmpl = page.template ? page.template : this.pageTemplate;
@@ -885,6 +891,7 @@ TIM.mixins.flipset = {
         if (!that.flipSetInitialized) {
 					
 					that.flipSet = new Flipset({containerEl: $(that.el), pages: [pageHtml], parentView: that});
+					
 					window.flipSet = that.flipSet; //for debugging
 					that.flipSetInitialized = true;
 				} else {
@@ -913,9 +920,7 @@ TIM.mixins.flipset = {
 			options.start = startIndex;
 			
 			//makePages groups raw events into 'pages' which will be rendered into html for the flipset
-			console.log("making pages hammer");
 			this.makePages(options);
-			console.log("made pages hammer");
 			
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
@@ -926,7 +931,6 @@ TIM.mixins.flipset = {
 			  TIM.appContainerElem.append(this.$el);
 			}
 			
-			//replace this with this.$el.hammer() ???
 			try{
 			  this.flipSet.initializeHammer();
 			} catch(e) {
@@ -961,9 +965,11 @@ TIM.mixins.flipset = {
 			  //shouldn't skip too many non-one-page events...
 			  
 				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
+				  //we have a 'single event page'
 				  var template = self.pageTemplate;
 					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
 				} else {
+				  //it's a half-page event
 					page.push(item);
 					if(page.length == 2) {
 						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
@@ -993,10 +999,9 @@ TIM.mixins.flipset = {
 			if (this.flipSet && this.pages.length > 0) {
 			  this.flipSet.createPageElements();
 			} else {
-			  this.$el.html('<div class="flipset-empty"><p>This user has no highlights</p></div>'); //hack for empty highlights, should be generalized
+			  this.$el.html('<div class="flipset-empty"><p>This user has no events</p></div>'); //hack for empty highlights/events, should be generalized
 			}
 		},
-		
 		
 		//this is called when the user has flipped to the next page in the flipset...
 		flipNext: function(){
@@ -1004,7 +1009,7 @@ TIM.mixins.flipset = {
 			var that = this;
 			
 			//prerendering 3 pages & sending to flipset
-			//we always want to have this many pages available to teh flipset because it needs to have as many as 4 pages in the DOM at one time
+			//we always want to have this many pages available to the flipset because it needs to have as many as 4 pages in the DOM at one time
 			
 			if(this.pageNum == (this.renderedIndex - 3)) {
 				this.renderPageChunk(this.renderedIndex);
@@ -1065,7 +1070,7 @@ TIM.mixins.flipset = {
   		
 		},
 		
-		//maybe a handler to do something when the user has flipped a page
+		//a handler to do something when the user has flipped a page
 		pageChanged: function (num) {
 		  
 		}

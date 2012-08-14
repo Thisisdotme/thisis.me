@@ -8,7 +8,8 @@
    <!-- loop through sources -->
    {?origin.known} 
 	    {?origin.known.service_name}
-				<span class="service-icon {origin.known.service_name}"></span>
+				<!-- span class="service-icon {origin.known.service_name}"></span -->
+				<img class="service-icon" src="{footer_img}"/>
 			{/origin.known.service_name}
    {/origin.known}
    {?origin.unknown}

@@ -37,7 +37,6 @@ $(function() {
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
     
-  
   if(!$.cookie('tim_session')) {
     $.cookie('tim_session', true);
   }
@@ -52,10 +51,6 @@ $(function() {
   //views can subscribe to this and ... update their sizes accordingly if they have explicit sizes
   //especially for scrollable areas, which need an explicit size, at least for iscroll
   //
-  //should have a scrollable area object in the views.js?
-  //
-  //
-  
   
   //move things like this to a utils object?
   function reorient(e) {
@@ -68,7 +63,7 @@ $(function() {
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
-  window.onorientationchange = reorient;
+  window.onorientationchange = reorient; //handle flip from partrait to landscape
   window.setTimeout(reorient, 0);
   window.onresize = TIM.setViewportSize;
   
@@ -76,6 +71,7 @@ $(function() {
   // thinking of themes as 'light' or 'dark', etc.
   // they should probably be specially-named, eg "theme-dark" and/or kept in a well-known list to make removing the previous theme easy
   //
+  
   TIM.setPageTheme = function(theme) {
      $("#app").addClass(theme);
   }
@@ -91,10 +87,7 @@ $(function() {
   
   TIM.setViewportSize();
   
-  //what is this preventscrolling nonsense?
-  
   TIM.disableScrolling = function() {
-    //$(document).on("touchstart", preventScrolling);
     $(document).on("touchmove", preventScrolling);
   }
   
@@ -110,7 +103,7 @@ $(function() {
 	TIM.disableScrolling();
 	
 	TIM.setNavVisible = function (visible) {
-	  visible = true;
+	  visible = true; //disabling this fn for the moment
 	  TIM.navVisible_ = visible;
 	  if(visible) {
 	    $('#app').removeClass('nav-hidden');
@@ -127,8 +120,6 @@ $(function() {
 	    $('#app').removeClass('loading');
 	  }
 	}
-	
-	
 	
 	TIM.isLoading = function() {
 	  return TIM._loading;
@@ -188,28 +179,14 @@ $(function() {
 	
 	//all available app features - hardcode for now, API call to get list doesn't exist?
 	TIM.allFeatures = new TIM.collections.AppFeatures(
-	  [
-	    {
-	      name: "cover"
-	    },
-	    {
-	      name: "timeline"
-	    },
-	    {
-	      name: "highlights"
-	    },
-	    {
-	      name: "photos"
-	    },
-	    {
-	      name: "videos"
-	    },
-	    {
-	      name: "places"
-	    },
-	    {
-	      name: "bio"
-	    }
+	  [ 
+	    {name: "cover"},
+	    { name: "timeline"  },
+	    { name: "highlights" },
+	    { name: "photos"  },
+	    { name: "videos"  },
+	    { name: "places"  },
+	    { name: "bio" }
 	  ]
 	);
 	
@@ -217,19 +194,18 @@ $(function() {
 	
 	TIM.features = new TIM.collections.Features();
 	
-	
 	//all available services
 	TIM.allServices = new TIM.collections.Services();
 	
 	//services for the current user
 	TIM.currentUserServices = new TIM.collections.Services();
 
-	
 	//set up the main feature nav
 	TIM.featureNavView = new TIM.views.FeatureNav({
 	  collection: TIM.features
 	})
 	
+	//get all the availiable services from the API - these will be needed for rendering
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
 		timeout : 5000,
@@ -244,8 +220,10 @@ $(function() {
 		}
 	});
 	
+	//use this to figure out path information
 	var parsedUri = parseUri(window.location.href);
   
+  //are we looking at an author's app or are we somewhere else (homepage, etc.)
 	TIM.isAuthorApp = function() {
 	  var val = true;
 	  if (TIM.pageInfo.authorName === 'thisis.me') {
@@ -336,7 +314,6 @@ $(function() {
       if(TIM.isAuthorApp()) {
         this.navigate(hash, {'trigger': true}); //trigger a hashchange event
       }
-      
     },
   
     //this obviously needs to be more generalized - should work for <a> tags
@@ -436,8 +413,7 @@ $(function() {
 	}
 	
 	//fetch the features for this author on load
-	//use a JSONP plugin that properly reports errors?
-	//
+	//if it's not an author's app, just add the default nav items (login, settings, home)
 	//
 	if (TIM.isAuthorApp()) {
 	  TIM.features.fetch({
@@ -463,19 +439,20 @@ $(function() {
 	}
   
   //see if we have a current user
+  //if we have an auth_tkt cookie we can assume we do... the api is free to reject requests
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
   
   console.log('have user')
   
 	$.fn.animationComplete = function( callback ) {
-		if( "WebKitTransitionEvent" in window ) {
-			return $( this ).one( 'webkitAnimationEnd', callback );
+		if("WebKitTransitionEvent" in window) {
+			return $(this).one('webkitAnimationEnd', callback);
 		}
 		else{
 			// defer execution for consistency between webkit/non webkit
-			setTimeout( callback, 0 );
-			return $( this );
+			setTimeout(callback, 0);
+			return $(this);
 		}
 	};
 	
@@ -581,8 +558,6 @@ $(function() {
   
   TIM.loadSettings = function() {
     if(TIM.authenticatedUser && TIM.authenticatedUser.loggedIn) {
-      //location.href = "/settings";
-      //localStorage.removeItem('tim_last_url');
       TIM.showSettingsPage();
     } else {
       TIM.showLoginForm();
@@ -631,11 +606,11 @@ $(function() {
     TIM.authenticatedUser.doLogout(function() { TIM.app.navigate('home', {trigger:true})});
   }
   
-  //also get the list of currently-activated services for the current user
-  
+
   TIM.showSettingsPage = function (options) {
     options = options || {};
     
+    //make sure we have the current user's features and services loaded before displaying the page
     function showView() {
       if(!TIM.currentUserServices.initialized || !TIM.currentUserFeatures.initialized) {
         return;
@@ -680,15 +655,16 @@ $(function() {
     if (!TIM.newUserView) {
       TIM.newUserView = new TIM.views.CreateUser();
     }
-    TIM.newUserView.render({message: "dam"});
+    TIM.newUserView.render({message: ""});
     TIM.setNavVisible(false);
     TIM.app.navigate("#login");
     TIM.transitionPage (TIM.newUserView.$el);
   };
   
+  //
   //for now this simply handles the DOM page transition
   //
-  //should keep a history stack & use that to determine whether to do a forward or reverse transition
+  //
   
 	TIM.transitionPage = function (toPage, options) {
 	  //TIM.setErrorShowing(false);
@@ -713,30 +689,39 @@ $(function() {
 	    inClasses += " reverse ";
 	    outClasses += " reverse ";
 	  } 
+	  
 	  $('#app').addClass('transitioning'); //make this a TIM method?
+	  
+	  //there might not be a 'from page' if this is the first page we're loading
 	  if (fromPage) {
 	    //animationComplete binds a one-time handler for when the animation of the element is complete
-	    fromPage.removeClass('in reverse ' + transitions).addClass(outClasses).addClass('active').animationComplete(function() {
-	      console.log('animation complete for from page: ');
-	      $(this).removeClass(outClasses + transitions + ' active');
-	      $('#app').removeClass('transitioning');
-	      TIM.setErrorShowing(false);
-  	    TIM.setSplashScreen(false);
-	      if(options.callback) {
-	        options.callback();
-	      }
-	     
-	    });
+	    fromPage.removeClass('in reverse ' + transitions)
+	            .addClass(outClasses)
+	            .addClass('active')
+	            .animationComplete(function() {
+	              console.log('animation complete for from page: ');
+        	      $(this).removeClass(outClasses + transitions + ' active');
+        	      $('#app').removeClass('transitioning');
+        	      TIM.setErrorShowing(false);
+          	    TIM.setSplashScreen(false);
+        	      if(options.callback) {
+        	        options.callback();
+        	      }
+        	    });
 	  }
-	  toPage.removeClass('out reverse').addClass(inClasses);
-    toPage.addClass('active').animationComplete(function() {
-	    console.log('animation complete for to page: ', this);
-      $(this).removeClass(transitions + " in").addClass('active');
-      $('#app').removeClass('transitioning');
-      setTimeout(function(){
-          window.scrollTo(0, 0);
-      }, 0);
-    });
+	  
+	  toPage.removeClass('out reverse')
+	        .addClass(inClasses);
+	  
+    toPage.addClass('active')
+        .animationComplete(function() {
+	          console.log('animation complete for to page: ', this);
+            $(this).removeClass(transitions + " in").addClass('active');
+            $('#app').removeClass('transitioning');
+            setTimeout(function(){
+                window.scrollTo(0, 0);
+            }, 0);
+        });
       	  
 	  TIM.currentPageElem = toPage;
 	  TIM.previousPageElem = fromPage;
@@ -748,6 +733,7 @@ $(function() {
 	  return TIM.availableTransitions.join(" ");
 	}
 	
+	//
 	//this is where we are sending all click/tap events for <a> tags
 	//normalize the URL to trigger the proper hash change?
 	//
@@ -755,23 +741,25 @@ $(function() {
 	TIM.handleLinkClick = function (event) {
 	  event.preventDefault();
 	  var el = event.currentTarget;
-	 
+	  
+	  //first look at data attribute of element
 	  var url = el.data && el.data("url") || (el.hash || el.pathname);
 	  TIM.app.navigate(url, {trigger: true});
 	}
 	
-	TIM.globalHammer = new Hammer(document.body);
-	localStorage.removeItem('tim_last_url');
+	localStorage.removeItem('tim_last_url'); //this is used for saving to homescreen demo purposes
 	
+	//if the user's trying to go directly to the settings page, prevent them if not authenticated
 	if(parsedUri.path === '/settings' || TIM.pageInfo.intendedPath === 'settings') {
 	  if(!TIM.authenticatedUser.loggedIn) {
 	    TIM.showLoginForm();
 	    return;
 	  }
 	  TIM.setLoading(true);
-	 TIM.showSettingsPage({noHashChange:true});
+	  TIM.showSettingsPage({noHashChange:true});
 	}
 	
+	//show an error message if there's one present in the page (provided by the server-side page template)
 	if(TIM.errorInfo && TIM.errorInfo !== '') {
 	  TIM.showErrorMessage({exception: TIM.errorInfo});
 	}

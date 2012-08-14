@@ -5,44 +5,33 @@
       loggedIn: false,
       logoutUrl: TIM.apiUrl + "logout",
       doLogin: function(name, password, callback) {
+      
+        var self = this;
         
-        
-          var self = this;
-          
-          /*
-          
-          $.post('/login', { name: name, password: password }, function(data) {
-            self.set(data); // data should be in JSON and contain model of this user
-          }, 'json').error(
-            self.trigger('loginError'); // our custom event
-          );
-          
-          */
-          
-          $.ajax({
-            type: 'POST',
-            url: this.url,
-            data: JSON.stringify({ login: name, password: password}),
-            xhrFields: {withCredentials: true},
-            contentType: 'application/json',
-            success: function(data, xhr) {
-               console.log("login response: ", data, status, xhr);
-               //do something with the data...
-               self.set(data);
-               $.cookie('tim_author_name', data.name);
-               self.loggedIn = true;
-               if(callback) {
-                 callback();
-               }
-               TIM.eventAggregator.trigger('login', {name:data.name});
-             },
-             error: function(data) {
-               console.log("login error: ", data);
-               $('.login-form .message').html('Could not find that user name and password.').css('visibility','visible');
-               self.trigger('loginError');
-             },
-            dataType: "json"
-          });
+        $.ajax({
+          type: 'POST',
+          url: this.url,
+          data: JSON.stringify({ login: name, password: password}),
+          xhrFields: {withCredentials: true},
+          contentType: 'application/json',
+          success: function(data, xhr) {
+             console.log("login response: ", data, status, xhr);
+             //do something with the data...
+             self.set(data);
+             $.cookie('tim_author_name', data.name);
+             self.loggedIn = true;
+             if(callback) {
+               callback();
+             }
+             TIM.eventAggregator.trigger('login', {name:data.name});
+           },
+           error: function(data) {
+             console.log("login error: ", data);
+             $('.login-form .message').html('Could not find that user name and password.').css('visibility','visible');
+             self.trigger('loginError');
+           },
+          dataType: "json"
+        });
         
       },
       doLogout: function(callback) {
@@ -221,7 +210,11 @@
   //model for services, e.g. facebook, twitter, etc.
   TIM.models.Service  = Backbone.Model.extend({
     getFooterImage: function() {
-      return this.get('color_icon_high_res');
+      var imgs = this.get('images');
+      if (imgs) {
+        return imgs.color.high_res;
+      }
+      return "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
     }
   });
   
