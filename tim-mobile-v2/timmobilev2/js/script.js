@@ -370,7 +370,6 @@ $(function() {
     
     handleFeatureAdd: function() {
       TIM.showFlashMessage('Added new feature!');
-      TIM.showSettingsView();
     }
         
 	}) //end of router declaration
