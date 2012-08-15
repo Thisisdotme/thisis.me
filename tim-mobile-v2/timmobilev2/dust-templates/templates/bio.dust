@@ -7,7 +7,6 @@
   	  {?picture_url}
   	    <img src="{picture_url}"/>
   	  {:else}
-  	    <img src="/xxx-nouser/asset/profile_thumb.jpg"/>
   	  {/picture_url}
   	</div>
   	<section class="location"><strong>Location: </strong>{location}</section>

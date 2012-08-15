@@ -175,7 +175,7 @@
       feature.showDetailId = resourceId;
     }
     //only fetch timeline, create view, etc. if need be...
-    feature.mainCollection = feature.mainCollection || new (TIM.collections.Events);
+    feature.mainCollection = feature.mainCollection || new TIM.collections.Events();
     feature.timelineView = feature.timelineView || new TIM.views.EventList({collection: feature.mainCollection});
   
     if(!feature.collectionInitialized) {
