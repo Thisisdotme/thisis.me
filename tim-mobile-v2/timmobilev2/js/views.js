@@ -13,8 +13,6 @@ TIM.views.FormView = Backbone.View.extend( {
    template:"_event",
    render: function() {
      var html = '';
-     
-     
    }
 });
 
@@ -103,7 +101,6 @@ TIM.views.getEventView = function (event) {
       break;
     case "photo_album":
       view = new TIM.views.PhotoAlbum({event: event});
-      console.log('event view:', event)
       break;
     default: 
       view = new TIM.views.EventView({event: event});
@@ -120,6 +117,10 @@ TIM.views.renderEvent = function(event, template) {
     var ev = event.events[i];
     
     //ugh, terrible place to find the image url
+    //maybe the Event model would be a good place to put the hairier JSON transformation
+    //
+    //
+    
     if (ev.origin.known) {
       ev.footer_img = TIM.allServices.getFooterImage(ev.origin.known.service_name);
     }
@@ -330,9 +331,9 @@ TIM.views.Settings = Backbone.View.extend( {
         
     className: "app-page light toolbar-top settings-page services",
     template: "settings",
+    userServices: TIM.currentUserServices,
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click .services-form li a" : "toggleSetting",
       "click .features-form li a" : "toggleFeature",
@@ -351,6 +352,10 @@ TIM.views.Settings = Backbone.View.extend( {
         var that = this;
         
         _.bindAll(this);
+        //update display if user activates a feature
+        TIM.currentUserFeatures.bind("add", function() {
+          that.render();
+        });
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -359,6 +364,8 @@ TIM.views.Settings = Backbone.View.extend( {
     
     render: function() {
       var that = this;
+      
+      this.$el.html(''); //clear DOM element
       
       //remove the 'me' service for display
       var me = that.collection.getByName('me');
@@ -402,7 +409,7 @@ TIM.views.Settings = Backbone.View.extend( {
   		this.$el.html(html);
   		return this.$el;
     },
-    
+        
     toggleSetting: function(e) {
       event.preventDefault();
       event.stopPropagation();
@@ -774,15 +781,15 @@ TIM.views.Comments = Backbone.View.extend( {
       }
       
       this.commentCollections[this.collectionNum].reset(generateFakeComments(randomNum(83)));
+      
+      //pausing for a second to fake like there's an API call being made
       window.setTimeout(function() {
         that.render();
         that.setSelectedService();
         that.resetScrollElem();
         TIM.setLoading(false);
       }, 1000);
-      
-      
-      
+            
     },
     
     setSelectedService: function () {
@@ -903,10 +910,8 @@ TIM.mixins.flipset = {
 		renderPage: function(page){ 
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({page:page});
-	    var tmpl = page.template ? page.template : this.pageTemplate;
+	    var tmpl = page.template || this.pageTemplate;
 	    var that = this;
-	    
-	    //console.log("page template: ", tmpl);
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
 	    //seems wasteful
@@ -921,7 +926,6 @@ TIM.mixins.flipset = {
 					that.flipSet.addSourceItem(pageHtml);
 				}
       });
-        
 
     },
     
@@ -987,6 +991,7 @@ TIM.mixins.flipset = {
 			  //
 			  //shouldn't skip too many non-one-page events...
 			  //skip correlations for now - they have no useful data
+			  
 			  if(itemJSON.type !== "correlation") {
 			    if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
   				  //we have a 'single event page'
@@ -1009,7 +1014,6 @@ TIM.mixins.flipset = {
 			if(page.length == 1) {
 			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
-			
     },
     
 		renderPageChunk: function(start) {
@@ -1090,6 +1094,8 @@ TIM.mixins.flipset = {
   		}
   	
   		this.flipSet._gotoPage(num);
+  		
+  		//updateRouter changes the URL hash (or pushState) for deep linking & browser history purposes
   		if (this.updateRouter) {
 			  this.updateRouter();
 			}
