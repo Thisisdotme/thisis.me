@@ -34,6 +34,7 @@ window.addEventListener("load",function() {
     }, 0);
 });
 
+//jquery document ready fn!
 $(function() {
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
@@ -458,10 +459,12 @@ $(function() {
   
   //see if we have a current user
   //if we have an auth_tkt cookie we can assume we do... the api is free to reject requests even if the front end thinks there's a user
+  //hmm should probably make an api request on load to get 'official' word on whether we're logged in...
   
   TIM.authenticatedUser = new TIM.models.AuthenticatedUser();
   TIM.authenticatedUser.createFromCookie();
   
+  //a jquery method to bind a callback to an animationend event & fallback for non-webkit browsers
 	$.fn.animationComplete = function( callback ) {
 		if("WebKitTransitionEvent" in window) {
 			return $(this).one('webkitAnimationEnd', callback);
@@ -801,4 +804,4 @@ $(function() {
 	}
 
 	
-});
+}); //end of jquery document ready

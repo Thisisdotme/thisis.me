@@ -211,7 +211,6 @@ TIM.mixins.paging = {
     
     this.fetch({
       add:true,
-      dataType:"jsonp",
       data: {page: this.page},
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
