@@ -1,3 +1,6 @@
+import datetime
+import calendar
+
 import miapi.resource
 import miapi.controllers
 
@@ -32,28 +35,32 @@ def get_events(events_context, request):
   author_id = events_context.author_id
 
   author = data_access.author.query_author(author_id)
-
   if author is None:
     # TODO: better error
     request.response.status_int = 404
     return {'error': 'unknown author %s' % author_id}
 
-  author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
+  # get the query parameters
+  since_date, since_service_id, since_event_id = parse_page_param(request.params.get('since'))
+  until_date, until_service_id, until_event_id = parse_page_param(request.params.get('until'))
 
-  # TODO: use paging limit should be configurable
-  page_limit = 200
+  max_page_limit = miapi.tim_config['api']['max_page_limi']
+  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
-  event_rows = data_access.service_event.query_service_events_descending_time(
+  event_rows = data_access.service_event.query_service_events_page(
       author_id,
-      page_limit)
+      page_limit,
+      since_date=since_date,
+      since_service_id=since_service_id,
+      since_event_id=since_event_id,
+      until_date=until_date,
+      until_service_id=until_service_id,
+      until_event_id=until_event_id)
+
+  prev_link = None
+  next_link = None
   events = []
   for event in event_rows:
-    # filter well-known and instagram photo albums so they don't appear in the timeline
-    if (event.type_id == data_access.post_type.label_to_id('photo_album') and
-        (event.service_id == data_access.service.name_to_id('me') or
-         event.service_id == data_access.service.name_to_id('instagram'))):
-      continue
-
     asm = data_access.author_service_map.query_asm_by_author_and_service(
         author_id,
         event.service_id)
@@ -66,10 +73,14 @@ def get_events(events_context, request):
     if event_obj:
       events.append(event_obj)
 
-  # TODO: implement the correct result for paging
-  return {'author': author_object,
-          'events': events,
-          'paging': {'prev': None, 'next': None}}
+      param_value = create_page_param(event.create_time, event.service_id, event.event_id)
+
+      if prev_link is None:
+        prev_link = request.resource_url(events_context, query={'since': param_value})
+      next_link = request.resource_url(events_context, query={'until': param_value})
+
+  return {'entries': events,
+          'paging': {'prev': prev_link, 'next': next_link}}
 
 
 def get_event_detail(event_context, request):
@@ -131,3 +142,18 @@ def get_highlights(self):
 
 
 '''
+
+
+def create_page_param(date, service_id, event_id):
+  return '{0}_{1}_{2}'.format(calendar.timegm(date.utctimetuple()), service_id, event_id)
+
+
+def parse_page_param(param):
+  if param is None:
+    return (None, None, None)
+
+  split_param = param.split('_')
+  return (
+      datetime.datetime.utcfromtimestamp(int(split_param[0])),
+      int(split_param[1]),
+      '_'.join(split_param[2:]))

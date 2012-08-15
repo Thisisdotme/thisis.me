@@ -46,10 +46,44 @@ def query_service_event_by_id(author_id, id):
   return row
 
 
-def query_service_events_descending_time(author_id, limit):
+def query_service_events_page(
+    author_id,
+    limit,
+    since_date=None,
+    since_service_id=None,
+    since_event_id=None,
+    until_date=None,
+    until_service_id=None,
+    until_event_id=None):
   query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
   query = query.filter_by(author_id=author_id)
-  query = query.order_by(mi_schema.models.ServiceEvent.create_time.desc())
+
+  # don't show photo albums from me and instagram
+  me_id = data_access.service.name_to_id('me')
+  instagram_id = data_access.service.name_to_id('instagram')
+  query = query.filter(sqlalchemy.or_(
+        mi_schema.models.ServiceEvent.type_id != data_access.post_type.label_to_id('photo_album'),
+        sqlalchemy.and_(mi_schema.models.ServiceEvent.service_id != me_id,
+                        mi_schema.models.ServiceEvent.service_id != instagram_id)))
+
+  if since_date:
+    query = query.filter(mi_schema.models.ServiceEvent.create_time >= since_date)
+  if since_service_id:
+    query = query.filter(mi_schema.models.ServiceEvent.service_id >= since_service_id)
+  if since_event_id:
+    query = query.filter(mi_schema.models.ServiceEvent.event_id > since_event_id)
+  if until_date:
+    query = query.filter(mi_schema.models.ServiceEvent.create_time <= until_date)
+  if until_service_id:
+    query = query.filter(mi_schema.models.ServiceEvent.service_id <= until_service_id)
+  if until_event_id:
+    query = query.filter(mi_schema.models.ServiceEvent.event_id < until_event_id)
+
+  query = query.order_by(
+      mi_schema.models.ServiceEvent.create_time.desc(),
+      mi_schema.models.ServiceEvent.service_id.desc(),
+      mi_schema.models.ServiceEvent.event_id.desc())
+
   return query.limit(limit)
 
 
