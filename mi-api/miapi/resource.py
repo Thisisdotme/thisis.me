@@ -73,15 +73,14 @@ class Authors:
 
   def __getitem__(self, key):
     try:
-      author_id = int(key)
-      author = data_access.author.query_author(author_id)
+      author = data_access.author.query_author(int(key))
     except ValueError:
       # Key is not an integer assume that it is an author_name
       # TODO: we can remove this once the client changes to using id.
       author = data_access.author.query_by_author_name(key)
 
-    if not author:
-      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+    if author is None:
+      raise KeyError('key "{key}" is not an existing author'.format(key=key))
 
     return location_aware(Author(author), self, author.id)
 
@@ -96,7 +95,7 @@ class Author:
         pyramid.security.DENY_ALL]
 
   def __init__(self, author):
-    self._author = author
+    self.author = author
     self.author_id = author.id
 
   def __getitem__(self, key):
@@ -120,10 +119,6 @@ class Author:
       return location_aware(resource, self, key)
 
     raise KeyError('Key "{key}" not a valid author entry'.format(key=key))
-
-  @property
-  def author(self):
-    return self._author
 
 
 class AuthorFeatures:
@@ -237,11 +232,16 @@ class Photos:
 class Events:
   def __getitem__(self, key):
     try:
-      event_id = int(key)
+      event = data_access.service_event.query_service_event_by_id(self.author.id, int(key))
     except ValueError:
-      raise KeyError('key "{key}" not a valid Authors entry'.format(key=key))
+      raise KeyError('key "{key}" not a valid event id'.format(key=key))
 
-    return location_aware(Event(event_id), self, event_id)
+    if event is None:
+      raise KeyError('Event ({author}, {event}) does not exist.'.format(
+            author=self.author.id,
+            event=key))
+
+    return location_aware(Event(event), self, event.id)
 
   @property
   def author(self):
@@ -253,8 +253,9 @@ class Events:
 
 
 class Event:
-  def __init__(self, event_id):
-    self.event_id = event_id
+  def __init__(self, event):
+    self.event = event
+    self.event_id = event.id
 
   @property
   def author(self):

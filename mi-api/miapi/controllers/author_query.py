@@ -32,13 +32,7 @@ def add_views(configuration):
 
 
 def get_events(events_context, request):
-  author_id = events_context.author_id
-
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
+  author = events_context.author
 
   # get the query parameters
   since_date, since_service_id, since_event_id = parse_page_param(request.params.get('since'))
@@ -48,7 +42,7 @@ def get_events(events_context, request):
   page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
   event_rows = data_access.service_event.query_service_events_page(
-      author_id,
+      author.id,
       page_limit,
       since_date=since_date,
       since_service_id=since_service_id,
@@ -62,7 +56,7 @@ def get_events(events_context, request):
   events = []
   for event in event_rows:
     asm = data_access.author_service_map.query_asm_by_author_and_service(
-        author_id,
+        author.id,
         event.service_id)
 
     event_obj = miapi.controllers.author_utils.createServiceEvent(
@@ -84,30 +78,16 @@ def get_events(events_context, request):
 
 
 def get_event_detail(event_context, request):
-  author_id = event_context.author_id
-  event_id = event_context.event_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
-
-  event_row = data_access.service_event.query_service_event_by_id(author_id, event_id)
-
-  if event_row is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown event id %d' % event_id}
+  author = event_context.author
+  event = event_context.event
 
   asm = data_access.author_service_map.query_asm_by_author_and_service(
-      author_id,
-      event_row.service_id)
+      author.id,
+      event.service_id)
 
   return miapi.controllers.author_utils.createServiceEvent(
       request,
-      event_row,
+      event,
       asm,
       author)
 
