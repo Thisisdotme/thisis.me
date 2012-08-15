@@ -16,4 +16,5 @@
    {/origin.unknown}
     <span class="time-and-location">{time_ago} {location.name}</span>
   </div>
+  <div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
 </footer>

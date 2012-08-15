@@ -8,6 +8,17 @@ Backbone.View.prototype.close = function(){
   }
 }
 
+TIM.views.FormView = Backbone.View.extend( {
+   className: "event",
+   template:"_event",
+   render: function() {
+     var html = '';
+     
+     
+   }
+});
+
+
 /*
   // - have a base 'event view'
   // - extend this if necessary to handle different post types
@@ -42,7 +53,7 @@ TIM.views.Highlight = TIM.views.EventView.extend( {
 
 TIM.views.PhotoAlbum = TIM.views.EventView.extend( {
   className: "event photo-album",
-  template:"_event"  
+  template:"_photoAlbum"  
 });
 
 TIM.views.Photo = TIM.views.EventView.extend( {
@@ -82,12 +93,17 @@ TIM.views.Correlation = TIM.views.EventView.extend( {
 
 TIM.views.getEventView = function (event) {
   var view;
+  
   switch(event.type) {
     case "follow":
       view = new TIM.views.Follow({event: event});
       break;
     case "checkin":
       view = new TIM.views.Checkin({event: event});
+      break;
+    case "photo_album":
+      view = new TIM.views.PhotoAlbum({event: event});
+      console.log('event view:', event)
       break;
     default: 
       view = new TIM.views.EventView({event: event});
@@ -107,10 +123,20 @@ TIM.views.renderEvent = function(event, template) {
     if (ev.origin.known) {
       ev.footer_img = TIM.allServices.getFooterImage(ev.origin.known.service_name);
     }
+    //horrible attempt at photo albums
+    if(ev.type == "photo_album") {
+      try {
+        ev.primary_image = ev.post_type_detail.photo_album.cover_photos[0][2];
+      } catch(e) {
+        
+      }
+      console.log("album event: ", ev)
+    }
     
     var view = TIM.views.getEventView(ev);
     ev.event_template = view.template; //this is probably wrong - do those really need to be views?
   }
+  
   return TIM.views.renderTemplate(template, event);
 }
 
@@ -954,25 +980,28 @@ TIM.mixins.flipset = {
 			  if(index < start || index >= end) return; //return if out of range
 			  
 			  itemJSON = item.toJSON();
-			  		   
+			  
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
 			  //possibly different templates for different event types?
 			  //
 			  //shouldn't skip too many non-one-page events...
-			  
-				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
-				  //we have a 'single event page'
-				  var template = self.pageTemplate;
-					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
-				} else {
-				  //it's a half-page event
-					page.push(item);
-					if(page.length == 2) {
-						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
-						page = [];
-					}
-				}
+			  //skip correlations for now - they have no useful data
+			  if(itemJSON.type !== "correlation") {
+			    if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
+  				  //we have a 'single event page'
+  				  var template = self.pageTemplate;
+  					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
+  				} else {
+  				  //it's a half-page event
+  					page.push(item);
+  					if(page.length == 2) {
+  						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
+  						page = [];
+  					}
+  				}
+			  }
+				
 				self.numResourcesRendered++;
 			});
 			
