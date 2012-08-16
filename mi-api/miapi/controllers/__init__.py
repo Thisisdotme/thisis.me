@@ -1,18 +1,15 @@
 import logging
 import calendar
+import datetime
 
 from sqlalchemy import func, and_
 from sqlalchemy.orm.exc import NoResultFound
 
 from tim_commons.json_serializer import load_string
-from tim_commons import db
 
-from data_access import service, post_type
+from data_access import service
 
 from mi_schema.models import (
-    Author,
-    AuthorServiceMap,
-    Service,
     ServiceObjectType,
     ServiceEvent,
     Relationship)
@@ -40,31 +37,13 @@ def get_profile_image_fragment(request, asm):
   return picture_obj
 
 
-def get_tim_author_fragment(request, author_name):
-
-  author, asm = db.Session().query(Author, AuthorServiceMap). \
-                             join(AuthorServiceMap, Author.id == AuthorServiceMap.author_id). \
-                             filter(Author.author_name == author_name). \
-                             filter(AuthorServiceMap.service_id == service.name_to_id('me')).one()
-
-  # for sure properties
-  author_obj = {'service_name': 'me',
-                'id': author.id,
-                'name': author.author_name,
-                'full_name': author.full_name}
-
-  author_obj['picture'] = get_profile_image_fragment(request, asm)
-
-  return author_obj
-
-
 def get_service_author_fragment(request, asm, author):
 
   profile_image_url = asm.profile_image_url
   if profile_image_url is None:
     profile_image_url = request.static_url('miapi:%s' % 'img/profile_placeholder.png')
 
-  author_obj = {'service_name': service.id_to_service[asm.service_id].service_name,
+  author_obj = {'service_name': service.id_to_name(asm.service_id),
                 'id': asm.service_author_id,
                 'name': author.author_name,     # TODO these need to become service user-name
                 'full_name': author.full_name}  # TODO and service full-name
@@ -276,3 +255,18 @@ def get_photo_detail_fragment(se):
       images.append(image)
 
     return images
+
+
+def create_page_param(date, service_id, event_id):
+  return '{0}_{1}_{2}'.format(calendar.timegm(date.utctimetuple()), service_id, event_id)
+
+
+def parse_page_param(param):
+  if param is None:
+    return (None, None, None)
+
+  split_param = param.split('_')
+  return (
+      datetime.datetime.utcfromtimestamp(int(split_param[0])),
+      int(split_param[1]),
+      '_'.join(split_param[2:]))

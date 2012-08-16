@@ -11,7 +11,7 @@ import tim_commons.json_serializer
 import miapi.controllers
 
 
-def createServiceEvent(request, se, asm, author):
+def createServiceEvent(request, se, me_asm, asm, author):
   event = {'id': se.id,
            'type': data_access.post_type.id_to_label(se.type_id),
            'truncated': False,
@@ -36,7 +36,7 @@ def createServiceEvent(request, se, asm, author):
     if se.photo_height:
       event['photo']['height'] = se.photo_height
 
-  author_info = miapi.controllers.get_tim_author_fragment(request, author.author_name)
+  author_info = miapi.controllers.get_service_author_fragment(request, me_asm, author)
   event['author'] = author_info
 
   location = miapi.controllers.get_location_fragment(se)

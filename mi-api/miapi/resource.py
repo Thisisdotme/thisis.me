@@ -178,11 +178,16 @@ class AuthorService:
 class PhotoAlbums:
   def __getitem__(self, key):
     try:
-      album_id = int(key)
+      album = data_access.service_event.query_photo_album(self.author.id, int(key))
     except ValueError:
       raise KeyError('key "{key}" not a valid photo albums entry'.format(key=key))
 
-    return location_aware(PhotoAlbum(album_id), self, key)
+    if album is None:
+      raise KeyError('Photo album ({author}, {album}) does not exist'.format(
+            author=self.author.id,
+            album=key))
+
+    return location_aware(PhotoAlbum(album), self, album.id)
 
   @property
   def author(self):
@@ -194,8 +199,9 @@ class PhotoAlbums:
 
 
 class PhotoAlbum:
-  def __init__(self, album_id):
-    self.album_id = album_id
+  def __init__(self, album):
+    self.album = album
+    self.album_id = album.id
 
   def __getitem__(self, key):
     if key == 'photos':
@@ -227,6 +233,10 @@ class Photos:
   @property
   def album_id(self):
     return self.__parent__.album_id
+
+  @property
+  def album(self):
+    return self.__parent__.album
 
 
 class Events:
@@ -282,11 +292,7 @@ class Services:
 
 class Service:
   def __init__(self, service_name):
-    self._name = service_name
-
-  @property
-  def name(self):
-    return self._name
+    self.name = service_name
 
 
 class Features:
