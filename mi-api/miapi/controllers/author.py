@@ -272,6 +272,10 @@ def view_author_topstories(author_context, request):
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
+
   # TODO: story limit should be configurable
   story_limit = 5
 
@@ -285,6 +289,7 @@ def view_author_topstories(author_context, request):
     event_obj = miapi.controllers.author_utils.createServiceEvent(
         request,
         event,
+        me_asm,
         asm,
         author)
     if event_obj:

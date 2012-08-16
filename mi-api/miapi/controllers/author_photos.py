@@ -1,17 +1,6 @@
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_
-
-from mi_schema.models import (
-    Author,
-    ServiceObjectType,
-    ServiceEvent,
-    Relationship,
-    AuthorServiceMap)
-
 import miapi.controllers.author_utils
 import miapi.resource
-import data_access.author
-import tim_commons.db
+import data_access.service_event
 
 
 def add_views(configuration):
@@ -25,68 +14,60 @@ def add_views(configuration):
 
 
 def get_photos(photos_context, request):
-  author_id = photos_context.author_id
+  author = photos_context.author
+  album = photos_context.album
 
-  author = data_access.author.query_author(author_id)
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
+  max_page_limit = miapi.tim_config['api']['max_page_limi']
+  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
-  album_id = photos_context.album_id
-
-  try:
-    album = tim_commons.db.Session().query(ServiceEvent). \
-            filter_by(id=album_id, type_id=ServiceObjectType.PHOTO_ALBUM_TYPE). \
-            one()
-  except NoResultFound:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown album %s' % album_id}
-
-  photos = []
+  # get the query parameters
+  since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
+      request.params.get('since'))
+  until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
+      request.params.get('until'))
 
   # check for the ALL well-known album and handle specially
-  if album.event_id == ServiceEvent.make_well_known_service_event_id(ServiceEvent.ALL_PHOTOS_ID, author_id):
-    for event, asm, author in tim_commons.db.Session(). \
-        query(ServiceEvent, AuthorServiceMap, Author). \
-        join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                    ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-        join(Author, ServiceEvent.author_id == Author.id). \
-        filter(and_(ServiceEvent.author_id == author_id,
-                    ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-        order_by(ServiceEvent.create_time.desc()). \
-        limit(200):
-      photo = miapi.controllers.author_utils.createServiceEvent(
-          request,
-          event,
-          asm,
-          author)
-      if photo:
-        photos.append(photo)
-  else:
-    # handle photos for other albums with relationship mappings
-    for event, asm, author in tim_commons.db.Session(). \
-        query(ServiceEvent, AuthorServiceMap, Author). \
-        join(Relationship, and_(Relationship.child_author_id == ServiceEvent.author_id,
-                                Relationship.child_service_id == ServiceEvent.service_id,
-                                Relationship.child_service_event_id == ServiceEvent.event_id)). \
-        join(AuthorServiceMap, and_(ServiceEvent.author_id == AuthorServiceMap.author_id,
-                                    ServiceEvent.service_id == AuthorServiceMap.service_id)). \
-        join(Author, ServiceEvent.author_id == Author.id). \
-        filter(and_(Relationship.parent_author_id == author_id,
-                    Relationship.parent_service_id == album.service_id,
-                    Relationship.parent_service_event_id == album.event_id)). \
-        order_by(ServiceEvent.create_time.desc()):
-      photo = miapi.controllers.author_utils.createServiceEvent(
-          request,
-          event,
-          asm,
-          author)
-      if photo:
-        photos.append(photo)
+  photo_events = data_access.service_event.query_photos_page(
+      author.id,
+      album.event_id,
+      album.service_id,
+      page_limit,
+      since_date=since_date,
+      since_service_id=since_service_id,
+      since_event_id=since_event_id,
+      until_date=until_date,
+      until_service_id=until_service_id,
+      until_event_id=until_event_id)
 
-  return {'author': miapi.controllers.get_tim_author_fragment(request, author.author_name),
-          'photos': photos,
-          'paging': {'prev': None, 'next': None}}
+  prev_link = None
+  next_link = None
+  photos = []
+  for photo_event in photo_events:
+    asm = data_access.author_service_map.query_asm_by_author_and_service(
+        author.id,
+        photo_event.service_id)
+
+    photo = miapi.controllers.author_utils.createServiceEvent(
+        request,
+        photo_event,
+        me_asm,
+        asm,
+        author)
+    if photo:
+      photos.append(photo)
+
+      param_value = miapi.controllers.create_page_param(
+          photo_event.create_time,
+          photo_event.service_id,
+          photo_event.event_id)
+
+      if prev_link is None:
+        prev_link = request.resource_url(photos_context, query={'since': param_value})
+      next_link = request.resource_url(photos_context, query={'until': param_value})
+
+  return {'entries': photos,
+          'paging': {'prev': prev_link, 'next': next_link}}

@@ -1,9 +1,10 @@
 import passlib.hash
 import pyramid.security
 
-import miapi.resource
 import data_access.author
 
+import miapi.resource
+import miapi.error
 import miapi.json_renders.author
 
 
@@ -35,25 +36,13 @@ def login(request):
     request.response.headers.extend(headers)
     return miapi.json_renders.author.to_person_fragment_JSON_dictionary(user)
 
-  return error(request.response, AUTHN_BAD_USER_OR_PASSWD)
+  return miapi.error.http_error(request.response, **miapi.error.AUTHN_BAD_USER_OR_PASSWD)
 
 
 def logout(request):
   headers = pyramid.security.forget(request)
   request.response.headers.extend(headers)
   return request.response
-
-
-# TODO move this and the error method somewhere else
-AUTHN_BAD_USER_OR_PASSWD = 40001
-
-
-def error(response, internal_code):
-  # TODO: implement message
-  response.status_int = internal_code / 100
-  return {'http_code': response.status_int,
-          'http_status': response.status,
-          'code': internal_code}
 
 
 def check_password(expected_encoded_password, actual_plain_password):

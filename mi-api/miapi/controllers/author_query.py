@@ -1,6 +1,3 @@
-import datetime
-import calendar
-
 import miapi.resource
 import miapi.controllers
 
@@ -32,23 +29,23 @@ def add_views(configuration):
 
 
 def get_events(events_context, request):
-  author_id = events_context.author_id
+  author = events_context.author
 
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
   # get the query parameters
-  since_date, since_service_id, since_event_id = parse_page_param(request.params.get('since'))
-  until_date, until_service_id, until_event_id = parse_page_param(request.params.get('until'))
+  since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
+      request.params.get('since'))
+  until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
+      request.params.get('until'))
 
   max_page_limit = miapi.tim_config['api']['max_page_limi']
   page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
   event_rows = data_access.service_event.query_service_events_page(
-      author_id,
+      author.id,
       page_limit,
       since_date=since_date,
       since_service_id=since_service_id,
@@ -62,18 +59,22 @@ def get_events(events_context, request):
   events = []
   for event in event_rows:
     asm = data_access.author_service_map.query_asm_by_author_and_service(
-        author_id,
+        author.id,
         event.service_id)
 
     event_obj = miapi.controllers.author_utils.createServiceEvent(
         request,
         event,
+        me_asm,
         asm,
         author)
     if event_obj:
       events.append(event_obj)
 
-      param_value = create_page_param(event.create_time, event.service_id, event.event_id)
+      param_value = miapi.controllers.create_page_param(
+          event.create_time,
+          event.service_id,
+          event.event_id)
 
       if prev_link is None:
         prev_link = request.resource_url(events_context, query={'since': param_value})
@@ -84,30 +85,21 @@ def get_events(events_context, request):
 
 
 def get_event_detail(event_context, request):
-  author_id = event_context.author_id
-  event_id = event_context.event_id
+  author = event_context.author
+  event = event_context.event
 
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
-
-  event_row = data_access.service_event.query_service_event_by_id(author_id, event_id)
-
-  if event_row is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown event id %d' % event_id}
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
   asm = data_access.author_service_map.query_asm_by_author_and_service(
-      author_id,
-      event_row.service_id)
+      author.id,
+      event.service_id)
 
   return miapi.controllers.author_utils.createServiceEvent(
       request,
-      event_row,
+      event,
+      me_asm,
       asm,
       author)
 
@@ -124,6 +116,7 @@ def get_highlights(self):
     self.request.response.status_int = 404
     return {'error': 'unknown author %s' % author_name}
 
+  # NOTE: this method doesn't exist anymore. use get_service_author_fragment
   author_obj = get_tim_author_fragment(self.request, author_name)
 
   events = []
@@ -142,18 +135,3 @@ def get_highlights(self):
 
 
 '''
-
-
-def create_page_param(date, service_id, event_id):
-  return '{0}_{1}_{2}'.format(calendar.timegm(date.utctimetuple()), service_id, event_id)
-
-
-def parse_page_param(param):
-  if param is None:
-    return (None, None, None)
-
-  split_param = param.split('_')
-  return (
-      datetime.datetime.utcfromtimestamp(int(split_param[0])),
-      int(split_param[1]),
-      '_'.join(split_param[2:]))
