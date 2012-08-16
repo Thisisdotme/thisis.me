@@ -30,7 +30,6 @@ def get_photos(photos_context, request):
   until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
       request.params.get('until'))
 
-  # check for the ALL well-known album and handle specially
   photo_events = data_access.service_event.query_photos_page(
       author.id,
       album.event_id,
@@ -66,8 +65,12 @@ def get_photos(photos_context, request):
           photo_event.event_id)
 
       if prev_link is None:
-        prev_link = request.resource_url(photos_context, query={'since': param_value})
-      next_link = request.resource_url(photos_context, query={'until': param_value})
+        prev_link = request.resource_url(
+            photos_context,
+            query={'since': param_value, 'count': page_limit})
+      next_link = request.resource_url(
+          photos_context,
+          query={'until': param_value, 'coun': page_limit})
 
   return {'entries': photos,
           'paging': {'prev': prev_link, 'next': next_link}}

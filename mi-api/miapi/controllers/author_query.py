@@ -77,8 +77,12 @@ def get_events(events_context, request):
           event.event_id)
 
       if prev_link is None:
-        prev_link = request.resource_url(events_context, query={'since': param_value})
-      next_link = request.resource_url(events_context, query={'until': param_value})
+        prev_link = request.resource_url(
+            events_context,
+            query={'since': param_value, 'count': page_limit})
+      next_link = request.resource_url(
+          events_context,
+          query={'until': param_value, 'count': page_limit})
 
   return {'entries': events,
           'paging': {'prev': prev_link, 'next': next_link}}
