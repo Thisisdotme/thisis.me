@@ -36,6 +36,10 @@ def get_events(author_service_context, request):
     request.response.status_int = 404
     return {'error': 'unknown service %s' % author_service_context.service_name}
 
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
+
   events = []
   for event, asm in tim_commons.db.Session().query(ServiceEvent, AuthorServiceMap). \
     join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
@@ -52,7 +56,7 @@ def get_events(author_service_context, request):
          event.service_id == service.name_to_id('instagram'))):
       continue
 
-    event_obj = createServiceEvent(request, event, asm, author)
+    event_obj = createServiceEvent(request, event, me_asm, asm, author)
     if event_obj:
       events.append(event_obj)
 

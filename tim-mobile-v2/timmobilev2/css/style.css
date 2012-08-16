@@ -629,6 +629,18 @@ body.splash {
   
 }
 
+.app-page .photo-album .thumbnail  {
+  height:35px;
+  width:35px;
+  float:left;
+  margin:8px;
+}
+
+.app-page .photo-album .thumbnail img {
+  height:35px;
+  width:35px;
+}
+
 /* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
     Built by David Kaneda and maintained by Jonathan Stark.
 */
@@ -780,29 +792,32 @@ body.splash {
   margin-right: 4px;
 }
 
+#content-container footer {
+  x-position:relative;
+}
+
 footer .service-icon { margin:0 3px;}
 
 #content-container .scroll-overlay .interaction-icons {  display: none }
 
-.photo-page .interaction-icons {
+footer .interaction-icons {
   position: absolute;
-  left: 2px;
-  bottom: 60px;
-  height: 100px;
+  right: 2px;
+  bottom: 16px;
+  height: 20px;
   width: 50px;
   display:none; /* hide these for now */
 }
-.photo-page .interaction-icons .comments {
+footer .interaction-icons .comments {
   position: absolute;
   height: 35px;
   width: 35px;
-  left: 0px;
+  right: 0px;
   background: transparent url(/img/comments_icon.png) no-repeat center center;
 }
-.photo-page .interaction-icons .location {
+footer interaction-icons .location {
   position: absolute;
-  top: 55px;
-  left: 0px;
+  right: 40px;
   height: 35px;
   width: 35px;
   background: transparent url(/img/location_pin_icon.png) no-repeat center center;
@@ -874,6 +889,7 @@ footer {
   margin: 0;
   bottom: 0;
   position: absolute;
+  width:100%;
 }
 footer .info {
   float: none;

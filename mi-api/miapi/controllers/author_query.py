@@ -29,74 +29,81 @@ def add_views(configuration):
 
 
 def get_events(events_context, request):
-  author_id = events_context.author_id
+  author = events_context.author
 
-  author = data_access.author.query_author(author_id)
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
+  # get the query parameters
+  since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
+      request.params.get('since'))
+  until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
+      request.params.get('until'))
 
-  author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
+  max_page_limit = miapi.tim_config['api']['max_page_limi']
+  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
-  # TODO: use paging limit should be configurable
-  page_limit = 200
+  event_rows = data_access.service_event.query_service_events_page(
+      author.id,
+      page_limit,
+      since_date=since_date,
+      since_service_id=since_service_id,
+      since_event_id=since_event_id,
+      until_date=until_date,
+      until_service_id=until_service_id,
+      until_event_id=until_event_id)
 
-  event_rows = data_access.service_event.query_service_events_descending_time(
-      author_id,
-      page_limit)
+  prev_link = None
+  next_link = None
   events = []
   for event in event_rows:
-    # filter well-known and instagram photo albums so they don't appear in the timeline
-    if (event.type_id == data_access.post_type.label_to_id('photo_album') and
-        (event.service_id == data_access.service.name_to_id('me') or
-         event.service_id == data_access.service.name_to_id('instagram'))):
-      continue
-
     asm = data_access.author_service_map.query_asm_by_author_and_service(
-        author_id,
+        author.id,
         event.service_id)
 
     event_obj = miapi.controllers.author_utils.createServiceEvent(
         request,
         event,
+        me_asm,
         asm,
         author)
     if event_obj:
       events.append(event_obj)
 
-  # TODO: implement the correct result for paging
-  return {'author': author_object,
-          'events': events,
-          'paging': {'prev': None, 'next': None}}
+      param_value = miapi.controllers.create_page_param(
+          event.create_time,
+          event.service_id,
+          event.event_id)
+
+      if prev_link is None:
+        prev_link = request.resource_url(
+            events_context,
+            query={'since': param_value, 'count': page_limit})
+      next_link = request.resource_url(
+          events_context,
+          query={'until': param_value, 'count': page_limit})
+
+  return {'entries': events,
+          'paging': {'prev': prev_link, 'next': next_link}}
 
 
 def get_event_detail(event_context, request):
-  author_id = event_context.author_id
-  event_id = event_context.event_id
+  author = event_context.author
+  event = event_context.event
 
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
-
-  event_row = data_access.service_event.query_service_event_by_id(author_id, event_id)
-
-  if event_row is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown event id %d' % event_id}
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
   asm = data_access.author_service_map.query_asm_by_author_and_service(
-      author_id,
-      event_row.service_id)
+      author.id,
+      event.service_id)
 
   return miapi.controllers.author_utils.createServiceEvent(
       request,
-      event_row,
+      event,
+      me_asm,
       asm,
       author)
 
@@ -113,6 +120,7 @@ def get_highlights(self):
     self.request.response.status_int = 404
     return {'error': 'unknown author %s' % author_name}
 
+  # NOTE: this method doesn't exist anymore. use get_service_author_fragment
   author_obj = get_tim_author_fragment(self.request, author_name)
 
   events = []

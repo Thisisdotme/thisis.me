@@ -1,0 +1,17 @@
+ <div class="content photo-album">
+		{?primary_image}
+		   	<div class="inner-image">
+				<img src='{primary_image.image_url}' />
+			</div>
+		{:else}
+		{/primary_image}
+     <div class="inner-text">
+  	    {?headline}
+  	     <p>{headline}</p>
+  	    {/headline}
+  	    {?content}
+  	     <p>{content}</p>
+  	    {/content}
+     </div>
+  </div>
+{>_eventFooter/}

@@ -1,23 +1,13 @@
-'''
-Created on Feb 22, 2012
-
-@author: howard
-'''
-
-import logging
-
 from tim_commons import db
 
-from data_access import service
+import data_access.service
+import data_access.author_service_map
 
 from mi_schema.models import Author, AuthorGroupMap, ServiceEvent, AuthorServiceMap, ServiceObjectType
 
 from author_utils import createServiceEvent
-#from author_utils import createHighlightEvent
 
 import miapi.resource
-
-log = logging.getLogger(__name__)
 
 
 def add_views(configuration):
@@ -50,6 +40,10 @@ def list_group_events(context, request):
   author = context.author
   author_group = context.author_group
 
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
+
   db_session = db.Session()
 
   events = []
@@ -67,11 +61,11 @@ def list_group_events(context, request):
         don't appear in the timeline
     '''
     if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-        (event.service_id == service.name_to_id('me') or
-         event.service_id == service.name_to_id('instagram'))):
+        (event.service_id == data_access.service.name_to_id('me') or
+         event.service_id == data_access.service.name_to_id('instagram'))):
       continue
 
-    event_obj = createServiceEvent(request, event, asm, author)
+    event_obj = createServiceEvent(request, event, me_asm, asm, author)
     if event_obj:
       events.append(event_obj)
 

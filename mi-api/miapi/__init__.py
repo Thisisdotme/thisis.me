@@ -15,6 +15,7 @@ import data_access.service
 import data_access.post_type
 
 import resource
+import error
 import controllers.login
 import controllers.author
 import controllers.author_reservation
@@ -86,13 +87,6 @@ def main(global_config, **settings):
 
   return configuration.make_wsgi_app()
 
-  # TODO: add status view: config.add_route('status', '/v1/status')
-  # TODO: do someething about the about template...
-  #       config.add_route('home', '/')
-  #       config.add_view('miapi.controllers.about.about',
-  #                       route_name='home',
-  #                       renderer='templates/about.pt')
-
 
 def add_views(configuration):
   controllers.status.add_views(configuration)
@@ -139,15 +133,11 @@ def preflight_crossdomain_access_control(request):
 
     return request.response
 
-  # TODO: better error
-  request.response = pyramid.httpexceptions.HTTPNotFound()
-  return {'error': 'not found'}
+  return error.http_error(request.response, **error.NOT_FOUND)
 
 
 def not_found(request):
-  # TODO: better error
-  request.response = pyramid.httpexceptions.HTTPNotFound()
-  return {'error': 'not found'}
+  return error.http_error(request.response, **error.NOT_FOUND)
 
 
 def crossdomain_access_control_response(event):

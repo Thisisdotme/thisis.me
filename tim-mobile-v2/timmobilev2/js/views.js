@@ -8,6 +8,15 @@ Backbone.View.prototype.close = function(){
   }
 }
 
+TIM.views.FormView = Backbone.View.extend( {
+   className: "event",
+   template:"_event",
+   render: function() {
+     var html = '';
+   }
+});
+
+
 /*
   // - have a base 'event view'
   // - extend this if necessary to handle different post types
@@ -42,7 +51,7 @@ TIM.views.Highlight = TIM.views.EventView.extend( {
 
 TIM.views.PhotoAlbum = TIM.views.EventView.extend( {
   className: "event photo-album",
-  template:"_event"  
+  template:"_photoAlbum"  
 });
 
 TIM.views.Photo = TIM.views.EventView.extend( {
@@ -82,12 +91,16 @@ TIM.views.Correlation = TIM.views.EventView.extend( {
 
 TIM.views.getEventView = function (event) {
   var view;
+  
   switch(event.type) {
     case "follow":
       view = new TIM.views.Follow({event: event});
       break;
     case "checkin":
       view = new TIM.views.Checkin({event: event});
+      break;
+    case "photo_album":
+      view = new TIM.views.PhotoAlbum({event: event});
       break;
     default: 
       view = new TIM.views.EventView({event: event});
@@ -104,13 +117,27 @@ TIM.views.renderEvent = function(event, template) {
     var ev = event.events[i];
     
     //ugh, terrible place to find the image url
+    //maybe the Event model would be a good place to put the hairier JSON transformation
+    //
+    //
+    
     if (ev.origin.known) {
       ev.footer_img = TIM.allServices.getFooterImage(ev.origin.known.service_name);
+    }
+    //horrible attempt at photo albums
+    if(ev.type == "photo_album") {
+      try {
+        ev.primary_image = ev.post_type_detail.photo_album.cover_photos[0][2];
+      } catch(e) {
+        
+      }
+      console.log("album event: ", ev)
     }
     
     var view = TIM.views.getEventView(ev);
     ev.event_template = view.template; //this is probably wrong - do those really need to be views?
   }
+  
   return TIM.views.renderTemplate(template, event);
 }
 
@@ -304,9 +331,9 @@ TIM.views.Settings = Backbone.View.extend( {
         
     className: "app-page light toolbar-top settings-page services",
     template: "settings",
+    userServices: TIM.currentUserServices,
     
     events: {
-      //"click span" : "itemClicked"
       "click .cancel-link" : "cancel",
       "click .services-form li a" : "toggleSetting",
       "click .features-form li a" : "toggleFeature",
@@ -325,6 +352,10 @@ TIM.views.Settings = Backbone.View.extend( {
         var that = this;
         
         _.bindAll(this);
+        //update display if user activates a feature
+        TIM.currentUserFeatures.bind("add", function() {
+          that.render();
+        });
         
         if(TIM.appContainerElem.find(this.el).length == 0)  {
            TIM.appContainerElem.append(this.$el);
@@ -333,6 +364,8 @@ TIM.views.Settings = Backbone.View.extend( {
     
     render: function() {
       var that = this;
+      
+      this.$el.html(''); //clear DOM element
       
       //remove the 'me' service for display
       var me = that.collection.getByName('me');
@@ -376,7 +409,7 @@ TIM.views.Settings = Backbone.View.extend( {
   		this.$el.html(html);
   		return this.$el;
     },
-    
+        
     toggleSetting: function(e) {
       event.preventDefault();
       event.stopPropagation();
@@ -748,15 +781,15 @@ TIM.views.Comments = Backbone.View.extend( {
       }
       
       this.commentCollections[this.collectionNum].reset(generateFakeComments(randomNum(83)));
+      
+      //pausing for a second to fake like there's an API call being made
       window.setTimeout(function() {
         that.render();
         that.setSelectedService();
         that.resetScrollElem();
         TIM.setLoading(false);
       }, 1000);
-      
-      
-      
+            
     },
     
     setSelectedService: function () {
@@ -877,10 +910,8 @@ TIM.mixins.flipset = {
 		renderPage: function(page){ 
 			//make a Page View out of 1-3 events
 	    var pageView = new TIM.views.Page({page:page});
-	    var tmpl = page.template ? page.template : this.pageTemplate;
+	    var tmpl = page.template || this.pageTemplate;
 	    var that = this;
-	    
-	    //console.log("page template: ", tmpl);
 	    
 	    //maybe do away with this process of sending html strings to the flipset to be injected into the flipset templates?
 	    //seems wasteful
@@ -895,7 +926,6 @@ TIM.mixins.flipset = {
 					that.flipSet.addSourceItem(pageHtml);
 				}
       });
-        
 
     },
     
@@ -954,25 +984,29 @@ TIM.mixins.flipset = {
 			  if(index < start || index >= end) return; //return if out of range
 			  
 			  itemJSON = item.toJSON();
-			  		   
+			  
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
 			  //possibly different templates for different event types?
 			  //
 			  //shouldn't skip too many non-one-page events...
+			  //skip correlations for now - they have no useful data
 			  
-				if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
-				  //we have a 'single event page'
-				  var template = self.pageTemplate;
-					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
-				} else {
-				  //it's a half-page event
-					page.push(item);
-					if(page.length == 2) {
-						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
-						page = [];
-					}
-				}
+			  if(itemJSON.type !== "correlation") {
+			    if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
+  				  //we have a 'single event page'
+  				  var template = self.pageTemplate;
+  					self.pages.push({template: template, num: index+1, options: options, "event_class" : "full-page", "events" : [itemJSON]});
+  				} else {
+  				  //it's a half-page event
+  					page.push(item);
+  					if(page.length == 2) {
+  						self.pages.push({template: template, "event_class" : "half-page", "events" : [page[0].toJSON(), page[1].toJSON()]});
+  						page = [];
+  					}
+  				}
+			  }
+				
 				self.numResourcesRendered++;
 			});
 			
@@ -980,7 +1014,6 @@ TIM.mixins.flipset = {
 			if(page.length == 1) {
 			  self.pages.push({"event_class" : "full-page", "events" : [page[0].toJSON()]});
 			}
-			
     },
     
 		renderPageChunk: function(start) {
@@ -1061,6 +1094,8 @@ TIM.mixins.flipset = {
   		}
   	
   		this.flipSet._gotoPage(num);
+  		
+  		//updateRouter changes the URL hash (or pushState) for deep linking & browser history purposes
   		if (this.updateRouter) {
 			  this.updateRouter();
 			}

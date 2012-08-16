@@ -267,28 +267,21 @@ def view_author_topstories(author_context, request):
   author_id = author_context.author_id
 
   author = data_access.author.query_author(author_id)
-
   if author is None:
     # TODO: better error
     request.response.status_int = 404
     return {'error': 'unknown author: %s' % author_id}
 
-  author_object = miapi.controllers.get_tim_author_fragment(request, author.author_name)
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
 
   # TODO: story limit should be configurable
   story_limit = 5
 
-  top_stories = data_access.service_event.query_service_events_descending_time(
-      author_id,
-      story_limit)
+  top_stories = data_access.service_event.query_service_events_page(author_id, story_limit)
   events = []
   for event in top_stories:
-    # filter well-known and instagram photo albums so they don't appear in the timeline
-    if (event.type_id == data_access.post_type.label_to_id('photo_album') and
-        (event.service_id == data_access.service.name_to_id('me') or
-         event.service_id == data_access.service.name_to_id('instagram'))):
-      continue
-
     asm = data_access.author_service_map.query_asm_by_author_and_service(
         author_id,
         event.service_id)
@@ -296,12 +289,10 @@ def view_author_topstories(author_context, request):
     event_obj = miapi.controllers.author_utils.createServiceEvent(
         request,
         event,
+        me_asm,
         asm,
         author)
     if event_obj:
       events.append(event_obj)
 
-  # TODO: implement the correct result for paging
-  return {'author': author_object,
-          'events': events,
-          'paging': {'prev': None, 'next': None}}
+  return events

@@ -35,10 +35,6 @@ TIM.collections.Features = TIM.collections.BaseCollection.extend({
 		  return (resp.features);
 		},
 		
-		getByName: function(name) {
-		  return this.find(function(model){return model.get('name') == name});
-		},
-		
 		getSelectedFeature: function() {
 		  return this.find(function(model){return model.get('selected') == true});
 		},
@@ -84,9 +80,6 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		parse: function(resp) {
 		  console.log('services: ', resp)
 		  return (resp.services);
-		},
-		getByName: function(name) {
-		  return this.find(function(model){return model.get('name') == name});
 		},
 		setURL: function(username) {
 		  this.url = TIM.apiUrl + "authors/" + username + "/services";
