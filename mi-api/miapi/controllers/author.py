@@ -187,13 +187,7 @@ def add_author(request):
 #################### Author ####################
 
 def view_author(author_context, request):
-  author_id = author_context.author_id
-
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author %s' % author_id}
+  author = author_context.author
 
   author_json = miapi.json_renders.author.to_JSON_dictionary(author)
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
@@ -207,70 +201,51 @@ def view_author(author_context, request):
 
 
 def update_author(author_context, request):
-  author_id = author_context.author_id
+  author = author_context.author
 
-  author = data_access.author.query_author(author_id)
+  author_info = request.json_body
+  plain_password = author_info.get('password')
+  if plain_password:
+    author.password = passlib.hash.sha256_crypt.encrypt(plain_password)
 
-  if author:
-    author_info = request.json_body
-    plain_password = author_info.get('password')
-    if plain_password:
-      author.password = passlib.hash.sha256_crypt.encrypt(plain_password)
+  fullname = author_info.get('fullname')
+  if fullname:
+    author.full_name = fullname
 
-    fullname = author_info.get('fullname')
-    if fullname:
-      author.full_name = fullname
+  email = author_info.get('email')
+  if email:
+    author.email = email
 
-    email = author_info.get('email')
-    if email:
-      author.email = email
+  template = author_info.get('template')
+  if template:
+    author.template = template
 
-    template = author_info.get('template')
-    if template:
-      author.template = template
+  try:
+    data_access.flush()
+  except Exception, e:
+    # TODO: better error
+    logging.error(e.message)
+    request.response.status_int = 500
+    return {'error': e.message}
 
-    try:
-      data_access.flush()
-    except Exception, e:
-      # TODO: better error
-      logging.error(e.message)
-      request.response.status_int = 500
-      return {'error': e.message}
-
-    # TODO: return the correct code
-    return miapi.json_renders.author.to_JSON_dictionary(author)
-
-  # TODO: better error
-  return {'error': 'user does not exist'}
+  # TODO: return the correct code
+  return miapi.json_renders.author.to_JSON_dictionary(author)
 
 
 def delete_author(author_context, request):
-  author_id = author_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_context.author
 
   data_access.author.delete_author(author)
   data_access.author_reservation.delete_author_reservation(author.author_name)
 
-  logging.info("deleted author: %s" % author_id)
+  logging.info("deleted author: %s" % author.id)
 
-  # TODO: return correct code
+  # TODO: return correct code (delete http code?)
   return {}
 
 
 def view_author_topstories(author_context, request):
-  author_id = author_context.author_id
-
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_context.author
 
   me_asm = data_access.author_service_map.query_asm_by_author_and_service(
       author.id,
@@ -279,11 +254,11 @@ def view_author_topstories(author_context, request):
   # TODO: story limit should be configurable
   story_limit = 5
 
-  top_stories = data_access.service_event.query_service_events_page(author_id, story_limit)
+  top_stories = data_access.service_event.query_service_events_page(author.id, story_limit)
   events = []
   for event in top_stories:
     asm = data_access.author_service_map.query_asm_by_author_and_service(
-        author_id,
+        author.id,
         event.service_id)
 
     event_obj = miapi.controllers.author_utils.createServiceEvent(

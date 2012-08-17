@@ -125,23 +125,38 @@ class Author:
 
 class AuthorFeatures:
   @property
-  def author_id(self):
-    return self.__parent__.author_id
+  def author(self):
+    return self.__parent__.author
 
   def __getitem__(self, key):
     if key == 'default':
       raise KeyError('Key "{key}" not a valid author feature entry'.format(key=key))
 
-    return location_aware(AuthorFeature(key), self, key)
+    feature = mi_schema.models.Feature.query_by_name(key)
+
+    if feature is None:
+      raise KeyError('Feature ({feature}) does not exist'.format(feature=key))
+
+    author_feature = data_access.author_feature_map.query_author_feature(
+        self.author.id,
+        feature.id)
+
+    if author_feature is None:
+      raise KeyError('Author feature ({author}, {feature}) does not exist'.format(
+        author=self.author.id,
+        feature=feature.feature_id))
+
+    return location_aware(AuthorFeature(feature, author_feature), self, key)
 
 
 class AuthorFeature:
-  def __init__(self, feature_name):
-    self.feature_name = feature_name
+  def __init__(self, feature, author_feature):
+    self.author_feature = author_feature
+    self.feature = feature
 
   @property
-  def author_id(self):
-    return self.__parent__.author_id
+  def author(self):
+    return self.__parent__.author
 
 
 class AuthorServices:

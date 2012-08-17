@@ -22,13 +22,7 @@ def add_views(configuration):
 
 
 def get_events(author_service_context, request):
-  author_id = author_service_context.author_id
-
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_service_context.author
 
   service = data_access.service.name_to_service.get(author_service_context.service_name)
   if service is None:

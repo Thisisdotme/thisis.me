@@ -46,20 +46,13 @@ def add_views(configuration):
 
 
 def list_author_services(author_services_context, request):
-  author_id = author_services_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_services_context.author
 
   services = []
   for service in tim_commons.db.Session().query(Service). \
     join(AuthorServiceMap). \
     filter(and_(Service.id == AuthorServiceMap.service_id,
-                AuthorServiceMap.author_id == author_id)). \
+                AuthorServiceMap.author_id == author.id)). \
     order_by(Service.service_name):
 
     services.append(miapi.json_renders.service.to_JSON_dictionary(service, request))
@@ -68,14 +61,7 @@ def list_author_services(author_services_context, request):
 
 
 def get_author_service_info(author_service_context, request):
-  author_id = author_service_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_service_context.author
 
   service = data_access.service.name_to_service.get(author_service_context.service_name)
   if service is None:
@@ -83,7 +69,7 @@ def get_author_service_info(author_service_context, request):
     request.response.status_int = 404
     return {'error': 'unknown service %s' % author_service_context.service_name}
 
-  asm = data_access.author_service_map.query_asm_by_author_and_service(author_id, service.id)
+  asm = data_access.author_service_map.query_asm_by_author_and_service(author.id, service.id)
   if asm is None:
     # TODO: better error
     request.response.status_int = 404
@@ -97,14 +83,7 @@ def get_author_service_info(author_service_context, request):
 
 
 def add_author_service(author_services_context, request):
-  author_id = author_services_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_services_context.author
 
   payload = request.json_body
   service_name = payload.get('name')
@@ -119,7 +98,7 @@ def add_author_service(author_services_context, request):
     return {'error': 'unknown service %s' % service_name}
 
   author_service_map = AuthorServiceMap(
-      author_id,
+      author.id,
       service.id,
       accessToken,
       accessTokenSecret,
@@ -134,9 +113,9 @@ def add_author_service(author_services_context, request):
       instagram__album = ServiceEvent(
           author_service_map.id,
           ServiceObjectType.PHOTO_ALBUM_TYPE,
-          author_id,
+          author.id,
           service.id,
-          '_{0}@{1}'.format(service.service_name, author_id),
+          '_{0}@{1}'.format(service.service_name, author.id),
           datetime.now(),
           None,
           None,
@@ -165,14 +144,7 @@ def add_author_service(author_services_context, request):
 
 
 def delete_author_service(author_service_context, request):
-  author_id = author_service_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_service_context.author
 
   service = data_access.service.name_to_service.get(author_service_context.service_name)
   if service is None:
@@ -180,7 +152,7 @@ def delete_author_service(author_service_context, request):
     request.response.status_int = 404
     return {'error': 'unknown service %s' % author_service_context.service_name}
 
-  asm = data_access.author_service_map.query_asm_by_author_and_service(author_id, service.id)
+  asm = data_access.author_service_map.query_asm_by_author_and_service(author.id, service.id)
   if asm is None:
     # TODO: better error
     request.response.status_int = 404
