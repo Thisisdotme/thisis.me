@@ -1,0 +1,12 @@
+server {
+  listen              80;
+  server_name					api2.thisis.me;
+  access_log          on;
+  error_log           /var/log/nginx/api2.error.log;
+
+  charset             utf-8;
+  location / {
+      uwsgi_pass      unix:///tmp/mi-api-2.sock;
+      include         uwsgi_params;
+  }
+}

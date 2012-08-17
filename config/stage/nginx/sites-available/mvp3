@@ -1,13 +1,13 @@
 server {
   listen              80;
-  server_name					mvp1.thisis.me;
+  server_name					mvp3.thisis.me;
   access_log          on;
-  error_log           /var/log/nginx/tim-mobile.error.log;
+  error_log           /var/log/nginx/tim-mobile-v3.error.log;
 
   charset             utf-8;
 
   location / {
-      uwsgi_pass      unix:///tmp/tim-mobile.sock;
+      uwsgi_pass      unix:///tmp/tim-mobile-v3.sock;
       include         uwsgi_params;
       auth_basic      "thisis.me";
       auth_basic_user_file htpasswd;
