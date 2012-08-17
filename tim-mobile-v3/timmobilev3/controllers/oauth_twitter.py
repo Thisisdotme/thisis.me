@@ -11,14 +11,14 @@ from pyramid.security import unauthenticated_userid
 
 from tim_commons.oauth import make_request
 
-from timmobilev2 import tim_config
+from timmobilev3 import tim_config
 
 log = logging.getLogger(__name__)
 
 SERVICE = 'twitter'
 
 
-@view_config(route_name='twitter', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
+@view_config(route_name='twitter', request_method='GET', renderer='timmobilev3:templates/oauth.pt')
 def get_twitter(request):
 
   return {'feature': 'Twitter',
@@ -55,7 +55,7 @@ def post_twitter(request):
   return HTTPFound(location=redirectURL)
 
 
-@view_config(route_name='twitter_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+@view_config(route_name='twitter_callback', request_method='GET', renderer='timmobilev3:templates/settings.pt')
 def twitter_callback(request):
 
   error_msg = None

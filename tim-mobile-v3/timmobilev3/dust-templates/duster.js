@@ -3,7 +3,7 @@
 // by Dan McGrady http://dmix.ca
 
 var src_path = "./templates"; // directory of dust templates are stored with .dust file extension
-//var public_path = "/Users/klenga/Projects/thisisme/thisis.me-MVP/tim-mobile-v2/timmobilev2/assets/default/"; // directory where the compiled .js files should be saved to
+//var public_path = "/Users/klenga/Projects/thisisme/thisis.me-MVP/tim-mobile-v3/timmobilev3/assets/default/"; // directory where the compiled .js files should be saved to
 var public_path = "../assets/default/"; // directory where the compiled .js files should be saved to
 
 var fs = require('fs');                                                                        

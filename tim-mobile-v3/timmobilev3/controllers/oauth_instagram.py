@@ -10,7 +10,7 @@ from pyramid.security import unauthenticated_userid
 
 from instagram import client
 
-from timmobilev2 import tim_config
+from timmobilev3 import tim_config
 
 
 SERVICE = 'instagram'
@@ -18,7 +18,7 @@ SERVICE = 'instagram'
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name='instagram', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
+@view_config(route_name='instagram', request_method='GET', renderer='timmobilev3:templates/oauth.pt')
 def get_instagram(request):
 
   return {'feature': 'Instagram',
@@ -40,7 +40,7 @@ def post_instagram(request):
   return HTTPFound(location=redirectURL)
 
 
-@view_config(route_name='instagram_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+@view_config(route_name='instagram_callback', request_method='GET', renderer='timmobilev3:templates/settings.pt')
 def instagram_callback(request):
 
   error_msg = None

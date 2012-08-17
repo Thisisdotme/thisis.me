@@ -12,7 +12,7 @@ from pyramid.security import unauthenticated_userid
 
 from tim_commons.oauth import make_request
 
-from timmobilev2 import tim_config
+from timmobilev3 import tim_config
 
 log = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 SERVICE = 'linkedin'
 
 
-@view_config(route_name='linkedin', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
+@view_config(route_name='linkedin', request_method='GET', renderer='timmobilev3:templates/oauth.pt')
 def linkedin_get(request):
   return {'feature': 'LinkedIn',
           'url': request.route_url('linkedin'),
@@ -59,7 +59,7 @@ def linkedin_post(request):
   return HTTPFound(location=redirectURL)
 
 
-@view_config(route_name='linkedin_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+@view_config(route_name='linkedin_callback', request_method='GET', renderer='timmobilev3:templates/settings.pt')
 def linkedin_callback(request):
 
   error_msg = None

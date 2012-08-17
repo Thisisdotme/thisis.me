@@ -1,4 +1,4 @@
-tim-mobile-v2 README
+tim-mobile-v3 README
 ==================
 
 Getting Started
@@ -8,7 +8,7 @@ Getting Started
 
 - $venv/bin/python setup.py develop
 
-- $venv/bin/populate_tim-mobile-v2 development.ini
+- $venv/bin/populate_tim-mobile-v3 development.ini
 
 - $venv/bin/pserve development.ini
 
