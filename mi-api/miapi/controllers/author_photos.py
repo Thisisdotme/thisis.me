@@ -70,7 +70,7 @@ def get_photos(photos_context, request):
             query={'since': param_value, 'count': page_limit})
       next_link = request.resource_url(
           photos_context,
-          query={'until': param_value, 'coun': page_limit})
+          query={'until': param_value, 'count': page_limit})
 
   return {'entries': photos,
           'paging': {'prev': prev_link, 'next': next_link}}
