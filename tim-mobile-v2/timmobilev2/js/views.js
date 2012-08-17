@@ -1052,7 +1052,7 @@ TIM.mixins.flipset = {
 			  if(TIM.isLoading() || this.collection.getNextPage === undefined) {
 			    return;
 			  }
-			  this.collection.getNextPage();
+			  //this.collection.getNextPage();
 			  this.pageNum++;
 			}
 			if (this.updateRouter) {

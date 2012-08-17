@@ -76,7 +76,7 @@
   		
   		//could also subclass in parse?
   		parse: function(resp) {
-  		  return (resp.events);
+  		  return (resp.entries);
   		}
 
   });
@@ -97,6 +97,7 @@
           
   				//collection fires 'reset' event when fetch is complete
           this.collection.bind( "reset", this.render );
+          this.collection.bind('pageLoaded', this.renderNextPageset, this);
       },
 
   		events: {
@@ -123,6 +124,10 @@
   		    feature.showDetailId = detailId;
   		    TIM.app.navigate(feature.path + detailId, {'trigger': true});
   		  }
+      },
+      
+      renderNextPageset: function() {
+        alert('hey, we paged!');
       }
 
   } );

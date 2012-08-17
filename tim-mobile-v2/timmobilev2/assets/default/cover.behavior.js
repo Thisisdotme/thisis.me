@@ -28,10 +28,6 @@
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/topstories',
   		
   		initialize: function() {
-  		},
-  		
-  		parse: function(resp) {
-  		  return (resp.events);
   		}
 
   });

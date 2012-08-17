@@ -71,7 +71,7 @@ TIM.collections.Comments = TIM.collections.BaseCollection.extend({
 
 TIM.collections.Services = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Service,
-		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
 		initialized: false,
 		
 		initialize: function(options) {
@@ -102,7 +102,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 
 TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.AppFeature,
-		url: TIM.apiUrl + "/services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
 		initialized: false,
 		
 		initialize: function(options) {
@@ -123,7 +123,7 @@ TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 
 TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Author,
-		url: TIM.apiUrl + "/authors", //get a list of the authors in the app
+		url: TIM.apiUrl + "authors", //get a list of the authors in the app
 		
 		initialize: function(options) {
 		  options = options || {};
@@ -164,7 +164,7 @@ TIM.collections.Authors = TIM.collections.BaseCollection.extend({
 
 TIM.collections.PostTypes = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.PostTypes,
-		url: TIM.apiUrl + "/types",
+		url: TIM.apiUrl + "types",
 		
 		initialize: function(options) {
 		  options = options || {};
@@ -186,7 +186,7 @@ TIM.mixins.paging = {
     options = options || {};
     this.page = 1;
   	this.pageSize = options.pageSize || 15;
-  	this.max = options.max || 0; 
+  	this.max = options.max || 0;
   },
   
   //get earlier events and append them to the beginning of the collection
@@ -196,22 +196,22 @@ TIM.mixins.paging = {
   },
   
   getNextPage: function() {
+    
+    if (!this.paging.next) {
+       that.trigger("noMorePages");
+       return;
+    }
+    
     var that = this;
     
-    if(this.max) {
-       if (this.max && this.length >= this.max) {
-          console.log("tried to page too far!")
-          return;
-        }      
-    }
-  
     this.page++;
-
+    this.url = this.paging.next;
+    
     TIM.setLoading(true);
     
     this.fetch({
       add:true,
-      data: {page: this.page},
+      
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
   		  that.trigger("pageLoaded");

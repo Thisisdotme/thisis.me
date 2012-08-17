@@ -46,14 +46,20 @@ the behavior for the photo feature
   		
   		parse: function(resp) {
        //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
-  		  //this will be more intelligent in the future
+  		 //this will be more intelligent in the future
+  		  
   		  _.each(resp.photo_albums, function(album) {
   		    album.headline = album.headline || 'All Photos';
   		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
+  		    
+  		    //a hack to avoid duplicating images on the album list page if the first two albums begin with the same cover photo
+  		    
   		    var photoNum = album.headline == 'All Photos' && resp.photo_albums.length  > 1 ? 1 : 0;
   		    var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
   		    album.main_image = cover_photo[cover_photo.length-1];
+  		    
   		  });
+  		  
   		  return (resp.photo_albums);
   		}
 
@@ -67,8 +73,8 @@ the behavior for the photo feature
     },
 
     initialize: function() {
-      this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000)));
-      //this.set("location", "");
+      this.set("time_ago", $.timeago(new Date(this.get("create_time") * 1000))); //move to base model
+      //this.set("location", ""); //and this?
     },
 	
     clear: function() {
@@ -77,12 +83,15 @@ the behavior for the photo feature
     }
 
   });
+
+  //photos collection is a collection with paging...
   
   TIM.collections.Photos = TIM.collections.BaseCollection.extend({
+    
   	 	model: TIM.models.Photo,
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/photos',
   		max: 0,
-  		albumId:0,
+  		albumId: 0,
 			  		
   		initialize: function(options) {
   		  options = options || {};
@@ -103,18 +112,24 @@ the behavior for the photo feature
   		
   		
   		parse: function(resp) {
+  		  
+  		  var that = this;
+  		  
   		  //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		  //this will be more intelligent in the future - making decisions based on image size metadata
-  		  console.log("photos in album:", resp.photos);
-  		  _.each(resp.photos, function(photo) {
-  		    //photo.thumb_image = photo.images[0];
-  		    //photo.main_image = photo.images[photo.images.length-1];
+  		  
+  		  console.log("photos in album:", resp.entries);
+  		  _.each(resp.entries, function(photo) {
+  		    		    
+  		    photo.thumb_image = that.getSmallestImg(photo.post_type_detail.photo, 100, 100 ); //assuming first image is smallest - write fn to get the smallest one that 'fits the bill'
   		    
-  		    photo.thumb_image = photo.post_type_detail.photo[0];
-    		  photo.main_image = photo.post_type_detail.photo[photo.post_type_detail.photo.length - 1]; //photo.images[photo.images.length-1];
+    		  photo.main_image = that.getSmallestImg(photo.post_type_detail.photo, 600, 600 ); //use arbitrary size
+    		  
   		    photo.caption_text = (photo.headline && !photo.tagline) ? photo.headline : '';
+  		    
   		  });
-  		  return (resp.photos);
+  		  this.paging = resp.paging;
+  		  return (resp.entries);
   		  
   		},
   		
@@ -124,7 +139,20 @@ the behavior for the photo feature
   		
   		setURL: function(searchTerm, pageSize) {
   		  
+  		},
+  		
+  		//assumes the photos are ordered smallest -> largest
+  		getSmallestImg: function(photos, minHeight, minWidth) {
+  		  var photo;
+  		  for(var i = 0; i < photos.length; i++) {
+  		    photo = photos[i];
+  		    if(photo.height >= minHeight && photo.width >= minWidth) {
+  		      return photo;
+  		    }
+  		  }
+  		  return photo;
   		}
+  		
 
   });
   
@@ -366,7 +394,7 @@ the behavior for the photo feature
             chunkSize = numLeft;
             this.$el.find('.loading').html('---');
           }
-         
+          window.c = this.collection;
           var photos = this.collection.toJSON();
           
           //fetch next page if we're getting close to the end of the collection
@@ -375,9 +403,9 @@ the behavior for the photo feature
           //make this automatically triggered by an event?
           //
           
-          if(this.collection.length <= this.numRendered + (2 * chunkSize)) {
+          if(photos.length <= this.numRendered + (2 * chunkSize)) {
             //make this only get until the number specified by the album's 'count'!
-            this.collection.getNextPage();
+            this.collection.getNextPage();  //turn off the paging this for the moment
           }
           
           photos = photos.slice(this.numRendered, this.numRendered + chunkSize);
@@ -401,6 +429,7 @@ the behavior for the photo feature
       //is this used?
       
       renderNextPageset: function() {
+        TIM.setLoading(false);
       }
       
   });
@@ -443,7 +472,6 @@ the behavior for the photo feature
   			  TIM.appContainerElem.append(this.$el);
   			}
   			this.collection.bind('pageLoaded', this.renderNextPageset, this);
-  			//this.collection.bind( "reset", this.render );
       },
       
       setCollection: function(album) {
@@ -460,13 +488,11 @@ the behavior for the photo feature
       //e.g., if we get here from the highlight or timeline feature
       
       events: {
-    			//"tap .detail-link" : "toggleMode",
     			//"tap .grid-link" : "showGridView",
     			"click .grid-link" : "showGridView",
     			//"tap .full-photo" : "toggleMode",
     			"tap .interaction-icons .comments" : "showComments",
     			"tap .interaction-icons .location" : "showLocation",
-    			//"tap .interaction-icons" : "interactionIconsClicked",
     			"tap .interaction-icons" : "interactionIconsClicked",
     			"swiperight" : "showGridView",
     			
@@ -500,65 +526,6 @@ the behavior for the photo feature
       renderNextPageset: function() {
         this.renderFlipSet();
         TIM.setLoading(false);
-      },
-      
-      // this is going to need some work to be able to (fairly) seamlessly transition between
-      // 'flip mode' and a mode where the image is scrollable and zoomable
-      //
-      // also should have a 'comments mode' and perhaps a 'map mode'
-      //
-      
-      toggleMode: function(event) {
-        var that = this;
-        
-        var photoObj = this.collection.at(this.pageNum);
-        //
-  		  
-  		  if (this.flipMode) {
-  		    this.$el.toggleClass('flip-mode');
-  		    this.flipMode = false;
-  		    
-  		    //make an iscroll container
-  		    //get the actual photo image & lay the over the actual flip area?
-  		    var overlay = $("<div class='scroll-overlay photo-feature'></div>");
-  		    //this.$el.prepend(overlay);
-  		    $('#content-container').prepend(overlay);
-  		    var clonedPage = $('.back .photo-page').eq(1).clone();
-  		    //alert(img.css('background-image'));
-  		    
-  		    overlay.append(clonedPage).css("height", TIM.viewportHeight_);
-  		    this.$el.addClass('hidden');
-  		    var img = clonedPage.find('.image');
-  		    //$('.scroll-overlay > div').css('width', photoObj.get('width') + 'px').css('height', photoObj.get('height') + 'px');
-  		    $('.scroll-overlay > div').css('width', TIM.viewportWidth_ + 'px').css('height', TIM.viewportHeight_ + 'px');
-  		    //console.log('imgae: ', img);
-  		    
-  		    window.setTimeout(function() {
-  		      overlay.addClass('no-toolbars');
-  		    }, 10);
-  		    
-  		    overlay.on('tap', function(event){
-  		      that.toggleMode();
-  		    })
-  		    var containerEl = overlay.get(0);
-  		    //var containerEl = $("#content-container").css('height','200px');//this.$el.get(0);
-  		    if(containerEl) {
-  		      this.iScrollElem = new iScroll(containerEl, { zoom: true, vScroll: true, hScroll: true, hScrollbar: false, vScrollbar: false });
-  		       window.setTimeout(function() {
-      		      that.iScrollElem.refresh();
-      		    }, 10); 
-  		    }
-  		    
-  		  } else {
-  		     this.$el.removeClass('hidden');
-  		     window.setTimeout(function() {
-    		      that.$el.toggleClass('flip-mode');
-    		    }, 10);
-  		    $('.scroll-overlay').remove();
-  		    this.flipMode = true;
-  		    this.iScrollElem.destroy();
-          this.iScrollElem = null;
-  		  }
       },
       
       getCurrentModel: function() {
