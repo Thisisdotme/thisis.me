@@ -26,6 +26,10 @@ def main(global_config, **settings):
   global tim_config
   tim_config = load_configuration('{TIM_CONFIG}/config.ini')
 
+  # TODO: THIS NEEDS TO EVENTUALL BE REMOVED
+  if 'api.endpoint' in settings:
+    tim_config['api']['endpoint'] = settings['api.endpoint']
+
   """ Setup the database
   """
   db_url = db.create_url_from_config(tim_config['db'])
