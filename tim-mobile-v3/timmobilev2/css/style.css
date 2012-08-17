@@ -1,0 +1,1492 @@
+/*
+ * HTML5 ✰ Boilerplate
+ *
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ *
+ * Detailed information about this CSS: h5bp.com/css
+ *
+ * ==|== normalize ==========================================================
+ */
+
+
+/* =============================================================================
+   HTML5 display definitions
+   ========================================================================== */
+
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section { display: block; }
+audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+audio:not([controls]) { display: none; }
+[hidden] { display: none; }
+
+
+/* =============================================================================
+   Base
+   ========================================================================== */
+
+/*
+ * 1. Correct text resizing oddly in IE6/7 when body font-size is set using em units
+ * 2. Force vertical scrollbar in non-IE
+ * 3. Prevent iOS text size adjust on device orientation change, without disabling user zoom: h5bp.com/g
+ */
+
+html { font-size: 100%; overflow-y: scroll; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+
+body { margin: 0; font-size: 13px; line-height: 1.231; }
+
+body, button, input, select, textarea { font-family: sans-serif; color: #222; }
+
+/*
+ * Remove text-shadow in selection highlight: h5bp.com/i
+ * These selection declarations have to be separate
+ * Also: hot pink! (or customize the background color to match your design)
+ */
+
+::-moz-selection { background: #fe57a1; color: #fff; text-shadow: none; }
+::selection { background: #fe57a1; color: #fff; text-shadow: none; }
+
+
+/* =============================================================================
+   Links
+   ========================================================================== */
+
+a { color: #5980AB; }
+a:visited { color: #5980AB; }
+a:hover { color: #5980AB; }
+a:focus { outline: thin dotted; }
+
+/* Improve readability when focused and hovered in all browsers: h5bp.com/h */
+a:hover, a:active { outline: 0; }
+
+
+/* =============================================================================
+   Typography
+   ========================================================================== */
+
+abbr[title] { border-bottom: 1px dotted; }
+
+b, strong { font-weight: bold; }
+
+blockquote { margin: 1em 40px; }
+
+dfn { font-style: italic; }
+
+hr { display: block; height: 1px; border: 0; border-top: 1px solid #ccc; margin: 1em 0; padding: 0; }
+
+ins { background: #ff9; color: #000; text-decoration: none; }
+
+mark { background: #ff0; color: #000; font-style: italic; font-weight: bold; }
+
+/* Redeclare monospace font family: h5bp.com/j */
+pre, code, kbd, samp { font-family: monospace, serif; _font-family: 'courier new', monospace; font-size: 1em; }
+
+/* Improve readability of pre-formatted text in all browsers */
+pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
+
+q { quotes: none; }
+q:before, q:after { content: ""; content: none; }
+
+small { font-size: 85%; }
+
+/* Position subscript and superscript content without affecting line-height: h5bp.com/k */
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+
+/* =============================================================================
+   Lists
+   ========================================================================== */
+
+ul, ol { margin: 1em 0; padding: 0 0 0 40px; }
+dd { margin: 0 0 0 40px; }
+nav ul, nav ol { list-style: none; list-style-image: none; margin: 0; padding: 0; }
+
+h1 {  margin: 0 }
+
+
+/* =============================================================================
+   Embedded content
+   ========================================================================== */
+
+/*
+ * 1. Improve image quality when scaled in IE7: h5bp.com/d
+ * 2. Remove the gap between images and borders on image containers: h5bp.com/e
+ */
+
+img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+
+/*
+ * Correct overflow not hidden in IE9
+ */
+
+svg:not(:root) { overflow: hidden; }
+
+
+/* =============================================================================
+   Figures
+   ========================================================================== */
+
+figure { margin: 0; }
+
+
+/* =============================================================================
+   Forms
+   ========================================================================== */
+
+form { margin: 0; }
+fieldset { border: 0; margin: 0; padding: 0; }
+
+/* Indicate that 'label' will shift focus to the associated form element */
+label { cursor: pointer; }
+
+/*
+ * 1. Correct color not inheriting in IE6/7/8/9
+ * 2. Correct alignment displayed oddly in IE6/7
+ */
+
+legend { border: 0; *margin-left: -7px; padding: 0; }
+
+/*
+ * 1. Correct font-size not inheriting in all browsers
+ * 2. Remove margins in FF3/4 S5 Chrome
+ * 3. Define consistent vertical alignment display in all browsers
+ */
+
+button, input, select, textarea { font-size: 100%; margin: 0; vertical-align: baseline; *vertical-align: middle; }
+
+/*
+ * 1. Define line-height as normal to match FF3/4 (set using !important in the UA stylesheet)
+ * 2. Correct inner spacing displayed oddly in IE6/7
+ */
+
+button, input { line-height: normal; *overflow: visible; }
+
+/*
+ * Reintroduce inner spacing in 'table' to avoid overlap and whitespace issues in IE6/7
+ */
+
+table button, table input { *overflow: auto; }
+
+/*
+ * 1. Display hand cursor for clickable form elements
+ * 2. Allow styling of clickable form elements in iOS
+ */
+
+button, input[type="button"], input[type="reset"], input[type="submit"], [role="button"] { cursor: pointer; -webkit-appearance: button; }
+
+/*
+ * Consistent box sizing and appearance
+ */
+
+input[type="checkbox"], input[type="radio"] { box-sizing: border-box; padding: 0; }
+input[type="search"] { -webkit-appearance: textfield; -moz-box-sizing: content-box; -webkit-box-sizing: content-box; box-sizing: content-box; }
+input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
+
+/*
+ * Remove inner padding and border in FF3/4: h5bp.com/l
+ */
+
+button::-moz-focus-inner, input::-moz-focus-inner { border: 0; padding: 0; }
+
+/*
+ * 1. Remove default vertical scrollbar in IE6/7/8/9
+ * 2. Allow only vertical resizing
+ */
+
+textarea { overflow: auto; vertical-align: top; resize: vertical; }
+
+/* Colors for form validity */
+input:valid, textarea:valid {  }
+input:invalid, textarea:invalid { background-color: #f0dddd; }
+
+
+/* =============================================================================
+   Tables
+   ========================================================================== */
+
+table { border-collapse: collapse; border-spacing: 0; }
+td { vertical-align: top; }
+
+
+
+/* ==|== primary styles =====================================================
+    Author:
+    ========================================================================== */
+
+/*  TIM red = #c01e28 */
+
+body {
+  font-family: arial, sans-serif;
+  -webkit-tap-highlight-color: rgba(0,0,0,0); /* remove highlight color for tap events */
+  -webkit-backface-visibility: hidden; /* helps with flickering? */
+  height: 100%;
+}
+
+body.splash {
+  background-color: #c01e28;
+}
+
+#loading-img {
+  display: none;
+  background: transparent center center no-repeat;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+  text-align: center;
+}
+#loading-img > div {
+  background: rgba(60,60,60,.8);
+  position: absolute;
+  top: 44%;
+  height: 30px;
+  line-height: 30px;
+  width: 30%;
+  border: 1px solid #999;
+  border-radius: 8px;
+  left: 35%;
+  margin: 0 auto;
+  color: #eee;
+  text-shadow: #333 1px 1px 2px;
+  font-weight:bold;
+  
+}
+.loading #loading-img {  display: block }
+.flipset-empty {
+  margin-top: 150px;
+  text-align: center;
+  width: 100%;
+}
+.flipset-empty p {
+  display: inline-block;
+  margin: 0 auto;
+  background-color: #FAF5B1;
+  opacity: 0.7;
+  border: 1px solid #BAAE04;
+  border-radius: 8px;
+  padding: 20px;
+  color:#333;
+}
+#error-message {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: #FAF5B1;
+  opacity: 0.7;
+  border: 1px solid #BAAE04;
+  border-radius: 2px;
+  x-display: none;
+  z-index: 100;
+}
+.error #error-message {  display: block }
+#error-message > div {
+  text-align: center;
+  padding: 12px;
+}
+#app {
+  width: 100%;
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+}
+@media screen and (min-width: 420px) { 
+    #app {
+      /* gotta get rid of these explicit pixel sizes- just doing this so it doesn't look obnoxious on a desktop when developing */
+      width: 320px;
+      min-height: 370px;
+    }
+}
+@media screen and (width: 320px) { 
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      width: 320px;
+      min-height: 100%;
+    }
+}
+@media screen and (width: 390px) { 
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      min-height: 390px;
+    }
+}
+@media screen and (height: 320px) { 
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      min-height: 320px;
+      width: 480px;
+    }
+}
+@media screen and (width: 360px) { 
+    #app {
+      /* gotta get rid of these explicit pixel sizes */
+      width: 360px;
+      min-height: 515px;
+    }
+}
+#app.transitioning {  -webkit-perspective: 1000 }
+.app-page {
+  position: absolute;
+  width: 100%;
+  min-height: 100%;
+  display: none;
+  border: 0;
+  background-color: #333;
+  -webkit-transform: translate3d(0,0,0);
+  -webkit-backface-visibility: hidden;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box; /* Firefox */
+  -webkit-box-sizing: border-box; /* Safari */
+}
+.app-page.active {  display: block }
+.app-page.light { background-color: #eee; }
+.app-page.toolbar-top {  padding-top: 40px }
+#content-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+#splash-screen {
+  background: #c01e28 url(/img/thisisme_logo.png) center 30% no-repeat;
+  z-index:4;
+}
+
+.initializing #feature-nav,
+.initializing #nav-toggle {  display: none }
+
+.nav-hidden #feature-nav,
+.nav-hidden #nav-toggle {  display: none }
+
+#nav-toggle {
+  background: url(/img/nav/logo.svg) no-repeat, url(/img/nav/logo-active.svg) no-repeat;
+  background-size: contain;
+  display: block;
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 0 8px rgba(0,0,0,.5);
+  /*test*/
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  z-index: 3;
+  /*more performant approach to hiding text?*/
+  line-height: 0;
+  font-size: 0;
+  color: transparent;
+  /*temp*/
+  -webkit-user-select: none; /* disable cut copy paste */
+  -webkit-touch-callout: none; /* disable callout, image save panel */
+  -webkit-tap-highlight-color: transparent; /* "turn off" link highlight */
+}
+.nav-open #nav-toggle {  background: url(/img/nav/logo-active.svg) no-repeat; background-size: contain; }
+#feature-nav {
+  padding: 0;
+  margin: 0;
+  background-color: rgba(191,30,40,1);
+  width: 0px;
+  height: 100%;
+  /*test*/
+  position: absolute;
+  top: 0;
+  right: 0px;
+  z-index: 2;
+  box-sizing: border-box;
+  -webkit-transition: width .3s cubic-bezier(.49, .22, .5, .88);
+  box-shadow: -5px 0px 5px rgba(0,0,0,.2);
+  overflow: hidden;
+  color: #fff;
+}
+#feature-nav a, #feature-nav a:visited{
+  color:#fff;
+  text-decoration:none;
+}
+.nav-open #feature-nav {  width: 44px }
+#feature-nav li {
+  display: block;
+  text-align: center;
+  margin: 0;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-family: Helvetica, sans-serif;
+  font-weight: bold;
+  padding: 0;
+  height: 46px;
+  vertical-align: text-bottom;
+  line-height: 74px;
+  width: 46px;
+  margin-left: 0px;
+  margin-right: 4px;
+  border-radius: 6px;
+}
+#feature-nav li.active {
+  background-color: rgba(0,0,0,.05);
+  box-shadow: 0 1px 2px rgba(0,0,0,.3) inset;
+}
+#feature-nav li:first-child {  margin-top: 56px }
+#nav-highlights {
+  margin-top: 6px;
+  background: url(/img/nav/timeline.svg) no-repeat center 4px;
+}
+#nav-news {
+  margin-top: 6px;
+  background: url(/img/nav/timeline.svg) no-repeat center 4px;
+}
+#nav-photos {
+  margin-top: 3px;
+  background: url(/img/nav/photos.svg) no-repeat center 6px;
+}
+#nav-bio {
+  margin-top: 4px;
+  background: url(/img/nav/bio.svg) no-repeat center 8px;
+}
+#nav-cover {  background: url(/img/nav/cover.svg) no-repeat center 5px }
+#nav-cover.active {  background: url(/img/nav/cover-active.svg) no-repeat center 5px }
+#nav-home {
+  margin-top: 4px;
+  background: url(/img/nav/sign-in.svg) no-repeat center 6px;
+}
+#nav-signin {
+  margin-top: 4px;
+  background: url(/img/nav/sign-in.svg) no-repeat center 6px;
+}
+#nav-signup {
+  margin-top: 45px !important;
+  background: url(/img/nav/sign-up.svg) no-repeat center 4px;
+}
+#nav-settings, #nav-login {
+  margin-top: 4px;
+  background: url(/img/nav/sign-up.svg) no-repeat center 6px;
+}
+#feature-nav #nav-settings {
+  display:none;
+}
+.logged-in #feature-nav #nav-settings {
+  display:block;
+}
+
+.logged-in #feature-nav #nav-settings {
+  display:block;
+}
+
+.logged-in #feature-nav #nav-settings:nth-child(2) {
+  margin-top:56px; /* total hack! */
+}
+
+
+#nav-login {
+}
+.logged-in #feature-nav #nav-login {
+  display:none;
+}
+.loading-previous {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: #333 url(/img/loading.gif) center 2% no-repeat;
+  z-index: 0;
+}
+.loading-next {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: #333 url(/img/loading.gif) center 98% no-repeat;
+  z-index: 0;
+}
+/* styles for comments */
+.comment-list {
+  background-color: #fff;
+  font-size: 12px;
+}
+.comment-list .split-pane {  padding-left: 52px }
+.comment-list ul.service-tabs {
+  width: 45px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 -45px;
+  float: left;
+}
+.comment-list .service-tabs li {
+  padding: 0;
+  margin: 0;
+  height: 35px;
+  width: 45px;
+  margin-bottom: 8px;
+  margin-left: 0px;
+  position: relative;
+  right: -1px;
+}
+.comment-list .service-tabs li.selected {  background: url(/img/selected_border.png) right center no-repeat }
+.comment-list .service-tabs li.facebook {  background: url(/img/icons/35/facebook_35.png) 2px center no-repeat }
+.comment-list .service-tabs li.twitter {  background: url(/img/icons/35/twitter_35.png) 2px center no-repeat }
+.comment-list .service-tabs li.instagram {  background: url(/img/icons/35/instagram_35.png) 2px center no-repeat }
+.comment-list .service-tabs li.facebook.selected {  background: url(/img/icons/35/facebook_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat }
+.comment-list .service-tabs li.twitter.selected {  background: url(/img/icons/35/twitter_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat }
+.comment-list .service-tabs li.instagram.selected {  background: url(/img/icons/35/instagram_35.png) 2px center no-repeat, url(/img/selected_border.png) right center no-repeat }
+.comment-list .comments {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #ccc;
+}
+.comment-list .comment {
+  margin-bottom: 8px;
+  padding-left: 50px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #f6f6f6;
+}
+.comment-list .user-thumb {
+  float: left;
+  margin-left: -45px;
+  background: url(/img/profile_thumb_35.png) center center no-repeat;
+  height: 35px;
+  width: 35px;
+}
+.comment-list .user-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.comment-list .time-ago {
+  float: right;
+  color: #999;
+  font-weight: normal;
+}
+.comment-list .toolbar,
+.app-page .toolbar {
+  position: absolute;
+  top: 0px;
+  height: 36px;
+  color: #fff;
+  background: rgba(60,60,60,.8);
+  width: 100%;
+  z-index: 9000;
+  overflow: hidden;
+  -moz-box-shadow: 0 0px 7px 2px #555;
+  -webkit-box-shadow: 0 0px 7px 2px #555;
+  box-shadow: 0 0px 7px 2px #555;
+  text-align: center;
+}
+.comment-list .toolbar h1,
+.app-page .toolbar h1 {
+  font-size: 18px;
+  font-weight: normal;
+  text-shadow: #333 1px 1px 2px;
+  line-height: 40px;
+  text-align: center;
+}
+.comment-list  .toolbar .back-link {
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  height: 36px;
+  width: 24px;
+  background: transparent url(/img/back_arrow.png) no-repeat center center;
+}
+
+/* end comments styles */
+
+.app-page.light .toolbar {
+  position: absolute;
+  top: 0px;
+  height: 36px;
+  color: #333;
+  background: rgba(230,230,230,.8);
+  width: 100%;
+  z-index: 9000;
+  overflow: hidden;
+  -moz-box-shadow: 0 0px 7px 2px #999;
+  -webkit-box-shadow: 0 0px 7px 2px #999;
+  box-shadow: 0 0px 7px 2px #999;
+  text-align: center;
+}
+.app-page.light .toolbar h1 {
+  font-size: 20px;
+  font-weight: normal;
+  text-shadow: #ccc 1px 1px 2px;
+  line-height: 40px;
+  text-align: center;
+}
+.app-page.light .toolbar span.back-link {
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  height: 36px;
+  width: 24px;
+  background: transparent url(/img/back_arrow.png) no-repeat center center;
+}
+
+/* classes for different post-types */
+/* this is where we can really make an author's timeline have much more variety in appearance */
+
+.app-page .follow .inner-text {
+
+}
+
+.app-page .checkin .inner-text {
+  
+}
+
+.app-page .photo-album .thumbnail  {
+  height:35px;
+  width:35px;
+  float:left;
+  margin:8px;
+}
+
+.app-page .photo-album .thumbnail img {
+  height:35px;
+  width:35px;
+}
+
+/* Transitions from jQtouch (with small modifications): http://www.jqtouch.com/
+    Built by David Kaneda and maintained by Jonathan Stark.
+*/
+    
+.in,
+.out {
+  -webkit-animation-timing-function: ease-in-out;
+  -webkit-animation-duration: 500ms;
+}
+.slide.out {
+  -x-webkit-transform: translateX(-100%);
+  -webkit-animation-name: slideouttoleft;
+}
+.slide.in {
+  -webkit-transform: translateX();
+  -webkit-animation-name: slideinfromright;
+}
+.slide.out.reverse {
+  x-webkit-transform: translateX(100%);
+  -webkit-animation-name: slideouttoright;
+  z-index:10;
+}
+.slide.in.reverse {
+  -webkit-transform: translateX();
+  -webkit-animation-name: slideinfromleft;
+  z-index: 0;
+}
+.fade.out {
+  z-index: 0;
+  -webkit-animation-name: fadeout;
+}
+.fade.in {
+  opacity: 1;
+  z-index: 10;
+  -webkit-animation-name: fadein;
+}
+
+
+@-webkit-keyframes slideinfromright { 
+    from {  -webkit-transform: translateX(100%); }
+    to {  -webkit-transform: translateX(); }
+}
+@-webkit-keyframes slideinfromleft { 
+    from {  -webkit-transform: translateZ(-20px) }
+    70% {  -webkit-transform: translateZ() }
+    to {
+      -webkit-transform: translateX();
+      -webkit-transform: translateZ();
+    }
+}
+@-webkit-keyframes slideouttoleft { 
+    from {  -webkit-transform: translateX() }
+    50% {  -webkit-transform: translateZ(-20px) }
+    to {
+      -webkit-transform: translateX();
+      -webkit-transform: translateZ(-20px);
+    }
+}
+@-webkit-keyframes slideouttoright { 
+    from {  -webkit-transform: translateX() }
+    to {  -webkit-transform: translateX(100%) }
+}
+@-webkit-keyframes fadein { 
+    from {  opacity: 0 }
+    to {  opacity: 1 }
+}
+@-webkit-keyframes fadeout { 
+    from {  opacity: 1 }
+    to {  opacity: 0 }
+}
+
+.flip {
+  -webkit-animation-duration: .65s;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateX(); /* Needed to work around an iOS 3.1 bug that causes listview thumbs to disappear when -webkit-visibility: hidden is used. */;
+}
+.flip.out {
+  -webkit-transform: rotateY(-180deg) scale(.8);
+  -webkit-animation-name: flipouttoleft;
+}
+.flip.in {
+  -webkit-transform: rotateY() scale(1);
+  -webkit-animation-name: flipinfromleft;
+}
+/* Shake it all about */
+
+.flip.out.reverse {
+  -webkit-transform: rotateY(180deg) scale(.8);
+  -webkit-animation-name: flipouttoright;
+}
+.flip.in.reverse {
+  -webkit-transform: rotateY() scale(1);
+  -webkit-animation-name: flipinfromright;
+}
+@-webkit-keyframes flipinfromright { 
+    from {  -webkit-transform: rotateY(-180deg) scale(.8) }
+    to {  -webkit-transform: rotateY() scale(1) }
+}
+@-webkit-keyframes flipinfromleft { 
+    from {  -webkit-transform: rotateY(180deg) scale(.8) }
+    to {  -webkit-transform: rotateY() scale(1) }
+}
+@-webkit-keyframes flipouttoleft { 
+    from {  -webkit-transform: rotateY() scale(1) }
+    to {  -webkit-transform: rotateY(-180deg) scale(.8) }
+}
+@-webkit-keyframes flipouttoright { 
+    from {  -webkit-transform: rotateY() scale(1) }
+    to {  -webkit-transform: rotateY(180deg) scale(.8) }
+}
+
+#detail-container {  background-color: #fff }
+.hidden {  display: none }
+
+/* moved photo page css up to global file so it's accessible from other features */
+.photo-page footer > .main-text,
+.scroll-overlay .caption .main-text {  padding: 0 4px; }
+.photo-page .caption .grid-link,
+.photo-detail .caption .grid-link {
+  position: absolute;
+  right: 34px;
+  bottom: 4px;
+  height: 24px;
+  width: 24px;
+  background: transparent url(/img/back_arrow.png) no-repeat center center;
+}
+.photo-detail .caption .list-link {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  height: 25px;
+  width: 20px;
+  background: transparent url(/img/listIcon.png) no-repeat center center;
+}
+/* let's do some caption styling here */
+.photo-page footer .profile-thumb {
+  float: left;
+  height: 25px;
+  width: 25px;
+  border: 1px solid #ccc;
+  margin: 8px;
+  margin-bottom: 16px;
+  background: transparent url(/img/profile_thumb.png) no-repeat center center;
+}
+.photo-page footer .source-img {
+  float: left;
+  height: 15px;
+  width: 15px;
+  margin-right: 4px;
+}
+
+#content-container footer {
+  x-position:relative;
+}
+
+footer .service-icon { margin:0 3px;}
+
+#content-container .scroll-overlay .interaction-icons {  display: none }
+
+footer .interaction-icons {
+  position: absolute;
+  right: 2px;
+  bottom: 16px;
+  height: 20px;
+  width: 50px;
+  display:none; /* hide these for now */
+}
+footer .interaction-icons .comments {
+  position: absolute;
+  height: 35px;
+  width: 35px;
+  right: 0px;
+  background: transparent url(/img/comments_icon.png) no-repeat center center;
+}
+footer interaction-icons .location {
+  position: absolute;
+  right: 40px;
+  height: 35px;
+  width: 35px;
+  background: transparent url(/img/location_pin_icon.png) no-repeat center center;
+}
+
+/* Newsfeed/flipboard styles */
+.flippage-container .mi-content {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  margin-top: 40px;
+  background-color: #F9F7F7;
+}
+.flippage-container .event {
+  height: 90%;
+  margin: 0; /*Allow for footer height*/
+  position: relative;
+}
+.flippage-container .event.half-page {
+  height: 45%;
+  position: relative;
+}
+.flippage-container .event .content {  width: 100% }
+.flippage-container .event.half-page:first-child {  border-bottom: 1px inset #777 }
+.flippage-container .event.half-page .content {
+  padding-top: 10px;
+  height: 90px;
+  display: table-cell;
+  vertical-align: middle;
+}
+.flippage-container .event.full-page .content {
+  padding-top: 10px;
+  height: 290px;
+  float: left;
+}
+.flippage-container .event .content .inner-text {
+  float: left;
+  padding: 14px;
+  padding-top: 14px;
+  text-align: left;
+  margin: 0 auto;
+  font-size: 16px;
+}
+
+.flippage-container .event.full-page .content .inner-text {  padding-bottom: 0 }
+.flippage-container .event .content .inner-text p {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  /*    max-height: 56px;*/
+}
+.flippage-container .event .content .inner-image {
+  /*    padding: 5px 0;*/
+  height: 190px;
+  /*    background-color: black;*/
+  text-align: center;
+}
+.flippage-container .event .content .inner-image img {
+  max-height: 100%;
+  max-width: 100%;
+  min-height: 50%;
+  min-width: 50%;
+}
+footer {
+  padding: 8px;
+  margin: 0;
+  bottom: 0;
+  position: absolute;
+  width:100%;
+}
+footer .info {
+  float: none;
+  display: table-cell;
+  vertical-align: middle;
+  height: 100%;
+  padding-left: 5px;
+  padding-right: 10px;
+}
+footer .author a, footer .author a:visited {
+  font-weight: bold;
+  color: #000;
+  text-decoration: none;
+}
+.photo-page footer .author a, footer .photo-page .author a:visited {
+  color: #fff;
+}
+.cover-page .service-icon {
+  display:inline-block;
+  position:relative;
+  top:-2px;
+  height:15px;
+  width:15px;
+  margin-right:5px;
+  line-height:1.1;
+}
+footer .info .caption {
+  display: none;
+  height: 18px;
+  font-size: 14px;
+  width: 250px;
+  white-space: nowrap;
+  word-wrap: break-word;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+footer > div {  float: left }
+footer div.main-text {
+  float:none;
+}
+footer .avatar, footer .author { display:none; }
+footer .author { display:none; }
+footer .sources { padding:4px;}
+footer .avatar {  height: 22px }
+footer .avatar .frame {
+  height: 21px;
+  width: 15px;
+  margin-left: 4px;
+  margin-right: 4px;
+  padding: 1px;
+  background-color: #fff;
+  -webkit-box-shadow: 0px 0px 2px .1px #555;
+  -moz-box-shadow: 0px 0px 2px .1px #000;
+}
+footer .avatar img {
+  max-height: 100%;
+  max-width: 100%;
+}
+.flippage-container .event .baseline {
+  height: 15px;
+  padding-top: 7px;
+  padding-left: 5px;
+}
+footer span.service-icon, footer img.service-icon {
+  float: left;
+  height: 15px;
+  width: 15px;
+  background-size: cover;
+}
+
+footer .time-and-location {
+  float: left;
+  padding-left: 5px;
+  padding-top: 2px;
+  color: gray;
+  font-size: 12px;
+}
+
+/* the login form! */
+
+.login-form {
+  margin:40px auto 0 auto;
+  padding:16px;
+  max-width:400px;
+}
+
+.input-form h1 {
+  font-size:16px;
+  margin:25px 0;
+}
+
+.input-form label {
+  display:block;
+}
+
+.input-form .message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.7;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+  visibility:hidden;
+  margin-bottom:12px;
+}
+
+.input-form input {
+  border-radius:8px;
+  padding:6px;
+  margin-bottom:8px;
+  width:100%;
+  outline:none;
+  display:block;
+  box-sizing: border-box;
+  font-size:1.2em;
+}
+
+.input-form .submit-button {
+  margin:16px auto 2.5em auto;
+  width:180px;
+  display:block;
+  padding: 6px 6px 7px;
+  height:auto;
+}
+
+.newuser-form #newuser-submit {
+  margin-bottom:1.2em;
+}
+
+.form-container {
+  max-width: 250px;
+  margin:0 auto;
+  box-sizing: border-box;
+}
+
+.login-form #create-user-link, .newuser-form #login-link  {
+  display:block;
+  margin-top:1em;
+  text-align:center;
+}
+
+.app-page .toolbar .cancel-link {
+  position: absolute;
+  left: 8px;
+  top: 7px;
+  line-height:22px;
+  text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:0 4px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  color:#333;
+}
+
+/* --end login form */
+
+#flash-message {
+  padding:8px;
+  background-color: #FAF5B1;
+  opacity: 0.9;
+  border: 1px solid #BAAE04;
+  border-radius: 4px;
+  display:none;
+  margin-bottom:12px;
+  position:absolute;
+  bottom:8px;
+  z-index:0;
+  width:93%;
+}
+
+#app.flash-message #flash-message {
+  display:block;
+  z-index:100;
+}
+
+/* the new user form! */
+
+.newuser-form {
+  margin-top:40px;
+  padding:16px;
+}
+
+.newuser-form label {
+  display:block;
+}
+
+.newuser-form h1 {
+  font-size:16px;
+  margin:25px 0;
+}
+
+.newuser-form input {
+  border-radius:8px;
+  height:25px;
+  margin-bottom:8px;
+  width:90%;
+  outline:none;
+}
+
+.newuser-form #login-submit {
+  margin-top:16px;
+}
+
+
+/* --end login form */
+
+/* the settings page! */
+
+
+.edit-profile-form, .features-form, .services-form {
+  margin:0 auto;
+  padding:8px 16px;
+  max-width:400px;
+  display:none;
+}
+
+.edit-profile-form .display-none {
+  display:none;
+}
+
+.profile .edit-profile-form, .features .features-form, .services .services-form {
+  display: block;
+}
+
+nav.side-tabs {
+  font-size:11px;
+  overflow:hidden;
+}
+
+nav.side-tabs a {
+  display:block;
+  text-decoration:none;
+}
+
+.split-pane {  padding-left: 52px; }
+.split-pane .side-tabs {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  width: 45px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 -45px;
+  float: left;
+  position:relative;
+  right:-1px;
+}
+
+/* side tabs nav for settings page */
+.settings-page .side-tabs li {
+  height:40px;
+}
+.settings-page .side-tabs li.selected {  background: url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat }
+.settings-page .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat }
+.settings-page .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat }
+.settings-page.profile .side-tabs li.profile-tab {  background: url(/img/nav/settings-tab-icons.png) 2px 4px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.services .side-tabs li.services-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -33px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.settings-page.features .side-tabs li.features-tab {  background: url(/img/nav/settings-tab-icons.png) 2px -70px no-repeat, url(/img/selected_border_eee.png) right center no-repeat }
+.comment-list .comments {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #ccc;
+}
+
+.split-pane .main-content {
+  box-sizing: box-border;
+  padding: 8px 16px 8px 0;
+  border-left: 1px solid #CCC;
+  min-height: 340px;
+}
+
+.settings-page h3 {
+  margin:0 0 1em 0;
+}
+
+.settings-form {
+  padding:8px 16px;
+}
+
+.settings-form li a:link, .settings-form li a:visited {
+  color:#369;
+  text-decoration:none;
+}
+
+.settings-form ul {
+  list-style:none;
+  margin:1em 0;
+  padding:0;
+}
+
+.settings-form li {
+  position:relative;
+  border-bottom: 1px dotted #ddd;
+}
+
+.settings-form li.enabled a.activate {
+  display:none;
+}
+
+.settings-form li.disabled a.activate {
+  text-decoration:none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding:2px;
+  background: -webkit-gradient( linear, left top, left bottom, from(#ccc), to(#aaa) );
+  font-size:11px;
+  line-height:13px;
+  color:#333;
+}
+  
+.settings-form li.disabled .deactivate{
+  display:none;
+}
+
+.settings-form li .deactivate, .activate{
+  margin-left:15px;
+  position:absolute;
+  top:0px;
+  right:0px;
+  margin-top:2px;
+}
+
+.settings-form li .deactivate{
+  text-transform: uppercase;
+  color:#666;
+}
+
+.settings-form li .activate{
+  top:2px;
+}
+
+.settings-form li {
+  padding-left:20px;
+  line-height:2.2;
+  background: url(/img/icons/thisisme_15.png) left center no-repeat;
+}
+
+
+.settings-form li.twitter {  background: url(/img/icons/twitter_15.png) left center no-repeat }
+.settings-form li.instagram {  background: url(/img/icons/instagram_15.png) left center no-repeat }
+.settings-form li.linkedin {  background: url(/img/icons/linked_in_15.png) left center no-repeat }
+.settings-form li.facebook {  background: url(/img/icons/facebook_15.png) left center no-repeat }
+.settings-form li.foursquare {  background: url(/img/icons/foursquare_15.gif) left center no-repeat }
+.settings-form li.flickr {  background: url(/img/icons/flickr_15.png) left center no-repeat }
+.settings-form li.me {  background: url(/img/icons/thisisme_15.png) left center no-repeat }
+.settings-form li.googleplus {  background: url(/img/icons/google_plus_15.png) left center no-repeat }
+.settings-form li.wordpress {  background: url(/img/icons/wordpress_15.png) left center no-repeat }
+.settings-form li.youtube {  background: url(/img/icons/youtube_15.gif) left center no-repeat }
+
+#logout-link {
+  display:block;
+  margin:2em 0 0 0;
+  cursor: pointer;
+}
+
+/* the oauth confirmation page */
+
+.add-feature-container {
+  margin-top:40px;
+  padding:12px;
+}
+
+.add-feature-container h1 {
+  font-size:1.4em;
+  margin-top:1.5em;
+}
+
+.addfeature { width: 230px;	height: 90px; text-align: center; margin: 0px auto; }
+.addfeature div { float: left; }
+.addfeature img { margin-top: 10px; max-height: 100%;	max-width: 100%; }
+.addfeature .logo { width: 80px; }
+.addfeature .arrow { margin-top: 25px; width: 60px; font-weight: bold; font-size: 30px; }
+
+/* end settings page */
+
+
+/* flipboard css */
+
+.big-num {
+  font-size:340px;
+}
+
+.back .big-num {
+  color:red;
+}
+
+.flippage {
+	-webkit-perspective: 2200px;
+	-moz-perspective: 2200px;
+	perspective: 2200px;
+} 
+
+.page {
+	height: 50%;
+	top:50%;
+	width: 100%;
+	position: absolute;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-transform-origin: center top;
+	-moz-transform-origin: center top;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.page > div {
+	display: block;
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	background: #fff;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+}
+.page .front {
+} 
+.page .back {	
+	-webkit-transform: rotateX(-180deg);
+	-moz-transform: rotateX(-180deg);
+}
+.page .outer{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	overflow: hidden;
+	z-index: 999;
+}
+.page > div > div > .content{
+	//height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+.page .front > div > .content {
+  height: 200%;
+  top: -100%;
+  width:100%;
+}
+
+.page  .back > div > .content {
+  height: 200%;
+  width:100%;
+}
+  
+.overlay, .flipoverlay{
+	background-color: rgba(0, 0, 0, 0.6);
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+.flipoverlay{
+	background-color: rgba(0, 0, 0, 0.2);
+}
+.page .content .inner{
+	height: 100%;
+}
+.page h1{
+	text-align: center;
+}
+
+
+
+
+
+
+
+/* end flipboard */
+
+/* classes for the various event types that can appear in a timeline - actually they're called 'post types' at the moment */
+
+
+/* end post-type things */
+
+
+   /*
+    * Media queries for responsive design https://github.com/shichuan/mobile-html5-boilerplate/wiki/The-Style
+    */
+
+
+   /* Styles for desktop and large screen ----------- */
+
+   /*styles for 800px and up!*/
+   @media only screen and (min-width: 800px) {
+     /* Styles */
+   }/*/mediaquery*/
+
+
+   /* iPhone 4, Opera Mobile 11 and other high pixel ratio devices ----------- */
+   @media
+   only screen and (-webkit-min-device-pixel-ratio: 1.5),
+   only screen and (-o-min-device-pixel-ratio: 3/2),
+   only screen and (min--moz-device-pixel-ratio: 1.5),
+   only screen and (min-device-pixel-ratio: 1.5) {
+     /* Styles */
+   }
+
+   /* jQuery Mobile sets this to 20% by default, which is too small */
+   .ui-field-contain label.ui-slider {
+   	width: auto;
+   }
+
+
+
+/*
+ * Media queries for responsive design https://github.com/shichuan/mobile-html5-boilerplate/wiki/The-Style
+ */
+
+
+/* Styles for desktop and large screen ----------- */
+
+/*styles for 800px and up!*/
+@media only screen and (min-width: 800px) {
+  /* Styles */
+}/*/mediaquery*/
+
+
+/* iPhone 4, Opera Mobile 11 and other high pixel ratio devices ----------- */
+@media
+only screen and (-webkit-min-device-pixel-ratio: 1.5),
+only screen and (-o-min-device-pixel-ratio: 3/2),
+only screen and (min--moz-device-pixel-ratio: 1.5),
+only screen and (min-device-pixel-ratio: 1.5) {
+  /* Styles */
+}
+
+
+
+/* ==|== non-semantic helper classes ========================================
+   Please define your styles before this section.
+   ========================================================================== */
+
+/* prevent callout */
+.nocallout {-webkit-touch-callout: none;}
+
+/* Text overflow with ellipsis */
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* A hack for HTML5 contenteditable attribute on mobile */
+textarea[contenteditable] {-webkit-appearance: none;}
+
+/* A workaround for S60 3.x and 5.0 devices which do not animated gif images if they have been set as display: none */
+.gifhidden {position: absolute; left: -100%;}
+
+/* For image replacement */
+.ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; }
+.ir br { display: none; }
+
+/* Hide from both screenreaders and browsers: h5bp.com/u */
+.hidden { display: none !important; visibility: hidden; }
+
+/* Hide only visually, but have it available for screenreaders: h5bp.com/v */
+.visuallyhidden { border: 0; clip: rect(0 0 0 0); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute; width: 1px; }
+
+/* Extends the .visuallyhidden class to allow the element to be focusable when navigated to via the keyboard: h5bp.com/p */
+.visuallyhidden.focusable:active, .visuallyhidden.focusable:focus { clip: auto; height: auto; margin: 0; overflow: visible; position: static; width: auto; }
+
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible { visibility: hidden; }
+
+/* Contain floats: h5bp.com/q */
+.clearfix:before, .clearfix:after { content: ""; display: table; }
+.clearfix:after { clear: both; }
+.clearfix { *zoom: 1; }
+
+
+
+/* ==|== print styles =======================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+  * { background: transparent !important; color: black !important; text-shadow: none !important; filter:none !important; -ms-filter: none !important; } /* Black prints faster: h5bp.com/s */
+  a, a:visited { text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  /* Don't show links for images, or javascript/internal links */
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+  thead { display: table-header-group; } /* h5bp.com/t */
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+}

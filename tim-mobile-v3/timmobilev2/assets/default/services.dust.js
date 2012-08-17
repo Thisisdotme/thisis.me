@@ -1,0 +1,1 @@
+(function(){dust.register("services",body_0);function body_0(chk,ctx){return chk.write("<div class=\"toolbar\"><span class=\"cancel-link\" href=\"#\">Back</span><h1>Settings</h1></div><div>some sort of menu</div>").partial("_services",ctx).partial("_features",ctx).partial("_profile",ctx);}return body_0;})();

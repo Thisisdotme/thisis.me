@@ -1,0 +1,11 @@
+<div class="toolbar"><span class="grid-link" data-toolbar-item="gridLink"/><span class="detail-link" data-toolbar-item="detailLink"/><h1>{headline}</h1></div>
+<div class="photo-grid">
+  <div id="photo-grid-scroll" class="clearfix">
+    <div> 
+      <div class="clearfix grid-container">
+  	    {>_photoList/}
+  	  </div>
+  	  <div class="loading">loading more...</div>
+  	</div>
+	</div>
+</div>

@@ -1,0 +1,27 @@
+<div class="toolbar"><h1>Bio</h1></div>
+<div class="bio">
+  <div id="bio-wrapper">
+  	<h1>{name}</h1>
+  	<section class="headline">{headline}</section>
+  	<div class="profile-img">
+  	  {?picture_url}
+  	    <img src="{picture_url}"/>
+  	  {:else}
+  	  {/picture_url}
+  	</div>
+  	<section class="location"><strong>Location: </strong>{location}</section>
+  	{?specialties}
+  	  <section class="specialties"><strong>Specializing in: </strong>{specialties}</section>
+  	{/specialties}
+  	{?summary}
+  	  <section class="summary"><strong>Summary: </strong>{summary}</section>
+  	{/summary}
+  	{?bio}
+  	  {#bio}
+    	  <section>
+    	    <p class="bio-paragraph">{text}</p>
+    	  </section>
+    	{/bio}
+  	{/bio}
+	</div>
+</div>

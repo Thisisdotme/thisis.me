@@ -1,0 +1,10 @@
+<div class="photo-page">
+  <div class="toolbar"><span class="grid-link" data-toolbar-item="grid-link"/><h1>{num} of {options.pageMetaData.count}</h1></div>
+	{#events}
+	  {#main_image}
+	    <div class="full-photo" style="background-image:url({image_url})" data-photo_id="{id}"/>
+	  {/main_image}
+		{>_eventFooter/}
+		<div class="interaction-icons"><span class="location" data-photo_id="{id}"></span><span class="comments" data-photo_id="{id}"></span></div>
+	{/events}
+</div>

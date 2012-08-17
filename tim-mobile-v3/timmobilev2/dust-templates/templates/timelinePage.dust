@@ -1,0 +1,8 @@
+<div class="toolbar"><h1>News</h1></div>
+<div class="mi-content"  style="height: 100%;">
+	{#events}
+	  <div class="event {event_class}" data-event_id="{id}">
+			{>"{event_template}"/}
+	  </div>
+	{/events}
+</div>

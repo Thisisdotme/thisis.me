@@ -1,0 +1,24 @@
+{?toolbar}
+<div class="toolbar"><span class="back-link" data-toolbar-item="back-link"/><h1>Comments</h1></div>
+{/toolbar}
+<div class="split-pane">
+  <ul class="service-tabs">
+    {#sources}
+    <li class="{source_name} {selected}"></li>
+    {/sources}
+  </ul>
+  <div class="comments scrollable">
+    <div class="scroll-inner">
+      {#comments}
+        <div class="comment">
+          <div class="user-thumb"></div>
+          <div class="info">
+            <div class="user-name">{authorName}<span class="time-ago">{time}</span></div>
+      
+            <div class="text">{text|s}</div>
+          </div>
+        </div>
+      {/comments}
+    </div>
+  </div>
+</div>

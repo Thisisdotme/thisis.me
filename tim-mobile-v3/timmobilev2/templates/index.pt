@@ -1,0 +1,371 @@
+<metal:index use-macro="load: master_template.html">
+	<div id="app" class="initializing loading" data-role="page" data-title="Index" data-url="/" metal:fill-slot="page_content">
+    <style>
+      body { background-color:#fff !important;}
+      #index { display:none; }
+      header h1 {
+        margin:0;
+        font-size:18px;
+      }
+      .author-list ul {
+        list-style-type:none;
+        padding:0 20px;
+        margin:8px auto 12px auto;
+      }
+      .author-list li {
+        display:inline-block;
+        vertical-align:top;
+        width:90px;
+        padding:8px 0;
+        text-align:center;
+      }
+       .author-list a,  .author-list a:visited {
+        color:#333;
+        text-decoration:none;
+        font-weight:bold;
+       }
+       .author-list a span {
+         display:block;
+        }
+      .author-list a img {
+        height:70px;
+        width:70px;
+        display:block;
+        margin: 0 auto;
+        margin-bottom:4px;
+        border:1px solid #ccc;
+        padding:1px;
+      }
+      .author-list a:active img {
+        border:1px solid #cee;
+      }
+      
+      #index-content-favorites {
+        display:none;
+      }
+      .favorites #index-content-favorites {
+        display:block;
+      }
+      .favorites #index-content-all {
+        display:none;
+      }
+      #tabs {
+        margin-top:10px;
+      }
+      #tabs a {
+        padding:12px 6px;
+      }
+      .no-favorites {
+        display: inline-block;
+        margin: 20px auto;
+        background-color: #FAF5B1;
+        opacity: 0.7;
+        border: 1px solid #BAAE04;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      
+      #welcome-message, #login-link, #settings-link {
+        display:none;
+      }
+      
+      .logged-in #welcome-message, .logged-in #settings-link {
+        display:block;
+      }
+      
+      .logged-out #login-link {
+        display:block;
+      }
+      
+      #index-page {
+        padding-top:40px;
+      }
+      
+    </style>
+    <a href="#" id="nav-toggle"></a>
+		
+		<div id="content-container">
+		  <div id="index-page" class="app-page light active">
+    		<div class="toolbar">
+    			<h1>thisis.me</h1>
+    		</div><!-- /header -->
+    		<div id="index-page-scrollable">
+    		  <div>
+        		<section id="authors">
+          	  <!-- <div id="tabs"><a href="#all">All</a> | <a href="#favorites">Favorites</a> </div>  -->
+          		<div id="index-content-all" class="author-list">
+          		</div><!-- /content -->
+              <div id="index-content-favorites" class="author-list">
+          		</div><!-- /content -->
+            </section>
+          </div>
+        </div>
+      </div>
+      <div id="loading-img"><div>loading...</div></div>
+    </div>
+    <nav id="feature-nav" class="clearfix">
+  		<ul id="feature-nav-items"></ul>
+  	</nav>
+    <script src="/js/templates/coreTemplates.dust.js"></script>
+	</div><!-- /page -->
+	
+	<script type="text/javascript" metal:fill-slot="page_script">
+	  window.TIM = TIM || {};
+	  TIM.pageInfo = {
+			authorName: '${author_name}'
+		}
+	  
+	  TIM.models = TIM.models || {};
+    TIM.collections = TIM.collections || {};
+    TIM.views = TIM.views || {};
+    TIM.mixins = TIM.mixins || {};
+    TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
+	  var authorJSON, favorites = [], renderFavorites;
+	  var holding = false; var lastURL = '/', hasSession = false, $scrollElem, iScrollElem;
+	  
+    //get the authors
+    
+    $(function(){
+      hasSession = $.cookie('tim_session');
+      $.cookie('tim_session', true);
+      //using localstorage to navigate to last saved state upon new session (a workaround for demoing from home screen)
+      if (Modernizr.localstorage) {
+        if (!hasSession) {
+          lastURL = localStorage.getItem('tim_last_url');
+          if(lastURL && lastURL != "/") {
+             localStorage.setItem('tim_last_url', '/');
+             location.href = lastURL;
+             return;
+          }
+        } else {
+          $.cookie('tim_session', true);
+        }   
+      
+        localStorage.setItem('tim_last_url', '/');
+        favorites = localStorage.getItem('tim_favorite_authors');
+        
+        if(favorites) {
+          favorites = favorites.split(',');
+        } else {
+          favorites = [];
+        }
+        console.log('favorites: ', favorites);
+      } else {
+        favorites = [];
+      }
+    
+      //prefill with people we know we have
+      TIM.authors = new TIM.collections.Authors();
+      TIM.authors.reset(
+        [   {
+              author_id: 1,
+              name: "howard",
+              email: "howard@thisis.me",
+              full_name: "Howard Burrows",
+              template: null
+            },
+            {
+              author_id: 6,
+              name: "phil",
+              email: "phil@mobileidentity.me",
+              full_name: "Philip Goffin",
+              template: null
+            },
+            {
+              author_id: 2,
+              name: "loree",
+              email: "loree@mobileidentity.me",
+              full_name: "Loree Hirschman",
+              template: null
+            },
+            {
+              author_id: 8,
+              name: "philblack",
+              email: "pblack@trueventures.com",
+              full_name: "Philip Black",
+              template: null
+            },
+            {
+              author_id: 39,
+              name: "jose",
+              email: "jose@thisis.me",
+              full_name: "Jose Garcia",
+              template: null
+            
+            },
+            {
+              author_id: 37,
+              name: "Ken",
+              email: "k_lenga@yahoo.com",
+              full_name: "Ken Lenga",
+              template: null
+            },
+            {
+              author_id: 43,
+              name: "mchammer",
+              email: "mchammer",
+              full_name: "MC Hammer",
+              template: null
+            }
+        ]
+      );
+      
+      function authorFetchCallback() {
+        authorJSON = {"authors":
+            TIM.authors.toJSON()
+        }
+        
+        renderAuthors();
+      }
+      
+      function renderAuthors() {
+        console.log(authorJSON);
+        var name;
+        console.log("author json", authorJSON);
+        var html = TIM.views.renderTemplate("authorList", authorJSON);
+        $("#index-content-all").html(html);
+        $scrollElem =  $("#index-page-scrollable"); //this.$scrollElem || this.$el.find('.scrollable');
+        $scrollElem.css('height', TIM.getViewportSize().height - 40); //window height - the toolbar height
+        iScrollElem = new iScroll(this.$scrollElem.get(0), { 
+               hScroll: false,
+               vScrollbar: false
+          });
+   			setTimeout(function () { iScrollElem.refresh();  }, 0);
+   			TIM.setLoading(false);
+   			TIM.setInitializing(false);
+        renderFavorites();
+      }
+      
+      renderFavorites = function() {
+        //now do 'favorites'
+        var html = "<div class='no-favorites'>no favorites yet</div>";
+        var favoritesJSON = {authors:[]};
+        TIM.authors.each (function(item){
+          name = item.get('name');
+          if(isFavorite(name)) {
+            favoritesJSON.authors.push(item.toJSON());
+          }
+        })
+        console.log("favorites json", favoritesJSON);
+        if(favoritesJSON.authors.length > 0) {
+           html = TIM.views.renderTemplate("authorList", favoritesJSON);
+        }
+        $("#index-content-favorites").html(html);
+      }
+
+    	TIM.authors.fetch({
+    		callbackParameter: "callback",
+    		success: function(resp) {
+    		  console.log('fetched authors');
+    		  authorFetchCallback();
+    		},
+    		error: function(resp) {
+    	    console.log('fetching authors failed');
+    	    authorFetchCallback();
+    		}
+    	});
+    	
+    	
+    	$('.author-list').on('click', 'a', function(e){
+    	  if(holding) {
+      	  e.preventDefault();
+      	  e.stopPropagation();
+      	}
+    	  holding = false;
+    	  console.log('click', e);
+    	  window.location.href = (e.currentTarget.href);
+    	});
+    	
+    	$('#tabs a').on('tap', function(e) {
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  return;
+    	  var href = $(this).attr('href');
+    	  if(href === '#favorites') {
+    	    $('#authors').removeClass('all').addClass('favorites');
+    	  } else {
+    	    $('#authors').removeClass('favorites').addClass('all');
+    	  }
+    	});
+    	  	
+    	
+    	$('.author-list').on('tap', 'a', function(e) {
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  console.log('tap', e);
+    	})
+    	
+    	
+    	$('#index-content-all').on('hold', 'a', function(e){
+    	  e.preventDefault();
+    	  e.stopPropagation();
+    	  return;
+    	  console.log(e);
+    	  holding = true;
+    	  var a = $(e.currentTarget);
+    	  var name = a.data("name");
+    	  //search favorites, decide whether to add or delete
+    	  if(isFavorite(name)) {
+    	    var remove = confirm('remove ' + a.data("name") + ' from your favorites?');
+      	  if (remove) {
+            removeFavorite(name);
+      	  }
+    	  } else {
+    	    var add = confirm('add ' + a.data("name") + ' as a favorite?');
+      	  if (add) {
+            addFavorite(name);
+      	  }
+    	  }
+    	})
+    	
+    	
+    	$('#index').show();
+    
+    });
+    
+    //temporary thing to make sure there are some favorites
+  	function bootstrapFavorites() {
+      var favs = [], name;
+  	  TIM.authors.each (function(item){
+  	    
+  	    name = item.get('name');
+        if (item.get('name') === 'mchammer' || item.get('name') === 'howard' ) {
+          favs.push(name);
+        }
+      })
+  	  localStorage.setItem('tim_favorite_authors', favs);
+  	}
+  	
+  	function isFavorite (name) {
+  	  for (var i = 0; i < favorites.length; i++) {
+  	    if(favorites[i] === name) {
+  	      return true;
+  	    }
+  	  }
+  	  return false;
+  	}
+  	
+  	function addFavorite(name) {
+  	  if(!isFavorite(name)) {
+  	    favorites.push(name);
+  	  }
+  	  localStorage.setItem('tim_favorite_authors', favorites);
+  	  renderFavorites();
+  	}
+  	
+  	function removeFavorite(name) {
+  	  var favs = [];
+  	  for (var i = 0; i < favorites.length; i++) {
+  	    if(favorites[i] !== name) {
+  	      favs.push(favorites[i]);
+  	    }
+  	  }
+  	  localStorage.setItem('tim_favorite_authors', favs);
+  	  favorites = favs;
+  	  renderFavorites();
+  	}
+  	TIM.currentPageElem = $('#index-page');
+  	
+  </script>
+
+</metal:index>

@@ -1,0 +1,6 @@
+{#photos}
+  {#thumb_image}
+    <!-- show the smallest photo -->
+    <div class="thumb" style="background-image:url({image_url})" data-photo_id="{id}"></div>
+  {/thumb_image}
+{/photos}

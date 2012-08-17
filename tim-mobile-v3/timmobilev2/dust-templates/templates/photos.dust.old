@@ -1,0 +1,10 @@
+<div class="photoGrid">
+	<h2>Photos of {author.first_name}</h2>
+		{#photos_of_author}
+			<img class="thumb" src="{src}" data-photo_id="{photo_id}"/>
+		{/photos_of_author}
+	<h2>Photo Stream</h2>
+		{#photo_stream}
+			<img class="thumb" src="{src}" data-photo_id="{photo_id}"/>
+		{/photo_stream}
+</div>

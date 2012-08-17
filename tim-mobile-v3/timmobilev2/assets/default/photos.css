@@ -1,0 +1,245 @@
+#photo-grid {
+  background-color:#333;
+}
+
+#photo-grid .photo-grid {
+  padding:8px 4px;
+   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
+#photo-grid h2 {
+  font-family:"Holtwood One SC",sans-serif;
+  clear:both;
+  font-size:24px;
+  color:#fff200;
+  -webkit-text-stroke: 1px #333;
+  line-height:1.0;
+}
+
+#photo-grid .loading {
+  color:#fff;
+  font-size:14px;
+  font-weight:normal;
+  text-shadow:#333 1px 1px 2px;
+  line-height:30px;
+  text-align:center;
+}
+
+#photo-grid .thumb, .thumbs .thumb {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+  /* width:33.333%;
+  min-width:33.333%; */
+  height:103px;
+  width:103px;
+  x-background:transparent url(/img/loading.gif) center center no-repeat;
+  background-size:cover;
+  padding:1px;
+  /*width:54px; */
+  float:left;
+  margin-right:-1px;
+  margin-bottom:-1px;
+  /* margin-bottom:12px; */
+  /* margin-right:4px; */
+  border:1px solid #ccc;
+}
+
+.thumbs .thumb {
+  margin-bottom:0;
+  width:300px;
+  background-size:cover;
+  background-position:0 50%;
+}
+
+#photo-detail-container {
+  background-color:#000;
+  overflow:hidden;
+  height:100%;
+}
+
+#photo-stream-container {
+  max-height:170px;
+}
+
+.photo-feature .toolbar {
+  position:absolute;
+  top:0px;
+  height:36px;
+  color:#fff;
+  background:rgba(60,60,60,.8);
+  width:100%;
+  z-index:9000;
+  overflow:hidden;
+  
+  -moz-box-shadow:    0 0px 7px 2px #555;
+  -webkit-box-shadow: 0 0px 7px 2px #555;
+  box-shadow:         0 0px 7px 2px #555;
+  text-align:center;
+}
+
+#photo-list-container {
+}
+
+#photo-list-container .toolbar {
+  top:-36px;
+  -webkit-transition: all .3s linear;
+}
+
+#photo-list-container.flip-mode .toolbar {
+  top:0px;
+}
+
+.photo-feature  .toolbar .grid-link  {
+  position:absolute;
+  left:8px;
+  top:2px;
+  height:36px;
+  width:24px;
+  background: transparent url(/img/back_arrow.png) no-repeat center center;
+}
+
+#content-container .scroll-overlay {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:100%;
+  min-height:370px;
+  width:320px;
+  z-index:100;
+}
+
+@-webkit-keyframes slideDownAndDisappear {
+    from { -webkit-transform: translateY(0px); opacity:1; }
+    80% { -webkit-transform: translateY(50px); opacity:1 }
+    to { -webkit-transform: translateY(50px); opacity:0 }
+}
+
+@-webkit-keyframes slideUpAndDisappear {
+    from { -webkit-transform: translateY(0px); opacity:.8;}
+    80% { -webkit-transform: translateY(-50px); opacity:.8}
+    to { -webkit-transform: translateY(-50px); opacity:0 }
+}
+
+#content-container .scroll-overlay > div {
+ overflow:visible;
+}
+
+.photo-page .full-photo {
+  height:100%;
+  width:100%;
+  background-size:cover;
+  background-repeat:no-repeat;
+  
+  background-position:10%,15%;
+  /* min-height:480px; /* need to make dynamic? */
+  /* background-size:100%,auto; */
+}
+
+.photo-page {
+  height:100%;
+  width:100%;
+}
+
+.scroll-overlay .photo-page {
+  height:500px;
+  width:500px;
+}
+
+.scroll-overlay .photo-page .full-photo {
+  /*background-size:auto 80%;
+  background-position: 0 10%;
+  /*height:1000px;
+  width:1000px; */
+}
+
+.photo-detail {
+  min-height:100%;
+}
+
+.photo-detail img {
+  /* -webkit-transform:translate3d(0,0,0)  */
+}
+
+.photo-detail footer, .photo-page footer, .scroll-overlay footer {
+  position:absolute;
+  bottom:-50px;
+  color:#fff;
+  background:rgba(60,60,60,1);
+  width:100%;
+  overflow:hidden;
+  -webkit-transition: all .3s linear;
+  opacity:0.8;
+}
+
+.flip-mode .photo-page footer, .scroll-overlay footer {
+  -webkit-transition: all .3s linear;
+  bottom:0px;
+}
+
+.scroll-overlay.no-toolbars footer {
+  -webkit-animation-name: slideDownAndDisappear;
+  -webkit-animation-timing-function: linear;
+	-webkit-animation-duration: 500ms;
+	bottom:-50px;
+	opacity:0;
+}
+
+.scroll-overlay.no-toolbars .toolbar {
+  -webkit-animation-name: slideUpAndDisappear;
+  -webkit-animation-timing-function: linear;
+	-webkit-animation-duration: 500ms;
+	top:-40px;
+	opacity:0;
+}
+
+
+
+
+#photo-grid-scroll {
+  position:absolute;
+  top:40px;
+  height:320px;
+  overflow:hidden;
+}
+
+#photo-albums {
+  background-color:#333;
+  color:#ccc;
+}
+
+.photo-albums {
+  position:absolute;
+  top:40px;
+  height:320px;
+  width:100%;
+  overflow:hidden;
+}
+
+.photo-albums .album {
+  x-background-color:#fff;
+  box-sizing:border-box;
+  -moz-box-sizing:border-box; /* Firefox */
+  -webkit-box-sizing:border-box; /* Safari */
+  width:100%;
+  padding:8px;  
+}
+
+.photo-albums .album .album-info {
+ padding:4px 0;  
+}
+
+.photo-albums .album .more-link {
+  float:right; 
+}
+
+.photo-feature .toolbar h1 {
+  font-size:18px;
+  font-weight:normal;
+  text-shadow:#333 1px 1px 2px;
+  line-height:40px;
+  text-align:center;
+}
+
+.photo-page footer .time-and-location {
+  color: #fff;
+  text-shadow:#333 1px 1px 2px;
+}

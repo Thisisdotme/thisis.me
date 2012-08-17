@@ -1,0 +1,20 @@
+<div class="toolbar"><h1>Photos</h1></div>
+<div class="photo-albums" id="photo-album-list">
+  <div>
+  {#photo_albums}
+    {#post_type_detail}
+    {#photo_album}
+      <div class="album" data-album_id="{id}">
+    	  <div class="album-info">{headline} ({photo_count}) <span class="more-link" data-album_id="{id}">see all &#187;</span></div>
+    	  <div class="thumbs clearfix">
+    	      {#main_image}
+    	        <!-- img class="thumb" src="{url}" data-id="{id}" data-album_id="{album_id}"/ -->
+      	      <div class="thumb" style="background-image:url({image_url});" data-id="{id}" data-album_id="{album_id}"></div>
+      	    {/main_image}
+    	  </div>
+      </div>
+    {/photo_album}
+    {/post_type_detail}
+	{/photo_albums}
+	</div>
+</div>

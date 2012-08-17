@@ -1,0 +1,23 @@
+<div class="cover-page">
+	<div class="header"><span id="first-name">{first_name}</span><span id="last-name">{last_name}</span></div>
+	<section class="primary-story highlight" data-event_id="{primaryStory.event_id}">
+		<p class="pullquote"><a href="timeline/{primaryStory.id}">
+		  {?primaryStory.footerIcon}<img class="service-icon" src="{primaryStory.footerIcon}" />{/primaryStory.footerIcon}
+		  {?primaryStory.headline}{primaryStory.headline}{/primaryStory.headline}
+		  {?primaryStory.content}{primaryStory.content}{/primaryStory.content}
+		</a></p>
+	</section>
+	<div class="secondary-story highlight" data-event_id="{secondaryStory.event_id}">
+		{?secondaryStory.content.label}
+			{@truncate value="{secondaryStory.content.label}" length="50"}{/truncate}
+		{/secondaryStory.content.label}
+		{?secondaryStory.content.data}
+			{@truncate value="{secondaryStory.content.data}" length="50"}{/truncate}
+		{/secondaryStory.content.data}
+	</div>
+	<div class="tertiary-story highlight" data-event_id="{tertiaryStory.event_id}">
+		{?tertiaryStory.content.label}
+		  {@truncate value="{tertiaryStory.content.label}" length="50"}{/truncate}
+		{/tertiaryStory.content.label}
+	</div>
+</div>

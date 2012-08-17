@@ -1,0 +1,206 @@
+@font-face
+{
+	font-family:Chunkfive;
+	src:url(/mchammer/asset/chunkfive.otf) format(opentype);
+}
+
+#cover {
+  background:#333 url(/mchammer/asset/cover_bg_2.jpg) no-repeat left top;
+  background-size:cover;
+  -moz-animation:kenburns 2s linear 0 alternate;
+	-webkit-animation:kenburns 2s linear 0 alternate;
+	-webkit-transform:translate3d(0,0,0);
+	animation:kenburns 2s linear 0 alternate;
+	background-color:#000;
+	background-size:cover;
+	box-shadow:10px 0 10px rgba(0,0,0,0.3);
+	height:100%;
+	position:absolute;
+	transform:translate3d(0,0,0);
+	width:100%;
+	z-index:0;
+}
+
+.cover-page {
+  width:100%;
+  height:100%;
+  color:#fff;
+  font-weight: bold;
+}
+
+.cover-page h1.title {
+  font-size:34px;
+  font-weight:normal;
+  color:#fff200;
+  text-align:left;
+  -webkit-text-stroke: 1px #333;
+  position:absolute;
+  top:62px;
+  left:12px;
+  font-family: 'chunkfive',serif;
+  line-height:1.1;
+  text-transform:uppercase;
+}
+
+.cover-page a, .cover-page a:visited {
+  font-size:16px;
+  font-weight:bold;
+  color:#fff;
+  text-decoration:none;
+}
+
+
+.x-cover-page .primary-story {
+  font-size:16px;
+  font-weight:bold;
+  color:#fff200;
+  position:absolute;
+  top:160px;
+  width:250px;
+  left:28px;
+  font-family:helvetica,sans-serif;
+  line-height:1.1;
+  text-shadow:1px 1px #333;
+}
+
+.cover-page .secondary-story {
+  position:absolute;
+  bottom:25px;
+  width:100px;
+  left:15%;
+  font-size:13px;
+  font-weight:bold;
+  color:#fff;
+  font-family:helvetica,sans-serif;
+  line-height:1.1;
+  text-shadow:1px 1px #333;
+  text-overflow:ellipsis;
+  
+}
+
+.cover-page .tertiary-story {
+  position:absolute;
+   bottom:25px;
+   width:100px;
+   right:28px;
+   font-size:13px;
+   font-weight:bold;
+   color:#fff;
+   font-family:helvetica,sans-serif;
+   line-height:1.1;
+   text-shadow:1px 1px #333;
+   text-overflow:ellipsis;
+  
+}
+
+/* cameron's styles */
+
+
+.cover-page .header
+{
+	display:block;
+	left:0;
+	margin:10%;
+	padding:0;
+	position:absolute;
+	top:0;
+	width:80%;
+}
+
+.cover-page .header span
+{
+	display:block;
+	font-family:Chunkfive;
+	text-align:left;
+	white-space:nowrap;
+}
+
+
+.cover-page  #first-name
+{
+	-webkit-text-fill-color:#FF0;
+	-webkit-text-stroke:1px #000;
+	line-height:30%;
+	margin-left:0px;
+	margin-top:10px;
+	text-shadow:0 2px 4px rgba(0,0,0,0.5);
+	z-index:2;
+}
+
+.cover-page  #last-name
+{
+	-webkit-text-fill-color:#FFF;
+	-webkit-text-stroke:1px #000;
+	padding-left:10%;
+	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
+	z-index:3;
+}
+
+.cover-page section
+{
+	bottom:0;
+	left:0;
+	position:absolute;
+	width:100%;
+}
+
+.cover-page p {
+  margin:0;
+  padding:0;
+}
+
+.pullquote,#links
+{
+	padding:10px 20px;
+}
+
+.cover-page .pullquote
+{
+	display:block;
+	font-family:'Helvetica Neue';
+	font-size:16px;
+	line-height:1.2;
+	margin-bottom:20px;
+	margin-left:4%;
+	text-align:left;
+	text-shadow:8px 8px 12px #000;
+	width:75%;
+}
+
+.cover-page .pullquote a
+{
+	color:#FF0;
+	font-size:22px;
+	font-weight:700;
+	text-decoration:none;
+}
+
+@keyframes kenburns {
+  /* line 142, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 143, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+
+@-moz-keyframes kenburns {
+  /* Firefox */
+  /* line 146, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 147, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+
+@-webkit-keyframes kenburns {
+  /* Safari and Chrome */
+  /* line 150, ../sass/style.scss */
+  0% {
+    width: 120%; }
+
+  /* line 151, ../sass/style.scss */
+  100% {
+    width: 100%; } }
+
