@@ -30,12 +30,31 @@ def query_service_event(author_id, service_id, service_event_id):
   return query.first()
 
 
+def query_meta_photo_album(author_id, id):
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter(
+      mi_schema.models.ServiceEvent.id == id,
+      mi_schema.models.ServiceEvent.author_id == author_id,
+      mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
+      mi_schema.models.ServiceEvent.service_id == data_access.service.name_to_id('me'))
+
+  row = None
+  try:
+    row = query.one()
+  except sqlalchemy.orm.exc.NoResultFound:
+    # event not found variable should be None
+    pass
+
+  return row
+
+
 def query_photo_album(author_id, id):
   query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
-  query = query.filter_by(
-      id=id,
-      author_id=author_id,
-      type_id=data_access.post_type.label_to_id('photo_album'))
+  query = query.filter(
+      mi_schema.models.ServiceEvent.id == id,
+      mi_schema.models.ServiceEvent.author_id == author_id,
+      mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
+      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'))
 
   row = None
   try:
@@ -167,6 +186,53 @@ def query_service_events_page(
       mi_schema.models.ServiceEvent.event_id.desc())
 
   return query.limit(limit)
+
+
+def query_photo_albums_page(
+    author_id,
+    limit,
+    since_date=None,
+    since_service_id=None,
+    since_event_id=None,
+    until_date=None,
+    until_service_id=None,
+    until_event_id=None):
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter(
+      mi_schema.models.ServiceEvent.author_id == author_id,
+      mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
+      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'))
+  query = query.order_by(
+      mi_schema.models.ServiceEvent.modify_time.desc(),
+      mi_schema.models.ServiceEvent.service_id.desc(),
+      mi_schema.models.ServiceEvent.event_id.desc())
+
+  # paging check point
+  if since_date:
+    query = query.filter(mi_schema.models.ServiceEvent.create_time >= since_date)
+  if since_service_id:
+    query = query.filter(mi_schema.models.ServiceEvent.service_id >= since_service_id)
+  if since_event_id:
+    query = query.filter(mi_schema.models.ServiceEvent.event_id > since_event_id)
+  if until_date:
+    query = query.filter(mi_schema.models.ServiceEvent.create_time <= until_date)
+  if until_service_id:
+    query = query.filter(mi_schema.models.ServiceEvent.service_id <= until_service_id)
+  if until_event_id:
+    query = query.filter(mi_schema.models.ServiceEvent.event_id < until_event_id)
+
+  return query.limit(limit)
+
+
+def query_meta_photo_albums(author_id):
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter_by(
+      author_id=author_id,
+      type_id=data_access.post_type.label_to_id('photo_album'),
+      service_id=data_access.service.name_to_id('me'))
+  query = query.order_by(mi_schema.models.ServiceEvent.id)
+
+  return query.all()
 
 
 def delete(identifier):

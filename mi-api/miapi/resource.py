@@ -108,8 +108,10 @@ class Author:
       resource = Events()
     elif key == 'services':
       resource = AuthorServices()
-    elif key == 'photoalbums':
+    elif key == 'photo_albums':
       resource = PhotoAlbums()
+    elif key == 'meta_photo_albums':
+      resource = MetaPhotoAlbums()
     elif key == 'features':
       resource = AuthorFeatures()
     elif key == 'groups':
@@ -173,6 +175,25 @@ class AuthorService:
   @property
   def author_id(self):
     return self.__parent__.author_id
+
+
+class MetaPhotoAlbums():
+  def __getitem__(self, key):
+    try:
+      album = data_access.service_event.query_meta_photo_album(self.author.id, int(key))
+    except ValueError:
+      raise KeyError('key "{key}" not a valid photo albums entry'.format(key=key))
+
+    if album is None:
+      raise KeyError('Meta photo album ({author}, {album}) does not exist'.format(
+            author=self.author.id,
+            album=key))
+
+    return location_aware(PhotoAlbum(album), self, album.id)
+
+  @property
+  def author(self):
+    return self.__parent__.author
 
 
 class PhotoAlbums:
