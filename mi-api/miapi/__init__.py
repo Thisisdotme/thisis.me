@@ -40,6 +40,9 @@ tim_config = {}
 # object created from JSON file that stores oAuth configuration for social services
 oauth_config = {}
 
+# "origin" hosts that are allowed to call the API
+_acceptable_host = ['localhost']
+
 
 def main(global_config, **settings):
   global tim_config
@@ -51,6 +54,9 @@ def main(global_config, **settings):
 
   global oauth_config
   oauth_config = tim_config['oauth']
+
+  global _acceptable_host
+  _acceptable_host = tim_config['api']['cors_whitelist']
 
   data_access.service.initialize()
   data_access.post_type.initialize()
@@ -226,11 +232,6 @@ class AuthTktCookieHelper(pyramid.authentication.AuthTktCookieHelper):
                 self.static_flags)))
 
     return cookies
-
-
-# call with credential. only allow *.host to call it
-# TODO: move this config
-_acceptable_host = ['localhost', 'mvp2.thisis.me', 'mvp3.thisis.me', 'www.thisis.me', 'blog.thisis.me']
 
 
 '''
