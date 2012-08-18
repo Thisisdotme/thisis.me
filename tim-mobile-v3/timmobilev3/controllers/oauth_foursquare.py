@@ -8,14 +8,14 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import unauthenticated_userid
 
-from timmobilev2 import tim_config
+from timmobilev3 import tim_config
 
 log = logging.getLogger(__name__)
 
 SERVICE = 'foursquare'
 
 
-@view_config(route_name='foursquare', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
+@view_config(route_name='foursquare', request_method='GET', renderer='timmobilev3:templates/oauth.pt')
 def foursquare_get(request):
   return {'feature': 'Foursquare',
           'url': request.route_url('foursquare'),
@@ -34,7 +34,7 @@ def foursquare_post(request):
   return HTTPFound(location=url)
 
 
-@view_config(route_name='foursquare_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+@view_config(route_name='foursquare_callback', request_method='GET', renderer='timmobilev3:templates/settings.pt')
 def foursquare_callback(request):
 
   error_msg = None

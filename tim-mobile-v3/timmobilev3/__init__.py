@@ -26,6 +26,10 @@ def main(global_config, **settings):
   global tim_config
   tim_config = load_configuration('{TIM_CONFIG}/config.ini')
 
+  # TODO: THIS NEEDS TO EVENTUALL BE REMOVED
+  if 'api.endpoint' in settings:
+    tim_config['api']['endpoint'] = settings['api.endpoint']
+
   """ Setup the database
   """
   db_url = db.create_url_from_config(tim_config['db'])
@@ -41,9 +45,9 @@ def main(global_config, **settings):
                         authorization_policy=authz_policy,
                         session_factory=session_factory)
 
-  config.add_static_view('img', 'timmobilev2:img', cache_max_age=0)
-  config.add_static_view('css', 'timmobilev2:css', cache_max_age=0)
-  config.add_static_view('js', 'timmobilev2:js', cache_max_age=0)
+  config.add_static_view('img', 'timmobilev3:img', cache_max_age=0)
+  config.add_static_view('css', 'timmobilev3:css', cache_max_age=0)
+  config.add_static_view('js', 'timmobilev3:js', cache_max_age=0)
 
   config.add_route('index', '/')
   config.add_route('settings', '/settings')

@@ -19,9 +19,9 @@ requires = [
 if sys.version_info[:3] < (2,5,0):
     requires.append('pysqlite')
 
-setup(name='tim-mobile-v2',
+setup(name='tim-mobile-v3',
       version='0.0',
-      description='tim-mobile-v2',
+      description='tim-mobile-v3',
       long_description=README + '\n\n' +  CHANGES,
       classifiers=[
         "Programming Language :: Python",
@@ -36,13 +36,13 @@ setup(name='tim-mobile-v2',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='timmobilev2',
+      test_suite='timmobilev3',
       install_requires = requires,
       entry_points = """\
       [paste.app_factory]
-      main = timmobilev2:main
+      main = timmobilev3:main
       [console_scripts]
-      populate_tim-mobile-v2 = timmobilev2.scripts.populate:main
+      populate_tim-mobile-v3 = timmobilev3.scripts.populate:main
       """,
       )
 

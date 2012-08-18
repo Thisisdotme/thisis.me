@@ -9,14 +9,14 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import unauthenticated_userid
 
-from timmobilev2 import tim_config
+from timmobilev3 import tim_config
 
 log = logging.getLogger(__name__)
 
 SERVICE = 'facebook'
 
 
-@view_config(route_name='facebook', request_method='GET', renderer='timmobilev2:templates/oauth.pt')
+@view_config(route_name='facebook', request_method='GET', renderer='timmobilev3:templates/oauth.pt')
 def get_facebook(request):
 
   return {'feature': 'Facebook',
@@ -36,7 +36,7 @@ def post_facebook(request):
   return HTTPFound(location=url)
 
 
-@view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev2:templates/settings.pt')
+@view_config(route_name='facebook_callback', request_method='GET', renderer='timmobilev3:templates/settings.pt')
 def facebook_callback(request):
 
   error_msg = None
