@@ -1,13 +1,7 @@
-from sqlalchemy import (and_)
-
-from mi_schema.models import AuthorServiceMap, ServiceEvent, ServiceObjectType
-
-
 from author_utils import createServiceEvent
 import miapi.resource
-import data_access.author
 import data_access.service
-import tim_commons.db
+import data_access.service_event
 
 
 def add_views(configuration):
@@ -23,35 +17,52 @@ def add_views(configuration):
 
 def get_events(author_service_context, request):
   author = author_service_context.author
-
-  service = data_access.service.name_to_service.get(author_service_context.service_name)
-  if service is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown service %s' % author_service_context.service_name}
+  asm = author_service_context.author_service_map
 
   me_asm = data_access.author_service_map.query_asm_by_author_and_service(
       author.id,
       data_access.service.name_to_id('me'))
 
+  # get the query parameters
+  since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
+      request.params.get('since'))
+  until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
+      request.params.get('until'))
+
+  max_page_limit = miapi.tim_config['api']['max_page_limi']
+  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
+
+  service_events = data_access.service_event.query_service_events_page_by_service(
+      author.id,
+      asm.service_id,
+      page_limit,
+      since_date=since_date,
+      since_service_id=since_service_id,
+      since_event_id=since_event_id,
+      until_date=until_date,
+      until_service_id=until_service_id,
+      until_event_id=until_event_id)
+
+  prev_link = None
+  next_link = None
   events = []
-  for event, asm in tim_commons.db.Session().query(ServiceEvent, AuthorServiceMap). \
-    join(AuthorServiceMap, AuthorServiceMap.id == ServiceEvent.author_service_map_id). \
-    filter(and_(AuthorServiceMap.service_id == service.id,
-                AuthorServiceMap.author_id == author.id)). \
-    filter(ServiceEvent.correlation_id == None). \
-    order_by(ServiceEvent.create_time.desc()):
-
-    ''' filter well-known and instagram photo albums so they
-        don't appear in the timeline
-    '''
-    if (event.type_id == ServiceObjectType.PHOTO_ALBUM_TYPE and
-        (event.service_id == service.name_to_id('me') or
-         event.service_id == service.name_to_id('instagram'))):
-      continue
-
-    event_obj = createServiceEvent(request, event, me_asm, asm, author)
+  for service_event in service_events:
+    event_obj = createServiceEvent(request, service_event, me_asm, asm, author)
     if event_obj:
       events.append(event_obj)
 
-  return {'events': events, 'paging': {'prev': None, 'next': None}}
+      param_value = miapi.controllers.create_page_param(
+          service_event.create_time,
+          service_event.service_id,
+          service_event.event_id)
+
+      if prev_link is None:
+        prev_link = request.resource_url(
+            author_service_context,
+            query={'since': param_value, 'count': page_limit})
+      next_link = request.resource_url(
+          author_service_context,
+          query={'until': param_value, 'count': page_limit})
+
+  return {'entries': events,
+          'paging': {'prev': prev_link, 'next': next_link}}

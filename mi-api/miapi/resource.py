@@ -1,7 +1,6 @@
 import pyramid.security
 
 import data_access.author
-
 import mi_schema.models
 
 
@@ -90,13 +89,12 @@ class Author:
   def __acl__(self):
     return [
         (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author_id, 'write'),
-        (pyramid.security.Allow, self.author_id, 'create'),
+        (pyramid.security.Allow, self.author.id, 'write'),
+        (pyramid.security.Allow, self.author.id, 'create'),
         pyramid.security.DENY_ALL]
 
   def __init__(self, author):
     self.author = author
-    self.author_id = author.id
 
   def __getitem__(self, key):
     resource = None
@@ -164,32 +162,37 @@ class AuthorServices:
   def __acl__(self):
     return [
         (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author_id, ['write', 'create']),
+        (pyramid.security.Allow, self.author.id, ['write', 'create']),
         pyramid.security.DENY_ALL]
 
   @property
   def author(self):
     return self.__parent__.author
 
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
-
   def __getitem__(self, key):
-    return location_aware(AuthorService(key), self, key)
+    service = data_access.service.name_to_service.get(key)
+    if service is None:
+      raise KeyError('Service ({service}) does not exist'.format(service=key))
+
+    asm = data_access.author_service_map.query_asm_by_author_and_service(
+        self.author.id,
+        service.id)
+    if asm is None:
+      raise KeyError('Author service ({author}, {service}) does not exist'.format(
+        author=self.author.id,
+        service=service.id))
+
+    return location_aware(AuthorService(asm, key), self, key)
 
 
 class AuthorService:
-  def __init__(self, service_name):
+  def __init__(self, author_service_map, service_name):
+    self.author_service_map = author_service_map
     self.service_name = service_name
 
   @property
   def author(self):
     return self.__parent__.author
-
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
 
 
 class MetaPhotoAlbums():
@@ -229,10 +232,6 @@ class PhotoAlbums:
   def author(self):
     return self.__parent__.author
 
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
-
 
 class PhotoAlbum:
   def __init__(self, album):
@@ -252,19 +251,11 @@ class PhotoAlbum:
   def author(self):
     return self.__parent__.author
 
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
-
 
 class Photos:
   @property
   def author(self):
     return self.__parent__.author
-
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
 
   @property
   def album_id(self):
@@ -293,10 +284,6 @@ class Events:
   def author(self):
     return self.__parent__.author
 
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
-
 
 class Event:
   def __init__(self, event):
@@ -306,10 +293,6 @@ class Event:
   @property
   def author(self):
     return self.__parent__.author
-
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
 
 
 class Services:
@@ -363,14 +346,14 @@ class AuthorGroups:
   @property
   def __acl__(self):
     return [
-        (pyramid.security.Allow, self.author_id, 'read'),
-        (pyramid.security.Allow, self.author_id, 'write'),
-        (pyramid.security.Allow, self.author_id, 'create'),
+        (pyramid.security.Allow, self.author.id, 'read'),
+        (pyramid.security.Allow, self.author.id, 'write'),
+        (pyramid.security.Allow, self.author.id, 'create'),
         pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
     group_name = key
-    author_group = mi_schema.models.AuthorGroup.lookup(self.author_id, group_name)
+    author_group = mi_schema.models.AuthorGroup.lookup(self.author.id, group_name)
     if not author_group:
       raise KeyError('key "{key}" not a valid Group entry'.format(key=group_name))
 
@@ -379,10 +362,6 @@ class AuthorGroups:
   @property
   def author(self):
     return self.__parent__.author
-
-  @property
-  def author_id(self):
-    return self.__parent__.author_id
 
 
 class AuthorGroup:
