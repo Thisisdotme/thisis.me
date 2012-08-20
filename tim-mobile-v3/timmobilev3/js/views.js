@@ -958,6 +958,7 @@ TIM.mixins.flipset = {
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
 			}
+			
 			this.renderPageChunk(this.renderedIndex); //render the first chunk of pages
 			
 			if(TIM.appContainerElem.find(this.el).length == 0)  {
@@ -1025,7 +1026,7 @@ TIM.mixins.flipset = {
     },
     
 		renderPageChunk: function(start) {
-			//would this fn check for earlier/later events if they haven't been loaded?
+			
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
 				end = this.pages.length;
@@ -1056,14 +1057,14 @@ TIM.mixins.flipset = {
 				this.renderPageChunk(this.renderedIndex);
 			}
 			
-			if (this.pageNum < this.pages.length - 2) {
+			if (this.pageNum < this.pages.length - 2) { //if we're not at the end of the 'pages', just return
 				this.pageNum++;
 			} else {
 			  
 			  if(TIM.isLoading() || this.collection.getNextPage === undefined) {
 			    return;
 			  }
-			  this.collection.getNextPage(); //bring back paging!
+			  this.collection.getNextPage({showLoading:false}); //bring back paging!
 			  this.pageNum++;
 			}
 			if (this.updateRouter) {
