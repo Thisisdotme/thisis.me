@@ -1,9 +1,7 @@
 import miapi.resource
 import miapi.controllers
 
-import data_access.author
 import data_access.service_event
-import data_access.post_type
 import data_access.service
 import data_access.author_service_map
 
