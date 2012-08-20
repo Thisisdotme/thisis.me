@@ -21,7 +21,7 @@ def get_photos(photos_context, request):
       author.id,
       data_access.service.name_to_id('me'))
 
-  max_page_limit = miapi.tim_config['api']['max_page_limi']
+  max_page_limit = miapi.tim_config['api']['max_page_limit']
   page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
 
   # get the query parameters
