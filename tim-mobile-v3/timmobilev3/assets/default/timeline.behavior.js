@@ -1,3 +1,8 @@
+//
+//
+// the 'behavior' script for the timeline feature
+//
+//
 
 (function(TIM) {
   var feature = {};
@@ -54,16 +59,9 @@
   });
 
   TIM.collections.Events = TIM.collections.BaseCollection.extend({
-  		//setting which subclass the model is here?  not sure if this is necessary....
-  		//actually, subclassing the model might not be the way to go - the view though, could probably be subclassed
+  		
   	 	model: function(attrs) {
-  			switch(attrs.feature) {
-           case "linkedin":
-             return new TIM.models.Event(attrs);
-             break;
-           default:
-             return new TIM.models.Event(attrs);
-         }
+        return new TIM.models.Event(attrs);
   		},
   		
   		url: TIM.apiUrl + 'authors/' + TIM.pageInfo.authorName + '/events',
@@ -75,7 +73,7 @@
   		
   		//could also subclass in parse?
   		parse: function(resp) {
-  		  this.paging = resp.paging;
+  		  this.paging = resp.paging; //parse is part of paging mixin?
   		  return (resp.entries);
   		}
 
@@ -83,12 +81,14 @@
   
   //is this view just a page of 1-3 events?  ...with appropriate templating based on the number of events in its 'collection'?
 
-  TIM.views.EventList = Backbone.View.extend( {
+  TIM.views.EventList = Backbone.View.extend({
+    
       id: "timeline",
       className: "flippage flippage-container app-page light",   
       pageTemplate: "timelinePage",
       
       initialize: function() {
+        
           //add flipset functionality to this view
           _.extend(this, TIM.mixins.flipset);
           this.initializeFlipset();
@@ -96,10 +96,12 @@
           _.bindAll(this, "render", "renderPage", "renderNextPageset");
           
   				//collection fires 'reset' event when fetch is complete
-          this.collection.bind( "reset", this.render );
-          this.collection.bind('pageLoaded', this.renderNextPageset, this);
+          this.collection.bind("reset", this.render);
+          this.collection.bind('paging:nextPageLoaded', this.renderNextPageset, this);
+          
       },
-
+      
+      //used to have a 'detail view'
   		events: {
   			//"click .event" : "showDetailView"
   		},
@@ -107,6 +109,7 @@
       render: function() {
         //mixing in FlipSet functionality to this view, so the main purpose of 'render' is to render the flipset
         this.renderFlipSet();
+        
         //go straight to the detail view if we got here from an external link to a story
         //change this to more like what the photo feature does...
         if(feature.showDetails) {
@@ -171,7 +174,12 @@
 
   } );
   
-  //this should follow the /authorname/feature/detail_id pattern?
+  //
+  //
+  // this should follow the /authorname/feature/detail_id pattern?
+  //
+  //
+  
   feature.activate = function(resourceId) {
     if(resourceId) { 
       
@@ -191,7 +199,6 @@
   
     if(!feature.collectionInitialized) {
       feature.mainCollection.fetch({
-        dataType: "json",
   			success: function(resp) {
 			    feature.collectionInitialized = true;
   			}
@@ -262,10 +269,17 @@
   }
   
   feature.findPageForEvent = function(eventId) {
-    var pageNum = 1;
-    for(var i = 0; i < feature.timelineView.pages.length; i++) {
+    var pageNum = 1, i, j;
+    
+    //
+    //heh, need to get more comfortable with the underscore methods
+    //could probably skip all of this looping
+    //
+    
+    
+    for(i = 0; i < feature.timelineView.pages.length; i++) {
       var page = feature.timelineView.pages[i];
-      for(var j = 0; j < page.events.length; j++) {
+      for(j = 0; j < page.events.length; j++) {
         if (page.events[j].id == eventId) {
           pageNum = i + 1;
         }
@@ -274,7 +288,14 @@
     return pageNum;
   }
   
-  //add to feature?
+  //
+  //
+  //add this 'behavior' to the feature
+  //this might be bad since it assumes the feature exists in the TIM.features namepsace
+  //
+  //
+  
+  
   TIM.features.getByName("timeline").behavior = feature;
   
   TIM.loadedFeatures["timeline"] = feature;

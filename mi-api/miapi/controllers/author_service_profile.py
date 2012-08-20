@@ -28,19 +28,12 @@ def add_views(configuration):
 
 
 def get_profile(author_context, request):
-  author_id = author_context.author_id
-
-  author = data_access.author.query_author(author_id)
-
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_context.author
 
   # service profile precedence is: linkedin, facebook, googleplus, twitter, instagram, foursquare
   # get all service mappings for author
   mappings = {}
-  for asm in tim_commons.db.Session().query(AuthorServiceMap).filter_by(author_id=author_id).all():
+  for asm in tim_commons.db.Session().query(AuthorServiceMap).filter_by(author_id=author.id).all():
     mappings[asm.service_id] = asm
 
   profile_json = None
@@ -56,13 +49,7 @@ def get_profile(author_context, request):
 
 
 def get_service_profile(author_service_context, request):
-  author_id = author_service_context.author_id
-
-  author = data_access.author.query_author(author_id)
-  if author is None:
-    # TODO: better error
-    request.response.status_int = 404
-    return {'error': 'unknown author: %s' % author_id}
+  author = author_service_context.author
 
   service = data_access.service.name_to_service.get(author_service_context.service_name)
   if service is None:
@@ -79,7 +66,7 @@ def get_service_profile(author_service_context, request):
 
   try:
     mapping = tim_commons.db.Session().query(AuthorServiceMap). \
-              filter_by(service_id=service.id, author_id=author_id).one()
+              filter_by(service_id=service.id, author_id=author.id).one()
   except:
     request.response.status_int = 404
     return {'error': 'unknown service for author'}

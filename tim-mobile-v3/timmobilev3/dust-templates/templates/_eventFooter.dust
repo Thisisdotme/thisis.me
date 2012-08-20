@@ -1,5 +1,5 @@
 <footer>
-  <div class="main-text">{?tagline}{@truncate value="{tagline}" length="50"}{/truncate}{/tagline}{?caption_text}{@truncate value="{caption_text}" length="50"}{/truncate}{/caption_text}</div>
+  <div class="main-text">{?tagline}{tagline}{/tagline}{?caption_text}{caption_text}{/caption_text}</div>
   <div class="avatar"><div class="frame"><img src="{author.picture.image_url}"/></div></div>
   <div class="author">
     <a href="/{author.name}/#timeline">{author.full_name}</a>
