@@ -106,10 +106,8 @@ class Author:
       resource = Events()
     elif key == 'services':
       resource = AuthorServices()
-    elif key == 'photo_albums':
+    elif key == 'photoalbums':
       resource = PhotoAlbums()
-    elif key == 'meta_photo_albums':
-      resource = MetaPhotoAlbums()
     elif key == 'features':
       resource = AuthorFeatures()
     elif key == 'groups':
