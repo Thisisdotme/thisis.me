@@ -1,8 +1,11 @@
 import logging
 import datetime
 
+from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 import passlib.hash
+
+from pyramid.security import authenticated_userid
 
 import mi_schema.models
 import data_access.service
@@ -12,7 +15,8 @@ import data_access.author_reservation
 import data_access.author_group_map
 import data_access.author_group
 import data_access.author_service_map
-import tim_commons.db
+
+from tim_commons import db
 
 import miapi.resource
 import miapi.controllers.feature_utils
@@ -75,8 +79,12 @@ def add_views(configuration):
 
 def list_authors(request):
   author_list = []
-  for author in data_access.author.query_authors():
-    author_json = miapi.json_renders.author.to_JSON_dictionary(author)
+  for author, asm in db.Session().query(mi_schema.models.Author, mi_schema.models.AuthorServiceMap). \
+                                  join(mi_schema.models.AuthorServiceMap,
+                                       and_(mi_schema.models.Author.id == mi_schema.models.AuthorServiceMap.author_id,
+                                            mi_schema.models.AuthorServiceMap.service_id == data_access.service.name_to_id("me"))). \
+                                       all():
+    author_json = miapi.json_renders.author.to_JSON_dictionary(author, asm)
     author_list.append(author_json)
 
   return author_list
@@ -190,10 +198,15 @@ def view_author(author_context, request):
   author = author_context.author
 
   author_json = miapi.json_renders.author.to_JSON_dictionary(author)
+
+  # TODO: is this the preferred way of determining if we're the author ???
+  if authenticated_userid(request) == author.id:
+    miapi.json_renders.author.append_private_JSON(author, author_json)
+
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
   # ??? HAB what's wrong with passing session's around
   author_json['features'] = miapi.controllers.feature_utils.get_author_features(
-      tim_commons.db.Session(),
+      db.Session(),
       author.id,
       request)
 

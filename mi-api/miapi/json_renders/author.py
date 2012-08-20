@@ -12,19 +12,22 @@ import mi_schema.models
 import data_access.service
 
 
-def to_JSON_dictionary(self):
-  return {'id': self.id,
-          'author_name': self.author_name,
-          'email': self.email,
-          'full_name': self.full_name,
-          'template': self.template}
+def to_JSON_dictionary(author, author_service_map=None):
+  return to_person_fragment_JSON_dictionary(author, author_service_map)
+
+
+def append_private_JSON(author, JSON_dict):
+  JSON_dict['email'] = author.email
+  return JSON_dict
 
 
 def to_person_fragment_JSON_dictionary(author, author_service_map=None):
   JSON_dict = {'service_name': 'me',
                'id': author.id,
                'name': author.author_name,
-               'full_name': author.full_name}
+               'full_name': author.full_name,
+               'template': author.template}
+
   if not author_service_map:
     try:
       author_service_map = db.Session().query(mi_schema.models.AuthorServiceMap). \
