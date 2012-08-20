@@ -93,21 +93,16 @@ class EventTwitterFeedDriver(app_base.AppBase):
         handler = TwitterHandler(asm, self)
         handlers.append(handler)
 
-    group_handler = GroupTwitterHandler(handlers, self)
+    group_handler = GroupTwitterHandler(handlers, self, token_key, token_secret)
+    group_handler.start_feed()
 
-    self._listen_to_twitter(token_key, token_secret, group_handler)
-
-    for handler in handlers:
-      self._notify_event_collector(handler.author_service_map)
-      handler.schedule_collector_done()
-
-  def _notify_event_collector(self, asm):
+  def notify_event_collector(self, asm):
     notification = messages.create_notification_message('twitter', asm.service_author_id)
     queue = notification['header']['type']
     body = json_serializer.dump_string(notification)
     self.amqp.send_message(exchange='', routing_key=queue, msg=body)
 
-  def _listen_to_twitter(self, token_key, token_secret, handler):
+  def listen_to_twitter(self, token_key, token_secret, handler):
     method = 'POST'
     url = 'https://stream.twitter.com/1/statuses/filter.json'
     data = {'follow': ','.join(handler.list_of_twitter_ids())}
@@ -160,9 +155,11 @@ class EventTwitterFeedDriver(app_base.AppBase):
 
 
 class GroupTwitterHandler:
-  def __init__(self, handlers, factory):
+  def __init__(self, handlers, factory, token_key, token_secret):
     self.handlers = handlers
     self.factory = factory
+    self.token_key = token_key
+    self.token_secret = token_secret
 
     self.id_to_handler = {}
     for handler in self.handlers:
@@ -186,6 +183,13 @@ class GroupTwitterHandler:
     else:
       logging.info('Skipping tweet by user %s because we do not have an author with that id',
                    service_author_id)
+
+  def start_feed(self):
+    self.factory.listen_to_twitter(self.token_key, self.token_secret, self)
+
+    for handler in self.handlers:
+      self.factory.notify_event_collector(handler.author_service_map)
+      handler.schedule_collector_done()
 
 
 class TwitterHandler:
@@ -282,10 +286,11 @@ class TwitterStreamProtocol(LineReceiver):
         logging.exception('Error handling twitter event: %s', line)
 
   def connectionLost(self, reason):
-    # TODO: restart connection on error
-    logging.error('Finished receiving body: %s', reason.getErrorMessage())
-    logging.error('Data: %s', self.handler.list_of_twitter_ids())
-    logging.error(reason.getTraceback())
+    logging.warning('Finished receiving body: %s', reason.getErrorMessage())
+    logging.warning('Data: %s', self.handler.list_of_twitter_ids())
+    logging.warning(reason.getTraceback())
+
+    self.handler.start_feed()
 
 
 class WebClientContextFactory(ClientContextFactory):
