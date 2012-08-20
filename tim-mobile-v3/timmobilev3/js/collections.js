@@ -78,7 +78,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		  options = options || {};
 		},
 		parse: function(resp) {
-		  console.log('services: ', resp)
+		  //console.log('services: ', resp)
 		  return (resp.services);
 		},
 		setURL: function(username) {
@@ -175,30 +175,63 @@ TIM.collections.PostTypes = TIM.collections.BaseCollection.extend({
 		
 });
 
+//
+//
 //paging for collection as a mixin
 //
 //have some sort of variable that says whether there's a maximum/total count - after reaching this count, don't try to get the next page?
 //
+//it's the responsibility of the view based on this collection to make the paging methos calls
+//
+//
+//todo: override collection's 'parse' method to get the paging info from the response & add it to the collection
+//  have to do this explicitly in the collection that's being overriden now
 
 TIM.mixins.paging = {
   
   initializePaging: function(options) {
     options = options || {};
     this.page = 1;
-  	this.pageSize = options.pageSize || 15;
+  	this.pageSize = options.pageSize || 25;
   	this.max = options.max || 0;
   },
   
   //get earlier events and append them to the beginning of the collection
-  //basically the same as getNextPage with 'at' set to 0 in the call to 'fetch'
-  getPrevPage: function() {
+  //basically the same as getNextPage using the 'prev' url and 'at' set to 0 in the call to 'fetch'
   
+  getPrevPage: function() {
+    if (!this.paging.prev) {
+       this.trigger("paging:noEarlierPages");
+       return;
+    }
+    
+    var that = this;
+    
+    this.page--;
+    this.url = this.paging.prev;
+    
+    TIM.setLoading(true); //should make this an event, not an explicit call
+    
+    this.fetch({
+      add: true,
+      at: 0,
+      
+      success: function(coll, resp) {
+  		  console.log('first item in collection after prev fetch: ', coll.at(0).get('id'));
+  		  that.trigger("paging:prevPageLoaded");
+  		},
+  		error: function(resp) {
+        console.log("paging error: ", resp);
+  		}
+    });
   },
   
-  getNextPage: function() {
+  getNextPage: function(options) {
+    
+    options = options || {};
     
     if (!this.paging.next) {
-       this.trigger("noMorePages");
+       this.trigger("pagin:noMorePages");
        return;
     }
     
@@ -207,14 +240,16 @@ TIM.mixins.paging = {
     this.page++;
     this.url = this.paging.next;
     
-    TIM.setLoading(true);
+    if (options.showLoading !== false) {
+       TIM.setLoading(true);
+    }
     
     this.fetch({
-      add:true,
+      add: true,
       
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
-  		  that.trigger("pageLoaded");
+  		  that.trigger("paging:nextPageLoaded");
   		},
   		error: function(resp) {
         console.log("paging error: ", resp);

@@ -24,6 +24,7 @@ TIM.currentUser = undefined; //the person who is currently logged in - will be a
 TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
 TIM.authenticatedUser = TIM.authenticatedUser || undefined;
+TIM.debugSmallScreen = false; //set this tp 'true' to always use an iphone-sized screen
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -61,7 +62,7 @@ $(function() {
       var height =  $(window).height(),
           width =  $(window).width();
       //don't bother for desktop sizes!
-      if (height > 480) return;
+      if (height > 480 || TIM.debugSmallScreen) return;
       $("#app").css("min-height", height);
       $("#app").css("width", width);
   }
@@ -211,9 +212,8 @@ $(function() {
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
 		timeout : 5000,
-		callbackParameter: "callback",
 		success: function(resp) {
-		  console.log('fetched services');
+		  //console.log('fetched services');
 		},
 		error: function(resp) {
 			TIM.showErrorMessage({
@@ -308,10 +308,10 @@ $(function() {
     
     //
     //this is called wehn a feature has finished loading (css, templates, behavior)
-    //if it's passed 'nabigateOnLoad' as an option, it will 'activate' the feature
+    //if it's passed 'navigateOnLoad' as an option, it will 'activate' the feature
     //
     featureLoaded: function(options) {
-      console.log("Feature loaded callback: ", options);
+      //console.log("Feature loaded callback: ", options);
       var feature = options.feature, path = options.path, navigate = options.navigateOnLoad;
       if(navigate) {
         feature.behavior.activate(path);
@@ -320,7 +320,7 @@ $(function() {
     },
     
     featureLoadError: function(options) {
-      console.log("Feature loaded failed: ", options);
+      //console.log("Feature loaded failed: ", options);
       TIM.showErrorMessage(options);
     },
     
@@ -406,7 +406,7 @@ $(function() {
   	  TIM.currentUserFeatures.fetch({
     		timeout : 5000,
     		success: function(resp) {
-    		  console.log('fetched user features ', TIM.currentUserFeatures.length);
+    		  //console.log('fetched user features ', TIM.currentUserFeatures.length);
     		  TIM.currentUserFeatures.initialized = true;
     		  if(options.callback) {
     		    options.callback();
@@ -440,7 +440,7 @@ $(function() {
 	  //get features for this author from backend
 	  TIM.features.fetch({
   		success: function(resp) {
-  		  console.log('fetched features');
+  		  //console.log('fetched features');
   		},
   		error: function(resp) {
   			TIM.showErrorMessage({
@@ -705,7 +705,7 @@ $(function() {
 	  
 	  //only do transition if necessary - if the from and to page are the same, just return
 	  
-	  console.log('transitioning (fromPage, toPage, fromPage==toPage:) ', toPage, fromPage, toPage.is(fromPage));
+	  //console.log('transitioning (fromPage, toPage, fromPage==toPage:) ', toPage, fromPage, toPage.is(fromPage));
 	  
 	  if(toPage.is(fromPage) && !options.transitionSamePage) { //always transitioning for now...
 	    return;
@@ -731,7 +731,7 @@ $(function() {
 	            .addClass(outClasses)
 	            .addClass('active')
 	            .animationComplete(function() {
-	              console.log('animation complete for from page: ');
+	              //console.log('animation complete for from page: ');
         	      $(this).removeClass(outClasses + transitions + ' active');
         	      $('#app').removeClass('transitioning');
         	      TIM.setErrorShowing(false);
@@ -747,7 +747,7 @@ $(function() {
 	  
     toPage.addClass('active')
         .animationComplete(function() {
-	          console.log('animation complete for to page: ', this);
+	          //console.log('animation complete for to page: ', this);
             $(this).removeClass(transitions + " in").addClass('active');
             $('#app').removeClass('transitioning');
             setTimeout(function(){

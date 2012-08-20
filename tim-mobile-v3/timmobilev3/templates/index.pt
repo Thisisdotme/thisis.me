@@ -110,6 +110,7 @@
 	</div><!-- /page -->
 	
 	<script type="text/javascript" metal:fill-slot="page_script">
+	  var prefill = false;
 	  window.TIM = TIM || {};
 	  TIM.pageInfo = {
 			authorName: '${author_name}'
@@ -156,59 +157,64 @@
     
       //prefill with people we know we have
       TIM.authors = new TIM.collections.Authors();
-      TIM.authors.reset(
-        [   {
-              author_id: 1,
-              name: "howard",
-              email: "howard@thisis.me",
-              full_name: "Howard Burrows",
-              template: null
-            },
-            {
-              author_id: 6,
-              name: "phil",
-              email: "phil@mobileidentity.me",
-              full_name: "Philip Goffin",
-              template: null
-            },
-            {
-              author_id: 2,
-              name: "loree",
-              email: "loree@mobileidentity.me",
-              full_name: "Loree Hirschman",
-              template: null
-            },
-            {
-              author_id: 8,
-              name: "philblack",
-              email: "pblack@trueventures.com",
-              full_name: "Philip Black",
-              template: null
-            },
-            {
-              author_id: 39,
-              name: "jose",
-              email: "jose@thisis.me",
-              full_name: "Jose Garcia",
-              template: null
+      
+      if(prefill) {
+        TIM.authors.reset(
+          [   {
+                author_id: 1,
+                name: "howard",
+                email: "howard@thisis.me",
+                full_name: "Howard Burrows",
+                template: null
+              },
+              {
+                author_id: 6,
+                name: "phil",
+                email: "phil@mobileidentity.me",
+                full_name: "Philip Goffin",
+                template: null
+              },
+              {
+                author_id: 2,
+                name: "loree",
+                email: "loree@mobileidentity.me",
+                full_name: "Loree Hirschman",
+                template: null
+              },
+              {
+                author_id: 8,
+                name: "philblack",
+                email: "pblack@trueventures.com",
+                full_name: "Philip Black",
+                template: null
+              },
+              {
+                author_id: 39,
+                name: "jose",
+                email: "jose@thisis.me",
+                full_name: "Jose Garcia",
+                template: null
             
-            },
-            {
-              author_id: 37,
-              name: "Ken",
-              email: "k_lenga@yahoo.com",
-              full_name: "Ken Lenga",
-              template: null
-            },
-            {
-              author_id: 43,
-              name: "mchammer",
-              email: "mchammer",
-              full_name: "MC Hammer",
-              template: null
-            }
-        ]
-      );
+              },
+              {
+                author_id: 37,
+                name: "Ken",
+                email: "k_lenga@yahoo.com",
+                full_name: "Ken Lenga",
+                template: null
+              },
+              {
+                author_id: 43,
+                name: "mchammer",
+                email: "mchammer",
+                full_name: "MC Hammer",
+                template: null
+              }
+          ]
+        );
+      }
+      
+      
       
       function authorFetchCallback() {
         authorJSON = {"authors":

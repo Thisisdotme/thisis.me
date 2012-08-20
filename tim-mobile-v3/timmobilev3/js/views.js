@@ -958,6 +958,7 @@ TIM.mixins.flipset = {
 			if(startIndex == 0) {
 			  this.$el.html(''); //if this if the first time rendering this flipset, make sure its container element is empty
 			}
+			
 			this.renderPageChunk(this.renderedIndex); //render the first chunk of pages
 			
 			if(TIM.appContainerElem.find(this.el).length == 0)  {
@@ -1025,7 +1026,7 @@ TIM.mixins.flipset = {
     },
     
 		renderPageChunk: function(start) {
-			//would this fn check for earlier/later events if they haven't been loaded?
+			
 			var end = start + this.chunkSize;
 			if (end > this.pages.length) {
 				end = this.pages.length;
@@ -1046,24 +1047,25 @@ TIM.mixins.flipset = {
 			
 			var that = this;
 			
-			console.log('flipNext:', this);
+			console.log('flipNext: pagenum, pages.length, renderedIndex, numResourcesRendered', this.pageNum, this.pages.length, this.renderedIndex, this.numResourcesRendered);
 			console.log('---');
 			
-			//prerendering 3 pages & sending to flipset
+			//when we get 3 pages from the end of the flipset, render a chunk of pages & send them to the flipset
+			//
 			//we always want to have this many pages available to the flipset because it needs to have as many as 4 pages in the DOM at one time
 			
 			if(this.pageNum == (this.renderedIndex - 3)) {
 				this.renderPageChunk(this.renderedIndex);
 			}
 			
-			if (this.pageNum < this.pages.length - 2) {
+			if (this.pageNum < this.pages.length - 5) { //if we're not at the end of the 'pages', just return
 				this.pageNum++;
 			} else {
 			  
 			  if(TIM.isLoading() || this.collection.getNextPage === undefined) {
 			    return;
 			  }
-			  this.collection.getNextPage(); //bring back paging!
+			  this.collection.getNextPage({showLoading:false}); //bring back paging!
 			  this.pageNum++;
 			}
 			if (this.updateRouter) {

@@ -21,7 +21,7 @@
 		this.$el	= options.containerEl;  //should probably just pas in the id of the container dom element
 		this.containerElemId = this.$el.attr('id');
 		this.$el.html(''); //clear out the container
-		console.log("el: " , this.$el);
+		//console.log("el: " , this.$el);
 		this._init(options);
 		
 	};
@@ -47,7 +47,7 @@
 			this.options 		= $.extend(true, {}, Flipset.defaults, options);
 			this.parentView = options.parentView;
 			
-			console.log("flipset parentview: ", this.parentView);
+			//console.log("flipset parentview: ", this.parentView);
 			
 			this.loading = false; //flag for if the flipset is in the 'loading' state
 			
