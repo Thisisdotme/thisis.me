@@ -930,6 +930,11 @@ footer .info .caption {
 footer > div {  float: left }
 footer div.main-text {
   float:none;
+  overflow : hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 footer .avatar, footer .author { display:none; }
 footer .author { display:none; }

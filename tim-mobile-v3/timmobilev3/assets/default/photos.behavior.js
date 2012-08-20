@@ -273,7 +273,7 @@ the behavior for the photo feature
         this.collection = album.photos;
         this.collection.max = album.get("count");
         this.collection.setURL();
-        this.collection.bind('pageLoaded', this.renderNextPageset, this);
+        this.collection.bind('paging:nextPageLoaded', this.renderNextPageset, this);
       },
 
 
@@ -482,7 +482,7 @@ the behavior for the photo feature
         this.collection = album.photos;
         this.collection.max = album.get("count");
         this.collection.setURL();
-        this.collection.bind('pageLoaded', this.renderNextPageset, this);
+        this.collection.bind('paging:nextPageLoaded', this.renderNextPageset, this);
   			this.collection.bind( "reset", this.render );
       },
       
@@ -527,7 +527,9 @@ the behavior for the photo feature
       
       //we're attempting to load ahead of teh flip
       renderNextPageset: function() {
-        this.renderFlipSet();
+        this.renderFlipSet({
+          pageMetaData: {count:getAlbumCount(this.album)}
+        });
         TIM.setLoading(false);
       },
       
