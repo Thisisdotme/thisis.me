@@ -250,7 +250,7 @@ the behavior for the photo feature
       className: "app-page photo-feature",
       numRendered: 0,
       chunkSize: 15,
-      initialRenderSize: 30,
+      initialRenderSize: 24, //can't be bigger than 25!
       chunkRendering: false,
       template: "photoGrid",
 
