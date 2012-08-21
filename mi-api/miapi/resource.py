@@ -193,6 +193,8 @@ class AuthorService:
     return self.__parent__.author
 
 
+# This is currently not used. It is suppose to cover the case where we want to page photoalbum
+# and display all photos, photos of me, photos liked.
 class MetaPhotoAlbums():
   def __getitem__(self, key):
     try:

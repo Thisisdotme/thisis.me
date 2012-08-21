@@ -30,7 +30,7 @@ def get_events(author_service_context, request):
       request.params.get('until'))
 
   max_page_limit = miapi.tim_config['api']['max_page_limit']
-  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
+  page_limit = min(int(request.params.get('count', max_page_limit)), int(max_page_limit))
 
   service_events = data_access.service_event.query_service_events_page_by_service(
       author.id,

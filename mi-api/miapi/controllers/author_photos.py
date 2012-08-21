@@ -22,7 +22,7 @@ def get_photos(photos_context, request):
       data_access.service.name_to_id('me'))
 
   max_page_limit = miapi.tim_config['api']['max_page_limit']
-  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
+  page_limit = min(int(request.params.get('count', max_page_limit)), int(max_page_limit))
 
   # get the query parameters
   since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
