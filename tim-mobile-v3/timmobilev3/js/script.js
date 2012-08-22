@@ -24,7 +24,7 @@ TIM.currentUser = undefined; //the person who is currently logged in - will be a
 TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
 TIM.authenticatedUser = TIM.authenticatedUser || undefined;
-TIM.debugSmallScreen = true; //set this tp 'true' to always use an iphone-sized screen
+TIM.debugSmallScreen = false; //set this tp 'true' to always use an iphone-sized screen
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
