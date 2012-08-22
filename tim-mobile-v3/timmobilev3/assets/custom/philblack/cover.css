@@ -56,11 +56,10 @@
 	text-align:left;
 	white-space:nowrap;
 	letter-spacing:-1px;
+	color:#fff;
 }
 
 .cover-page #first-name {
-	-webkit-text-fill-color:#FFF;
-	x--webkit-text-stroke:1px #000;
 	line-height:30%;
 	margin-top:12%;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
@@ -69,8 +68,6 @@
 }
 
 .cover-page #last-name {
-	-webkit-text-fill-color:#FFF;
-	x--webkit-text-stroke:1px #000;
 	margin-left:0;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:3;
