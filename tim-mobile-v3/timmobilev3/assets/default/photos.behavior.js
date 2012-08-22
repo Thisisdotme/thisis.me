@@ -27,6 +27,16 @@ the behavior for the photo feature
     initialize: function() {
       this.photos = new TIM.collections.Photos({albumId: this.id});
     },
+    
+    getCount: function() {
+      var count = 0;
+      try {
+        count = this.get('post_type_detail').photo_album.photo_count;
+      } catch(e) {
+        count = 0;
+      }
+      return count
+    },
 	
     clear: function() {
       this.destroy();
@@ -48,19 +58,21 @@ the behavior for the photo feature
        //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		 //this will be more intelligent in the future
   		  
-  		  _.each(resp.photo_albums, function(album) {
+  		  _.each(resp.entries, function(album) {
+  		    
   		    album.headline = album.headline || 'All Photos';
-  		    //album.cover_photo.thumb_image = album.cover_photo.images[0];
   		    
   		    //a hack to avoid duplicating images on the album list page if the first two albums begin with the same cover photo
   		    
-  		    var photoNum = album.headline == 'All Photos' && resp.photo_albums.length  > 1 ? 1 : 0;
-  		    var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
-  		    album.main_image = cover_photo[cover_photo.length-1];
+  		    var photoNum = album.headline == 'All Photos' && resp.entries.length  > 1 ? 1 : 0;
   		    
+  		    if(album.post_type_detail.photo_album.photo_count > 0) {
+  		      var cover_photo = album.post_type_detail.photo_album.cover_photos[photoNum];
+    		    album.main_image = cover_photo[cover_photo.length-1];
+  		    }
   		  });
   		  
-  		  return (resp.photo_albums);
+  		  return (resp.entries);
   		}
 
   });
@@ -118,15 +130,10 @@ the behavior for the photo feature
   		  //the first 'image' for each photo should be the smallest - let's call it the 'thumb image'
   		  //this will be more intelligent in the future - making decisions based on image size metadata
   		  
-  		  console.log("photos in album:", resp.entries);
   		  _.each(resp.entries, function(photo) {
-  		    		    
-  		    photo.thumb_image = that.getSmallestImg(photo.post_type_detail.photo, 100, 100 ); //assuming first image is smallest - write fn to get the smallest one that 'fits the bill'
-  		    
-    		  photo.main_image = that.getSmallestImg(photo.post_type_detail.photo, 600, 600 ); //use arbitrary size
-    		  
-  		    photo.caption_text = (photo.headline && !photo.tagline) ? photo.headline : '';
-  		    
+  		  	  photo.thumb_image = that.getSmallestImg(photo.post_type_detail.photo, 100, 100 ); //assuming first image is smallest - write fn to get the smallest one that 'fits the bill'
+      		  photo.main_image = that.getSmallestImg(photo.post_type_detail.photo, 600, 600 ); //use arbitrary size
+    		    photo.caption_text = (photo.headline && !photo.tagline) ? photo.headline : '';
   		  });
   		  this.paging = resp.paging;
   		  return (resp.entries);
@@ -181,6 +188,15 @@ the behavior for the photo feature
 
         var albums = this.collection.toJSON();
         console.log('albums: ', albums);
+        
+        //remove any albums with zero photos
+        
+        albums = _.reject(albums, function(album) {
+          return album.post_type_detail.photo_album.photo_count === 0;
+        })
+        
+        console.log('albums after filter: ', albums);
+        
         var templateContext = {
                                 "photo_albums": albums
         };
@@ -384,6 +400,7 @@ the behavior for the photo feature
           //only render up to the album's count size!
           var count = this.album.get('post_type_detail').photo_album.photo_count;
           var numLeft = count - this.numRendered;
+          
           if(numLeft <= 0) {
             console.log('no more to render');
             this.$el.find('.loading').html('---');
@@ -395,7 +412,7 @@ the behavior for the photo feature
             chunkSize = numLeft;
             this.$el.find('.loading').html('---');
           }
-          window.c = this.collection;
+          window.c = this.collection; //shorthand for debugging
           var photos = this.collection.toJSON();
           
           //fetch next page if we're getting close to the end of the collection
@@ -616,6 +633,7 @@ the behavior for the photo feature
       feature.albumCollection.fetch({
   			success: function(model, resp) {
   		    feature.hasFetchedCollection = true;
+  		    window.albums = feature.albumCollection;
       		feature.showView({albumId: albumId, photoId: photoId, showComments : showComments});
   			},
   			error: function(model, resp) {
