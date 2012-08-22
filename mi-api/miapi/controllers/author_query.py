@@ -39,8 +39,8 @@ def get_events(events_context, request):
   until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
       request.params.get('until'))
 
-  max_page_limit = miapi.tim_config['api']['max_page_limit']
-  page_limit = min(int(request.params.get('count', max_page_limit)), int(max_page_limit))
+  page_limit = min(int(request.params.get('count', miapi.tim_config['api']['default_page_limit'])),
+                   int(miapi.tim_config['api']['max_page_limit']))
 
   event_rows = data_access.service_event.query_service_events_page(
       author.id,
