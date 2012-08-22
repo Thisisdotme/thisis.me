@@ -13,31 +13,18 @@
   font-weight: bold;
 }
 
-.cover-page h1.title {
-  font-size:34px;
-  font-weight:normal;
-  color:#fff200;
-  text-align:left;
-  -webkit-text-stroke: 1px #333;
-  position:absolute;
-  top:22px;
-  left:12px;
-  font-family: 'Holtwood One SC',serif;
-  line-height:1.1;
-  text-transform:uppercase;
-}
 
 .cover-page a, .cover-page a:visited {
   text-decoration:none;
-  color:#FFCE78;
+  color:#FFF;
 }
 
 
 .cover-page .primary-story {
   box-sizing:border-box;
   font-size:1.2em;
-  color:#FFCE78;
-  font-family:helvetica,sans-serif;
+  color:#FFF;
+  x-font-family:helvetica,sans-serif;
   line-height:1.2;
   text-shadow:1px 1px #333;
   padding:1px 12px;
@@ -68,26 +55,23 @@
 
 .cover-page .header span {
 	display:block;
-	font-family:"Holtwood One SC";
+	font-family:"PT Sans";
 	text-align:left;
 	white-space:nowrap;
+	text-shadow:0 2px 4px rgba(0,0,0,0.5);
+	color:#fff;
 }
 
 .cover-page #first-name {
-	-webkit-text-fill-color:#FF0;
-	-webkit-text-stroke:1px #000;
 	line-height:30%;
 	margin-top:12%;
-	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:2;
 	font-size:44px;
 }
 
 .cover-page #last-name {
-	-webkit-text-fill-color:#FFF;
-	-webkit-text-stroke:1px #000;
-	margin-left:10%;
-	text-shadow:5px 5px 14px rgba(0,0,0,0.5);
+	margin-left:0%;
+	margin-top:8px;
 	z-index:3;
 	font-size:36px;
 }
@@ -105,6 +89,6 @@ p.pullquote {
 
 .pullquote a
 {
-	color:#FFCE78;
+	color:#FFF;
 	text-decoration:none;
 }

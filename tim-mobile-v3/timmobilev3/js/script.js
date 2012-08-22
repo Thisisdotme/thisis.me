@@ -24,7 +24,7 @@ TIM.currentUser = undefined; //the person who is currently logged in - will be a
 TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
 TIM.authenticatedUser = TIM.authenticatedUser || undefined;
-TIM.debugSmallScreen = false; //set this tp 'true' to always use an iphone-sized screen
+TIM.debugSmallScreen = true; //set this tp 'true' to always use an iphone-sized screen
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -212,7 +212,6 @@ $(function() {
 	//get all the availiable services from the API - these will be needed for rendering
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
-		timeout : 5000,
 		success: function(resp) {
 		  //console.log('fetched services');
 		},
