@@ -900,6 +900,7 @@ TIM.mixins.flipset = {
   		this.renderedIndex = 0;
   		this.numResourcesRendered = 0;
   		this.flipMode = true;
+  		this.pagingThreshold = 8;
 		},
 		
 		//
@@ -994,8 +995,6 @@ TIM.mixins.flipset = {
 			  
 			  itemJSON = item.toJSON();
 			  
-			  console.log('item json for event', itemJSON)
-			  
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
 			  //possibly different templates for different event types?
@@ -1071,7 +1070,7 @@ TIM.mixins.flipset = {
 				this.renderPageChunk(this.renderedIndex);
 			}
 			
-			if (this.pageNum < this.pages.length - 5) { //if we're not at the end of the 'pages', just return
+			if (this.pageNum < this.pages.length - this.pagingThreshold) { //if we're not at the end of the 'pages', just return
 				this.pageNum++;
 			} else {
 			  

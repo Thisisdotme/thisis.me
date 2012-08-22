@@ -112,7 +112,7 @@ the behavior for the photo feature
   		  this.albumId = options.albumId || 0;
   		  
   		  this.max = options.max || 0;
-  		  var pageSize = this.max || 100;
+  		  var pageSize = this.max || 25;
   		  
   		  this.initializePaging({pageSize:pageSize});
   		  
