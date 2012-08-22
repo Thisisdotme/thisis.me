@@ -900,6 +900,7 @@ TIM.mixins.flipset = {
   		this.renderedIndex = 0;
   		this.numResourcesRendered = 0;
   		this.flipMode = true;
+  		this.pagingThreshold = 8;
 		},
 		
 		//
@@ -999,9 +1000,20 @@ TIM.mixins.flipset = {
 			  //possibly different templates for different event types?
 			  //
 			  //shouldn't skip too many non-one-page events...
-			  //skip correlations for now - they have no useful data
+			  //
+			  ///was skipping correlation, but they seem to be fixed?
+			  //
 			  
-			  if(itemJSON.type !== "correlation") {
+			  if(itemJSON.type !== "correlation-xxx") {
+			    //add source icons
+			    //
+			    if(itemJSON.shares) {
+			      for (var i = 0; i < itemJSON.shares.length; i++) {
+			        var svcname = itemJSON.shares[i].service_name;
+			        itemJSON.shares[i].footer_img = TIM.allServices.getByName(svcname).getFooterImage();
+			      }
+			    }
+			    
 			    if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
   				  //we have a 'single event page'
   				  var template = self.pageTemplate;
@@ -1058,7 +1070,7 @@ TIM.mixins.flipset = {
 				this.renderPageChunk(this.renderedIndex);
 			}
 			
-			if (this.pageNum < this.pages.length - 5) { //if we're not at the end of the 'pages', just return
+			if (this.pageNum < this.pages.length - this.pagingThreshold) { //if we're not at the end of the 'pages', just return
 				this.pageNum++;
 			} else {
 			  

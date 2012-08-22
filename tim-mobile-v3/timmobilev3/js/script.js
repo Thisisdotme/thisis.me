@@ -212,14 +212,14 @@ $(function() {
 	//get all the availiable services from the API - these will be needed for rendering
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
-		timeout : 5000,
 		success: function(resp) {
 		  //console.log('fetched services');
 		},
 		error: function(resp) {
+		  /*
 			TIM.showErrorMessage({
 			    exception: "loading services failed."
-			});
+			}); */
 		}
 	});
 	

@@ -15,13 +15,13 @@
 
 .cover-page a, .cover-page a:visited {
   text-decoration:none;
-  color:#FFCE78;
+  color:#FFF;
 }
 
 .cover-page .primary-story {
   box-sizing:border-box;
-  font-size:1.2em;
-  color:#FFCE78;
+  font-size:1.1em;
+  color:#FFF;
   font-family:helvetica,sans-serif;
   line-height:1.2;
   text-shadow:1px 1px #333;
@@ -29,6 +29,8 @@
   background-color: rgba(0, 0, 0, 0.4);
   font-weight:normal;
 }
+
+/* hide these for now... this will probably change */
 
 .cover-page .secondary-story {
   display:none;
@@ -38,42 +40,40 @@
   display:none;
 }
 
-.cover-page .header
-{
+.cover-page .header {
 	display:block;
 	left:0;
 	margin:10%;
+	margin-left:4%;
 	margin-top:0;
 	padding:0;
 	position:absolute;
-	top:0;
+	top:6px;
 	width:80%;
 }
 
 .cover-page .header span {
 	display:block;
-	font-family:"Holtwood One SC";
 	text-align:left;
 	white-space:nowrap;
+	color:#FFF;
+	text-transform:uppercase;
 }
 
 .cover-page #first-name {
-	-webkit-text-fill-color:#FF0;
-	-webkit-text-stroke:1px #000;
 	line-height:30%;
 	margin-top:12%;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:2;
-	font-size:40px;
+	font-size:42px;
 }
 
 .cover-page #last-name {
-	-webkit-text-fill-color:#FFF;
-	-webkit-text-stroke:1px #000;
-	margin-left:15%;
-	text-shadow:2px 2px 5px rgba(0,0,0,0.3);
+	margin-left:0;
+	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:3;
-	font-size:32px;
+	font-size:42px;
+	margin-top:6px;
 }
 
 .cover-page section {
@@ -87,3 +87,7 @@ p.pullquote {
   margin:.6em 0;
 }
 
+.pullquote a {
+	color:#FFF;
+	text-decoration:none;
+}

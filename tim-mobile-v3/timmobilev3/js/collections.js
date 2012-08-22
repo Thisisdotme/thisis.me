@@ -9,6 +9,10 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
      options.callbackParameter = options.callbackParameter || "callback";
      options.timeout = options.timeout || 25000;
      
+     if(this.pageSize) {
+       options.data = {count:this.pageSize}
+     }
+     
      //CORS!
      options.xhrFields = {withCredentials: true};
      options.contentType = 'application/json';
@@ -247,6 +251,7 @@ TIM.mixins.paging = {
     
     this.fetch({
       add: true,
+      //data: {count: this.pageSize},
       
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
