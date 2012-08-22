@@ -88,8 +88,17 @@
   				      primaryStoryService = context.primaryStory.origin.known;
   				      context.primaryStory.footerIcon = TIM.allServices.getByName(primaryStoryService.service_name).getFooterImage();
   				    } else if(context.primaryStory.origin.unknown) {
-    				    primaryStoryService = context.primaryStory.origin.unknown;
-    				    context.primaryStory.footerIcon = primaryStoryService.small_icon;
+  				      
+  				      //try shares?
+  				      if (context.primaryStory.shares) {
+  				        if(context.primaryStory.shares[0]) {
+  				          primaryStoryService = context.primaryStory.shares[0];
+        				    context.primaryStory.footerIcon = TIM.allServices.getByName(primaryStoryService.service_name).getFooterImage();
+  				        }
+  				      } else {
+  				        primaryStoryService = context.primaryStory.origin.unknown;
+      				    context.primaryStory.footerIcon = primaryStoryService.small_icon;
+  				      } 
   				    }
   				  } catch(e) {
   				    context.primaryStory.footerIcon = undefined;
