@@ -147,6 +147,35 @@ def query_service_event_by_id(author_id, id):
   return row
 
 
+def query_photo_albums(author_id):
+  albums = []
+
+  # meta albums
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter_by(
+      author_id=author_id,
+      type_id=data_access.post_type.label_to_id('photo_album'),
+      service_id=data_access.service.name_to_id('me'))
+  query = query.order_by(mi_schema.models.ServiceEvent.id)
+
+  albums = query.all()
+
+  # normal photos
+  query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
+  query = query.filter(
+      mi_schema.models.ServiceEvent.author_id == author_id,
+      mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
+      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'))
+  query = query.order_by(
+      mi_schema.models.ServiceEvent.modify_time.desc(),
+      mi_schema.models.ServiceEvent.service_id.desc(),
+      mi_schema.models.ServiceEvent.event_id.desc())
+
+  albums.extend(query.all())
+
+  return albums
+
+
 def query_service_events_page_by_service(
     author_id,
     service_id,
