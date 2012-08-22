@@ -25,6 +25,7 @@ TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
 TIM.authenticatedUser = TIM.authenticatedUser || undefined;
 TIM.debugSmallScreen = false; //set this tp 'true' to always use an iphone-sized screen
+TIM.footerPlaceholderImage = "//api.thisis.me/img/h/services/mono/placeholder.png";
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
