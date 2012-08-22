@@ -48,7 +48,7 @@
 	margin-top:0;
 	padding:0;
 	position:absolute;
-	top:0;
+	top:6px;
 	width:80%;
 }
 
@@ -65,15 +65,15 @@
 	margin-top:12%;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:2;
-	font-size:40px;
+	font-size:42px;
 }
 
 .cover-page #last-name {
-	margin-left:12px;
+	margin-left:0;
 	text-shadow:0 2px 4px rgba(0,0,0,0.5);
 	z-index:3;
-	font-size:40px;
-	margin-top:10px;
+	font-size:42px;
+	margin-top:6px;
 }
 
 .cover-page section {
