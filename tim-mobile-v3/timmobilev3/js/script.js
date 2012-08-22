@@ -216,9 +216,10 @@ $(function() {
 		  //console.log('fetched services');
 		},
 		error: function(resp) {
+		  /*
 			TIM.showErrorMessage({
 			    exception: "loading services failed."
-			});
+			}); */
 		}
 	});
 	
