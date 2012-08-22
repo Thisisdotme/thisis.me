@@ -37,6 +37,7 @@ window.addEventListener("load",function() {
 
 //jquery document ready fn!
 $(function() {
+  
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
     

@@ -217,11 +217,12 @@ TIM.mixins.paging = {
       at: 0,
       
       success: function(coll, resp) {
-  		  console.log('first item in collection after prev fetch: ', coll.at(0).get('id'));
+  		  //console.log('first item in collection after prev fetch: ', coll.at(0).get('id'));
   		  that.trigger("paging:prevPageLoaded");
   		},
   		error: function(resp) {
         console.log("paging error: ", resp);
+        TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   		}
     });
   },
@@ -253,6 +254,7 @@ TIM.mixins.paging = {
   		},
   		error: function(resp) {
         console.log("paging error: ", resp);
+        TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   		}
     });
   }
