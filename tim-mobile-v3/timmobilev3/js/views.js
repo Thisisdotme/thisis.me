@@ -994,14 +994,27 @@ TIM.mixins.flipset = {
 			  
 			  itemJSON = item.toJSON();
 			  
+			  console.log('item json for event', itemJSON)
+			  
 			  //this is very dependent on the old structure of the data
 			  //will probably change going forward...
 			  //possibly different templates for different event types?
 			  //
 			  //shouldn't skip too many non-one-page events...
-			  //skip correlations for now - they have no useful data
+			  //
+			  ///was skipping correlation, but they seem to be fixed?
+			  //
 			  
-			  if(itemJSON.type !== "correlation") {
+			  if(itemJSON.type !== "correlation-xxx") {
+			    //add source icons
+			    //
+			    if(itemJSON.shares) {
+			      for (var i = 0; i < itemJSON.shares.length; i++) {
+			        var svcname = itemJSON.shares[i].service_name;
+			        itemJSON.shares[i].footer_img = TIM.allServices.getByName(svcname).getFooterImage();
+			      }
+			    }
+			    
 			    if(itemJSON.title !== undefined || itemJSON.type === "photo" || itemJSON.photo !== undefined || itemJSON.post_type_detail !== undefined) {
   				  //we have a 'single event page'
   				  var template = self.pageTemplate;
