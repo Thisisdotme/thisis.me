@@ -26,7 +26,8 @@ def correlate_event(event_json):
 
 
 def _normalize_uri(uri):
-  response = requests.head(uri, allow_redirects=True)
+  # We should be using GET instead of HEAD because some servers don't redirect them the same.
+  response = requests.get(uri, allow_redirects=True)
   return normalize_uri(response.url)
 
 

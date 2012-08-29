@@ -1,7 +1,6 @@
 import fcntl
 import os
 import re
-import urlparse
 
 
 def total_seconds(td):
@@ -78,11 +77,6 @@ url_re = re.compile(url, re.VERBOSE | re.MULTILINE)
 
 
 def normalize_uri(uri):
-  parsed_url = urlparse.urlparse(uri)
-  return urlparse.urlunparse((
-        parsed_url[0],
-        parsed_url[1],
-        parsed_url[2],
-        parsed_url[3],
-        '',
-        parsed_url[5]))
+  # Before we were removing the query parameters from the URI but that is not correct
+  # for some websites that use query paramters to identify pages
+  return uri
