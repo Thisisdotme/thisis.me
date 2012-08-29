@@ -75,7 +75,7 @@ TIM.collections.Comments = TIM.collections.BaseCollection.extend({
 
 TIM.collections.Services = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Service,
-		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated...
 		initialized: false,
 		
 		initialize: function(options) {
@@ -93,7 +93,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		  if (service) {
 		    return service.getFooterImage();
 		  } else {
-		    return "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
+		    return TIM.footerPlaceholderImage; //the 'me' icon?
 		  }
 		}
 		
@@ -106,7 +106,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 
 TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.AppFeature,
-		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated...
 		initialized: false,
 		
 		initialize: function(options) {
