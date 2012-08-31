@@ -134,6 +134,9 @@ class EventTwitterFeedDriver(app_base.AppBase):
         logging.info('Starting to listen for stream from: %s', data)
         response.deliverBody(TwitterStreamProtocol(handler))
         handler.connected()
+      elif response.code == 401:
+        logging.info('Authorization failed. Try to reconnect: %s', data)
+        handler.reconnect_feed()
       else:
         logging.error(
             'Got a bad response: %s, phrase: %s, for: %s',
@@ -167,7 +170,7 @@ class GroupTwitterHandler:
     self.factory = factory
     self.token_key = token_key
     self.token_secret = token_secret
-    self.reconnection_delay = 0
+    self.reconnection_delay = 5
 
     self.id_to_handler = {}
     for handler in self.handlers:
