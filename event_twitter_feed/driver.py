@@ -15,6 +15,7 @@ from twisted.web.client import Agent, FileBodyProducer
 from twisted.web.http_headers import Headers
 from twisted.enterprise import adbapi
 from twisted_amqp import AmqpFactory
+import twisted.internet.error
 
 from tim_commons import app_base, json_serializer, messages, message_queue, db
 from mi_schema import models
@@ -132,14 +133,20 @@ class EventTwitterFeedDriver(app_base.AppBase):
       if response.code == 200:
         logging.info('Starting to listen for stream from: %s', data)
         response.deliverBody(TwitterStreamProtocol(handler))
+        handler.connected()
       else:
-        logging.info(
+        logging.error(
             'Got a bad response: %s, phrase: %s, for: %s',
             response.code,
             response.phrase,
             data)
 
-    d.addCallback(handle_response)
+    def handle_connection_refused(failure):
+      failure.trap(twisted.internet.error.ConnectionRefusedError)
+      logging.warning('Connection refused for: %s', data)
+      handler.reconnect_feed()
+
+    d.addCallbacks(handle_response, handle_connection_refused)
     d.addErrback(err)
 
   def _process_twitter_users(self):
@@ -160,6 +167,7 @@ class GroupTwitterHandler:
     self.factory = factory
     self.token_key = token_key
     self.token_secret = token_secret
+    self.reconnection_delay = 0
 
     self.id_to_handler = {}
     for handler in self.handlers:
@@ -176,7 +184,7 @@ class GroupTwitterHandler:
         None)
 
     service_author_id = interpreter.service_author_id()
-    handler = self.id_to_handler.get(service_author_id, None)
+    handler = self.id_to_handler.get(service_author_id)
 
     if handler:
       handler.handle(interpreter)
@@ -190,6 +198,22 @@ class GroupTwitterHandler:
     for handler in self.handlers:
       self.factory.notify_event_collector(handler.author_service_map)
       handler.schedule_collector_done()
+
+  def reconnect_feed(self):
+    reactor.callLater(self.reconnection_delay, self.start_feed)
+    logging.info(
+        'Reconnecting in %s seconds for: %s',
+        self.reconnection_delay,
+        self.list_of_twitter_ids())
+
+    # Increase the reconnection delay
+    if self.reconnection_delay == 0:
+      self.reconnection_delay = 5
+    else:
+      self.reconnection_delay = min(320, self.reconnection_delay * 2)
+
+  def connected(self):
+    self.reconnection_delay = 0
 
 
 class TwitterHandler:
@@ -290,7 +314,7 @@ class TwitterStreamProtocol(LineReceiver):
     logging.warning('Data: %s', self.handler.list_of_twitter_ids())
     logging.warning(reason.getTraceback())
 
-    self.handler.start_feed()
+    self.handler.reconnect_feed()
 
 
 class WebClientContextFactory(ClientContextFactory):
