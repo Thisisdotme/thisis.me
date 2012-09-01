@@ -108,6 +108,12 @@ def add_views(configuration):
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
 
+  configuration.add_view(
+      unauthorized_request_to_self,
+      context=resource.V1Root,
+      name='self',
+      renderer='jsonp')
+
 
 def preflight_crossdomain_access_control(request):
   origin = request.headers.get('Origin')
@@ -138,6 +144,10 @@ def preflight_crossdomain_access_control(request):
 
 def not_found(request):
   return error.http_error(request.response, **error.NOT_FOUND)
+
+
+def unauthorized_request_to_self(request):
+  return error.http_error(request.response, **error.UNAUTHORIZED)
 
 
 def crossdomain_access_control_response(event):
