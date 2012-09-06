@@ -4,6 +4,7 @@ import miapi.controllers
 import data_access.service_event
 import data_access.service
 import data_access.author_service_map
+import mi_schema.models
 
 
 def add_views(configuration):
@@ -22,6 +23,13 @@ def add_views(configuration):
       context=miapi.resource.Event,
       request_method='GET',
       permission='read',
+      renderer='jsonp',
+      http_cache=0)
+  configuration.add_view(
+      update_event,
+      context=miapi.resource.Event,
+      request_method='PATCH',
+      permission='write',
       renderer='jsonp',
       http_cache=0)
 
@@ -97,6 +105,48 @@ def get_event_detail(event_context, request):
   asm = data_access.author_service_map.query_asm_by_author_and_service(
       author.id,
       event.service_id)
+
+  return miapi.controllers.author_utils.createServiceEvent(
+      request,
+      event,
+      me_asm,
+      asm,
+      author)
+
+
+def update_event(event_context, request):
+  author = event_context.author
+  event = event_context.event
+
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
+
+  asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      event.service_id)
+
+  put = request.json_body
+  hidden = put.get('hidden')
+
+  if hidden is not None:
+    if (hidden is True and
+        event.service_id == data_access.service.name_to_id('me') and
+        (event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.ALL_PHOTOS_ID,
+           author.id) or
+         event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.OFME_PHOTOS_ID,
+           author.id) or
+         event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.LIKED_PHOTOS_ID,
+           author.id))):
+      # You can't hide well known photo albums
+      return miapi.error.http_error(request.response, **miapi.error.UNPROCESSABLE)
+    else:
+      event.hidden = hidden
+
+  data_access.flush()
 
   return miapi.controllers.author_utils.createServiceEvent(
       request,

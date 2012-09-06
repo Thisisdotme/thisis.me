@@ -32,11 +32,11 @@ def query_service_event(author_id, service_id, service_event_id):
 
 def query_meta_photo_album(author_id, id):
   query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
-  query = query.filter(
-      mi_schema.models.ServiceEvent.id == id,
-      mi_schema.models.ServiceEvent.author_id == author_id,
-      mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
-      mi_schema.models.ServiceEvent.service_id == data_access.service.name_to_id('me'))
+  query = query.filter_by(
+      id=id,
+      author_id=author_id,
+      type_id=data_access.post_type.label_to_id('photo_album'),
+      service_id=data_access.service.name_to_id('me'))
 
   row = None
   try:
@@ -87,7 +87,8 @@ def query_photos_page(
     query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
     query = query.filter_by(
         author_id=author_id,
-        type_id=data_access.post_type.label_to_id('photo'))
+        type_id=data_access.post_type.label_to_id('photo'),
+        hidden=False)
     query = query.order_by(
         mi_schema.models.ServiceEvent.create_time.desc(),
         mi_schema.models.ServiceEvent.service_id.desc(),
@@ -108,7 +109,8 @@ def query_photos_page(
         sqlalchemy.and_(
           mi_schema.models.Relationship.parent_author_id == author_id,
           mi_schema.models.Relationship.parent_service_id == album_service_id,
-          mi_schema.models.Relationship.parent_service_event_id == album_event_id))
+          mi_schema.models.Relationship.parent_service_event_id == album_event_id,
+          mi_schema.models.ServiceEvent.hidden == False))
     query = query.order_by(
         mi_schema.models.ServiceEvent.create_time.desc(),
         mi_schema.models.ServiceEvent.service_id.desc(),
@@ -148,14 +150,13 @@ def query_service_event_by_id(author_id, id):
 
 
 def query_photo_albums(author_id):
-  albums = []
-
   # meta albums
   query = tim_commons.db.Session().query(mi_schema.models.ServiceEvent)
   query = query.filter_by(
       author_id=author_id,
       type_id=data_access.post_type.label_to_id('photo_album'),
-      service_id=data_access.service.name_to_id('me'))
+      service_id=data_access.service.name_to_id('me'),
+      hidden=False)
   query = query.order_by(mi_schema.models.ServiceEvent.id)
 
   albums = query.all()
@@ -165,7 +166,8 @@ def query_photo_albums(author_id):
   query = query.filter(
       mi_schema.models.ServiceEvent.author_id == author_id,
       mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
-      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'))
+      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'),
+      mi_schema.models.ServiceEvent.hidden == False)
   query = query.order_by(
       mi_schema.models.ServiceEvent.modify_time.desc(),
       mi_schema.models.ServiceEvent.service_id.desc(),
@@ -192,10 +194,13 @@ def query_service_events_page_by_service(
   # don't show photo albums from me and instagram
   me_id = data_access.service.name_to_id('me')
   instagram_id = data_access.service.name_to_id('instagram')
-  query = query.filter(sqlalchemy.or_(
-        mi_schema.models.ServiceEvent.type_id != data_access.post_type.label_to_id('photo_album'),
-        sqlalchemy.and_(mi_schema.models.ServiceEvent.service_id != me_id,
-                        mi_schema.models.ServiceEvent.service_id != instagram_id)))
+  query = query.filter(
+    sqlalchemy.or_(
+      mi_schema.models.ServiceEvent.type_id != data_access.post_type.label_to_id('photo_album'),
+      sqlalchemy.and_(
+        mi_schema.models.ServiceEvent.service_id != me_id,
+        mi_schema.models.ServiceEvent.service_id != instagram_id)),
+    mi_schema.models.ServiceEvent.hidden == False)
 
   if since_date:
     query = query.filter(mi_schema.models.ServiceEvent.create_time >= since_date)
@@ -233,10 +238,13 @@ def query_service_events_page(
   # don't show photo albums from me and instagram
   me_id = data_access.service.name_to_id('me')
   instagram_id = data_access.service.name_to_id('instagram')
-  query = query.filter(sqlalchemy.or_(
-        mi_schema.models.ServiceEvent.type_id != data_access.post_type.label_to_id('photo_album'),
-        sqlalchemy.and_(mi_schema.models.ServiceEvent.service_id != me_id,
-                        mi_schema.models.ServiceEvent.service_id != instagram_id)))
+  query = query.filter(
+    sqlalchemy.or_(
+      mi_schema.models.ServiceEvent.type_id != data_access.post_type.label_to_id('photo_album'),
+      sqlalchemy.and_(
+        mi_schema.models.ServiceEvent.service_id != me_id,
+        mi_schema.models.ServiceEvent.service_id != instagram_id)),
+    mi_schema.models.ServiceEvent.hidden == False)
 
   if since_date:
     query = query.filter(mi_schema.models.ServiceEvent.create_time >= since_date)
@@ -272,7 +280,8 @@ def query_photo_albums_page(
   query = query.filter(
       mi_schema.models.ServiceEvent.author_id == author_id,
       mi_schema.models.ServiceEvent.type_id == data_access.post_type.label_to_id('photo_album'),
-      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'))
+      mi_schema.models.ServiceEvent.service_id != data_access.service.name_to_id('me'),
+      mi_schema.models.ServiceEvent.hidden == False)
   query = query.order_by(
       mi_schema.models.ServiceEvent.modify_time.desc(),
       mi_schema.models.ServiceEvent.service_id.desc(),
@@ -300,10 +309,41 @@ def query_meta_photo_albums(author_id):
   query = query.filter_by(
       author_id=author_id,
       type_id=data_access.post_type.label_to_id('photo_album'),
-      service_id=data_access.service.name_to_id('me'))
+      service_id=data_access.service.name_to_id('me'),
+      hidden=False)
   query = query.order_by(mi_schema.models.ServiceEvent.id)
 
   return query.all()
+
+
+def compute_album_count(author_id, service_id, event_id):
+  if event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+      mi_schema.models.ServiceEvent.ALL_PHOTOS_ID,
+      author_id):
+    query = tim_commons.db.Session().query(sqlalchemy.func.count(mi_schema.models.ServiceEvent.id))
+    query = query.filter_by(
+        author_id=author_id,
+        type_id=data_access.post_type.label_to_id('photo'),
+        hidden=False)
+  else:
+    query = tim_commons.db.Session().query(sqlalchemy.func.count(mi_schema.models.ServiceEvent.id))
+    query = query.join(
+        mi_schema.models.Relationship,
+        sqlalchemy.and_(
+          mi_schema.models.Relationship.child_author_id ==
+            mi_schema.models.ServiceEvent.author_id,
+          mi_schema.models.Relationship.child_service_id ==
+            mi_schema.models.ServiceEvent.service_id,
+          mi_schema.models.Relationship.child_service_event_id ==
+            mi_schema.models.ServiceEvent.event_id))
+    query = query.filter(
+        sqlalchemy.and_(
+          mi_schema.models.Relationship.parent_author_id == author_id,
+          mi_schema.models.Relationship.parent_service_id == service_id,
+          mi_schema.models.Relationship.parent_service_event_id == event_id,
+          mi_schema.models.ServiceEvent.hidden == False))
+
+  return query.scalar()
 
 
 def delete(identifier):

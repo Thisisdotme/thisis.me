@@ -1,14 +1,11 @@
 import os
 import logging
 import optparse
-import socket
 import pwd
-import datetime
 import daemon
 import setproctitle
 
-from tim_commons.config import load_configuration
-from tim_commons import PidFileContext
+import tim_commons.config
 
 
 class AppBase:
@@ -67,7 +64,7 @@ class AppBase:
         pwd_database = pwd.getpwnam(os.environ['TIM_USER'])
         with daemon.DaemonContext(
             working_directory='/',
-            pidfile=PidFileContext('/var/run/tim/{0}.pid'.format(self._program_name)),
+            pidfile=tim_commons.PidFileContext('/var/run/tim/{0}.pid'.format(self._program_name)),
             umask=0o022,
             files_preserve=list(reversed(range(2048))),
             uid=pwd_database.pw_uid,
@@ -82,7 +79,7 @@ class AppBase:
       return 1
 
   def _main(self, is_daemon, config, options, args):
-    _init_logger(self._program_name, is_daemon)
+    tim_commons.init_logger(self._program_name, is_daemon)
     self.app_main(config, options, args)
 
 
@@ -95,41 +92,5 @@ def _is_daemon(options):
   return is_daemon
 
 
-def _init_logger(program_name, is_daemon):
-  message = '%(levelname)s %(asctime)s %(thread)d %(pathname)s:%(lineno)d] %(message)s'
-  root_logger = logging.getLogger()
-  if not is_daemon:
-    root_logger.addHandler(_create_stderr_handler(message))
-  root_logger.addHandler(_create_file_handler(program_name, message))
-  root_logger.setLevel(logging.DEBUG)
-
-  # Configure the sqlalchemy logger
-  logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-
 def _load_config(config_file):
-  return load_configuration(config_file)
-
-
-def _create_stderr_handler(message_format):
-  handler = logging.StreamHandler()
-  handler.setLevel(logging.DEBUG)
-  handler.setFormatter(logging.Formatter(message_format))
-
-  return handler
-
-
-def _create_file_handler(program_name, message_format):
-  filename_args = {'program': program_name,
-                   'hostname': socket.gethostname(),
-                   'user': pwd.getpwuid(os.getuid()).pw_name,
-                   'date': datetime.datetime.utcnow().date().isoformat(),
-                   'time': datetime.datetime.utcnow().time().isoformat(),
-                   'pid': os.getpid()}
-  filename = '/tmp/{program}.{hostname}.{user}.log.{date}.{time}.{pid}'.format(**filename_args)
-
-  handler = logging.FileHandler(filename)
-  handler.setLevel(logging.DEBUG)
-  handler.setFormatter(logging.Formatter(message_format))
-
-  return handler
+  return tim_commons.config.load_configuration(config_file)

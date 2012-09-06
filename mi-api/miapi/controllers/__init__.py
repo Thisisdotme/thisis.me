@@ -2,17 +2,17 @@ import logging
 import calendar
 import datetime
 
-from sqlalchemy import func, and_
+from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
 from tim_commons.json_serializer import load_string
 
-from data_access import service
+import data_access.service
+import data_access.service_event
 
 from mi_schema.models import (
     ServiceObjectType,
-    ServiceEvent,
-    Relationship)
+    ServiceEvent)
 
 PHOTO_ALBUM_COVER_LIMIT = 3
 
@@ -43,7 +43,7 @@ def get_service_author_fragment(request, asm, author):
   if profile_image_url is None:
     profile_image_url = request.static_url('miapi:%s' % 'img/profile_placeholder.png')
 
-  author_obj = {'service_name': service.id_to_name(asm.service_id),
+  author_obj = {'service_name': data_access.service.id_to_name(asm.service_id),
                 'id': asm.service_author_id,
                 'name': author.author_name,     # TODO these need to become service user-name
                 'full_name': author.full_name}  # TODO and service full-name
@@ -55,7 +55,7 @@ def get_service_author_fragment(request, asm, author):
 
 def get_known_event_info_fragment(request, se, asm, author):
 
-  event_info = {'service_name': service.id_to_service[se.service_id].service_name,
+  event_info = {'service_name': data_access.service.id_to_name(se.service_id),
                 'service_event_id': se.event_id,
                 'service_user': get_service_author_fragment(request, asm, author)
                 }
@@ -82,7 +82,7 @@ def get_unknown_event_info_fragment(se):
 def get_location_fragment(se):
 
   location_info = None
-  if se.service_id == service.name_to_id('instagram') and se.json:
+  if se.service_id == data_access.service.name_to_id('instagram') and se.json:
     json_obj = load_string(se.json)
     if 'location' in json_obj:
       # TODO this needs to be normalized to thisis.me's structure using the event interpreter
@@ -97,26 +97,14 @@ def get_album_name(event):
                        ServiceEvent.OFME_PHOTOS_ID: 'Photos of Me',
                        ServiceEvent.LIKED_PHOTOS_ID: 'Photos I Like'}
 
-  if event.service_id == service.name_to_id('me'):
+  if event.service_id == data_access.service.name_to_id('me'):
     return well_known_albums[event.event_id[:event.event_id.index('@')]]
   else:
     return event.caption
 
 
 def _get_album_count(db_session, se):
-  # check for the special well-known album "all photos"
-  if se.event_id == ServiceEvent.make_well_known_service_event_id(ServiceEvent.ALL_PHOTOS_ID, se.author_id):
-    count = db_session.query(func.count(ServiceEvent.id)). \
-                       filter(and_(ServiceEvent.author_id == se.author_id,
-                                   ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-                       scalar()
-  else:
-    count = db_session.query(func.count(Relationship.child_service_event_id)). \
-                       filter(and_(Relationship.parent_author_id == se.author_id,
-                                   Relationship.parent_service_id == se.service_id, \
-                                   Relationship.parent_service_event_id == se.event_id)). \
-                       scalar()
-  return count
+  return data_access.service_event.compute_album_count(se.author_id, se.service_id, se.event_id)
 
 
 def get_post_type_detail_fragment(db_session, se, author):
@@ -151,7 +139,7 @@ def get_photo_album_detail_fragment(db_session, album_se, author):
 
   cover_photos = []
 
-  facebook_service_id = service.name_to_id('facebook')
+  facebook_service_id = data_access.service.name_to_id('facebook')
 
   if album_se.service_id == facebook_service_id:
 
@@ -172,43 +160,29 @@ def get_photo_album_detail_fragment(db_session, album_se, author):
       except NoResultFound:
         pass
     else:
-      cover_photos = _get_top_album_photos(db_session, album_se, author)
+      cover_photos = _get_top_album_photos(db_session, album_se)
 
   else:
-    cover_photos = _get_top_album_photos(db_session, album_se, author)
+    cover_photos = _get_top_album_photos(db_session, album_se)
 
   return {'photo_count': _get_album_count(db_session, album_se),
           'cover_photos': cover_photos}
 
 
-def _get_top_album_photos(db_session, album_se, author):
+def _get_top_album_photos(db_session, album_se):
 
   photos = []
 
-  # check if this is the ALL well-known album
-  if ServiceEvent.make_well_known_service_event_id(ServiceEvent.ALL_PHOTOS_ID, author.id) == album_se.event_id:
-    for photo_se in db_session.query(ServiceEvent). \
-          filter(and_(ServiceEvent.author_id == author.id,
-                      ServiceEvent.type_id == ServiceObjectType.PHOTO_TYPE)). \
-          order_by(ServiceEvent.create_time.desc()). \
-          limit(PHOTO_ALBUM_COVER_LIMIT):
-      photo = get_photo_detail_fragment(photo_se)
-      if photo:
-        photos.append(photo)
-  else:
-    for photo_se in db_session.query(ServiceEvent). \
-          join(Relationship, and_(Relationship.child_author_id == ServiceEvent.author_id,
-                                  Relationship.child_service_id == ServiceEvent.service_id,
-                                  Relationship.child_service_event_id == ServiceEvent.event_id)). \
-          filter(and_(Relationship.parent_author_id == album_se.author_id,
-                      Relationship.parent_service_id == album_se.service_id,
-                      Relationship.parent_service_event_id == album_se.event_id)). \
-          order_by(ServiceEvent.create_time.desc()). \
-          limit(PHOTO_ALBUM_COVER_LIMIT):
+  photo_rows = data_access.service_event.query_photos_page(
+      album_se.author_id,
+      album_se.event_id,
+      album_se.service_id,
+      PHOTO_ALBUM_COVER_LIMIT)
 
-      photo = get_photo_detail_fragment(photo_se)
-      if photo:
-          photos.append(photo)
+  for photo_se in photo_rows:
+    photo = get_photo_detail_fragment(photo_se)
+    if photo:
+      photos.append(photo)
 
   return photos if len(photos) > 0 else None
 
@@ -216,7 +190,7 @@ def _get_top_album_photos(db_session, album_se, author):
 def get_photo_detail_fragment(se):
 
     size_ordered_images = {}
-    if se.service_id == service.name_to_id('facebook'):
+    if se.service_id == data_access.service.name_to_id('facebook'):
 
       json_obj = load_string(se.json)
 
@@ -236,7 +210,7 @@ def get_photo_detail_fragment(se):
 
         size_ordered_images[size] = image
 
-    elif se.service_id == service.name_to_id('instagram'):
+    elif se.service_id == data_access.service.name_to_id('instagram'):
 
       json_obj = load_string(se.json)
 

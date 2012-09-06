@@ -4,6 +4,7 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
+    Boolean,
     Text,
     DateTime,
     ForeignKey,
@@ -315,6 +316,7 @@ class ServiceEvent(Base):
   photo_url = Column(String(4096))
   photo_width = Column(Integer)
   photo_height = Column(Integer)
+  hidden = Column(Boolean, nullable=False, default=False)
 
   auxillary_content = Column(Text(65565))  # deprecated
 
@@ -332,6 +334,7 @@ class ServiceEvent(Base):
                caption=None,
                content=None,
                photo_url=None,
+               hidden=False,
                auxillaryContent=None,
                json=None,
                correlation_id=None,
@@ -348,6 +351,7 @@ class ServiceEvent(Base):
     self.caption = caption
     self.content = content
     self.photo_url = photo_url
+    self.hidden = hidden
     self.auxillary_content = auxillaryContent
     self.json = json
     self.correlation_id = correlation_id

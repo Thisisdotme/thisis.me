@@ -3,12 +3,15 @@ import math
 import logging
 import datetime
 
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import IntegrityError
+import sqlalchemy.exc
 
-from mi_schema import models
-from tim_commons import json_serializer, db, total_seconds, messages
-from data_access import service, service_event, event_scanner_priority
+import mi_schema.models
+import tim_commons.json_serializer
+import tim_commons.db
+import tim_commons.messages
+import data_access.service
+import data_access.service_event
+import data_access.event_scanner_priority
 import event_correlator
 import event_interpreter
 
@@ -20,8 +23,8 @@ class EventProcessor:
     self.max_priority = max_priority
     self.min_duration = min_duration
 
-    self.service_id = service.name_to_service[service_name].id
-    self.me_service_id = service.name_to_service['me'].id
+    self.service_id = data_access.service.name_to_service[service_name].id
+    self.me_service_id = data_access.service.name_to_service['me'].id
 
   def process(
       self,
@@ -32,7 +35,7 @@ class EventProcessor:
       service_event_json,
       links):
 
-    if state == messages.NOT_FOUND_STATE:
+    if state == tim_commons.messages.NOT_FOUND_STATE:
       self.process_not_found(tim_author_id, service_author_id, service_event_id)
     else:
       self.process_current(
@@ -43,23 +46,23 @@ class EventProcessor:
           links)
 
   def process_not_found(self, tim_author_id, service_author_id, service_event_id):
-    service_object = service_event.query_service_event(
+    service_object = data_access.service_event.query_service_event(
         tim_author_id,
         self.service_id,
         service_event_id)
 
     if service_object:
-      service_event.delete(service_object.id)
+      data_access.service_event.delete(service_object.id)
 
       # do we have any correlated events?
       if service_object.correlation_id:
-        correlated_events = service_event.query_correlated_events(
+        correlated_events = data_access.service_event.query_correlated_events(
             tim_author_id,
             service_object.correlation_id)
 
         if not correlated_events:
           # list is empty we should delete the correlation event
-          count = service_event.delete_correlation_event(
+          count = data_access.service_event.delete_correlation_event(
               self.me_service_id,
               service_object.correlation_id,
               tim_author_id)
@@ -81,7 +84,7 @@ class EventProcessor:
       links):
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
-    query = db.Session().query(models.AuthorServiceMap)
+    query = tim_commons.db.Session().query(mi_schema.models.AuthorServiceMap)
     query = query.filter_by(author_id=tim_author_id, service_id=self.service_id)
     asm = query.one()
 
@@ -92,13 +95,10 @@ class EventProcessor:
         self.oauth_config)
 
     # check for existing update
-    existing_event = None
-    try:
-      query = db.Session().query(models.ServiceEvent)
-      query = query.filter_by(author_service_map_id=asm.id, event_id=interpreter.get_id())
-      existing_event = query.one()
-    except NoResultFound:
-      pass
+    existing_event = data_access.service_event.query_service_event(
+        tim_author_id,
+        self.service_id,
+        interpreter.event_id())
 
     event_updated = True
     if existing_event:
@@ -106,13 +106,13 @@ class EventProcessor:
       # check for possible update
 
       # generate checksum for existing json stored in DB
-      existing_json = json_serializer.normalize_string(existing_event.json)
+      existing_json = tim_commons.json_serializer.normalize_string(existing_event.json)
       existing_md5 = hashlib.md5()
       existing_md5.update(existing_json)
       existing_digest = existing_md5.hexdigest()
 
       # generate checksum for new json
-      new_json = json_serializer.dump_string(service_event_json)
+      new_json = tim_commons.json_serializer.dump_string(service_event_json)
       new_md5 = hashlib.md5()
       new_md5.update(new_json)
       new_digest = new_md5.hexdigest()
@@ -163,7 +163,7 @@ class EventProcessor:
       auxiliary_content = interpreter.get_auxiliary_content()
       correlation_id, correlation_url = event_correlator.correlate_event(interpreter)
 
-      service_event = models.ServiceEvent(
+      service_event = mi_schema.models.ServiceEvent(
           asm.id,
           interpreter.get_type(),
           asm.author_id,
@@ -176,10 +176,10 @@ class EventProcessor:
           content,
           photo,
           auxiliary_content,
-          json_serializer.dump_string(service_event_json),
+          tim_commons.json_serializer.dump_string(service_event_json),
           correlation_id=correlation_id)
-      db.Session().add(service_event)
-      db.Session().flush()
+      tim_commons.db.Session().add(service_event)
+      tim_commons.db.Session().flush()
 
       event_correlator.correlate_and_update_event(
           correlation_url,
@@ -190,7 +190,7 @@ class EventProcessor:
     # process any links for this event
     if links:
       for link in links:
-        relationship = models.Relationship(
+        relationship = mi_schema.models.Relationship(
             tim_author_id,
             link['service_id'],
             link['service_event_id'],
@@ -198,9 +198,9 @@ class EventProcessor:
             asm.service_id,
             interpreter.get_id())
         try:
-          db.Session().add(relationship)
-          db.Session().flush()
-        except IntegrityError:
+          tim_commons.db.Session().add(relationship)
+          tim_commons.db.Session().flush()
+        except sqlalchemy.exc.IntegrityError:
           logging.warning("Relationship already exists")
 
     update_time = interpreter.get_update_time()
@@ -219,12 +219,12 @@ def delete_scanner_event(
     service_event_id,
     service_user_id,
     service_name):
-  event_id = models.EventScannerPriority.generate_id(
+  event_id = mi_schema.models.EventScannerPriority.generate_id(
       service_event_id,
       service_user_id,
       service_name)
 
-  count = event_scanner_priority.delete(event_id)
+  count = data_access.event_scanner_priority.delete(event_id)
   if count != 1:
     logging.error(
         'Delete %s event scanner priority for event = %s, user = %s, name = %s',
@@ -242,11 +242,12 @@ def update_scanner(event_updated,
                    max_priority,
                    min_duration):
   # Get the scanner state from the database
-  event_id = models.EventScannerPriority.generate_id(
+  event_id = mi_schema.models.EventScannerPriority.generate_id(
       service_event_id,
       service_user_id,
       service_name)
-  scanner_event = db.Session().query(models.EventScannerPriority).get(event_id)
+  query = tim_commons.db.Session().query(mi_schema.models.EventScannerPriority)
+  scanner_event = query.get(event_id)
 
   if scanner_event is not None:
     if event_updated:
@@ -254,9 +255,9 @@ def update_scanner(event_updated,
   else:
     logging.debug('The event update time is %s.', update_time)
 
-    min_duration_in_sec = total_seconds(min_duration)
+    min_duration_in_sec = tim_commons.total_seconds(min_duration)
     event_age = datetime.datetime.utcnow() - update_time
-    event_age_in_sec = total_seconds(event_age)
+    event_age_in_sec = tim_commons.total_seconds(event_age)
     if event_age_in_sec < 0.0:
       event_age_in_sec = math.fabs(event_age_in_sec)
       if event_age_in_sec > min_duration_in_sec:
@@ -272,9 +273,9 @@ def update_scanner(event_updated,
     elif priority > max_priority:
       priority = max_priority
 
-    scanner_event = models.EventScannerPriority(
+    scanner_event = mi_schema.models.EventScannerPriority(
         service_event_id,
         service_user_id,
         service_name,
         priority)
-    db.Session().add(scanner_event)
+    tim_commons.db.Session().add(scanner_event)

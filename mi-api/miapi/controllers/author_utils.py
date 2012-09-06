@@ -29,6 +29,8 @@ def createServiceEvent(request, se, me_asm, asm, author):
   if se.content:
     event['content'] = se.content
 
+  event['hidden'] = se.hidden
+
   if se.photo_url:
     event['photo'] = {'image_url': se.photo_url}
     if se.photo_width:

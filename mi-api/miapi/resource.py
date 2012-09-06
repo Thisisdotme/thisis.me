@@ -62,8 +62,7 @@ class Status:
 
 class Reservations:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -77,8 +76,7 @@ class Reservation:
 
 class Authors:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -100,8 +98,7 @@ class Author:
   def __acl__(self):
     return [
         (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author.id, 'write'),
-        (pyramid.security.Allow, self.author.id, 'create'),
+        (pyramid.security.Allow, self.author.id, ['write', 'create']),
         pyramid.security.DENY_ALL]
 
   def __init__(self, author):
@@ -167,13 +164,6 @@ class AuthorFeature:
 
 
 class AuthorServices:
-  @property
-  def __acl__(self):
-    return [
-        (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author.id, ['write', 'create']),
-        pyramid.security.DENY_ALL]
-
   @property
   def author(self):
     return self.__parent__.author
@@ -308,9 +298,7 @@ class Event:
 
 class Services:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'write', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -327,9 +315,7 @@ class Service:
 
 class Features:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'write', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -357,9 +343,7 @@ class AuthorGroups:
   @property
   def __acl__(self):
     return [
-        (pyramid.security.Allow, self.author.id, 'read'),
-        (pyramid.security.Allow, self.author.id, 'write'),
-        (pyramid.security.Allow, self.author.id, 'create'),
+        (pyramid.security.Allow, self.author.id, ['read', 'write', 'create']),
         pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
