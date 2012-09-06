@@ -41,6 +41,22 @@ def get_events(events_context, request):
       author.id,
       data_access.service.name_to_id('me'))
 
+  post_type_ids = []
+  for post_type_name in request.params.getall('post_type'):
+    post_type = data_access.post_type.label_to_post_type.get(post_type_name)
+    if post_type:
+      post_type_ids.append(post_type.type_id)
+    else:
+      return miapi.error.http_error(request.response, **miapi.error.BAD_REQUEST)
+
+  service_ids = []
+  for service_name in request.params.getall('service_name'):
+    service = data_access.service.name_to_service.get(service_name)
+    if service:
+      service_ids.append(service.id)
+    else:
+      return miapi.error.http_error(request.response, **miapi.error.BAD_REQUEST)
+
   # get the query parameters
   since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
       request.params.get('since'))
@@ -53,6 +69,8 @@ def get_events(events_context, request):
   event_rows = data_access.service_event.query_service_events_page(
       author.id,
       page_limit,
+      post_type_ids=post_type_ids,
+      service_ids=service_ids,
       since_date=since_date,
       since_service_id=since_service_id,
       since_event_id=since_event_id,
@@ -85,10 +103,16 @@ def get_events(events_context, request):
       if prev_link is None:
         prev_link = request.resource_url(
             events_context,
-            query={'since': param_value, 'count': page_limit})
+            query={'since': param_value,
+                   'count': page_limit,
+                   'post_type': request.params.getall('post_type'),
+                   'service_name': request.params.getall('service_name')})
       next_link = request.resource_url(
           events_context,
-          query={'until': param_value, 'count': page_limit})
+          query={'until': param_value,
+                 'count': page_limit,
+                 'post_type': request.params.getall('post_type'),
+                 'service_name': request.params.getall('service_name')})
 
   return {'entries': events,
           'paging': {'prev': prev_link, 'next': next_link}}

@@ -226,6 +226,8 @@ def query_service_events_page_by_service(
 def query_service_events_page(
     author_id,
     limit,
+    post_type_ids=[],
+    service_ids=[],
     since_date=None,
     since_service_id=None,
     since_event_id=None,
@@ -245,6 +247,14 @@ def query_service_events_page(
         mi_schema.models.ServiceEvent.service_id != me_id,
         mi_schema.models.ServiceEvent.service_id != instagram_id)),
     mi_schema.models.ServiceEvent.hidden == False)
+
+  # filter post type ids
+  if post_type_ids:
+    query = query.filter(mi_schema.models.ServiceEvent.type_id.in_(post_type_ids))
+
+  # filter service ids
+  if service_ids:
+    query = query.filter(mi_schema.models.ServiceEvent.service_id.in_(service_ids))
 
   if since_date:
     query = query.filter(mi_schema.models.ServiceEvent.create_time >= since_date)
