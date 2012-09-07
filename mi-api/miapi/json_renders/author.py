@@ -1,10 +1,3 @@
-'''
-Created on Aug 9, 2012
-
-@author: howard
-'''
-
-from sqlalchemy import and_
 import sqlalchemy.orm.exc
 
 from tim_commons import db
@@ -26,14 +19,14 @@ def to_person_fragment_JSON_dictionary(author, author_service_map=None):
                'id': author.id,
                'name': author.author_name,
                'full_name': author.full_name,
-               'template': author.template}
+               'template': author.template,
+               'tagline': author.tagline}
 
   if not author_service_map:
     try:
-      author_service_map = db.Session().query(mi_schema.models.AuthorServiceMap). \
-                                        filter(and_(mi_schema.models.AuthorServiceMap.author_id == author.id,
-                                                    mi_schema.models.AuthorServiceMap.service_id == data_access.service.name_to_id("me"))). \
-                                        one()
+      query = db.Session().query(mi_schema.models.AuthorServiceMap)
+      query = query.filter_by(author_id=author.id, service_id=data_access.service.name_to_id("me"))
+      author_service_map = query.one()
     except sqlalchemy.orm.exc.NoResultFound:
       pass
 

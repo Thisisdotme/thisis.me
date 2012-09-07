@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from sqlalchemy.exc import IntegrityError
 import passlib.hash
 
-from pyramid.security import authenticated_userid
+import pyramid.security
 
 import mi_schema.models
 import data_access.service
@@ -52,7 +52,7 @@ def add_views(configuration):
   configuration.add_view(
       update_author,
       context=miapi.resource.Author,
-      request_method='POST',
+      request_method='PATCH',
       permission='write',
       renderer='jsonp',
       http_cache=0)
@@ -199,14 +199,11 @@ def view_author(author_context, request):
 
   author_json = miapi.json_renders.author.to_JSON_dictionary(author)
 
-  # TODO: is this the preferred way of determining if we're the author ???
-  if authenticated_userid(request) == author.id:
+  if pyramid.security.unauthenticated_userid(request) == author.id:
     miapi.json_renders.author.append_private_JSON(author, author_json)
 
   # TODO: replace getAuthorFeature with something better. should be passing sessions around
-  # ??? HAB what's wrong with passing session's around
   author_json['features'] = miapi.controllers.feature_utils.get_author_features(
-      db.Session(),
       author.id,
       request)
 
@@ -233,13 +230,11 @@ def update_author(author_context, request):
   if template:
     author.template = template
 
-  try:
-    data_access.flush()
-  except Exception, e:
-    # TODO: better error
-    logging.error(e.message)
-    request.response.status_int = 500
-    return {'error': e.message}
+  tagline = author_info.get('tagline')
+  if tagline:
+    author.tagline = tagline
+
+  data_access.flush()
 
   # TODO: return the correct code
   return miapi.json_renders.author.to_JSON_dictionary(author)

@@ -1,7 +1,10 @@
 import fcntl
+import socket
+import pwd
 import os
 import re
-import urlparse
+import logging
+import datetime
 
 
 def total_seconds(td):
@@ -78,11 +81,42 @@ url_re = re.compile(url, re.VERBOSE | re.MULTILINE)
 
 
 def normalize_uri(uri):
-  parsed_url = urlparse.urlparse(uri)
-  return urlparse.urlunparse((
-        parsed_url[0],
-        parsed_url[1],
-        parsed_url[2],
-        parsed_url[3],
-        '',
-        parsed_url[5]))
+  # Before we were removing the query parameters from the URI but that is not correct
+  # for some websites that use query paramters to identify pages
+  return uri
+
+
+def init_logger(program_name, is_daemon=False):
+  message = '%(levelname)s %(asctime)s %(thread)d %(pathname)s:%(lineno)d] %(message)s'
+  root_logger = logging.getLogger()
+  if not is_daemon:
+    root_logger.addHandler(_create_stderr_handler(message))
+  root_logger.addHandler(_create_file_handler(program_name, message))
+  root_logger.setLevel(logging.DEBUG)
+
+  # Configure the sqlalchemy logger
+  logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+
+def _create_stderr_handler(message_format):
+  handler = logging.StreamHandler()
+  handler.setLevel(logging.DEBUG)
+  handler.setFormatter(logging.Formatter(message_format))
+
+  return handler
+
+
+def _create_file_handler(program_name, message_format):
+  filename_args = {'program': program_name,
+                   'hostname': socket.gethostname(),
+                   'user': pwd.getpwuid(os.getuid()).pw_name,
+                   'date': datetime.datetime.utcnow().date().isoformat(),
+                   'time': datetime.datetime.utcnow().time().isoformat(),
+                   'pid': os.getpid()}
+  filename = '/tmp/{program}.{hostname}.{user}.log.{date}.{time}.{pid}'.format(**filename_args)
+
+  handler = logging.FileHandler(filename)
+  handler.setLevel(logging.DEBUG)
+  handler.setFormatter(logging.Formatter(message_format))
+
+  return handler

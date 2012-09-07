@@ -84,7 +84,8 @@
   			this.iScrollElem = new iScroll(containerEl, { hScroll: false });
   		  TIM.transitionPage (this.$el, {
   		      callback: function() {
-              that.iScrollElem.refresh();
+  		        window.setTimeout(function(){that.iScrollElem.refresh()}, 200);
+              
               if(options.error) {
                 //alert(options);
                 TIM.eventAggregator.trigger("error", {exception:"couldn't find profile for " + TIM.pageInfo.authorName});

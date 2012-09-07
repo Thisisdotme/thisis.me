@@ -25,6 +25,7 @@ TIM.loggedIn = false;
 TIM.navVisiblestyle_ = true;
 TIM.authenticatedUser = TIM.authenticatedUser || undefined;
 TIM.debugSmallScreen = false; //set this tp 'true' to always use an iphone-sized screen
+TIM.footerPlaceholderImage = "//api.thisis.me/img/h/services/mono/placeholder.png";
 
 TIM.apiUrl = TIM.globals.apiBaseURL + "/v1/";
 
@@ -37,6 +38,7 @@ window.addEventListener("load",function() {
 
 //jquery document ready fn!
 $(function() {
+  
   //set up global event aggregator
 	TIM.eventAggregator =  _.extend({}, Backbone.Events);
     
@@ -211,14 +213,14 @@ $(function() {
 	//get all the availiable services from the API - these will be needed for rendering
 	TIM.allServices.fetch({
 		//add this timeout in case call fails...
-		timeout : 5000,
 		success: function(resp) {
 		  //console.log('fetched services');
 		},
 		error: function(resp) {
+		  /*
 			TIM.showErrorMessage({
 			    exception: "loading services failed."
-			});
+			}); */
 		}
 	});
 	

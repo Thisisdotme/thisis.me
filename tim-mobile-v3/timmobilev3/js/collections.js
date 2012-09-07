@@ -9,6 +9,10 @@ TIM.collections.BaseCollection = Backbone.Collection.extend( {
      options.callbackParameter = options.callbackParameter || "callback";
      options.timeout = options.timeout || 25000;
      
+     if(this.pageSize) {
+       options.data = {count:this.pageSize}
+     }
+     
      //CORS!
      options.xhrFields = {withCredentials: true};
      options.contentType = 'application/json';
@@ -71,7 +75,7 @@ TIM.collections.Comments = TIM.collections.BaseCollection.extend({
 
 TIM.collections.Services = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.Service,
-		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated...
 		initialized: false,
 		
 		initialize: function(options) {
@@ -89,7 +93,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 		  if (service) {
 		    return service.getFooterImage();
 		  } else {
-		    return "http://mvp2.thisis.me:8080/img/icons/instagram_15.png";
+		    return TIM.footerPlaceholderImage; //the 'me' icon?
 		  }
 		}
 		
@@ -102,7 +106,7 @@ TIM.collections.Services = TIM.collections.BaseCollection.extend({
 
 TIM.collections.AppFeatures = TIM.collections.BaseCollection.extend({
 	 	model: TIM.models.AppFeature,
-		url: TIM.apiUrl + "services", //get a list of the services that this author has activated... hm, should probably also keep a list of *all* services
+		url: TIM.apiUrl + "services", //get a list of the services that this author has activated...
 		initialized: false,
 		
 		initialize: function(options) {
@@ -217,11 +221,12 @@ TIM.mixins.paging = {
       at: 0,
       
       success: function(coll, resp) {
-  		  console.log('first item in collection after prev fetch: ', coll.at(0).get('id'));
+  		  //console.log('first item in collection after prev fetch: ', coll.at(0).get('id'));
   		  that.trigger("paging:prevPageLoaded");
   		},
   		error: function(resp) {
         console.log("paging error: ", resp);
+        TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   		}
     });
   },
@@ -246,6 +251,7 @@ TIM.mixins.paging = {
     
     this.fetch({
       add: true,
+      //data: {count: this.pageSize},
       
       success: function(coll, resp) {
   		  console.log('first item in collection after fetch: ', coll.at(0).get('id'));
@@ -253,6 +259,7 @@ TIM.mixins.paging = {
   		},
   		error: function(resp) {
         console.log("paging error: ", resp);
+        TIM.eventAggregator.trigger("error", {exception: "Could not load photo albums for this author"});
   		}
     });
   }

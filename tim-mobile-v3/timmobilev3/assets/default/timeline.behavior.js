@@ -98,6 +98,7 @@
   				//collection fires 'reset' event when fetch is complete
           this.collection.bind("reset", this.render);
           this.collection.bind('paging:nextPageLoaded', this.renderNextPageset, this);
+          window.c = this.collection;
           
       },
       

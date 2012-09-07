@@ -45,6 +45,9 @@ _acceptable_host = ['localhost']
 
 
 def main(global_config, **settings):
+  tim_commons.init_logger('miapi')
+  logging.info(settings)
+
   global tim_config
   tim_config = tim_commons.config.load_configuration('{TIM_CONFIG}/config.ini')
 
@@ -81,6 +84,9 @@ def main(global_config, **settings):
       renderer='jsonp')
   configuration.add_notfound_view(not_found, renderer='jsonp')
 
+  # configure forbidden view
+  configuration.add_forbidden_view(forbidden_view, renderer='jsonp')
+
   # decorate cross domain calls
   configuration.add_subscriber(crossdomain_access_control_response, pyramid.events.NewResponse)
   add_views(configuration)
@@ -107,6 +113,12 @@ def add_views(configuration):
 
   controllers.services.add_views(configuration)
   controllers.feature.add_views(configuration)
+
+  configuration.add_view(
+      unauthorized_request_to_self,
+      context=resource.V1Root,
+      name='self',
+      renderer='jsonp')
 
 
 def preflight_crossdomain_access_control(request):
@@ -138,6 +150,20 @@ def preflight_crossdomain_access_control(request):
 
 def not_found(request):
   return error.http_error(request.response, **error.NOT_FOUND)
+
+
+def forbidden_view(request):
+  # read the read of the body
+  # TODO: body file is a buffer reader. should probably read the size of the buffer
+  read = "buffer"
+  while(read != ""):
+    read = request.body_file.read(4096)
+
+  return error.http_error(request.response, **error.FORBIDDEN)
+
+
+def unauthorized_request_to_self(request):
+  return error.http_error(request.response, **error.UNAUTHORIZED)
 
 
 def crossdomain_access_control_response(event):

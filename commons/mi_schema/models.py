@@ -4,6 +4,7 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
+    Boolean,
     Text,
     DateTime,
     ForeignKey,
@@ -28,21 +29,25 @@ class Author(Base):
   email = Column(String(255), unique=True, nullable=False)
   full_name = Column(String(255))
   password = Column(String(255), nullable=False)
+  tagline = Column(String(255), nullable=True)
   template = Column(String(255), nullable=True)
 
-  def __init__(self, authorname, email, fullname, password, template):
+  def __init__(self, authorname, email, fullname, password, template=None, tagline=None):
     self.author_name = authorname
     self.email = email
     self.full_name = fullname
     self.password = password
     self.template = template
+    self.tagline = tagline
 
   def __repr__(self):
-    return "<Author('%s','%s','%s','%s','%s')>" % (self.author_name,
-                                                   self.email,
-                                                   self.full_name,
-                                                   self.password,
-                                                   self.template)
+    return "<Author('{}','{}','{}','{}','{}', '{}')>".format(
+        self.author_name,
+        self.email,
+        self.full_name,
+        self.password,
+        self.template,
+        self.tagline)
 
   def to_JSON_dictionary(self):
     return {'id': self.id,
@@ -315,6 +320,7 @@ class ServiceEvent(Base):
   photo_url = Column(String(4096))
   photo_width = Column(Integer)
   photo_height = Column(Integer)
+  hidden = Column(Boolean, nullable=False, default=False)
 
   auxillary_content = Column(Text(65565))  # deprecated
 
@@ -332,6 +338,7 @@ class ServiceEvent(Base):
                caption=None,
                content=None,
                photo_url=None,
+               hidden=False,
                auxillaryContent=None,
                json=None,
                correlation_id=None,
@@ -348,6 +355,7 @@ class ServiceEvent(Base):
     self.caption = caption
     self.content = content
     self.photo_url = photo_url
+    self.hidden = hidden
     self.auxillary_content = auxillaryContent
     self.json = json
     self.correlation_id = correlation_id

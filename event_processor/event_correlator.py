@@ -26,7 +26,8 @@ def correlate_event(event_json):
 
 
 def _normalize_uri(uri):
-  response = requests.head(uri, allow_redirects=True)
+  # We should be using GET instead of HEAD because some servers don't redirect them the same.
+  response = requests.get(uri, allow_redirects=True)
   return normalize_uri(response.url)
 
 
@@ -60,6 +61,7 @@ def correlate_and_update_event(url, correlation_id, author_id, me_service_id):
       correlation_event.modify_time = modified_time
       correlation_event.create_time = created_time
       correlation_event.headline = source_event.headline
+      correlation_event.caption = source_event.caption
       correlation_event.tagline = source_event.tagline
       correlation_event.content = source_event.content
       correlation_event.photo_url = source_event.photo_url
@@ -75,6 +77,7 @@ def correlate_and_update_event(url, correlation_id, author_id, me_service_id):
           created_time,
           modified_time,
           headline=source_event.headline,
+          caption=source_event.caption,
           tagline=source_event.tagline,
           content=source_event.content,
           photo_url=source_event.photo_url,

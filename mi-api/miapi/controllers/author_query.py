@@ -4,6 +4,7 @@ import miapi.controllers
 import data_access.service_event
 import data_access.service
 import data_access.author_service_map
+import mi_schema.models
 
 
 def add_views(configuration):
@@ -24,6 +25,13 @@ def add_views(configuration):
       permission='read',
       renderer='jsonp',
       http_cache=0)
+  configuration.add_view(
+      update_event,
+      context=miapi.resource.Event,
+      request_method='PATCH',
+      permission='write',
+      renderer='jsonp',
+      http_cache=0)
 
 
 def get_events(events_context, request):
@@ -33,18 +41,36 @@ def get_events(events_context, request):
       author.id,
       data_access.service.name_to_id('me'))
 
+  post_type_ids = []
+  for post_type_name in request.params.getall('post_type'):
+    post_type = data_access.post_type.label_to_post_type.get(post_type_name)
+    if post_type:
+      post_type_ids.append(post_type.type_id)
+    else:
+      return miapi.error.http_error(request.response, **miapi.error.BAD_REQUEST)
+
+  service_ids = []
+  for service_name in request.params.getall('service_name'):
+    service = data_access.service.name_to_service.get(service_name)
+    if service:
+      service_ids.append(service.id)
+    else:
+      return miapi.error.http_error(request.response, **miapi.error.BAD_REQUEST)
+
   # get the query parameters
   since_date, since_service_id, since_event_id = miapi.controllers.parse_page_param(
       request.params.get('since'))
   until_date, until_service_id, until_event_id = miapi.controllers.parse_page_param(
       request.params.get('until'))
 
-  max_page_limit = miapi.tim_config['api']['max_page_limi']
-  page_limit = min(request.params.get('count', max_page_limit), max_page_limit)
+  page_limit = min(int(request.params.get('count', miapi.tim_config['api']['default_page_limit'])),
+                   int(miapi.tim_config['api']['max_page_limit']))
 
   event_rows = data_access.service_event.query_service_events_page(
       author.id,
       page_limit,
+      post_type_ids=post_type_ids,
+      service_ids=service_ids,
       since_date=since_date,
       since_service_id=since_service_id,
       since_event_id=since_event_id,
@@ -77,10 +103,16 @@ def get_events(events_context, request):
       if prev_link is None:
         prev_link = request.resource_url(
             events_context,
-            query={'since': param_value, 'count': page_limit})
+            query={'since': param_value,
+                   'count': page_limit,
+                   'post_type': request.params.getall('post_type'),
+                   'service_name': request.params.getall('service_name')})
       next_link = request.resource_url(
           events_context,
-          query={'until': param_value, 'count': page_limit})
+          query={'until': param_value,
+                 'count': page_limit,
+                 'post_type': request.params.getall('post_type'),
+                 'service_name': request.params.getall('service_name')})
 
   return {'entries': events,
           'paging': {'prev': prev_link, 'next': next_link}}
@@ -97,6 +129,48 @@ def get_event_detail(event_context, request):
   asm = data_access.author_service_map.query_asm_by_author_and_service(
       author.id,
       event.service_id)
+
+  return miapi.controllers.author_utils.createServiceEvent(
+      request,
+      event,
+      me_asm,
+      asm,
+      author)
+
+
+def update_event(event_context, request):
+  author = event_context.author
+  event = event_context.event
+
+  me_asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      data_access.service.name_to_id('me'))
+
+  asm = data_access.author_service_map.query_asm_by_author_and_service(
+      author.id,
+      event.service_id)
+
+  put = request.json_body
+  hidden = put.get('hidden')
+
+  if hidden is not None:
+    if (hidden is True and
+        event.service_id == data_access.service.name_to_id('me') and
+        (event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.ALL_PHOTOS_ID,
+           author.id) or
+         event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.OFME_PHOTOS_ID,
+           author.id) or
+         event.event_id == mi_schema.models.ServiceEvent.make_well_known_service_event_id(
+           mi_schema.models.ServiceEvent.LIKED_PHOTOS_ID,
+           author.id))):
+      # You can't hide well known photo albums
+      return miapi.error.http_error(request.response, **miapi.error.UNPROCESSABLE)
+    else:
+      event.hidden = hidden
+
+  data_access.flush()
 
   return miapi.controllers.author_utils.createServiceEvent(
       request,

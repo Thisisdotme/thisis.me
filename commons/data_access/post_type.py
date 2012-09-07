@@ -1,9 +1,3 @@
-'''
-Created on Jul 17, 2012
-
-@author: howard
-'''
-
 from tim_commons import db
 from mi_schema import models
 

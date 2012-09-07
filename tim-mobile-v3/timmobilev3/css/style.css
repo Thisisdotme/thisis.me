@@ -297,7 +297,7 @@ body.splash {
     #app {
       /* gotta get rid of these explicit pixel sizes- just doing this so it doesn't look obnoxious on a desktop when developing */
       width: 320px;
-      min-height: 370px;
+      min-height: 460px;
     }
 }
 @media screen and (width: 320px) { 

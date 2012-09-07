@@ -1,10 +1,3 @@
-'''
-Created on Aug 13, 2012
-
-@author: howard
-'''
-
-
 def to_JSON_dictionary(feature, request):
   return {'id': feature.id,
           'name': feature.name,

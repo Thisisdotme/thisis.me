@@ -5,12 +5,12 @@ import mi_schema.models
 
 
 class Root:
-  def __init__(self):
-    self.v1_root = location_aware(V1Root(), self, 'v1')
+  def __init__(self, request):
+    self.request = request
 
   def __getitem__(self, key):
-    if key == self.v1_root.__name__:
-      return self.v1_root
+    if key == 'v1':
+      return location_aware(V1Root(), self, key)
 
     raise KeyError('key "{key}" not a valid root entry'.format(key=key))
 
@@ -21,26 +21,37 @@ class V1Root:
       (pyramid.security.Allow, pyramid.security.Authenticated, 'logout'),
       pyramid.security.DENY_ALL]
 
-  def __init__(self):
-    self.authors = location_aware(Authors(), self, 'authors')
-    self.services = location_aware(Services(), self, 'services')
-    self.features = location_aware(Features(), self, 'features')
-    self.reservations = location_aware(Reservations(), self, 'reservations')
-    self.status = location_aware(Status(), self, 'status')
-
   def __getitem__(self, key):
-    if key == self.authors.__name__:
-      return self.authors
-    elif key == self.services.__name__:
-      return self.services
-    elif key == self.features.__name__:
-      return self.features
-    elif key == self.reservations.__name__:
-      return self.reservations
-    elif key == self.status.__name__:
-      return self.status
+    resource = None
+    if key == 'authors':
+      resource = Authors()
+    elif key == 'services':
+      resource = Services()
+    elif key == 'features':
+      resource = Features
+    elif key == 'reservations':
+      resource = Reservations()
+    elif key == 'status':
+      resource = Status()
+    elif key == 'self':
+      author_id = pyramid.security.unauthenticated_userid(self.request)
+      if author_id is None:
+        raise KeyError('Key "{key}" not valid because user is not authenticated'.format(key=key))
 
-    raise KeyError('key "{key}" not a valid v1 root entry'.format(key=key))
+      author = data_access.author.query_author(author_id)
+      if author is None:
+        raise KeyError('Author id "{0}" is not an existing author'.format(author_id))
+
+      resource = Author(author)
+
+    if resource is None:
+      raise KeyError('Key "{key}" not a valid v1 root entry'.format(key=key))
+
+    return location_aware(resource, self, key)
+
+  @property
+  def request(self):
+    return self.__parent__.request
 
 
 class Status:
@@ -51,8 +62,7 @@ class Status:
 
 class Reservations:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -66,8 +76,7 @@ class Reservation:
 
 class Authors:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -89,8 +98,7 @@ class Author:
   def __acl__(self):
     return [
         (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author.id, 'write'),
-        (pyramid.security.Allow, self.author.id, 'create'),
+        (pyramid.security.Allow, self.author.id, ['write', 'create']),
         pyramid.security.DENY_ALL]
 
   def __init__(self, author):
@@ -106,10 +114,8 @@ class Author:
       resource = Events()
     elif key == 'services':
       resource = AuthorServices()
-    elif key == 'photo_albums':
+    elif key == 'photoalbums':
       resource = PhotoAlbums()
-    elif key == 'meta_photo_albums':
-      resource = MetaPhotoAlbums()
     elif key == 'features':
       resource = AuthorFeatures()
     elif key == 'groups':
@@ -159,13 +165,6 @@ class AuthorFeature:
 
 class AuthorServices:
   @property
-  def __acl__(self):
-    return [
-        (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-        (pyramid.security.Allow, self.author.id, ['write', 'create']),
-        pyramid.security.DENY_ALL]
-
-  @property
   def author(self):
     return self.__parent__.author
 
@@ -195,6 +194,8 @@ class AuthorService:
     return self.__parent__.author
 
 
+# This is currently not used. It is suppose to cover the case where we want to page photoalbum
+# and display all photos, photos of me, photos liked.
 class MetaPhotoAlbums():
   def __getitem__(self, key):
     try:
@@ -297,9 +298,7 @@ class Event:
 
 class Services:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'write', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -316,9 +315,7 @@ class Service:
 
 class Features:
   __acl__ = [
-      (pyramid.security.Allow, pyramid.security.Everyone, 'read'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'write'),
-      (pyramid.security.Allow, pyramid.security.Everyone, 'create'),
+      (pyramid.security.Allow, pyramid.security.Everyone, ['read', 'write', 'create']),
       pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -346,9 +343,7 @@ class AuthorGroups:
   @property
   def __acl__(self):
     return [
-        (pyramid.security.Allow, self.author.id, 'read'),
-        (pyramid.security.Allow, self.author.id, 'write'),
-        (pyramid.security.Allow, self.author.id, 'create'),
+        (pyramid.security.Allow, self.author.id, ['read', 'write', 'create']),
         pyramid.security.DENY_ALL]
 
   def __getitem__(self, key):
@@ -394,7 +389,10 @@ class AuthorGroup:
 class AuthorGroupMembers:
   def __getitem__(self, key):
     member = key
-    author_group_member = mi_schema.models.AuthorGroupMap.lookup(self.author.id, self.author_group.group_name, member)
+    author_group_member = mi_schema.models.AuthorGroupMap.lookup(
+        self.author.id,
+        self.author_group.group_name,
+        member)
     if not author_group_member:
       raise KeyError('key "{key}" not a valid member entry'.format(key=member))
 
@@ -453,7 +451,4 @@ def location_aware(resource, parent, name):
 
 
 def root_factory(request):
-  return _root
-
-
-_root = location_aware(Root(), None, '')
+  return location_aware(Root(request), None, '')
