@@ -29,21 +29,25 @@ class Author(Base):
   email = Column(String(255), unique=True, nullable=False)
   full_name = Column(String(255))
   password = Column(String(255), nullable=False)
+  tagline = Column(String(255), nullable=True)
   template = Column(String(255), nullable=True)
 
-  def __init__(self, authorname, email, fullname, password, template):
+  def __init__(self, authorname, email, fullname, password, template=None, tagline=None):
     self.author_name = authorname
     self.email = email
     self.full_name = fullname
     self.password = password
     self.template = template
+    self.tagline = tagline
 
   def __repr__(self):
-    return "<Author('%s','%s','%s','%s','%s')>" % (self.author_name,
-                                                   self.email,
-                                                   self.full_name,
-                                                   self.password,
-                                                   self.template)
+    return "<Author('{}','{}','{}','{}','{}', '{}')>".format(
+        self.author_name,
+        self.email,
+        self.full_name,
+        self.password,
+        self.template,
+        self.tagline)
 
   def to_JSON_dictionary(self):
     return {'id': self.id,

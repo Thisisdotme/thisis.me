@@ -65,7 +65,7 @@ def add_views(configuration):
 def list_author_features(author_features_context, request):
   author = author_features_context.author
 
-  features = get_author_features(tim_commons.db.Session(), author.id, request)
+  features = get_author_features(author.id, request)
 
   return {'author_name': author.author_name, 'features': features}
 

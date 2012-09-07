@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-
 import sys
 import logging
 
 from tim_commons import message_queue, db, app_base
 from event_updaters import event_updater
+import data_access.service
+import data_access.post_type
 
 
 class EventUpdaterDriver(app_base.AppBase):
@@ -25,6 +25,8 @@ class EventUpdaterDriver(app_base.AppBase):
 
     # initialize the db engine & session
     db.configure_session(db_url)
+    data_access.service.initialize()
+    data_access.post_type.initialize()
 
     # get message broker client and store in instance -- used for both receiving and sending
     client = message_queue.create_message_client(broker_url)
