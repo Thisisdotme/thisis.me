@@ -1,5 +1,0 @@
-      [paste.app_factory]
-      main = timweb:main
-      [console_scripts]
-      populate_tim-web = timweb.scripts.populate:main
-      

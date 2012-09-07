@@ -1,8 +1,0 @@
-<metal:index use-macro="load: main_structure.html">
-	<section metal:fill-slot="main_content">
-		<h1>${message} Below are a few of your most recent updates</h1>
-		<div>
-			${structure:content}
-		</div>
-	</section>
-</metal:index>

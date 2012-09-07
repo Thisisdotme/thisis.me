@@ -1,5 +1,0 @@
-<metal:index use-macro="load: main_structure.html">
-	<section metal:fill-slot="main_content">
-		<p>Features.... nothing here yet</p>
-	</section>
-</metal:index>
