@@ -3,10 +3,11 @@
 #      python tools/recreate_message_queues.py --delete_from_stdin
 import sys
 
-from tim_commons import app_base, message_queue
+import tim_commons.app_base
+import tim_commons.message_queue
 
 
-class RecreateMessageQueues(app_base.AppBase):
+class RecreateMessageQueues(tim_commons.app_base.AppBase):
   def init_args(self, option_parser):
     option_parser.add_option('--delete_from_stdin',
                              dest='delete_from_stdin',
@@ -20,18 +21,20 @@ class RecreateMessageQueues(app_base.AppBase):
                              help='Force the deleting of non-empty queues')
 
   def app_main(self, config, options, args):
-    client = message_queue.create_message_client(
-        message_queue.create_url_from_config(config['broker']))
+    client = tim_commons.message_queue.create_message_client(
+        tim_commons.message_queue.create_url_from_config(config['amqp']['broker']))
 
     if options.delete_from_stdin:
-      message_queue.delete_queues(client, (line.strip() for line in sys.stdin.readlines()))
+      tim_commons.message_queue.delete_queues(
+          client,
+          (line.strip() for line in sys.stdin.readlines()))
 
     # delete and create all the queues that we know about
-    for service_queue_config in config['queues'].itervalues():
-      for queue_config in service_queue_config.itervalues():
-        queue = queue_config['name']
-        message_queue.delete_queues(client, [queue], force=options.force)
-        message_queue.create_queues(client, [queue], bool(queue_config['durable']))
+    for queue in config['amqp']['queues'].itervalues():
+      if not tim_commons.to_bool(queue['exclusive']):
+        tim_commons.message_queue.delete_queues(client, [queue['queue']], force=options.force)
+
+    tim_commons.message_queue.create_queues_from_config(client, config['amqp'])
 
 
 if __name__ == '__main__':

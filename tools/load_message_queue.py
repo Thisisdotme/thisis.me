@@ -52,13 +52,13 @@ class NotificationLoad(app_base.AppBase):
     client = message_queue.create_message_client(options.url)
 
     # create all of the required queues
-    message_queue.create_queues_from_config(client, config['queues'])
+    message_queue.create_queues_from_config(client, config['amqp'])
 
     # itereate and send all the interesting messages
     for message in messages:
       queue = message['header']['type']
       if queue in queues:
-        message_queue.send_messages(client, [message])
+        message_queue.send_messages(client, config['amqp']['exchange']['name'], [message])
         sys.stdout.write('.')
     sys.stdout.write('\n')
 

@@ -17,18 +17,17 @@ import event_interpreter
 
 
 class EventProcessor:
-  def __init__(self, service_name, max_priority, min_duration, oauth_config):
-    self.service_name = service_name
+  def __init__(self, max_priority, min_duration, oauth_config):
     self.oauth_config = oauth_config
     self.max_priority = max_priority
     self.min_duration = min_duration
 
-    self.service_id = data_access.service.name_to_service[service_name].id
     self.me_service_id = data_access.service.name_to_service['me'].id
 
   def process(
       self,
       tim_author_id,
+      service_name,
       service_author_id,
       service_event_id,
       state,
@@ -36,19 +35,20 @@ class EventProcessor:
       links):
 
     if state == tim_commons.messages.NOT_FOUND_STATE:
-      self.process_not_found(tim_author_id, service_author_id, service_event_id)
+      self.process_not_found(tim_author_id, service_name, service_author_id, service_event_id)
     else:
       self.process_current(
           tim_author_id,
+          service_name,
           service_author_id,
           service_event_id,
           service_event_json,
           links)
 
-  def process_not_found(self, tim_author_id, service_author_id, service_event_id):
+  def process_not_found(self, tim_author_id, service_name, service_author_id, service_event_id):
     service_object = data_access.service_event.query_service_event(
         tim_author_id,
-        self.service_id,
+        data_access.service.name_to_id(service_name),
         service_event_id)
 
     if service_object:
@@ -73,11 +73,12 @@ class EventProcessor:
                 service_object.correlation_id,
                 tim_author_id)
 
-    delete_scanner_event(service_event_id, service_author_id, self.service_name)
+    delete_scanner_event(service_event_id, service_author_id, service_name)
 
   def process_current(
       self,
       tim_author_id,
+      service_name,
       service_author_id,
       service_event_id,
       service_event_json,
@@ -85,19 +86,21 @@ class EventProcessor:
     ''' Handler method to process service events '''
     # lookup the author service map for this user/service tuple
     query = tim_commons.db.Session().query(mi_schema.models.AuthorServiceMap)
-    query = query.filter_by(author_id=tim_author_id, service_id=self.service_id)
+    query = query.filter_by(
+        author_id=tim_author_id,
+        service_id=data_access.service.name_to_id(service_name))
     asm = query.one()
 
     interpreter = event_interpreter.create_event_interpreter(
-        self.service_name,
+        service_name,
         service_event_json,
         asm,
-        self.oauth_config)
+        self.oauth_config[service_name])
 
     # check for existing update
     existing_event = data_access.service_event.query_service_event(
         tim_author_id,
-        self.service_id,
+        data_access.service.name_to_id(service_name),
         interpreter.event_id())
 
     event_updated = True
@@ -170,13 +173,13 @@ class EventProcessor:
           asm.service_id,
           interpreter.get_id(),
           interpreter.get_create_time(),
-          interpreter.get_update_time(),
-          url,
-          caption,
-          content,
-          photo,
-          auxiliary_content,
-          tim_commons.json_serializer.dump_string(service_event_json),
+          modify_time=interpreter.get_update_time(),
+          url=url,
+          caption=caption,
+          content=content,
+          photo_url=photo,
+          auxillaryContent=auxiliary_content,
+          json=tim_commons.json_serializer.dump_string(service_event_json),
           correlation_id=correlation_id)
       tim_commons.db.Session().add(service_event)
       tim_commons.db.Session().flush()
@@ -209,7 +212,7 @@ class EventProcessor:
     update_scanner(event_updated,
                    interpreter.get_id(),
                    service_author_id,
-                   self.service_name,
+                   service_name,
                    update_time,
                    self.max_priority,
                    self.min_duration)

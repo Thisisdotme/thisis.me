@@ -5,7 +5,12 @@ from tim_commons import total_seconds, messages, db, message_queue
 from mi_schema import models
 
 
-def scan_events(message_url, priority, highest_priority_duration, maximum_priority):
+def scan_events(
+    message_url,
+    message_exchange,
+    priority,
+    highest_priority_duration,
+    maximum_priority):
   priority_duration = (2 ** priority) * highest_priority_duration
   message_client = message_queue.create_message_client(message_url)
   current_id = ""
@@ -23,7 +28,7 @@ def scan_events(message_url, priority, highest_priority_duration, maximum_priori
       time.sleep(total_seconds(event_interval))
 
       view_result = _query_event(current_id, priority)
-      current_id = _send_update_message_from_event(message_client, view_result)
+      current_id = _send_update_message_from_event(message_client, message_exchange, view_result)
       _decrease_priority(view_result, maximum_priority)
 
 
@@ -33,14 +38,14 @@ def _query_event_count(priority):
   return query.count()
 
 
-def _send_update_message_from_event(message_client, event):
+def _send_update_message_from_event(message_client, exchange, event):
   current_id = ""
   if event is not None:
     message = messages.create_event_update_message(
       event.service_name,
       event.service_user_id,
       event.service_event_id)
-    message_queue.send_messages(message_client, [message])
+    message_queue.send_messages(message_client, exchange, [message])
     current_id = event.hash_id
 
   return current_id

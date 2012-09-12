@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
+import tim_commons
+
 Session = scoped_session(sessionmaker())
 
 
@@ -25,7 +27,7 @@ def configure_mock_session():
 
 def create_url_from_config(config):
   url = '{protocol}://{user}:{password}@{host}/{database}{encoding}'
-  encoding = '?charset=utf8' if bool(config['unicode']) else ''
+  encoding = '?charset=utf8' if tim_commons.to_bool(config['unicode']) else ''
   return url.format(
       protocol='mysql',
       encoding=encoding,

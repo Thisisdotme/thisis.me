@@ -17,7 +17,7 @@ from twisted.enterprise import adbapi
 from twisted_amqp import AmqpFactory
 import twisted.internet.error
 
-from tim_commons import app_base, json_serializer, messages, message_queue, db
+from tim_commons import app_base, json_serializer, messages, message_queue, db, to_bool
 from mi_schema import models
 from data_access import service, post_type
 import event_interpreter
@@ -47,9 +47,10 @@ class EventTwitterFeedDriver(app_base.AppBase):
     self.wait_on_collector_query_delay = float(config['feed']['wait_on_collector_query_delay'])
 
     # Configure amqp
-    amqp_host = config['broker']['host']
-    amqp_port = int(config['broker']['port'])
-    amqp_spec = message_queue.create_spec_path(config['broker']['spec'])
+    amqp_host = config['amqp']['broker']['host']
+    amqp_port = int(config['amqp']['broker']['port'])
+    amqp_spec = message_queue.create_spec_path(config['amqp']['broker']['spec'])
+    self.amqp_exchange = config['amqp']['exchange']['name']
 
     self.amqp = AmqpFactory(host=amqp_host, port=amqp_port, spec_file=amqp_spec)
 
@@ -57,7 +58,7 @@ class EventTwitterFeedDriver(app_base.AppBase):
     db_user = config['db']['user']
     db_passwd = config['db']['password']
     db_database = config['db']['database']
-    db_unicode = bool(config['db']['unicode'])
+    db_unicode = to_bool(config['db']['unicode'])
 
     self.db_pool = adbapi.ConnectionPool(
         'MySQLdb',
@@ -99,9 +100,12 @@ class EventTwitterFeedDriver(app_base.AppBase):
 
   def notify_event_collector(self, asm):
     notification = messages.create_notification_message('twitter', asm.service_author_id)
-    queue = notification['header']['type']
+    routing_key = notification['header']['type']
     body = json_serializer.dump_string(notification)
-    self.amqp.send_message(exchange='', routing_key=queue, msg=body)
+    self.amqp.send_message(
+        exchange=self.amqp_exchange,
+        routing_key=routing_key,
+        msg=body)
 
   def listen_to_twitter(self, token_key, token_secret, handler):
     method = 'POST'
@@ -255,9 +259,12 @@ class TwitterHandler:
       self.most_recent_event_timestamp = interpreted_tweet.created_time()
 
   def _send_message(self, message):
-    queue = message['header']['type']
+    routing_key = message['header']['type']
     body = json_serializer.dump_string(message)
-    self.factory.amqp.send_message(exchange='', routing_key=queue, msg=body)
+    self.factory.amqp.send_message(
+        exchange=self.factory.amqp_exchange,
+        routing_key=routing_key,
+        msg=body)
 
   def schedule_collector_done(self):
     def query_service_event_map_by_id():

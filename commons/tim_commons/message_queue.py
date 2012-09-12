@@ -3,7 +3,7 @@ import puka
 import logging
 import os
 
-from tim_commons import json_serializer
+import tim_commons.json_serializer
 
 # Thread local client
 threadlocal = threading.local()
@@ -47,27 +47,45 @@ def close_message_client(client):
   client.wait(promise)
 
 
-def create_queues(client, queues, durable=True):
-  ''' Creates a set of queues
+def create_exchange(client, exchange, type):
+  promise = client.exchange_declare(exchange=exchange, type=type)
+  client.wait(promise)
+
+
+def create_queue(client, queue, exchange, routing_keys, durable=True, exclusive=False):
+  ''' Creates a queue
 
   Arguments:
   client -- the object returned by create_message_client or
             get_current_message_client
-  queues -- list of queues to create
+  queue -- the queue name
+  exchange -- name of the exchange
+  routing_keys -- array of routing keys
   '''
-  promises = []
-  for queue in queues:
-    promise = client.queue_declare(queue=queue, durable=durable)
-    promises.append(promise)
 
-  for promise in promises:
+  promise = client.queue_declare(queue=queue, durable=durable)
+  client.wait(promise)
+
+  for routing_key in routing_keys:
+    promise = client.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
     client.wait(promise)
 
 
 def create_queues_from_config(client, config):
-  for service_queue_config in config.itervalues():
-    for queue_config in service_queue_config.itervalues():
-      create_queues(client, [queue_config['name']], bool(queue_config['durable']))
+  # lets create the exchange
+  create_exchange(client, config['exchange']['name'], config['exchange']['type'])
+
+  for queue in config['queues'].itervalues():
+    if not tim_commons.to_bool(queue['exclusive']):
+      create_queue(
+          client,
+          queue['queue'],
+          queue['exchange'],
+          queue['routing_keys'],
+          tim_commons.to_bool(queue['durable']),
+          tim_commons.to_bool(queue['exclusive']))
+    else:
+      logging.info('Not creating queue %s from config because it is exclusing', queue)
 
 
 def delete_queues(client, queues, force=False):
@@ -86,7 +104,7 @@ def delete_queues(client, queues, force=False):
       logging.info('Unable to delete queue: %s', e)
 
 
-def send_messages(client, messages):
+def send_messages(client, exchange, messages):
   ''' Sends a list of messages to the appropriate queue.
 
   Arguments:
@@ -94,17 +112,17 @@ def send_messages(client, messages):
             get_current_message_client
   messages -- list of message to push
   '''
-# Send all the messages
+  # Send all the messages
   for message in messages:
-    queue = message['header']['type'].encode('ascii')
-    body = json_serializer.dump_string(message)
-    promise = client.basic_publish(exchange='',
-                                   routing_key=queue,
+    routing_key = message['header']['type'].encode('ascii')
+    body = tim_commons.json_serializer.dump_string(message)
+    promise = client.basic_publish(exchange=exchange,
+                                   routing_key=routing_key,
                                    body=body)
     client.wait(promise)
 
 
-def join(client, queues):
+def join(client, queue, handler):
   '''
   Receives messages from the message queues and forwards them to the
   handler for the corresponding queue. The handler needs to accepts
@@ -113,26 +131,19 @@ def join(client, queues):
   Arguments:
   client -- the object returned by create_message_client or
             get_current_message_client
-  queues -- a list of {'queue': <queue name>, 'handler': <handler>}i
+  queue --  the name of queue to listen on
+  handler -- the handler to execute for each messagea
   '''
-# Populate the handlers
-  handlers = {}
-  for queue in queues:
-    queue_name = queue['queue']
-    if queue_name in handlers:
-      raise Exception('Queue {0} appears twice in the set of queues'.format(queue_name))
 
-    handlers[queue_name] = queue['handler']
-
-# Start recieving message from all the queues
-  promise = client.basic_consume_multi(queues=queues, prefetch_count=1)
+  # Start recieving message from all the queues
+  promise = client.basic_consume(queue=queue, prefetch_count=1)
   while True:
     result = client.wait(promise)
 
     try:
-      message = json_serializer.load_string(result['body'])
+      message = tim_commons.json_serializer.load_string(result['body'])
       if message['header']['type'] == result['routing_key']:
-        handlers[result['routing_key']](message)
+        handler(message)
       else:
         logging.error('Message does not contain a header.type: %s' % result)
     except Exception:

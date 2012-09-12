@@ -8,20 +8,15 @@ import data_access.post_type
 
 
 class EventUpdaterDriver(app_base.AppBase):
-  def init_args(self, option_parser):
-    option_parser.add_option('--service',
-                             dest='services',
-                             action='append',
-                             default=[],
-                             help='Service to process')
-
   def app_main(self, config, options, args):
     logging.info("Beginning...")
 
     # read the db url from the config
     db_url = db.create_url_from_config(config['db'])
     # get the broker and queue config
-    broker_url = message_queue.create_url_from_config(config['broker'])
+    broker_url = message_queue.create_url_from_config(config['amqp']['broker'])
+    # get exchange information
+    self.amqp_exchange = config['amqp']['exchange']['name']
 
     # initialize the db engine & session
     db.configure_session(db_url)
@@ -29,56 +24,42 @@ class EventUpdaterDriver(app_base.AppBase):
     data_access.post_type.initialize()
 
     # get message broker client and store in instance -- used for both receiving and sending
-    client = message_queue.create_message_client(broker_url)
+    self.client = message_queue.create_message_client(broker_url)
 
-    services = services_configuration(options.services, config)
-
-    handlers = []
-    for service in services:
-      # Create handlers
-      updater = event_updater.from_service_name(service['name'], service['oauth'])
-      handler = {'queue': service['queue'],
-                 'handler': create_updater_handler(updater, client)}
-      handlers.append(handler)
+    self.handlers = {}
+    for service in _services_configuration(config):
+      self.handlers[service['name']] = event_updater.from_service_name(
+          service['name'],
+          service['oauth'])
 
     logging.info('Queue broker URL: %s', broker_url)
-    logging.debug('Active handlers: %s', handlers)
+    logging.debug('Active handlers: %s', self.handlers)
 
-    message_queue.create_queues_from_config(client, config['queues'])
-
-    message_queue.join(client, handlers)
+    message_queue.create_queues_from_config(self.client, config['amqp'])
+    message_queue.join(
+        self.client,
+        config['amqp']['queues']['updater']['queue'],
+        self.handler)
 
     logging.info("Finished...")
 
-
-def services_configuration(services, config):
-  # If services is empty then get all the services in the configuration
-  if not services:
-    for service in config['queues'].iterkeys():
-      services.append(service)
-
-  return [{'name': service,
-           'oauth': config['oauth'][service],
-           'queue': config['queues'][service]['update']['name']} for service in services]
-
-
-def create_event_callback(client):
-  def handler(message):
-    message_queue.send_messages(client, [message])
-
-  return handler
-
-
-def create_updater_handler(updater, client):
-  def handler(message):
+  def handler(self, message):
     body = message['message']
     with db.Context():
-      updater.fetch(body['service_id'],
-                    body['service_author_id'],
-                    body['service_event_id'],
-                    create_event_callback(client))
+      self.handlers[body['service_name']].fetch(
+        body['service_name'],
+        body['service_author_id'],
+        body['service_event_id'],
+        self.event_callback)
 
-  return handler
+  def event_callback(self, message):
+    message_queue.send_messages(self.client, self.amqp_exchange, [message])
+
+
+def _services_configuration(config):
+  return [{'name': service, 'oauth': config['oauth'][service]}
+      for service in config['oauth'].iterkeys()]
+
 
 if __name__ == '__main__':
   # Initialize with number of arguments script takes

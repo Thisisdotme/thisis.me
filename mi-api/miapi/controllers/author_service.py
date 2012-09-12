@@ -117,9 +117,7 @@ def add_author_service(author_services_context, request):
           service.id,
           '_{0}@{1}'.format(service.service_name, author.id),
           datetime.now(),
-          None,
-          None,
-          'Photos from Instagram')
+          caption='Photos from Instagram')
       tim_commons.db.Session().add(instagram__album)
       tim_commons.db.Session().flush()
 

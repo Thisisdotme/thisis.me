@@ -21,6 +21,15 @@ def prune_dictionary(source_dict, prune_dict):
       del source_dict[prune_key]
 
 
+def to_bool(string):
+  if string in ['True', 'true']:
+    return True
+  elif string in ['False', 'false']:
+    return False
+  else:
+    raise ValueError('invalid literal for to_bool(): {0}'.format(string))
+
+
 class PidFileContext():
   def __init__(self, path):
     self._path = path

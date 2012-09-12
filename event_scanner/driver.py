@@ -9,7 +9,8 @@ from event_scanner import scan_events
 class ScannerApplication(app_base.AppBase):
   def app_main(self, config, options, args):
     db_url = db.create_url_from_config(config['db'])
-    message_url = message_queue.create_url_from_config(config['broker'])
+    message_url = message_queue.create_url_from_config(config['amqp']['broker'])
+    message_exchange = config['amqp']['exchange']['name']
 
     maximum_priority = int(config['scanner']['maximum_priority'])
     iteration_minimum_duration = float(config['scanner']['iteration_minimum_duration'])
@@ -18,13 +19,14 @@ class ScannerApplication(app_base.AppBase):
     db.configure_session(db_url)
 
     message_client = message_queue.create_message_client(message_url)
-    message_queue.create_queues_from_config(message_client, config['queues'])
+    message_queue.create_queues_from_config(message_client, config['amqp'])
     message_queue.close_message_client(message_client)
 
     scanners = []
     for priority in range(0, maximum_priority + 1):
       scanner = threading.Thread(target=scan_events,
                                  args=(message_url,
+                                       message_exchange,
                                        priority,
                                        iteration_minimum_duration,
                                        maximum_priority))

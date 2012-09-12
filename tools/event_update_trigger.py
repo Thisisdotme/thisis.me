@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import sys
 import logging
 
@@ -57,7 +55,7 @@ class EventUpdateTrigger(AppBase):
     for service_name in service_names:
 
       # create the queue for this service
-      message_queue.create_queues_from_config(client, config['queues'])
+      message_queue.create_queues_from_config(client, config['amqp'])
 
       # for each specified author
       for author_name in author_names:

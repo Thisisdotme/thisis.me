@@ -2,75 +2,60 @@ import sys
 import logging
 
 from event_collectors import event_collector
-from tim_commons import message_queue, db, app_base
+import tim_commons.message_queue
+import tim_commons.db
+import tim_commons.app_base
 import data_access.service
 
 
-class EventCollectorDriver(app_base.AppBase):
-  def init_args(self, option_parser):
-    option_parser.add_option('--service',
-                              dest='services',
-                              action='append',
-                              default=[],
-                              help='Services to process')
+class EventCollectorDriver(tim_commons.app_base.AppBase):
+  def event_callback(self, message):
+    tim_commons.message_queue.send_messages(self.client, self.amqp_exchange, [message])
 
-  def create_event_callback(self):
-    def handler(message):
-      message_queue.send_messages(self.client, [message])
-
-    return handler
-
-  def create_collector_handler(self, collector):
-    def handler(message):
-      with db.Context():
-        collector.fetch(message['message']['service_author_id'], self.create_event_callback())
-
-    return handler
+  def handler(self, message):
+    with tim_commons.db.Context():
+      self.handlers[message['message']['service_name']].fetch(
+          message['message']['service_author_id'],
+          self.event_callback)
 
   def app_main(self, config, options, args):
     logging.info("Beginning...")
 
     # read the db url from the config
-    db_url = db.create_url_from_config(config['db'])
+    db_url = tim_commons.db.create_url_from_config(config['db'])
     # get the broker and queue config
-    broker_url = message_queue.create_url_from_config(config['broker'])
+    broker_url = tim_commons.message_queue.create_url_from_config(config['amqp']['broker'])
+    # get exchange information
+    self.amqp_exchange = config['amqp']['exchange']['name']
 
     # initialize the db engine & session
-    db.configure_session(db_url)
+    tim_commons.db.configure_session(db_url)
     data_access.service.initialize()
 
-    services = services_configuration(options.services, config)
-
     # Get a list of all the handlers
-    handlers = []
-    for service in services:
-      # Create handlers
-      collector = event_collector.from_service_name(service['name'], service['oauth'])
-      handler = {'queue': service['queue'],
-                 'handler': self.create_collector_handler(collector)}
-      handlers.append(handler)
+    self.handlers = {}
+    for service in _services_configuration(config):
+      self.handlers[service['name']] = event_collector.from_service_name(
+          service['name'], service['oauth'])
 
     logging.info('Queue broker URL: %s', broker_url)
-    logging.debug('Active handlers: %s', handlers)
+    logging.debug('Active handlers: %s', self.handlers)
 
     # get message broker client and store in instance -- used for both receiving and sending
-    self.client = message_queue.create_message_client(broker_url)
-    message_queue.create_queues_from_config(self.client, config['queues'])
+    self.client = tim_commons.message_queue.create_message_client(broker_url)
+    tim_commons.message_queue.create_queues_from_config(self.client, config['amqp'])
 
-    message_queue.join(self.client, handlers)
+    tim_commons.message_queue.join(
+        self.client,
+        config['amqp']['queues']['collector']['queue'],
+        self.handler)
 
     logging.info("Finished...")
 
 
-def services_configuration(services, config):
-  # If services is empty then get all the services in the configuration
-  if not services:
-    for service in config['queues'].iterkeys():
-      services.append(service)
-
-  return [{'name': service,
-           'oauth': config['oauth'][service],
-           'queue': config['queues'][service]['notification']['name']} for service in services]
+def _services_configuration(config):
+  return [{'name': service, 'oauth': config['oauth'][service]}
+      for service in config['oauth'].iterkeys()]
 
 
 if __name__ == '__main__':

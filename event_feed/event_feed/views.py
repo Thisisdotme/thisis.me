@@ -4,7 +4,7 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPNotFound
 from tim_commons.message_queue import send_messages
-from tim_commons.messages import create_facebook_notification
+from tim_commons.messages import create_notification_message
 from tim_commons.config import ENVIRONMENT_KEY
 from tim_commons import json_serializer
 
@@ -52,7 +52,7 @@ def convert_facebook_notification(facebook_notification):
     return uid is not None
 
   def convert(notification):
-    return create_facebook_notification(notification['uid'])
+    return create_notification_message('facebook', notification['uid'])
 
   # Only deal with changes to the user object
   object = facebook_notification.get('object', None)

@@ -38,7 +38,7 @@ class NotificationDriver(AppBase):
       service_names = options.services
 
     # get the broker and queue config
-    broker_url = message_queue.create_url_from_config(config['broker'])
+    broker_url = message_queue.create_url_from_config(config['amqp']['broker'])
 
     # get message broker client and store in instance
     client = message_queue.create_message_client(broker_url)
@@ -47,7 +47,7 @@ class NotificationDriver(AppBase):
     for service_name in service_names:
 
       # create the queue for this service
-      message_queue.create_queues_from_config(client, config['queues'])
+      message_queue.create_queues_from_config(client, config['amqp'])
 
       # post a notification for each author subscribed to this service
       for asm in db.Session().query(AuthorServiceMap). \

@@ -6,7 +6,7 @@ from tim_commons import message_queue, config
 @subscriber(NewRequest)
 def add_message_client(event):
   environment = event.request.registry.settings[config.ENVIRONMENT_KEY]
-  url = message_queue.create_url_from_config(environment['broker'])
+  url = message_queue.create_url_from_config(environment['amqp']['broker'])
   event.request.message_client = message_queue.get_current_message_client(url)
 
 
@@ -14,9 +14,9 @@ def add_message_client(event):
 def create_feed_queue(event):
   environment = event.app.registry.settings[config.ENVIRONMENT_KEY]
 
-  url = message_queue.create_url_from_config(environment['broker'])
+  url = message_queue.create_url_from_config(environment['amqp']['broker'])
   client = message_queue.get_current_message_client(url)
-  message_queue.create_queues_from_config(client, environment['queues'])
+  message_queue.create_queues_from_config(client, environment['amqp'])
 
 
 def main(global_config, **settings):

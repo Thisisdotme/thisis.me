@@ -75,7 +75,7 @@ def correlate_and_update_event(url, correlation_id, author_id, me_service_id):
           me_service_id,
           correlation_id,
           created_time,
-          modified_time,
+          modify_time=modified_time,
           headline=source_event.headline,
           caption=source_event.caption,
           tagline=source_event.tagline,
